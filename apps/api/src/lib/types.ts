@@ -1,0 +1,84 @@
+export interface Env {
+  SUPABASE_URL: string
+  SUPABASE_SERVICE_ROLE_KEY: string
+  ANTHROPIC_API_KEY: string
+  STRIPE_SECRET_KEY: string
+  STRIPE_WEBHOOK_SECRET: string
+  RESEND_API_KEY: string
+  ENVIRONMENT: string
+}
+
+export interface JwtPayload {
+  sub: string
+  email: string
+  role: string
+  app_metadata: {
+    provider: string
+  }
+  user_metadata: Record<string, unknown>
+  aud: string
+  exp: number
+}
+
+export interface FitnessProfile {
+  user_id: string
+  goal: 'lose_weight' | 'build_muscle' | 'maintain' | 'improve_endurance'
+  level: 'beginner' | 'intermediate' | 'advanced'
+  equipment: string[]
+  days_per_week: number
+  allergies: string[]
+  calorie_goal: number | null
+  age: number | null
+  weight_kg: number | null
+  height_cm: number | null
+  updated_at: string
+}
+
+export interface Plan {
+  id: string
+  user_id: string
+  status: 'generating' | 'ready' | 'error'
+  created_at: string
+}
+
+export interface PlanDay {
+  id: string
+  plan_id: string
+  weekday: number // 1=Mon … 7=Sun
+  type: 'workout' | 'nutrition' | 'rest'
+  content: WorkoutDay | NutritionDay | RestDay
+}
+
+export interface WorkoutDay {
+  name: string
+  focus: string
+  duration_minutes: number
+  exercises: Exercise[]
+}
+
+export interface Exercise {
+  name: string
+  sets: number
+  reps: string
+  rest_seconds: number
+  notes?: string
+}
+
+export interface NutritionDay {
+  total_calories: number
+  protein_g: number
+  carbs_g: number
+  fat_g: number
+  meals: Meal[]
+}
+
+export interface Meal {
+  name: string
+  time: string
+  calories: number
+  items: string[]
+}
+
+export interface RestDay {
+  notes: string
+}
