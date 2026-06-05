@@ -175,8 +175,8 @@ export function OnboardingPage() {
           <div>
             <h2 className="text-2xl font-bold mb-2">Hur många dagar per vecka?</h2>
             <p className="text-slate-400 mb-8">Välj hur ofta du vill träna.</p>
-            <div className="flex justify-center gap-3 mb-8">
-              {[2, 3, 4, 5, 6].map((d) => (
+            <div className="flex justify-center gap-2 mb-8">
+              {[1, 2, 3, 4, 5, 6, 7].map((d) => (
                 <button
                   key={d}
                   onClick={() => setForm(f => ({ ...f, days_per_week: d }))}
