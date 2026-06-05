@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api'
+import { workoutApi } from '../../lib/workoutApi'
+import { deriveDifficulty, sessionsThisWeek } from '../../lib/derive'
+import { toast } from '../../lib/toast'
 import { PlusIcon } from '../../components/ui/Icons'
 import { useWorkoutStore } from '../../hooks/useWorkoutStore'
 
@@ -38,10 +41,10 @@ export function TrainingOverview() {
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
   const [tab, setTab] = useState<'pass' | 'program' | 'ovningar'>('pass')
+  const [thisWeekDone, setThisWeekDone] = useState(0)
 
   const today = todayWeekday()
   const workoutDays = days.filter((d) => d.type === 'workout')
-  const thisWeekDone = 2 // TODO: track from logs
   const totalWeek = workoutDays.length
 
   useEffect(() => {
@@ -55,13 +58,31 @@ export function TrainingOverview() {
         navigate('/onboarding')
         return
       }
-      // TODO: fetch latest plan id from API list endpoint
-      // For now try session storage
-      const savedId = sessionStorage.getItem('formplan_plan_id')
-      if (savedId) {
-        const { plan, days } = await api.getPlan(savedId)
+
+      // Find the latest plan via the API; prefer a ready one. Fall back to the
+      // session-stored id so a freshly generated plan is picked up immediately.
+      let planId: string | null = null
+      try {
+        const { plans } = await api.listPlans()
+        planId = plans.find((p) => p.status === 'ready')?.id ?? plans[0]?.id ?? null
+      } catch {
+        planId = null
+      }
+      if (!planId) planId = sessionStorage.getItem('formplan_plan_id')
+
+      if (planId) {
+        sessionStorage.setItem('formplan_plan_id', planId)
+        const { plan, days } = await api.getPlan(planId)
         setPlan(plan as Plan)
         setDays((days as WorkoutDay[]).filter((d) => d.type === 'workout'))
+      }
+
+      // Weekly completed-session count from logged workouts.
+      try {
+        const { sessions } = await workoutApi.getSessions()
+        setThisWeekDone(sessionsThisWeek(sessions.map((s) => s.completed_at)))
+      } catch {
+        /* sessions are best-effort */
       }
     } catch {
       // no plan yet
@@ -90,7 +111,7 @@ export function TrainingOverview() {
         attempts++
       }
     } catch (e) {
-      alert((e as Error).message)
+      toast.error((e as Error).message)
     } finally {
       setGenerating(false)
     }
@@ -253,7 +274,7 @@ function WorkoutCard({
     Medel: 'bg-amber-100 text-amber-700',
     Hög: 'bg-red-100 text-red-700',
   }
-  const diffLabel = 'Medel' // TODO: derive from plan
+  const diffLabel = deriveDifficulty(day.content)
 
   return (
     <button

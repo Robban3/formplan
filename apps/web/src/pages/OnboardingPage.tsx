@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
+import { toast } from '../lib/toast'
 
 type Step = 'goal' | 'level' | 'equipment' | 'schedule' | 'diet' | 'body'
 
@@ -79,15 +80,16 @@ export function OnboardingPage() {
     try {
       await api.saveProfile(form)
       const { plan_id } = await api.generatePlan()
+      sessionStorage.setItem('formplan_plan_id', plan_id)
       navigate(`/plan/${plan_id}`)
     } catch (e) {
-      alert((e as Error).message)
+      toast.error((e as Error).message)
       setSaving(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-8">
+    <div className="min-h-screen flex flex-col items-center px-4 py-8 bg-slate-950 text-slate-100">
       <div className="w-full max-w-lg">
         {/* Progress bar */}
         <div className="w-full bg-slate-800 rounded-full h-1.5 mb-8">

@@ -1,13 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { api } from '../lib/api'
-
-interface PlanRow {
-  id: string
-  status: 'generating' | 'ready' | 'error'
-  created_at: string
-}
+import { api, type PlanSummary as PlanRow } from '../lib/api'
+import { toast } from '../lib/toast'
 
 export function DashboardPage() {
   const navigate = useNavigate()
@@ -27,8 +22,8 @@ export function DashboardPage() {
         navigate('/onboarding')
         return
       }
-      // TODO: fetch plans list from API (for now show generate button)
-      setPlans([])
+      const { plans } = await api.listPlans()
+      setPlans(plans)
     } catch {
       navigate('/onboarding')
     } finally {
@@ -42,7 +37,7 @@ export function DashboardPage() {
       const { plan_id } = await api.generatePlan()
       navigate(`/plan/${plan_id}`)
     } catch (e) {
-      alert((e as Error).message)
+      toast.error((e as Error).message)
       setGenerating(false)
     }
   }
@@ -53,14 +48,14 @@ export function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
         <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen px-4 py-8">
+    <div className="min-h-screen px-4 py-8 bg-slate-950 text-slate-100">
       <div className="max-w-lg mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-bold">FormPlan</h1>

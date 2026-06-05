@@ -6,6 +6,8 @@ import { WorkoutDetail } from '../pages/training/WorkoutDetail'
 import { NutritionHome } from '../pages/nutrition/NutritionHome'
 import { AnalyticsPage } from '../pages/AnalyticsPage'
 import { MorePage } from '../pages/MorePage'
+import { ProfilePage } from '../pages/ProfilePage'
+import { AboutPage } from '../pages/AboutPage'
 
 const tabs = [
   { to: '/hem',      label: 'Hem',      Icon: HomeIcon },
@@ -27,6 +29,8 @@ export function TabLayout() {
           <Route path="/traning/:id"    element={<WorkoutDetail />} />
           <Route path="/analys"         element={<AnalyticsPage />} />
           <Route path="/mer"            element={<MorePage />} />
+          <Route path="/mer/profil"     element={<ProfilePage />} />
+          <Route path="/mer/om"         element={<AboutPage />} />
           <Route path="*"               element={<Navigate to="/hem" replace />} />
         </Routes>
       </div>

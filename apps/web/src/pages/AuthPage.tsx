@@ -28,7 +28,7 @@ export function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-slate-950 text-slate-100">
       <div className="w-full max-w-sm">
         <h1 className="text-3xl font-bold text-center mb-2">FormPlan</h1>
         <p className="text-slate-400 text-center mb-8">AI-genererat tränings- &amp; kostschema</p>

@@ -67,6 +67,9 @@ export function PlanPage() {
       } else {
         setPolling(false)
         setLoading(false)
+        if ((plan as PlanRow).status === 'ready') {
+          sessionStorage.setItem('formplan_plan_id', id)
+        }
       }
     } catch {
       setLoading(false)
@@ -77,15 +80,28 @@ export function PlanPage() {
     load()
   }, [load])
 
+  // Poll while generating, with a gentle backoff (2s → 8s) instead of a tight loop.
   useEffect(() => {
     if (!polling) return
-    const t = setInterval(() => load(), 3000)
-    return () => clearInterval(t)
+    let cancelled = false
+    let attempt = 0
+    let timer: ReturnType<typeof setTimeout>
+    const tick = async () => {
+      await load()
+      if (cancelled) return
+      attempt++
+      timer = setTimeout(tick, Math.min(2000 + attempt * 1000, 8000))
+    }
+    timer = setTimeout(tick, 2000)
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
   }, [polling, load])
 
   if (loading || plan?.status === 'generating') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100">
         <div className="w-10 h-10 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
         <p className="text-slate-400">AI genererar ditt personliga schema...</p>
         <p className="text-slate-600 text-sm">Det tar ungefär 15–30 sekunder</p>
@@ -95,7 +111,7 @@ export function PlanPage() {
 
   if (plan?.status === 'error') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100">
         <p className="text-red-400">Något gick fel vid generering.</p>
         <button onClick={() => navigate('/')} className="text-brand-400 hover:underline">
           Tillbaka
@@ -110,13 +126,21 @@ export function PlanPage() {
   const selectedNutrition = nutritionDays.find((d) => d.weekday === selected)
 
   return (
-    <div className="min-h-screen pb-8">
+    <div className="min-h-screen pb-8 bg-slate-950 text-slate-100">
       <div className="max-w-lg mx-auto px-4">
-        <div className="flex items-center gap-3 py-6">
-          <button onClick={() => navigate('/')} className="text-slate-400 hover:text-slate-200">
-            ←
+        <div className="flex items-center justify-between py-6">
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate('/')} className="text-slate-400 hover:text-slate-200">
+              ←
+            </button>
+            <h1 className="text-xl font-bold">Mitt schema</h1>
+          </div>
+          <button
+            onClick={() => navigate('/traning')}
+            className="text-sm font-medium bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-xl transition-colors"
+          >
+            Öppna appen →
           </button>
-          <h1 className="text-xl font-bold">Mitt schema</h1>
         </div>
 
         {/* Day selector */}

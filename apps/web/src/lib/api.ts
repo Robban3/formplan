@@ -18,6 +18,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>
 }
 
+export interface PlanSummary {
+  id: string
+  status: 'generating' | 'ready' | 'error'
+  created_at: string
+}
+
 export const api = {
   getProfile: () => request<{ profile: unknown }>('/profile'),
 
@@ -28,4 +34,9 @@ export const api = {
     request<{ plan_id: string; status: string }>('/plan/generate', { method: 'POST', body: '{}' }),
 
   getPlan: (id: string) => request<{ plan: unknown; days: unknown[] }>(`/plan/${id}`),
+
+  listPlans: () => request<{ plans: PlanSummary[] }>('/plan/list'),
 }
+
+// Shared request helper for sibling API clients.
+export { request }

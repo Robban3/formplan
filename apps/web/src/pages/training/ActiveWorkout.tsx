@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWorkoutStore } from '../../hooks/useWorkoutStore'
 import { workoutStore } from '../../store/workoutStore'
+import { workoutApi } from '../../lib/workoutApi'
+import { toast } from '../../lib/toast'
 import { PauseIcon, PlayIcon, CheckIcon, XIcon, ChevronLeftIcon, ChevronRightIcon } from '../../components/ui/Icons'
 
 function formatTime(seconds: number) {
@@ -65,7 +67,7 @@ export function ActiveWorkout() {
       return { ...s, exercises }
     })
     // Start rest timer
-    setRestTimer(ex.restSeconds)
+    if (ex) setRestTimer(ex.restSeconds)
   }
 
   function updateSet(setIndex: number, field: 'reps' | 'weight_kg', value: string) {
@@ -92,7 +94,32 @@ export function ActiveWorkout() {
     setRestTimer(null)
   }
 
-  function finishWorkout() {
+  async function finishWorkout() {
+    const s = state
+    if (s) {
+      const completed = s.exercises.reduce(
+        (n, e) => n + e.sets.filter((x) => x.done).length,
+        0
+      )
+      // Only persist a session if the user actually logged something.
+      if (completed > 0) {
+        try {
+          await workoutApi.logSession({
+            plan_day_id: s.planDayId,
+            workout_name: s.workoutName,
+            started_at: new Date(s.startedAt).toISOString(),
+            duration_seconds: elapsed,
+            exercises: s.exercises.map((e) => ({
+              name: e.name,
+              sets: e.sets.map((x) => ({ reps: x.reps, weight_kg: x.weight_kg, done: x.done })),
+            })),
+          })
+          toast.success('Pass sparat 💪')
+        } catch (e) {
+          toast.error((e as Error).message)
+        }
+      }
+    }
     workoutStore.finish()
     navigate('/traning', { replace: true })
   }
