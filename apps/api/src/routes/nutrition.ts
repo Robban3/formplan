@@ -54,7 +54,7 @@ nutritionRouter.get('/foods/search', async (c) => {
   const q = (c.req.query('q') ?? '').trim()
   if (!q) return c.json({ items: [] })
   const db = supabaseAdmin(c.env)
-  const pattern = `*${encodeURIComponent(q)}*`
+  const pattern = `*${q}*`
   const { data } = await db.query<FoodItemRow[]>(
     `/food_item?name=ilike.${pattern}&select=*&order=name.asc&limit=20`
   )

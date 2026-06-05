@@ -13,6 +13,8 @@ import { NotificationsPage } from '../pages/NotificationsPage'
 import { RemindersPage } from '../pages/RemindersPage'
 import { AppleHealthPage } from '../pages/AppleHealthPage'
 import { HelpPage } from '../pages/HelpPage'
+import { GoalsPage } from '../pages/GoalsPage'
+import { RecipesPage } from '../pages/RecipesPage'
 
 const tabs = [
   { to: '/hem',      label: 'Hem',      Icon: HomeIcon },
@@ -41,6 +43,8 @@ export function TabLayout() {
           <Route path="/mer/apple-health"   element={<AppleHealthPage />} />
           <Route path="/mer/hjalp"          element={<HelpPage />} />
           <Route path="/mer/om"             element={<AboutPage />} />
+          <Route path="/mer/mina-mal"       element={<GoalsPage />} />
+          <Route path="/mer/recept"         element={<RecipesPage />} />
           <Route path="*"               element={<Navigate to="/hem" replace />} />
         </Routes>
       </div>
