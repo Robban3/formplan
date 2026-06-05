@@ -6,6 +6,7 @@ import { TabLayout } from './components/TabLayout'
 import { ActiveWorkout } from './pages/training/ActiveWorkout'
 import { PlanPage } from './pages/PlanPage'
 import { Toaster } from './components/ui/Toaster'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 export default function App() {
   const { user, loading } = useAuth()
@@ -19,7 +20,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <ErrorBoundary>
       <Toaster />
       <Routes>
         <Route path="/auth" element={user ? <Navigate to="/" replace /> : <AuthPage />} />
@@ -37,6 +38,6 @@ export default function App() {
         {/* Everything else lives inside the tab shell */}
         <Route path="/*" element={user ? <TabLayout /> : <Navigate to="/auth" replace />} />
       </Routes>
-    </>
+    </ErrorBoundary>
   )
 }

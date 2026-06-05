@@ -246,15 +246,39 @@ export function TrainingOverview() {
       )}
 
       {tab === 'program' && (
-        <div className="px-5 mt-8 text-center text-stone-400">
-          <p>Program-vyn kommer snart.</p>
+        <div className="px-5 mt-4">
+          {workoutDays.length === 0 ? (
+            <p className="text-center text-stone-400 mt-12">Generera ett schema för att se programöversikten.</p>
+          ) : (
+            <div className="space-y-3">
+              {workoutDays.map((day) => (
+                <div key={day.id} className="bg-white rounded-2xl border border-stone-100 p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <span className="text-xs text-stone-400 font-medium">{WEEKDAYS[(day.weekday ?? 1) - 1]}</span>
+                      <p className="font-semibold text-stone-900">{day.content.name}</p>
+                    </div>
+                    <span className="text-xs text-stone-400 bg-stone-100 px-2 py-1 rounded-lg">
+                      {day.content.duration_minutes} min
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    {day.content.exercises.map((ex, i) => (
+                      <div key={i} className="flex items-center justify-between py-1.5 border-t border-stone-50 first:border-0">
+                        <span className="text-sm text-stone-700">{ex.name}</span>
+                        <span className="text-xs text-stone-400">{ex.sets} × {ex.reps}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {tab === 'ovningar' && (
-        <div className="px-5 mt-8 text-center text-stone-400">
-          <p>Övningsbibliotek kommer snart.</p>
-        </div>
+        <ExerciseLibrary days={workoutDays} />
       )}
     </div>
   )
@@ -322,6 +346,70 @@ function WorkoutCard({
         )}
       </div>
     </button>
+  )
+}
+
+function ExerciseLibrary({ days }: { days: WorkoutDay[] }) {
+  const [query, setQuery] = useState('')
+
+  // Deduplicate exercises across workout days and enrich with which day they appear in.
+  const all = days.flatMap((day) =>
+    day.content.exercises.map((ex) => ({
+      name: ex.name,
+      sets: ex.sets,
+      reps: ex.reps,
+      dayName: day.content.name,
+      focus: day.content.focus,
+    }))
+  )
+
+  const unique = Array.from(
+    all
+      .reduce((map, ex) => {
+        if (!map.has(ex.name)) map.set(ex.name, ex)
+        return map
+      }, new Map<string, typeof all[number]>())
+      .values()
+  )
+
+  const filtered = query.trim()
+    ? unique.filter((e) => e.name.toLowerCase().includes(query.trim().toLowerCase()))
+    : unique
+
+  if (days.length === 0) {
+    return (
+      <div className="px-5 mt-12 text-center text-stone-400">
+        <p>Generera ett schema för att se övningsbiblioteket.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="px-5 mt-4 space-y-3">
+      <input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Sök övning…"
+        className="w-full bg-stone-100 rounded-xl px-4 py-3 text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 text-sm"
+      />
+      <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
+        {filtered.length === 0 && (
+          <p className="text-stone-400 text-sm text-center py-6">Inga träffar.</p>
+        )}
+        {filtered.map((ex, i) => (
+          <div
+            key={ex.name}
+            className={`flex items-center justify-between px-4 py-3 ${i > 0 ? 'border-t border-stone-50' : ''}`}
+          >
+            <div>
+              <p className="text-sm font-medium text-stone-800">{ex.name}</p>
+              <p className="text-xs text-stone-400">{ex.dayName} · {ex.focus}</p>
+            </div>
+            <span className="text-xs text-stone-500 ml-2 flex-shrink-0">{ex.sets} × {ex.reps}</span>
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 

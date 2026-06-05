@@ -8,6 +8,11 @@ import { AnalyticsPage } from '../pages/AnalyticsPage'
 import { MorePage } from '../pages/MorePage'
 import { ProfilePage } from '../pages/ProfilePage'
 import { AboutPage } from '../pages/AboutPage'
+import { SettingsPage } from '../pages/SettingsPage'
+import { NotificationsPage } from '../pages/NotificationsPage'
+import { RemindersPage } from '../pages/RemindersPage'
+import { AppleHealthPage } from '../pages/AppleHealthPage'
+import { HelpPage } from '../pages/HelpPage'
 
 const tabs = [
   { to: '/hem',      label: 'Hem',      Icon: HomeIcon },
@@ -28,9 +33,14 @@ export function TabLayout() {
           <Route path="/traning"        element={<TrainingOverview />} />
           <Route path="/traning/:id"    element={<WorkoutDetail />} />
           <Route path="/analys"         element={<AnalyticsPage />} />
-          <Route path="/mer"            element={<MorePage />} />
-          <Route path="/mer/profil"     element={<ProfilePage />} />
-          <Route path="/mer/om"         element={<AboutPage />} />
+          <Route path="/mer"                element={<MorePage />} />
+          <Route path="/mer/profil"         element={<ProfilePage />} />
+          <Route path="/mer/installningar"  element={<SettingsPage />} />
+          <Route path="/mer/notiser"        element={<NotificationsPage />} />
+          <Route path="/mer/paminnelser"    element={<RemindersPage />} />
+          <Route path="/mer/apple-health"   element={<AppleHealthPage />} />
+          <Route path="/mer/hjalp"          element={<HelpPage />} />
+          <Route path="/mer/om"             element={<AboutPage />} />
           <Route path="*"               element={<Navigate to="/hem" replace />} />
         </Routes>
       </div>

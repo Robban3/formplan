@@ -12,6 +12,8 @@ function formatTime(seconds: number) {
   return `${m}:${s}`
 }
 
+interface PrevSet { reps: number; weight_kg: number | null }
+
 export function ActiveWorkout() {
   const navigate = useNavigate()
   const state = useWorkoutStore()
@@ -20,6 +22,27 @@ export function ActiveWorkout() {
   const [restTimer, setRestTimer] = useState<number | null>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const restRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  // previousSets[exerciseName] = last logged sets for that exercise
+  const [previousSets, setPreviousSets] = useState<Record<string, PrevSet[]>>({})
+
+  // Fetch exercise history for all exercises in this workout once on mount.
+  useEffect(() => {
+    if (!state) return
+    const names = [...new Set(state.exercises.map((e) => e.name))]
+    Promise.all(
+      names.map((name) =>
+        workoutApi
+          .getExerciseHistory(name)
+          .then(({ history }) => ({ name, sets: history[0]?.sets ?? [] }))
+          .catch(() => ({ name, sets: [] }))
+      )
+    ).then((results) => {
+      const map: Record<string, PrevSet[]> = {}
+      for (const r of results) map[r.name] = r.sets
+      setPreviousSets(map)
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state?.planDayId])
 
   // Redirect if no active workout
   useEffect(() => {
@@ -182,6 +205,17 @@ export function ActiveWorkout() {
               Övning {state.currentExerciseIndex + 1} av {state.exercises.length}
             </p>
             <h2 className="text-xl font-bold text-stone-900 mt-0.5">{ex.name}</h2>
+            {(() => {
+              const prev = previousSets[ex.name]
+              if (!prev || prev.length === 0) return null
+              const kg = prev[0]?.weight_kg
+              const reps = prev[0]?.reps
+              return (
+                <p className="text-xs text-stone-400 mt-0.5">
+                  Förra: {kg != null ? `${kg} kg` : '—'} × {reps ?? '—'} reps
+                </p>
+              )
+            })()}
           </div>
           <button
             onClick={() => goToExercise(1)}
@@ -222,7 +256,9 @@ export function ActiveWorkout() {
               <input
                 type="number"
                 inputMode="decimal"
-                placeholder="—"
+                placeholder={previousSets[ex.name]?.[si]?.weight_kg != null
+                  ? String(previousSets[ex.name]?.[si]?.weight_kg)
+                  : '—'}
                 value={set.weight_kg ?? ''}
                 onChange={(e) => updateSet(si, 'weight_kg', e.target.value)}
                 disabled={set.done}

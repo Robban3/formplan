@@ -45,4 +45,9 @@ export const workoutApi = {
     const qs = params.toString()
     return request<{ sessions: WorkoutSession[] }>(`/workout/sessions${qs ? `?${qs}` : ''}`)
   },
+
+  getExerciseHistory: (name: string) =>
+    request<{
+      history: { date: string; sets: { reps: number; weight_kg: number | null }[] }[]
+    }>(`/workout/exercise-history?name=${encodeURIComponent(name)}`),
 }

@@ -90,4 +90,16 @@ export const nutritionApi = {
 
   deleteWater: (id: string) =>
     request<void>(`/nutrition/water/${id}`, { method: 'DELETE' }),
+
+  getSummary: (from: string, to: string) =>
+    request<{
+      days: {
+        date: string
+        kcal: number
+        protein_g: number
+        fat_g: number
+        carbs_g: number
+        entries: number
+      }[]
+    }>(`/nutrition/summary?from=${from}&to=${to}`),
 }
