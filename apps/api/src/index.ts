@@ -4,6 +4,8 @@ import { logger } from 'hono/logger'
 import { profileRouter } from './routes/profile'
 import { planRouter } from './routes/plan'
 import { stripeRouter } from './routes/stripe'
+import { nutritionRouter } from './routes/nutrition'
+import { workoutRouter } from './routes/workout'
 import type { Env } from './lib/types'
 
 const app = new Hono<{ Bindings: Env }>()
@@ -29,5 +31,7 @@ app.get('/health', (c) => c.json({ ok: true }))
 app.route('/profile', profileRouter)
 app.route('/plan', planRouter)
 app.route('/stripe', stripeRouter)
+app.route('/nutrition', nutritionRouter)
+app.route('/workout', workoutRouter)
 
 export default app

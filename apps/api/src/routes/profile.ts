@@ -3,9 +3,9 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import { requireAuth } from '../middleware/auth'
 import { supabaseAdmin } from '../lib/supabase'
-import type { Env } from '../lib/types'
+import type { AppContext } from '../lib/types'
 
-export const profileRouter = new Hono<{ Bindings: Env }>()
+export const profileRouter = new Hono<AppContext>()
 
 const profileSchema = z.object({
   goal: z.enum(['lose_weight', 'build_muscle', 'maintain', 'improve_endurance']),

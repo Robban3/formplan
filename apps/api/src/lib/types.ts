@@ -20,6 +20,12 @@ export interface JwtPayload {
   exp: number
 }
 
+// Shared Hono generic — bindings + the authenticated user set by requireAuth.
+export type AppContext = {
+  Bindings: Env
+  Variables: { user: JwtPayload }
+}
+
 export interface FitnessProfile {
   user_id: string
   goal: 'lose_weight' | 'build_muscle' | 'maintain' | 'improve_endurance'
@@ -81,4 +87,60 @@ export interface Meal {
 
 export interface RestDay {
   notes: string
+}
+
+export type MealSlot = 'frukost' | 'lunch' | 'middag' | 'mellanmar'
+
+export interface FoodItemRow {
+  id: string
+  name: string
+  brand: string | null
+  kcal_per_100g: number
+  protein_per_100g: number
+  fat_per_100g: number
+  carbs_per_100g: number
+  serving_size_g: number | null
+}
+
+export interface FoodLogRow {
+  id: string
+  user_id: string
+  log_date: string
+  meal_slot: MealSlot
+  food_id: string | null
+  food_name: string
+  amount_g: number
+  kcal: number
+  protein_g: number
+  fat_g: number
+  carbs_g: number
+}
+
+export interface WaterLogRow {
+  id: string
+  user_id: string
+  log_date: string
+  amount_ml: number
+  logged_at: string
+}
+
+export interface DailyGoals {
+  kcal: number
+  protein_g: number
+  fat_g: number
+  carbs_g: number
+}
+
+export interface WorkoutSessionRow {
+  id: string
+  user_id: string
+  plan_day_id: string | null
+  workout_name: string
+  started_at: string
+  completed_at: string
+  duration_seconds: number
+  total_sets: number
+  completed_sets: number
+  total_volume_kg: number
+  exercises: unknown
 }

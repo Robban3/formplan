@@ -4,9 +4,9 @@ import { zValidator } from '@hono/zod-validator'
 import { requireAuth } from '../middleware/auth'
 import { supabaseAdmin, isUserPremium } from '../lib/supabase'
 import { generatePlan } from '../lib/ai'
-import type { Env, FitnessProfile } from '../lib/types'
+import type { AppContext, FitnessProfile, Plan } from '../lib/types'
 
-export const planRouter = new Hono<{ Bindings: Env }>()
+export const planRouter = new Hono<AppContext>()
 
 planRouter.use('*', requireAuth)
 
@@ -61,6 +61,17 @@ planRouter.post(
     return c.json({ plan_id: planId, status: 'generating' }, 202)
   }
 )
+
+// List the user's plans, newest first. Registered before '/:id' so the
+// literal "list" segment is not captured as a plan id.
+planRouter.get('/list', async (c) => {
+  const user = c.get('user')
+  const db = supabaseAdmin(c.env)
+  const { data } = await db.query<Plan[]>(
+    `/plan?user_id=eq.${user.sub}&select=id,status,created_at&order=created_at.desc`
+  )
+  return c.json({ plans: data ?? [] })
+})
 
 planRouter.get('/:id', async (c) => {
   const user = c.get('user')
