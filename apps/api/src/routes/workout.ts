@@ -71,6 +71,32 @@ workoutRouter.post(
   }
 )
 
+// GET /workout/exercise-history?name= — last N sessions containing the named exercise.
+workoutRouter.get('/exercise-history', async (c) => {
+  const user = c.get('user')
+  const name = (c.req.query('name') ?? '').trim().toLowerCase()
+  if (!name) return c.json({ history: [] })
+  const db = supabaseAdmin(c.env)
+
+  const { data } = await db.query<{ completed_at: string; exercises: { name: string; sets: { reps: number; weight_kg: number | null; done: boolean }[] }[] }[]>(
+    `/workout_session?user_id=eq.${user.sub}&select=completed_at,exercises&order=completed_at.desc&limit=20`
+  )
+
+  const history: { date: string; sets: { reps: number; weight_kg: number | null }[] }[] = []
+  for (const session of data ?? []) {
+    const match = session.exercises.find((e) => e.name.toLowerCase() === name)
+    if (match) {
+      history.push({
+        date: session.completed_at,
+        sets: match.sets.filter((s) => s.done).map((s) => ({ reps: s.reps, weight_kg: s.weight_kg })),
+      })
+      if (history.length >= 5) break
+    }
+  }
+
+  return c.json({ history })
+})
+
 // GET /workout/sessions?from=ISO&to=ISO — sessions in a window, newest first.
 workoutRouter.get('/sessions', async (c) => {
   const user = c.get('user')

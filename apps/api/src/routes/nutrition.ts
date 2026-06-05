@@ -179,3 +179,43 @@ nutritionRouter.delete('/water/:id', async (c) => {
   if (error) return c.json({ error }, 500)
   return c.body(null, 204)
 })
+
+// GET /nutrition/summary?from=YYYY-MM-DD&to=YYYY-MM-DD
+// Returns per-day calorie + macro totals for charting.
+nutritionRouter.get('/summary', async (c) => {
+  const from = c.req.query('from')
+  const to = c.req.query('to')
+  if (!from || !to) return c.json({ error: 'Missing from/to' }, 400)
+  const user = c.get('user')
+  const db = supabaseAdmin(c.env)
+
+  const { data } = await db.query<Pick<FoodLogRow, 'log_date' | 'kcal' | 'protein_g' | 'fat_g' | 'carbs_g'>[]>(
+    `/food_log?user_id=eq.${user.sub}&log_date=gte.${from}&log_date=lte.${to}&select=log_date,kcal,protein_g,fat_g,carbs_g`
+  )
+
+  // Aggregate per date in the worker (PostgREST has no GROUP BY).
+  const map = new Map<string, { kcal: number; protein_g: number; fat_g: number; carbs_g: number; entries: number }>()
+  for (const row of data ?? []) {
+    const existing = map.get(row.log_date) ?? { kcal: 0, protein_g: 0, fat_g: 0, carbs_g: 0, entries: 0 }
+    map.set(row.log_date, {
+      kcal:      existing.kcal      + row.kcal,
+      protein_g: existing.protein_g + row.protein_g,
+      fat_g:     existing.fat_g     + row.fat_g,
+      carbs_g:   existing.carbs_g   + row.carbs_g,
+      entries:   existing.entries   + 1,
+    })
+  }
+
+  const days = [...map.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, totals]) => ({
+      date,
+      kcal:      Math.round(totals.kcal),
+      protein_g: Math.round(totals.protein_g),
+      fat_g:     Math.round(totals.fat_g),
+      carbs_g:   Math.round(totals.carbs_g),
+      entries:   totals.entries,
+    }))
+
+  return c.json({ days })
+})
