@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { api, type PlanSummary as PlanRow } from '../lib/api'
 import { toast } from '../lib/toast'
+import { toastIfNotNetwork } from '../lib/errors'
 
 export function DashboardPage() {
   const navigate = useNavigate()
@@ -37,7 +38,7 @@ export function DashboardPage() {
       const { plan_id } = await api.generatePlan()
       navigate(`/plan/${plan_id}`)
     } catch (e) {
-      toast.error((e as Error).message)
+      toastIfNotNetwork(e, toast.error)
       setGenerating(false)
     }
   }

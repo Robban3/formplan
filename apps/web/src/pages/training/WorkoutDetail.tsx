@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api'
-import { ChevronLeftIcon, PlayIcon } from '../../components/ui/Icons'
+import { PlayIcon } from '../../components/ui/Icons'
+import { WorkoutHero } from '../../components/training/WorkoutHero'
+import { ExerciseVideo } from '../../components/training/ExerciseVideo'
+import { ExerciseAnimation } from '../../components/training/ExerciseAnimation'
 import { workoutStore } from '../../store/workoutStore'
 import type { ExerciseLog } from '../../store/workoutStore'
 
@@ -34,13 +37,19 @@ export function WorkoutDetail() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!id) return
-    // The plan id is stored in session; we need the plan to find this day
+    if (!id) {
+      setLoading(false)
+      return
+    }
     const planId = sessionStorage.getItem('formplan_plan_id')
-    if (!planId) { navigate('/traning'); return }
+    if (!planId) {
+      setLoading(false)
+      navigate('/traning')
+      return
+    }
 
     api.getPlan(planId).then(({ days }) => {
-      const found = (days as PlanDay[]).find((d) => d.id === id)
+      const found = (days as PlanDay[]).find((d) => d.id === id && d.type === 'workout')
       if (found) setDay(found)
       setLoading(false)
     }).catch(() => setLoading(false))
@@ -88,23 +97,11 @@ export function WorkoutDetail() {
 
   return (
     <div className="pb-28">
-      {/* Hero */}
-      <div className="relative bg-stone-800 h-48 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-stone-700/60 to-stone-900/80" />
-        <div className="absolute bottom-4 left-5 right-5">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-1 text-white/70 text-sm mb-3"
-          >
-            <ChevronLeftIcon className="w-4 h-4 stroke-white/70" />
-            Träning
-          </button>
-          <h1 className="text-2xl font-bold text-white">{content.name}</h1>
-          <p className="text-white/60 text-sm mt-0.5">
-            {content.duration_minutes} min · {content.focus}
-          </p>
-        </div>
-      </div>
+      <WorkoutHero
+        title={content.name}
+        subtitle={`${content.duration_minutes} min · ${content.focus}`}
+        back={{ label: 'Träning', onClick: () => navigate(-1) }}
+      />
 
       {/* Description */}
       <div className="px-5 py-4">
@@ -118,19 +115,24 @@ export function WorkoutDetail() {
         {content.exercises.map((ex, i) => (
           <div
             key={i}
-            className="flex items-center gap-4 bg-white rounded-2xl p-4 shadow-sm border border-stone-100"
+            className="bg-white rounded-2xl p-4 shadow-sm border border-stone-100"
           >
-            {/* Placeholder image */}
-            <div className="w-14 h-14 bg-stone-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <span className="text-2xl">🏋️</span>
+            <div className="flex items-start gap-4">
+              <div className="w-20 h-20 rounded-xl overflow-hidden bg-stone-100 flex-shrink-0">
+                <ExerciseAnimation
+                  exerciseName={ex.name}
+                  className="w-full h-full object-cover object-top"
+                />
+              </div>
+              <div className="flex-1 min-w-0 pt-0.5">
+                <p className="font-semibold text-stone-900 text-sm">{ex.name}</p>
+                <p className="text-stone-400 text-xs mt-0.5">
+                  {ex.sets} set × {ex.reps} reps
+                </p>
+                {ex.notes && <p className="text-stone-300 text-xs mt-0.5">{ex.notes}</p>}
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-stone-900 text-sm">{ex.name}</p>
-              <p className="text-stone-400 text-xs mt-0.5">
-                {ex.sets} set × {ex.reps} reps
-              </p>
-              {ex.notes && <p className="text-stone-300 text-xs mt-0.5 truncate">{ex.notes}</p>}
-            </div>
+            <ExerciseVideo exerciseName={ex.name} variant="card" />
           </div>
         ))}
       </div>

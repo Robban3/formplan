@@ -7,9 +7,12 @@ import { ActiveWorkout } from './pages/training/ActiveWorkout'
 import { PlanPage } from './pages/PlanPage'
 import { Toaster } from './components/ui/Toaster'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { useNotificationScheduler } from './hooks/useNotificationScheduler'
+import { WeeklySessionsProvider } from './contexts/WeeklySessionsContext'
 
 export default function App() {
   const { user, loading } = useAuth()
+  useNotificationScheduler()
 
   if (loading) {
     return (
@@ -22,6 +25,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <Toaster />
+      <WeeklySessionsProvider>
       <Routes>
         <Route path="/auth" element={user ? <Navigate to="/" replace /> : <AuthPage />} />
         <Route path="/onboarding" element={user ? <OnboardingPage /> : <Navigate to="/auth" replace />} />
@@ -38,6 +42,7 @@ export default function App() {
         {/* Everything else lives inside the tab shell */}
         <Route path="/*" element={user ? <TabLayout /> : <Navigate to="/auth" replace />} />
       </Routes>
+      </WeeklySessionsProvider>
     </ErrorBoundary>
   )
 }

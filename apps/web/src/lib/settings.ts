@@ -9,10 +9,22 @@ export interface Reminder {
 }
 
 export interface AppSettings {
+  // Utseende
   dark_mode: boolean
-  imperial: boolean
+  // Träning
   auto_rest: boolean
+  rest_seconds_default: number
+  keep_screen_on: boolean
+  // Kost & hälsa
+  calorie_goal: number
+  protein_goal_g: number
+  water_goal_ml: number
+  // Notiser
   notifications_enabled: boolean
+  water_reminder: boolean
+  // Enheter
+  imperial: boolean
+  // Reminders
   reminders: Reminder[]
 }
 
@@ -20,9 +32,15 @@ const KEY = 'formplan_settings'
 
 const DEFAULTS: AppSettings = {
   dark_mode: false,
-  imperial: false,
   auto_rest: true,
+  rest_seconds_default: 60,
+  keep_screen_on: true,
+  calorie_goal: 2000,
+  protein_goal_g: 150,
+  water_goal_ml: 2500,
   notifications_enabled: false,
+  water_reminder: false,
+  imperial: false,
   reminders: [],
 }
 

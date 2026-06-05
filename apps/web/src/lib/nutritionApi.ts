@@ -21,7 +21,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const err = await res.json().catch(() => ({ error: res.statusText }))
     throw new Error((err as { error: string }).error ?? res.statusText)
   }
-  return res.json() as Promise<T>
+  if (res.status === 204) return undefined as T
+  const text = await res.text()
+  return (text ? JSON.parse(text) : undefined) as T
 }
 
 export interface FoodItem {
@@ -38,7 +40,7 @@ export interface FoodLogEntry {
   id: string
   date: string         // YYYY-MM-DD
   meal_slot: MealSlot
-  food_id: string
+  food_id: string | null
   food_name: string
   amount_g: number
   kcal: number
@@ -90,6 +92,11 @@ export const nutritionApi = {
 
   deleteWater: (id: string) =>
     request<void>(`/nutrition/water/${id}`, { method: 'DELETE' }),
+
+  getWaterSummary: (from: string, to: string) =>
+    request<{ days: { date: string; total_ml: number }[] }>(
+      `/nutrition/water/summary?from=${from}&to=${to}`
+    ),
 
   getSummary: (from: string, to: string) =>
     request<{

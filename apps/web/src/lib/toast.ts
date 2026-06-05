@@ -22,11 +22,11 @@ export const toastStore = {
     listeners.add(listener)
     return () => listeners.delete(listener)
   },
-  push(message: string, type: ToastType = 'info') {
+  push(message: string, type: ToastType = 'info', durationMs = 4000) {
     const id = nextId++
     toasts = [...toasts, { id, message, type }]
     emit()
-    setTimeout(() => toastStore.dismiss(id), 4000)
+    setTimeout(() => toastStore.dismiss(id), durationMs)
     return id
   },
   dismiss(id: number) {
@@ -37,6 +37,6 @@ export const toastStore = {
 
 export const toast = {
   error: (m: string) => toastStore.push(m, 'error'),
-  success: (m: string) => toastStore.push(m, 'success'),
+  success: (m: string, durationMs?: number) => toastStore.push(m, 'success', durationMs),
   info: (m: string) => toastStore.push(m, 'info'),
 }

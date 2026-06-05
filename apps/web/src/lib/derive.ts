@@ -30,6 +30,20 @@ export function dateKey(date: Date = new Date()): string {
   return `${y}-${m}-${d}`
 }
 
+// All local YYYY-MM-DD keys from `from` through `to` (inclusive).
+export function dateKeysInRange(from: Date, to: Date): string[] {
+  const keys: string[] = []
+  const d = new Date(from)
+  d.setHours(0, 0, 0, 0)
+  const end = new Date(to)
+  end.setHours(0, 0, 0, 0)
+  while (d <= end) {
+    keys.push(dateKey(d))
+    d.setDate(d.getDate() + 1)
+  }
+  return keys
+}
+
 // Monday 00:00:00 .. Sunday 23:59:59 of the week containing `date`.
 export function weekRange(date: Date = new Date()): { from: Date; to: Date } {
   const offset = isoWeekday(date) - 1
@@ -51,6 +65,15 @@ export function sessionsThisWeek(completedAt: string[], now: Date = new Date()):
     if (d >= from && d <= to) days.add(dateKey(d))
   }
   return days.size
+}
+
+/** Antal avslutade pass denna vecka (inte bara unika dagar). */
+export function sessionsCountThisWeek(completedAt: string[], now: Date = new Date()): number {
+  const { from, to } = weekRange(now)
+  return completedAt.filter((iso) => {
+    const d = new Date(iso)
+    return d >= from && d <= to
+  }).length
 }
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000

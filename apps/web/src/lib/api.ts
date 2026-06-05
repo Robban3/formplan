@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { getMockPlanResponse, parseMockPlanId, type MockGoal } from './mockPlan'
 
 const BASE = import.meta.env.VITE_API_URL as string
 
@@ -33,7 +34,23 @@ export const api = {
   generatePlan: () =>
     request<{ plan_id: string; status: string }>('/plan/generate', { method: 'POST', body: '{}' }),
 
-  getPlan: (id: string) => request<{ plan: unknown; days: unknown[] }>(`/plan/${id}`),
+  /** Skapar ett färdigt schema med mockdata i databasen (ingen AI). */
+  generateMockPlan: (goal?: MockGoal) =>
+    request<{ plan_id: string; status: string }>('/plan/mock', {
+      method: 'POST',
+      body: JSON.stringify(goal ? { goal } : {}),
+    }),
+
+  getPlan: async (id: string) => {
+    const mockGoal = parseMockPlanId(id)
+    if (mockGoal) {
+      return getMockPlanResponse(id, mockGoal)
+    }
+    if (import.meta.env.VITE_USE_MOCK_PLAN === 'true') {
+      return getMockPlanResponse(id)
+    }
+    return request<{ plan: unknown; days: unknown[] }>(`/plan/${id}`)
+  },
 
   listPlans: () => request<{ plans: PlanSummary[] }>('/plan/list'),
 }

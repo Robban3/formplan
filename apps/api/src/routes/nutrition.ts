@@ -136,6 +136,30 @@ nutritionRouter.delete('/log/:id', async (c) => {
   return c.body(null, 204)
 })
 
+// GET /nutrition/water/summary?from=YYYY-MM-DD&to=YYYY-MM-DD
+nutritionRouter.get('/water/summary', async (c) => {
+  const from = c.req.query('from')
+  const to = c.req.query('to')
+  if (!from || !to) return c.json({ error: 'Missing from/to' }, 400)
+  const user = c.get('user')
+  const db = supabaseAdmin(c.env)
+
+  const { data } = await db.query<Pick<WaterLogRow, 'log_date' | 'amount_ml'>[]>(
+    `/water_log?user_id=eq.${user.sub}&log_date=gte.${from}&log_date=lte.${to}&select=log_date,amount_ml`
+  )
+
+  const map = new Map<string, number>()
+  for (const row of data ?? []) {
+    map.set(row.log_date, (map.get(row.log_date) ?? 0) + row.amount_ml)
+  }
+
+  const days = [...map.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, total_ml]) => ({ date, total_ml }))
+
+  return c.json({ days })
+})
+
 // GET /nutrition/water?date=YYYY-MM-DD
 nutritionRouter.get('/water', async (c) => {
   const date = c.req.query('date')

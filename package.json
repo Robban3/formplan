@@ -16,5 +16,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "overrides": {
+    "@rollup/plugin-node-resolve": "^15.3.0"
   }
 }

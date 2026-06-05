@@ -1,4 +1,6 @@
 import { request } from './api'
+import { parseMockPlanId } from './mockPlan'
+import { addLocalSession, getLocalSessions, mergeSessions } from './workoutSessionStore'
 
 export interface SessionSetInput {
   reps: number
@@ -31,23 +33,49 @@ export interface WorkoutSession {
   total_volume_kg: number
 }
 
-export const workoutApi = {
-  logSession: (input: LogSessionInput) =>
-    request<{ session: WorkoutSession }>('/workout/session', {
-      method: 'POST',
-      body: JSON.stringify(input),
-    }),
+function apiPlanDayId(planDayId: string | null): string | null {
+  if (!planDayId) return null
+  if (parseMockPlanId(planDayId) || planDayId.startsWith('mock-')) return null
+  return planDayId
+}
 
-  getSessions: (from?: string, to?: string) => {
-    const params = new URLSearchParams()
-    if (from) params.set('from', from)
-    if (to) params.set('to', to)
-    const qs = params.toString()
-    return request<{ sessions: WorkoutSession[] }>(`/workout/sessions${qs ? `?${qs}` : ''}`)
+export const workoutApi = {
+  logSession: async (input: LogSessionInput) => {
+    const local = addLocalSession(input)
+    try {
+      const { session } = await request<{ session: WorkoutSession }>('/workout/session', {
+        method: 'POST',
+        body: JSON.stringify({ ...input, plan_day_id: apiPlanDayId(input.plan_day_id) }),
+      })
+      return { session }
+    } catch {
+      return { session: local }
+    }
   },
 
-  getExerciseHistory: (name: string) =>
-    request<{
-      history: { date: string; sets: { reps: number; weight_kg: number | null }[] }[]
-    }>(`/workout/exercise-history?name=${encodeURIComponent(name)}`),
+  getSessions: async (from?: string, to?: string) => {
+    const local = getLocalSessions(from, to)
+    try {
+      const params = new URLSearchParams()
+      if (from) params.set('from', from)
+      if (to) params.set('to', to)
+      const qs = params.toString()
+      const { sessions } = await request<{ sessions: WorkoutSession[] }>(
+        `/workout/sessions${qs ? `?${qs}` : ''}`
+      )
+      return { sessions: mergeSessions(sessions ?? [], local) }
+    } catch {
+      return { sessions: local }
+    }
+  },
+
+  getExerciseHistory: async (name: string) => {
+    try {
+      return await request<{
+        history: { date: string; sets: { reps: number; weight_kg: number | null }[] }[]
+      }>(`/workout/exercise-history?name=${encodeURIComponent(name)}`)
+    } catch {
+      return { history: [] }
+    }
+  },
 }

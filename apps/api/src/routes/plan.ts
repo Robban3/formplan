@@ -4,6 +4,7 @@ import { zValidator } from '@hono/zod-validator'
 import { requireAuth } from '../middleware/auth'
 import { supabaseAdmin, isUserPremium } from '../lib/supabase'
 import { generatePlan } from '../lib/ai'
+import { buildMockPlanDays } from '../lib/mockPlan'
 import type { AppContext, FitnessProfile, Plan } from '../lib/types'
 
 export const planRouter = new Hono<AppContext>()
@@ -61,6 +62,40 @@ planRouter.post(
     return c.json({ plan_id: planId, status: 'generating' }, 202)
   }
 )
+
+const mockGoalSchema = z.object({
+  goal: z.enum(['lose_weight', 'build_muscle', 'maintain', 'improve_endurance']).optional(),
+})
+
+// Dev-friendly: insert a ready plan with realistic Swedish mock data (no AI).
+planRouter.post('/mock', zValidator('json', mockGoalSchema), async (c) => {
+  const user = c.get('user')
+  const db = supabaseAdmin(c.env)
+  const { goal } = c.req.valid('json')
+
+  const { data: planRows, error: planErr } = await db.query<{ id: string; status: string; created_at: string }[]>(
+    '/plan',
+    {
+      method: 'POST',
+      body: JSON.stringify({ user_id: user.sub, status: 'ready' }),
+    }
+  )
+  if (planErr || !planRows?.[0]) return c.json({ error: 'Failed to create mock plan' }, 500)
+  const plan = planRows[0]
+  const dayRows = buildMockPlanDays(plan.id, goal ?? 'maintain')
+
+  const { error: daysErr } = await db.query('/plan_day', {
+    method: 'POST',
+    body: JSON.stringify(dayRows),
+    headers: { Prefer: 'return=minimal' },
+  })
+  if (daysErr) {
+    await db.query(`/plan?id=eq.${plan.id}`, { method: 'DELETE' })
+    return c.json({ error: 'Failed to insert mock plan days' }, 500)
+  }
+
+  return c.json({ plan_id: plan.id, status: 'ready', plan }, 201)
+})
 
 // List the user's plans, newest first. Registered before '/:id' so the
 // literal "list" segment is not captured as a plan id.

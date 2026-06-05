@@ -4,38 +4,9 @@ import { ChevronLeftIcon, PlusIcon, XIcon } from '../components/ui/Icons'
 import { useSettings } from '../hooks/useSettings'
 import { settingsStore, type Reminder } from '../lib/settings'
 import { toast } from '../lib/toast'
+import { scheduleReminderNotification } from '../lib/notifications'
 
 const DAY_LABELS = ['M', 'Ti', 'O', 'To', 'F', 'L', 'S']
-const DAY_FULL = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag']
-
-// Schedule a browser notification for the next occurrence of [days × time].
-function scheduleNotification(r: Reminder) {
-  if (Notification.permission !== 'granted') return
-
-  const now = new Date()
-  const [hh, mm] = r.time.split(':').map(Number)
-  const nextOccurrence = r.days
-    .map((day) => {
-      const d = new Date(now)
-      const diff = ((day - 1) - (now.getDay() === 0 ? 6 : now.getDay() - 1) + 7) % 7
-      d.setDate(d.getDate() + diff)
-      d.setHours(hh ?? 0, mm ?? 0, 0, 0)
-      if (d <= now) d.setDate(d.getDate() + 7)
-      return d
-    })
-    .sort((a, b) => a.getTime() - b.getTime())[0]
-
-  if (!nextOccurrence) return
-
-  const msUntil = nextOccurrence.getTime() - now.getTime()
-  setTimeout(() => {
-    if (Notification.permission !== 'granted') return
-    new Notification(`FormPlan – ${r.label}`, {
-      body: 'Dags att träna! Öppna appen för att komma igång.',
-      icon: '/logo.svg',
-    })
-  }, msUntil)
-}
 
 export function RemindersPage() {
   const navigate = useNavigate()
@@ -61,7 +32,7 @@ export function RemindersPage() {
       return
     }
     const r = settingsStore.addReminder({ days: newDays, time: newTime, label: newLabel, enabled: true })
-    scheduleNotification(r)
+    scheduleReminderNotification(r)
     setAdding(false)
     toast.success('Påminnelse skapad!')
   }
@@ -70,7 +41,7 @@ export function RemindersPage() {
     settingsStore.updateReminder(id, { enabled })
     if (enabled) {
       const r = settings.reminders.find((r) => r.id === id)
-      if (r) scheduleNotification({ ...r, enabled: true })
+      if (r) scheduleReminderNotification({ ...r, enabled: true })
     }
   }
 

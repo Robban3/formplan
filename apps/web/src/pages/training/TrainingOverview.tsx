@@ -1,23 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api'
-import { workoutApi } from '../../lib/workoutApi'
-import { deriveDifficulty, sessionsThisWeek } from '../../lib/derive'
+import { deriveDifficulty } from '../../lib/derive'
+import { useWeeklySessions } from '../../contexts/WeeklySessionsContext'
 import { toast } from '../../lib/toast'
-import { PlusIcon } from '../../components/ui/Icons'
+import { toastIfNotNetwork } from '../../lib/errors'
+import { PlusIcon, DumbbellIcon, PlayIcon } from '../../components/ui/Icons'
+import { WorkoutHero } from '../../components/training/WorkoutHero'
 import { useWorkoutStore } from '../../hooks/useWorkoutStore'
+import { useLoadTimeout } from '../../hooks/useLoadTimeout'
+import { loadActivePlan, type WorkoutPlanDay } from '../../lib/planLoader'
+import { parseMockPlanId } from '../../lib/mockPlan'
+import { ExerciseVideo } from '../../components/training/ExerciseVideo'
 
-interface WorkoutDay {
-  id: string
-  weekday: number
-  type: 'workout' | 'rest' | 'nutrition'
-  content: {
-    name: string
-    focus: string
-    duration_minutes: number
-    exercises: { name: string; sets: number; reps: string }[]
-  }
-}
+type WorkoutDay = WorkoutPlanDay
 
 interface Plan {
   id: string
@@ -41,7 +37,8 @@ export function TrainingOverview() {
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
   const [tab, setTab] = useState<'pass' | 'program' | 'ovningar'>('pass')
-  const [thisWeekDone, setThisWeekDone] = useState(0)
+  const thisWeekDone = useWeeklySessions()
+  const [isMock, setIsMock] = useState(false)
 
   const today = todayWeekday()
   const workoutDays = days.filter((d) => d.type === 'workout')
@@ -51,38 +48,34 @@ export function TrainingOverview() {
     loadPlan()
   }, [])
 
+  useLoadTimeout(setLoading)
+
   async function loadPlan() {
     try {
-      const profile = await api.getProfile()
-      if (!profile.profile) {
-        navigate('/onboarding')
-        return
-      }
+      const storedId = sessionStorage.getItem('formplan_plan_id')
+      const hasMockSession = !!storedId && !!parseMockPlanId(storedId)
 
-      // Find the latest plan via the API; prefer a ready one. Fall back to the
-      // session-stored id so a freshly generated plan is picked up immediately.
-      let planId: string | null = null
+      let profileData: unknown = null
       try {
-        const { plans } = await api.listPlans()
-        planId = plans.find((p) => p.status === 'ready')?.id ?? plans[0]?.id ?? null
+        const { profile } = await api.getProfile()
+        profileData = profile
+        if (!profile && !hasMockSession) {
+          navigate('/onboarding')
+          return
+        }
       } catch {
-        planId = null
-      }
-      if (!planId) planId = sessionStorage.getItem('formplan_plan_id')
-
-      if (planId) {
-        sessionStorage.setItem('formplan_plan_id', planId)
-        const { plan, days } = await api.getPlan(planId)
-        setPlan(plan as Plan)
-        setDays((days as WorkoutDay[]).filter((d) => d.type === 'workout'))
+        if (!hasMockSession) {
+          navigate('/onboarding')
+          return
+        }
       }
 
-      // Weekly completed-session count from logged workouts.
-      try {
-        const { sessions } = await workoutApi.getSessions()
-        setThisWeekDone(sessionsThisWeek(sessions.map((s) => s.completed_at)))
-      } catch {
-        /* sessions are best-effort */
+      const loaded = await loadActivePlan(profileData)
+      if (loaded) {
+        setPlan(loaded.plan as Plan)
+        setDays(loaded.workoutDays)
+        setIsMock(loaded.isMock)
+
       }
     } catch {
       // no plan yet
@@ -111,7 +104,7 @@ export function TrainingOverview() {
         attempts++
       }
     } catch (e) {
-      toast.error((e as Error).message)
+      toastIfNotNetwork(e, toast.error)
     } finally {
       setGenerating(false)
     }
@@ -127,17 +120,22 @@ export function TrainingOverview() {
 
   return (
     <div className="pb-4">
-      {/* Header */}
-      <div className="px-5 pt-12 pb-4 bg-white">
-        <h1 className="text-2xl font-bold text-stone-900">Träning</h1>
+      <WorkoutHero
+        title="Träning"
+        subtitle={
+          plan
+            ? `${thisWeekDone} av ${totalWeek} pass denna vecka${isMock ? ' · testdata' : ''}`
+            : 'Ditt träningsschema'
+        }
+      />
 
-        {/* Sub-tabs */}
-        <div className="flex gap-5 mt-4 border-b border-stone-100">
+      <div className="px-5 bg-white border-b border-stone-100">
+        <div className="flex gap-5">
           {(['pass', 'program', 'ovningar'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`pb-3 text-sm font-medium capitalize transition-colors ${
+              className={`pb-3 pt-1 text-sm font-medium capitalize transition-colors ${
                 tab === t
                   ? 'text-forest-600 border-b-2 border-forest-600'
                   : 'text-stone-400'
@@ -218,7 +216,9 @@ export function TrainingOverview() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <div className="text-5xl mb-3">🏋️</div>
+              <div className="flex justify-center mb-3">
+                <DumbbellIcon className="w-12 h-12 stroke-stone-300" />
+              </div>
               <h2 className="text-lg font-semibold mb-1">Inget schema ännu</h2>
               <p className="text-stone-400 text-sm mb-6">Generera ett personligt träningsschema med AI.</p>
               <button
@@ -262,14 +262,7 @@ export function TrainingOverview() {
                       {day.content.duration_minutes} min
                     </span>
                   </div>
-                  <div className="space-y-1">
-                    {day.content.exercises.map((ex, i) => (
-                      <div key={i} className="flex items-center justify-between py-1.5 border-t border-stone-50 first:border-0">
-                        <span className="text-sm text-stone-700">{ex.name}</span>
-                        <span className="text-xs text-stone-400">{ex.sets} × {ex.reps}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <ProgramExerciseList exercises={day.content.exercises} />
                 </div>
               ))}
             </div>
@@ -280,6 +273,50 @@ export function TrainingOverview() {
       {tab === 'ovningar' && (
         <ExerciseLibrary days={workoutDays} />
       )}
+    </div>
+  )
+}
+
+function ProgramExerciseList({
+  exercises,
+}: {
+  exercises: { name: string; sets: number; reps: string }[]
+}) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null)
+
+  return (
+    <div className="divide-y divide-stone-50">
+      {exercises.map((ex, i) => {
+        const isOpen = openIndex === i
+
+        return (
+          <div key={i} className="py-2.5 first:pt-0">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setOpenIndex(isOpen ? null : i)}
+                className="flex-1 min-w-0 flex items-center justify-between gap-2 text-left"
+              >
+                <span className="text-sm text-stone-700">{ex.name}</span>
+                <span className="text-xs text-stone-400 shrink-0">{ex.sets} × {ex.reps}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setOpenIndex(isOpen ? null : i)}
+                aria-label={`Teknikguide: ${ex.name}`}
+                className="shrink-0"
+              >
+                <ExerciseVideo exerciseName={ex.name} variant="row" />
+              </button>
+            </div>
+            {isOpen && (
+              <div className="mt-2">
+                <ExerciseVideo exerciseName={ex.name} variant="card" />
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -351,6 +388,7 @@ function WorkoutCard({
 
 function ExerciseLibrary({ days }: { days: WorkoutDay[] }) {
   const [query, setQuery] = useState('')
+  const [expanded, setExpanded] = useState<string | null>(null)
 
   // Deduplicate exercises across workout days and enrich with which day they appear in.
   const all = days.flatMap((day) =>
@@ -397,15 +435,29 @@ function ExerciseLibrary({ days }: { days: WorkoutDay[] }) {
           <p className="text-stone-400 text-sm text-center py-6">Inga träffar.</p>
         )}
         {filtered.map((ex, i) => (
-          <div
-            key={ex.name}
-            className={`flex items-center justify-between px-4 py-3 ${i > 0 ? 'border-t border-stone-50' : ''}`}
-          >
-            <div>
-              <p className="text-sm font-medium text-stone-800">{ex.name}</p>
-              <p className="text-xs text-stone-400">{ex.dayName} · {ex.focus}</p>
-            </div>
-            <span className="text-xs text-stone-500 ml-2 flex-shrink-0">{ex.sets} × {ex.reps}</span>
+          <div key={ex.name} className={i > 0 ? 'border-t border-stone-50' : ''}>
+            <button
+              type="button"
+              onClick={() => setExpanded(expanded === ex.name ? null : ex.name)}
+              className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-stone-50 transition-colors"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-stone-800">{ex.name}</p>
+                <p className="text-xs text-stone-400">{ex.dayName} · {ex.focus}</p>
+              </div>
+              <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                <span className="text-xs text-stone-500">{ex.sets} × {ex.reps}</span>
+                <span className="flex items-center gap-1 text-xs font-medium text-forest-600">
+                  <PlayIcon className="w-3.5 h-3.5" />
+                  {expanded === ex.name ? 'Stäng' : 'Video'}
+                </span>
+              </div>
+            </button>
+            {expanded === ex.name && (
+              <div className="px-4 pb-3">
+                <ExerciseVideo exerciseName={ex.name} variant="card" />
+              </div>
+            )}
           </div>
         ))}
       </div>

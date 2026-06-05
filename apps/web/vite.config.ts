@@ -1,27 +1,27 @@
+import path from 'node:path'
+import { createRequire } from 'node:module'
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { VitePWA } from 'vite-plugin-pwa'
+
+const root = path.dirname(fileURLToPath(import.meta.url))
+const require = createRequire(import.meta.url)
+
+// lucide-react@0.511 saknar "exports" — Vite 6 behöver explicit ESM-entry.
+// createRequire hittar paketet oavsett om det ligger i root eller apps/web node_modules.
+const lucidePkgDir = path.dirname(require.resolve('lucide-react/package.json'))
+const lucideEntry = path.join(lucidePkgDir, 'dist/esm/lucide-react.js')
 
 export default defineConfig({
-  plugins: [
-    react(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'logo.svg'],
-      manifest: {
-        name: 'FormPlan',
-        short_name: 'FormPlan',
-        description: 'AI-genererat personligt tränings- & kostschema',
-        theme_color: '#10b981',
-        background_color: '#0f172a',
-        display: 'standalone',
-        start_url: '/',
-        icons: [
-          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
-        ],
-      },
-    }),
-  ],
+  resolve: {
+    alias: {
+      'lucide-react': lucideEntry,
+    },
+  },
+  optimizeDeps: {
+    include: ['lucide-react'],
+  },
+  plugins: [react()],
+  // vite-plugin-pwa avstängd: workbox generateSW kraschar i denna miljö.
+  // Appen körs utan offline service worker tills PWA är återaktiverat.
 })

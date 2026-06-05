@@ -23,7 +23,28 @@ export interface ActiveWorkoutState {
   currentExerciseIndex: number
 }
 
-let _state: ActiveWorkoutState | null = null
+const ACTIVE_KEY = 'formplan_active_workout'
+
+function restore(): ActiveWorkoutState | null {
+  try {
+    const raw = sessionStorage.getItem(ACTIVE_KEY)
+    if (!raw) return null
+    return JSON.parse(raw) as ActiveWorkoutState
+  } catch {
+    return null
+  }
+}
+
+function persist(state: ActiveWorkoutState | null) {
+  try {
+    if (state) sessionStorage.setItem(ACTIVE_KEY, JSON.stringify(state))
+    else sessionStorage.removeItem(ACTIVE_KEY)
+  } catch {
+    /* sessionStorage blocked */
+  }
+}
+
+let _state: ActiveWorkoutState | null = restore()
 const _listeners = new Set<() => void>()
 
 export const workoutStore = {
@@ -32,15 +53,18 @@ export const workoutStore = {
   },
   start(state: ActiveWorkoutState) {
     _state = state
+    persist(_state)
     _listeners.forEach((l) => l())
   },
   update(updater: (s: ActiveWorkoutState) => ActiveWorkoutState) {
     if (!_state) return
     _state = updater(_state)
+    persist(_state)
     _listeners.forEach((l) => l())
   },
   finish() {
     _state = null
+    persist(null)
     _listeners.forEach((l) => l())
   },
   subscribe(listener: () => void) {

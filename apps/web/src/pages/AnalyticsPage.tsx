@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react'
+import { useLoadTimeout } from '../hooks/useLoadTimeout'
+import { BarChartIcon, LeafIcon } from '../components/ui/Icons'
 import { workoutApi, type WorkoutSession } from '../lib/workoutApi'
 import { nutritionApi } from '../lib/nutritionApi'
-import { sessionsThisWeek, weeklyCounts, dateKey } from '../lib/derive'
+import { sessionsCountThisWeek, weeklyCounts, dateKey } from '../lib/derive'
+import { getLocalSessions, subscribeSessions } from '../lib/workoutSessionStore'
+import { useUnits } from '../hooks/useUnits'
 
-type Tab = 'traning' | 'kost'
+type Tab = 'oversikt' | 'trender' | 'kalorier'
 
 interface DaySummary {
   date: string
@@ -28,7 +32,8 @@ function last7Days(): { from: string; to: string } {
 }
 
 export function AnalyticsPage() {
-  const [tab, setTab] = useState<Tab>('traning')
+  const { weightLabel, toDisplay } = useUnits()
+  const [tab, setTab] = useState<Tab>('oversikt')
   const [sessions, setSessions] = useState<WorkoutSession[]>([])
   const [daySummaries, setDaySummaries] = useState<DaySummary[]>([])
   const [loading, setLoading] = useState(true)
@@ -36,16 +41,35 @@ export function AnalyticsPage() {
   const [nutritionLoaded, setNutritionLoaded] = useState(false)
 
   useEffect(() => {
-    workoutApi
-      .getSessions()
-      .then(({ sessions }) => setSessions(sessions))
-      .catch(() => setSessions([]))
-      .finally(() => setLoading(false))
+    function refreshLocal() {
+      setSessions(getLocalSessions())
+    }
+
+    async function loadSessions() {
+      refreshLocal()
+      try {
+        const { sessions } = await workoutApi.getSessions()
+        setSessions(sessions ?? getLocalSessions())
+      } catch {
+        refreshLocal()
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadSessions()
+    return subscribeSessions(() => {
+      refreshLocal()
+      workoutApi.getSessions().then(({ sessions }) => {
+        setSessions(sessions ?? getLocalSessions())
+      }).catch(refreshLocal)
+    })
   }, [])
 
-  // Lazy-load nutrition data when the tab is first selected.
+  useLoadTimeout(setLoading)
+
   useEffect(() => {
-    if (tab !== 'kost' || nutritionLoaded) return
+    if ((tab !== 'kalorier' && tab !== 'trender') || nutritionLoaded) return
     setNutritionLoading(true)
     const { from, to } = last7Days()
     nutritionApi
@@ -67,56 +91,79 @@ export function AnalyticsPage() {
   }
 
   const completedAt = sessions.map((s) => s.completed_at)
-  const thisWeek = sessionsThisWeek(completedAt)
+  const thisWeek = sessionsCountThisWeek(completedAt)
   const totalVolume = sessions.reduce((s, w) => s + w.total_volume_kg, 0)
   const totalTime = sessions.reduce((s, w) => s + w.duration_seconds, 0)
   const weekly = weeklyCounts(completedAt, 8)
   const maxWeekly = Math.max(1, ...weekly)
 
-  const trainStats = [
-    { label: 'Pass denna vecka', value: String(thisWeek) },
-    { label: 'Totalt antal pass', value: String(sessions.length) },
-    { label: 'Total volym', value: `${Math.round(totalVolume).toLocaleString('sv-SE')} kg` },
-    { label: 'Total tid', value: formatDuration(totalTime) },
-  ]
-
-  // 7-day calorie chart
   const maxKcal = Math.max(1, ...daySummaries.map((d) => d.kcal))
   const avgKcal = daySummaries.length > 0
     ? Math.round(daySummaries.reduce((s, d) => s + d.kcal, 0) / daySummaries.length)
     : 0
+
+  const avgProtein = daySummaries.length > 0
+    ? Math.round(daySummaries.reduce((s, d) => s + d.protein_g, 0) / daySummaries.length)
+    : 0
+  const avgCarbs = daySummaries.length > 0
+    ? Math.round(daySummaries.reduce((s, d) => s + d.carbs_g, 0) / daySummaries.length)
+    : 0
+  const avgFat = daySummaries.length > 0
+    ? Math.round(daySummaries.reduce((s, d) => s + d.fat_g, 0) / daySummaries.length)
+    : 0
+  const macroTotal = avgProtein + avgCarbs + avgFat || 1
+  const macroPct = {
+    protein: Math.round((avgProtein / macroTotal) * 100),
+    carbs: Math.round((avgCarbs / macroTotal) * 100),
+    fat: Math.round((avgFat / macroTotal) * 100),
+  }
+
+  const TABS: { key: Tab; label: string }[] = [
+    { key: 'oversikt', label: 'Översikt' },
+    { key: 'trender', label: 'Trender' },
+    { key: 'kalorier', label: 'Kalorier' },
+  ]
 
   return (
     <div className="pt-12 pb-4">
       <div className="px-5 mb-4">
         <h1 className="text-2xl font-bold text-stone-900">Analys</h1>
         <div className="flex gap-5 mt-3 border-b border-stone-100">
-          {(['traning', 'kost'] as const).map((t) => (
+          {TABS.map(({ key, label }) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={key}
+              onClick={() => setTab(key)}
               className={`pb-3 text-sm font-medium transition-colors ${
-                tab === t ? 'text-forest-600 border-b-2 border-forest-600' : 'text-stone-400'
+                tab === key ? 'text-forest-600 border-b-2 border-forest-600' : 'text-stone-400'
               }`}
             >
-              {t === 'traning' ? 'Träning' : 'Kost'}
+              {label}
             </button>
           ))}
         </div>
       </div>
 
-      {tab === 'traning' && (
+      {/* ÖVERSIKT */}
+      {tab === 'oversikt' && (
         <div className="px-5 space-y-4">
           {sessions.length === 0 ? (
             <div className="text-center py-16">
-              <div className="text-5xl mb-3">📊</div>
+              <div className="flex justify-center mb-3">
+                <BarChartIcon className="w-12 h-12 stroke-stone-300" />
+              </div>
               <h2 className="text-lg font-semibold mb-1">Ingen data ännu</h2>
               <p className="text-stone-400 text-sm">Genomför ditt första pass så dyker statistiken upp här.</p>
             </div>
           ) : (
             <>
+              <p className="text-xs font-semibold text-stone-400 uppercase tracking-wide">Denna vecka</p>
               <div className="grid grid-cols-2 gap-3">
-                {trainStats.map((s) => (
+                {[
+                  { label: 'Pass', value: String(thisWeek) },
+                  { label: 'Totalt antal pass', value: String(sessions.length) },
+                  { label: 'Total volym', value: `${Math.round(toDisplay(totalVolume)).toLocaleString('sv-SE')} ${weightLabel}` },
+                  { label: 'Total tid', value: formatDuration(totalTime) },
+                ].map((s) => (
                   <div key={s.label} className="bg-white rounded-2xl border border-stone-100 p-4">
                     <p className="text-2xl font-bold text-stone-900">{s.value}</p>
                     <p className="text-xs text-stone-400 mt-0.5">{s.label}</p>
@@ -154,7 +201,7 @@ export function AnalyticsPage() {
                         {' · '}{s.completed_sets} set · {formatDuration(s.duration_seconds)}
                       </p>
                     </div>
-                    <span className="text-xs text-stone-500">{Math.round(s.total_volume_kg)} kg</span>
+                    <span className="text-xs text-stone-500">{Math.round(toDisplay(s.total_volume_kg))} {weightLabel}</span>
                   </div>
                 ))}
               </div>
@@ -163,20 +210,56 @@ export function AnalyticsPage() {
         </div>
       )}
 
-      {tab === 'kost' && (
+      {/* TRENDER */}
+      {tab === 'trender' && (
         <div className="px-5 space-y-4">
           {nutritionLoading ? (
-            <div className="flex items-center justify-center h-32">
+            <div className="flex justify-center h-32 items-center">
               <div className="w-6 h-6 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
             </div>
           ) : daySummaries.length === 0 ? (
             <div className="text-center py-16">
-              <div className="text-5xl mb-3">🥗</div>
+              <div className="flex justify-center mb-3">
+                <LeafIcon className="w-12 h-12 stroke-stone-300" />
+              </div>
               <h2 className="text-lg font-semibold mb-1">Ingen kostdata ännu</h2>
               <p className="text-stone-400 text-sm">Logga dina måltider så visas trenden här.</p>
             </div>
           ) : (
             <>
+              <div className="bg-white rounded-2xl border border-stone-100 p-4">
+                <p className="font-semibold text-stone-800 mb-4">Kalorier senaste 7 dagar</p>
+                {/* Line-style chart using SVG */}
+                <svg viewBox={`0 0 ${daySummaries.length * 40} 80`} className="w-full h-24" preserveAspectRatio="none">
+                  <polyline
+                    fill="none"
+                    stroke="#16a34a"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    points={daySummaries
+                      .map((d, i) => `${i * 40 + 20},${80 - (d.kcal / maxKcal) * 70}`)
+                      .join(' ')}
+                  />
+                  {daySummaries.map((d, i) => (
+                    <circle
+                      key={d.date}
+                      cx={i * 40 + 20}
+                      cy={80 - (d.kcal / maxKcal) * 70}
+                      r="4"
+                      fill="#16a34a"
+                    />
+                  ))}
+                </svg>
+                <div className="flex justify-between mt-1">
+                  {daySummaries.map((d) => (
+                    <span key={d.date} className="text-[9px] text-stone-400">
+                      {new Date(d.date + 'T12:00:00').toLocaleDateString('sv-SE', { weekday: 'short' })}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-white rounded-2xl border border-stone-100 p-4">
                   <p className="text-2xl font-bold text-stone-900">{avgKcal.toLocaleString('sv-SE')}</p>
@@ -184,13 +267,55 @@ export function AnalyticsPage() {
                 </div>
                 <div className="bg-white rounded-2xl border border-stone-100 p-4">
                   <p className="text-2xl font-bold text-stone-900">{daySummaries.length}</p>
-                  <p className="text-xs text-stone-400 mt-0.5">Dagar loggade (7 dgr)</p>
+                  <p className="text-xs text-stone-400 mt-0.5">Dagar loggade</p>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* KALORIER */}
+      {tab === 'kalorier' && (
+        <div className="px-5 space-y-4">
+          {nutritionLoading ? (
+            <div className="flex justify-center h-32 items-center">
+              <div className="w-6 h-6 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : daySummaries.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="flex justify-center mb-3">
+                <LeafIcon className="w-12 h-12 stroke-stone-300" />
+              </div>
+              <h2 className="text-lg font-semibold mb-1">Ingen kostdata ännu</h2>
+              <p className="text-stone-400 text-sm">Logga dina måltider så visas trenden här.</p>
+            </div>
+          ) : (
+            <>
+              {/* Macro donut (SVG) */}
+              <div className="bg-white rounded-2xl border border-stone-100 p-4">
+                <p className="font-semibold text-stone-800 mb-4">Makronutrienter (snitt)</p>
+                <div className="flex items-center gap-6">
+                  <MacroDonut protein={macroPct.protein} carbs={macroPct.carbs} fat={macroPct.fat} />
+                  <div className="space-y-2">
+                    {[
+                      { label: 'Protein', value: avgProtein, pct: macroPct.protein, color: 'bg-forest-500' },
+                      { label: 'Fett', value: avgFat, pct: macroPct.fat, color: 'bg-sky-400' },
+                      { label: 'Kolhydrater', value: avgCarbs, pct: macroPct.carbs, color: 'bg-amber-400' },
+                    ].map((m) => (
+                      <div key={m.label} className="flex items-center gap-2">
+                        <span className={`w-2.5 h-2.5 rounded-full ${m.color} flex-shrink-0`} />
+                        <span className="text-xs text-stone-600">{m.label}</span>
+                        <span className="text-xs text-stone-400 ml-auto">{m.value}g ({m.pct}%)</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* 7-day calorie bar chart */}
+              {/* Daily calorie bars */}
               <div className="bg-white rounded-2xl border border-stone-100 p-4">
-                <p className="font-semibold text-stone-800 mb-4">Kalorier senaste 7 dagar</p>
+                <p className="font-semibold text-stone-800 mb-4">Kalorier per dag</p>
                 <div className="flex items-end gap-2 h-32">
                   {daySummaries.map((d) => (
                     <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
@@ -208,13 +333,13 @@ export function AnalyticsPage() {
                 </div>
               </div>
 
-              {/* Per-day macro breakdown */}
+              {/* Per-day list */}
               <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
                 <p className="font-semibold text-stone-800 px-4 py-3 border-b border-stone-50">Daglig uppdelning</p>
                 {[...daySummaries].reverse().map((d) => (
                   <div key={d.date} className="flex items-center justify-between px-4 py-3 border-b border-stone-50 last:border-0">
                     <div>
-                      <p className="text-sm font-medium text-stone-800">
+                      <p className="text-sm font-medium text-stone-800 capitalize">
                         {new Date(d.date + 'T12:00:00').toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}
                       </p>
                       <p className="text-xs text-stone-400">
@@ -230,5 +355,44 @@ export function AnalyticsPage() {
         </div>
       )}
     </div>
+  )
+}
+
+function MacroDonut({ protein, carbs, fat }: { protein: number; carbs: number; fat: number }) {
+  const r = 36
+  const cx = 44
+  const cy = 44
+  const circ = 2 * Math.PI * r
+  const total = protein + carbs + fat || 1
+
+  const segments = [
+    { pct: protein / total, color: '#22c55e' },
+    { pct: fat / total, color: '#38bdf8' },
+    { pct: carbs / total, color: '#fbbf24' },
+  ]
+
+  let offset = 0
+  return (
+    <svg width={cx * 2} height={cy * 2} className="flex-shrink-0">
+      {segments.map((seg, i) => {
+        const dash = seg.pct * circ
+        const el = (
+          <circle
+            key={i}
+            cx={cx} cy={cy} r={r}
+            fill="none"
+            stroke={seg.color}
+            strokeWidth={10}
+            strokeDasharray={`${dash} ${circ - dash}`}
+            strokeDashoffset={-offset * circ / 1 + circ * 0.25}
+            strokeLinecap="butt"
+            transform={`rotate(-90 ${cx} ${cy})`}
+            style={{ strokeDashoffset: circ * 0.25 - offset * circ }}
+          />
+        )
+        offset += seg.pct
+        return el
+      })}
+    </svg>
   )
 }
