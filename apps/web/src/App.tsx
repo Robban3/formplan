@@ -29,7 +29,7 @@ export default function App() {
       <Toaster />
       <WeeklySessionsProvider>
       <Routes>
-        <Route path="/auth" element={user ? <Navigate to="/" replace /> : <AuthPage />} />
+        <Route path="/auth" element={user ? <Navigate to="/hem" replace /> : <AuthPage />} />
         <Route path="/onboarding" element={user ? <OnboardingPage /> : <Navigate to="/auth" replace />} />
         {/* Plan generation/preview is full-screen, outside the tab layout */}
         <Route
