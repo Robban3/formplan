@@ -86,7 +86,7 @@ export function AuthPage() {
               <div style={{ maxWidth: '380px', margin: '0 auto' }}>
               {/* Icon */}
               <div className="flex justify-center mb-6">
-                <img src="/logo.png" alt="FormPlan" style={{ height: '480px', width: 'auto' }} />
+                <img src="/logo.png" alt="FormPlan" style={{ height: '210px', width: 'auto' }} />
               </div>
 
               {sent ? (
