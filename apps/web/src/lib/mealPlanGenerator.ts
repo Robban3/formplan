@@ -204,7 +204,7 @@ function pickFoodsForMeal(
 ): MealPlanFood[] {
   const pool = FOODS[focus][slotKey as keyof typeof FOODS[typeof focus]] ?? FOODS[focus]['snack']
   // Shuffle pool
-  const shuffled = [...pool].sort(() => rng() - 0.5)
+  const shuffled = [...(pool ?? [])].sort(() => rng() - 0.5)
 
   const foods: MealPlanFood[] = []
   let remaining = targetKcal

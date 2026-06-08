@@ -73,7 +73,7 @@ export function MeasurementsPage() {
   const fieldSeries: Record<string, number[]> = {}
   for (const f of FIELDS) {
     fieldSeries[f.key] = entries
-      .map((e) => (e as Record<string, unknown>)[f.key] as number | undefined)
+      .map((e) => (e as unknown as Record<string, unknown>)[f.key] as number | undefined)
       .filter((v): v is number => v !== undefined)
   }
 
@@ -141,7 +141,7 @@ export function MeasurementsPage() {
           <div className="grid grid-cols-2 gap-3">
             {FIELDS.map((f) => {
               const vals = fieldSeries[f.key] ?? []
-              const latestVal = (latest as Record<string, unknown>)?.[f.key] as number | undefined
+              const latestVal = (latest as unknown as Record<string, unknown>)?.[f.key] as number | undefined
               if (vals.length === 0) return null
               const color = f.key === 'weight_kg' ? '#16a34a' : '#6366f1'
               return (
@@ -175,7 +175,7 @@ export function MeasurementsPage() {
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-1">
                   {FIELDS.map((f) => {
-                    const val = (e as Record<string, unknown>)[f.key] as number | undefined
+                    const val = (e as unknown as Record<string, unknown>)[f.key] as number | undefined
                     if (!val) return null
                     return (
                       <span key={f.key} className="text-xs text-stone-500">

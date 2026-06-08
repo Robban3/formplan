@@ -67,7 +67,7 @@ export function parseGoal(text: string): GoalMeta {
     t.match(/(klara|genomföra|göra)\s+(\d+)\s*(pass|träningar)/i) ||
     t.match(/(\d+)\s*(pass|träningar)\s*(totalt)?/i)
   if (totalMatch) {
-    const n = parseInt(totalMatch[2] ?? totalMatch[1])
+    const n = parseInt((totalMatch[2] ?? totalMatch[1]) as string)
     if (!isNaN(n) && n > 0 && n < 1000) return { type: 'training_total', targetValue: n, unit: 'pass' }
   }
 

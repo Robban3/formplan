@@ -195,7 +195,7 @@ export function PlanPage() {
                     </div>
                   </div>
                   <div className="mt-2 ml-9">
-                    <ExerciseVideo exerciseName={ex.name} variant="card" dark />
+                    <ExerciseVideo exerciseName={ex.name} variant="card" />
                   </div>
                 </div>
               ))}
