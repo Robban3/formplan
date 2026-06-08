@@ -14,6 +14,3 @@ ENVIRONMENT = "production"
 # STRIPE_WEBHOOK_SECRET
 # RESEND_API_KEY
 
-[[routes]]
-pattern = "api.formplan.app/*"
-zone_name = "formplan.app"
