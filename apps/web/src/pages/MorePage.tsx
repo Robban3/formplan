@@ -58,7 +58,7 @@ export function MorePage() {
       </div>
 
       <button
-        onClick={() => supabase.auth.signOut()}
+        onClick={async () => { await supabase.auth.signOut(); window.location.href = '/auth' }}
         className="w-full flex items-center justify-center gap-2 text-red-500 font-medium py-4 mt-4"
       >
         <LogOutIcon className="w-4 h-4 stroke-red-500" />
