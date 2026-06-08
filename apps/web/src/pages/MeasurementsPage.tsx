@@ -143,7 +143,7 @@ export function MeasurementsPage() {
               const vals = fieldSeries[f.key] ?? []
               const latestVal = (latest as unknown as Record<string, unknown>)?.[f.key] as number | undefined
               if (vals.length === 0) return null
-              const color = f.key === 'weight_kg' ? '#16a34a' : '#6366f1'
+              const color = f.key === 'weight_kg' ? '#22e6c6' : '#6366f1'
               return (
                 <div key={f.key} className="bg-white rounded-2xl border border-stone-100 p-3">
                   <p className="text-xs text-stone-400 font-medium">{f.label}</p>

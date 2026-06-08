@@ -163,7 +163,7 @@ export function ActiveWorkout() {
                   navigate('/', { replace: true })
                 }}
                 className={`aspect-square rounded-xl text-sm font-bold transition-colors ${
-                  n <= 3 ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                  n <= 3 ? 'bg-teal-100 text-teal-700 hover:bg-teal-200'
                   : n <= 6 ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
                   : 'bg-red-100 text-red-700 hover:bg-red-200'
                 }`}

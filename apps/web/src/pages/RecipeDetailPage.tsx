@@ -206,7 +206,7 @@ export function RecipeDetailPage() {
               { label: 'Kalorier', value: recipe.kcal, unit: 'kcal', color: 'bg-forest-50 text-forest-700' },
               { label: 'Protein',  value: recipe.protein_g, unit: 'g', color: 'bg-blue-50 text-blue-700' },
               { label: 'Fett',     value: recipe.fat_g,     unit: 'g', color: 'bg-amber-50 text-amber-700' },
-              { label: 'Kolhyd.', value: recipe.carbs_g,   unit: 'g', color: 'bg-green-50 text-green-700' },
+              { label: 'Kolhyd.', value: recipe.carbs_g,   unit: 'g', color: 'bg-teal-50 text-teal-700' },
             ].map((m) => (
               <div key={m.label} className={`${m.color} rounded-xl p-2.5 text-center`}>
                 <p className="font-bold text-sm">{m.value}</p>

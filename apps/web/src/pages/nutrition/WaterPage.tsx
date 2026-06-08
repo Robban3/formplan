@@ -170,7 +170,7 @@ export function WaterPage() {
                 <circle
                   cx={cx} cy={cy} r={r}
                   fill="none"
-                  stroke={goalReached ? '#16a34a' : '#0ea5e9'}
+                  stroke={goalReached ? '#22e6c6' : '#0ea5e9'}
                   strokeWidth={14}
                   strokeDasharray={circ}
                   strokeDashoffset={circ * (1 - pct)}

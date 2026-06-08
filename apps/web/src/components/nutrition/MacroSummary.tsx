@@ -41,7 +41,7 @@ export function MacroSummary({ eaten, goals, size = 110 }: Props) {
   const strokeW = size * 0.11
 
   const segments = [
-    { pct: macroKcal.protein / macroTotal, color: '#22c55e' },
+    { pct: macroKcal.protein / macroTotal, color: '#22e6c6' },
     { pct: macroKcal.fat / macroTotal, color: '#fbbf24' },
     { pct: macroKcal.carbs / macroTotal, color: '#86efac' },
   ]

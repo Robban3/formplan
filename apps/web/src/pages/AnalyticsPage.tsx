@@ -141,7 +141,7 @@ function WeeklyBars({ weekly }: { weekly: number[] }) {
 // ── Line chart ────────────────────────────────────────────────────────────────
 
 function LineChart({
-  points, color = '#16a34a', height = 72, showDots = true, showArea = true
+  points, color = '#22e6c6', height = 72, showDots = true, showArea = true
 }: {
   points: number[]; color?: string; height?: number; showDots?: boolean; showArea?: boolean
 }) {
@@ -178,7 +178,7 @@ function MacroDonut({ protein, carbs, fat, kcal }: { protein: number; carbs: num
   const r = 52; const cx = 64; const cy = 64; const circ = 2 * Math.PI * r
   const total = protein + carbs + fat || 1
   const segs = [
-    { label: 'Protein', g: protein, pct: protein / total, color: '#22c55e' },
+    { label: 'Protein', g: protein, pct: protein / total, color: '#22e6c6' },
     { label: 'Fett',    g: fat,     pct: fat / total,     color: '#38bdf8' },
     { label: 'Kolh.',   g: carbs,   pct: carbs / total,   color: '#fbbf24' },
   ]
@@ -257,7 +257,7 @@ function MultiLineChart({
         )
       })}
       {series[0]?.points.map((v, i) => (
-        <circle key={i} cx={fx(i)} cy={fy(v)} r="3" fill={series[0]?.color ?? '#16a34a'} />
+        <circle key={i} cx={fx(i)} cy={fy(v)} r="3" fill={series[0]?.color ?? '#22e6c6'} />
       ))}
     </svg>
   )
@@ -276,7 +276,7 @@ function WeightChart({ entries }: { entries: WeightEntry[] }) {
   if (entries.length < 2) return null
   const change = entries[entries.length - 1]!.weight_kg - entries[0]!.weight_kg
   const sign = change > 0 ? '+' : ''
-  const color = change < 0 ? '#16a34a' : change > 0 ? '#ef4444' : '#6b7280'
+  const color = change < 0 ? '#22e6c6' : change > 0 ? '#ef4444' : '#6b7280'
   const rawPts = entries.map((e) => e.weight_kg)
   const avgPts = rollingAvg(rawPts, 7)
   return (
@@ -293,7 +293,7 @@ function WeightChart({ entries }: { entries: WeightEntry[] }) {
       </div>
       <MultiLineChart
         series={[
-          { points: rawPts, color: '#16a34a' },
+          { points: rawPts, color: '#22e6c6' },
           { points: avgPts, color: '#f59e0b', dash: true },
         ]}
         height={80}
@@ -426,7 +426,7 @@ export function AnalyticsPage() {
               <StatRing
                 Icon={DumbbellIcon} label="Pass" unit="pass"
                 value={thisWeek} goal={weeklyGoal} goalLabel={`${weeklyGoal} pass`}
-                color="#16a34a" iconStroke="stroke-forest-600"
+                color="#22e6c6" iconStroke="stroke-forest-600"
               />
               <StatRing
                 Icon={DropletIcon} label="Vatten idag" unit="L"

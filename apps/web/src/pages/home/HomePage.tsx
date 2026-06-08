@@ -53,7 +53,7 @@ const QUICK_LINKS: QuickLink[] = [
 ]
 
 const DIFF_STYLES: Record<string, string> = {
-  Lätt: 'bg-emerald-100 text-emerald-700',
+  Lätt: 'bg-teal-100 text-teal-700',
   Medel: 'bg-amber-100 text-amber-700',
   Hög: 'bg-red-100 text-red-700',
 }

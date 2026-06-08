@@ -17,7 +17,7 @@ const FOCUS_OPTIONS: { key: DietFocus; label: string; desc: string }[] = [
 ]
 
 const MACRO_COLORS: Record<string, string> = {
-  protein: '#22c55e',
+  protein: '#22e6c6',
   fat:     '#38bdf8',
   carbs:   '#fbbf24',
 }
