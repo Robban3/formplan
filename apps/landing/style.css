@@ -54,7 +54,7 @@ body {
   padding: 8px 18px; border-radius: 10px;
   text-decoration: none; transition: background .2s;
 }
-.btn-nav:hover { background: #1daa50; }
+.btn-nav:hover { background: #10c4a8; }
 
 /* Hero */
 .hero {
@@ -96,7 +96,7 @@ h1 {
   text-decoration: none; transition: background .2s;
 }
 .btn-hero svg { width: 16px; height: 16px; stroke: #000; }
-.btn-hero:hover { background: #1daa50; }
+.btn-hero:hover { background: #10c4a8; }
 .hero-note {
   display: flex; align-items: center; gap: 6px;
   margin-top: 12px; font-size: 13px; color: var(--muted);
