@@ -54,7 +54,7 @@ export function AuthPage() {
         <div className="flex flex-col justify-between" style={{ width: '380px' }}>
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="FormPlan" style={{ height: '40px', width: 'auto' }} />
+            <img src="/logo.png" alt="FormPlan" style={{ height: '160px', width: 'auto' }} />
           </div>
 
           {/* Hero text */}
@@ -86,7 +86,7 @@ export function AuthPage() {
               <div style={{ maxWidth: '380px', margin: '0 auto' }}>
               {/* Icon */}
               <div className="flex justify-center mb-6">
-                <img src="/logo.png" alt="FormPlan" style={{ height: '160px', width: 'auto' }} />
+                <img src="/logo.png" alt="FormPlan" style={{ height: '480px', width: 'auto' }} />
               </div>
 
               {sent ? (
