@@ -54,13 +54,7 @@ export function AuthPage() {
         <div className="flex flex-col justify-between" style={{ width: '380px' }}>
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}>
-              <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none">
-                <path d="M4 6h16M4 12h10M4 18h7" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <span className="text-white text-xl font-bold">FormPlan</span>
+            <img src="/logo.png" alt="FormPlan" className="h-10 w-auto" />
           </div>
 
           {/* Hero text */}
@@ -92,15 +86,7 @@ export function AuthPage() {
               <div style={{ maxWidth: '380px', margin: '0 auto' }}>
               {/* Icon */}
               <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{
-                  background: 'linear-gradient(135deg, #0d2a1f, #0a1f17)',
-                  border: '1px solid rgba(16,185,129,0.25)',
-                  boxShadow: '0 0 30px rgba(16,185,129,0.15)',
-                }}>
-                  <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none">
-                    <path d="M4 6h16M4 12h10M4 18h7" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round"/>
-                  </svg>
-                </div>
+                <img src="/logo.png" alt="FormPlan" style={{ height: '72px', width: 'auto' }} />
               </div>
 
               {sent ? (
