@@ -54,7 +54,7 @@ export function AuthPage() {
         <div className="flex flex-col justify-between" style={{ width: '380px' }}>
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="FormPlan" style={{ height: '640px', width: 'auto' }} />
+            <img src="/logo.png" alt="FormPlan" style={{ maxHeight: '160px', width: 'auto', objectFit: 'contain' }} />
           </div>
 
           {/* Hero text */}
