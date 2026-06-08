@@ -26,6 +26,18 @@ import {
   Droplet,
   Utensils,
   GlassWater,
+  Trophy,
+  Share2,
+  Bot,
+  Zap,
+  TrendingUp,
+  MessageSquare,
+  Star,
+  Award,
+  Send,
+  ChevronUp,
+  ChevronDown,
+  Ruler,
 } from 'lucide-react'
 
 interface IconProps {
@@ -67,3 +79,15 @@ export const UtensilsIcon = wrap(Utensils)
 export const GlassWaterIcon = wrap(GlassWater)
 /** @deprecated Använd GlassWaterIcon */
 export const WaterGlassIcon = GlassWaterIcon
+export const TrophyIcon = wrap(Trophy)
+export const ShareIcon = wrap(Share2)
+export const BotIcon = wrap(Bot)
+export const ZapIcon = wrap(Zap)
+export const TrendingUpIcon = wrap(TrendingUp)
+export const MessageSquareIcon = wrap(MessageSquare)
+export const StarIcon = wrap(Star)
+export const AwardIcon = wrap(Award)
+export const SendIcon = wrap(Send, 2)
+export const ChevronUpIcon = wrap(ChevronUp, 2)
+export const ChevronDownIcon = wrap(ChevronDown, 2)
+export const RulerIcon = wrap(Ruler)

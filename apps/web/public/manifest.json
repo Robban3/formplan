@@ -1,0 +1,20 @@
+{
+  "name": "FormPlan",
+  "short_name": "FormPlan",
+  "description": "Din personliga tränings- och kostapp",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafaf9",
+  "theme_color": "#16a34a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/hero.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "fitness"],
+  "lang": "sv"
+}

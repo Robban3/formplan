@@ -9,6 +9,11 @@ import { nutritionApi, type FoodLogEntry, type MealSlot } from '../../lib/nutrit
 import { dateKey, deriveDifficulty, isoWeekday } from '../../lib/derive'
 import { loadActivePlan } from '../../lib/planLoader'
 import { useWeeklySessions } from '../../contexts/WeeklySessionsContext'
+import { getTrainingStreak } from '../../lib/streakStore'
+import { getLocalSessions } from '../../lib/workoutSessionStore'
+import { loadGoals, effectiveProgress } from '../GoalsPage'
+import { addLocalWater, getLocalWater } from '../../lib/waterStore'
+import { toast } from '../../lib/toast'
 import {
   DumbbellIcon,
   LeafIcon,
@@ -149,6 +154,49 @@ function WeeklyRing({ done, total, size = 56 }: { done: number; total: number; s
   )
 }
 
+function WeeklyReport({ weeklyDone, weeklyTotal }: { weeklyDone: number; weeklyTotal: number }) {
+  const now = new Date()
+  const monday = new Date(now)
+  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7))
+  monday.setHours(0, 0, 0, 0)
+
+  const weeklySessions = getLocalSessions().filter((s) => new Date(s.completed_at) >= monday)
+  const totalVolume = weeklySessions.reduce((s, x) => s + x.total_volume_kg, 0)
+  const totalTime = weeklySessions.reduce((s, x) => s + x.duration_seconds, 0)
+  const avgTime = weeklySessions.length > 0 ? Math.round(totalTime / weeklySessions.length / 60) : 0
+
+  const weekLabel = monday.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })
+  const onTrack = weeklyTotal > 0 && weeklyDone >= weeklyTotal
+  const pct = weeklyTotal > 0 ? Math.round((weeklyDone / weeklyTotal) * 100) : 0
+
+  return (
+    <div className="bg-white rounded-2xl border border-stone-100 p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <p className="text-xs font-semibold text-stone-400 uppercase tracking-wide">Veckans rapport</p>
+          <p className="text-[10px] text-stone-300">v. från {weekLabel}</p>
+        </div>
+        {onTrack && <span className="text-xs bg-forest-50 text-forest-700 font-semibold px-2 py-0.5 rounded-full border border-forest-100">Mål uppnått!</span>}
+      </div>
+      <div className="grid grid-cols-3 gap-3 text-center">
+        <div>
+          <p className="text-xl font-bold text-stone-900">{weeklyDone}</p>
+          <p className="text-[10px] text-stone-400">pass{weeklyTotal > 0 ? ` av ${weeklyTotal}` : ''}</p>
+          {weeklyTotal > 0 && <p className="text-[9px] text-forest-600 font-medium">{pct}%</p>}
+        </div>
+        <div>
+          <p className="text-xl font-bold text-stone-900">{totalVolume > 0 ? Math.round(totalVolume / 1000 * 10) / 10 : 0}</p>
+          <p className="text-[10px] text-stone-400">ton lyft</p>
+        </div>
+        <div>
+          <p className="text-xl font-bold text-stone-900">{avgTime}</p>
+          <p className="text-[10px] text-stone-400">min/pass</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function loadActiveGoalsCount(): number {
   try {
     const raw = JSON.parse(localStorage.getItem('formplan_goals') ?? '[]') as { done?: boolean }[]
@@ -173,8 +221,10 @@ export function HomePage() {
   const [eatenProtein, setEatenProtein] = useState(0)
   const [kcalGoal, setKcalGoal] = useState(settings.calorie_goal)
   const [proteinGoal, setProteinGoal] = useState(settings.protein_goal_g)
-  const [waterTotal, setWaterTotal] = useState(0)
+  const [waterTotal, setWaterTotal] = useState(() => getLocalWater(dateKey()).total_ml)
   const [activeGoals, setActiveGoals] = useState(loadActiveGoalsCount)
+  const [topGoals] = useState(() => loadGoals().filter((g) => !g.done).slice(0, 3))
+  const [streak] = useState(() => getTrainingStreak())
 
   const firstName = user?.user_metadata?.['full_name']?.split(' ')[0]
   const greeting = firstName ? `Hej, ${firstName}!` : 'Hej!'
@@ -249,11 +299,28 @@ export function HomePage() {
   const loggedMeals = MEAL_SLOTS.filter((slot) => entries.some((e) => e.meal_slot === slot))
   const waterPct = Math.min((waterTotal / settings.water_goal_ml) * 100, 100)
 
+  function handleQuickWater() {
+    addLocalWater(today, 250)
+    setWaterTotal((prev) => prev + 250)
+    toast.success('+250 ml vatten loggat')
+  }
+
   return (
     <div className="pb-4">
-      <div className="px-5 pt-12 pb-4">
-        <h1 className="text-2xl font-bold text-stone-900">{greeting}</h1>
-        <p className="text-stone-400 text-sm capitalize mt-0.5">{todayLabel()}</p>
+      <div className="px-5 pt-12 pb-3">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-stone-900">{greeting}</h1>
+            <p className="text-stone-400 text-sm capitalize mt-0.5">{todayLabel()}</p>
+          </div>
+          {/* Streak badge */}
+          {streak > 0 && (
+            <div className="flex flex-col items-center bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 min-w-[56px]">
+              <span className="text-xl font-bold text-amber-500">{streak}</span>
+              <span className="text-[9px] text-amber-400 font-medium">dag streak</span>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="px-5 space-y-5">
@@ -278,11 +345,11 @@ export function HomePage() {
               onClick={() => navigate('/kost')}
             />
             <StatCard
-              label="Steg"
-              value={0}
-              goal={STEPS_GOAL}
-              unit="steg"
-              onClick={() => navigate('/mer/apple-health')}
+              label="Kvar idag"
+              value={Math.max(0, kcalGoal - Math.round(eatenKcal))}
+              goal={kcalGoal}
+              unit="kcal"
+              onClick={() => navigate('/kost')}
             />
           </div>
         </div>
@@ -389,14 +456,19 @@ export function HomePage() {
               </div>
             </button>
 
-            <button
-              onClick={() => navigate('/kost')}
-              className="bg-white rounded-2xl border border-stone-100 p-4 text-left active:scale-[0.98] transition-transform"
-            >
-              <p className="text-xs text-stone-400 mb-2 flex items-center gap-1">
-                <DropletIcon className="w-3.5 h-3.5 stroke-sky-500" />
-                Vatten
-              </p>
+            <div className="bg-white rounded-2xl border border-stone-100 p-4 text-left">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs text-stone-400 flex items-center gap-1">
+                  <DropletIcon className="w-3.5 h-3.5 stroke-sky-500" />
+                  Vatten
+                </p>
+                <button
+                  onClick={handleQuickWater}
+                  className="text-[10px] font-semibold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full active:bg-sky-100"
+                >
+                  +250 ml
+                </button>
+              </div>
               <p className="text-lg font-bold text-stone-900">
                 {(waterTotal / 1000).toLocaleString('sv-SE', { maximumFractionDigits: 1 })} L
               </p>
@@ -407,25 +479,46 @@ export function HomePage() {
                   style={{ width: `${waterPct}%` }}
                 />
               </div>
-            </button>
+            </div>
           </div>
         </div>
 
+        {/* Veckorapport */}
+        {weeklyDone > 0 && <WeeklyReport weeklyDone={weeklyDone} weeklyTotal={weeklyTotal} />}
+
         {/* Aktiva mål */}
-        {activeGoals > 0 && (
-          <button
-            onClick={() => navigate('/mer/mina-mal')}
-            className="w-full bg-white rounded-2xl border border-stone-100 p-4 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
-          >
-            <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center flex-shrink-0">
-              <TargetIcon className="w-5 h-5 stroke-purple-500" />
+        {topGoals.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between px-1 mb-2">
+              <p className="text-xs font-semibold text-stone-400 uppercase tracking-wide">Mina mål</p>
+              <button onClick={() => navigate('/mer/mina-mal')} className="text-xs text-forest-600 font-medium">
+                Se alla →
+              </button>
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-stone-900">{activeGoals} aktiva mål</p>
-              <p className="text-xs text-stone-400">Fortsätt arbeta mot dina mål</p>
+            <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden divide-y divide-stone-50">
+              {topGoals.map((goal) => {
+                const pct = effectiveProgress(goal)
+                return (
+                  <button
+                    key={goal.id}
+                    onClick={() => navigate('/mer/mina-mal')}
+                    className="w-full px-4 py-3 text-left hover:bg-stone-50 active:bg-stone-100 transition-colors"
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <p className="text-sm font-medium text-stone-800 truncate pr-2">{goal.text}</p>
+                      <span className="text-xs font-bold text-forest-600 flex-shrink-0">{pct}%</span>
+                    </div>
+                    <div className="w-full bg-stone-100 rounded-full h-1.5">
+                      <div
+                        className="bg-forest-600 h-1.5 rounded-full transition-all"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </button>
+                )
+              })}
             </div>
-            <ChevronRightIcon className="w-4 h-4 stroke-stone-300" />
-          </button>
+          </div>
         )}
 
         {/* Dagens måltider */}

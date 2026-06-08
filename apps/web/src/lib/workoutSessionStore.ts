@@ -1,6 +1,7 @@
 import type { LogSessionInput, WorkoutSession } from './workoutApi'
 import { sessionsCountThisWeek } from './derive'
 import { notifySessionsUpdated, SESSIONS_UPDATED } from './workoutSessionEvents'
+import { recordExerciseSession } from './exerciseHistoryStore'
 
 const KEY = 'formplan_workout_sessions'
 const BACKUP_KEY = 'formplan_workout_sessions_backup'
@@ -109,6 +110,13 @@ export function addLocalSession(input: LogSessionInput): WorkoutSession {
     ...stats,
   }
   saveAll([session, ...loadAll()])
+
+  // Store per-exercise history for progression charts
+  const date = session.completed_at.slice(0, 10)
+  for (const ex of input.exercises) {
+    recordExerciseSession(ex.name, date, ex.sets)
+  }
+
   notify()
   return session
 }
@@ -148,4 +156,11 @@ export function mergeSessions(api: WorkoutSession[], local: WorkoutSession[]): W
   for (const s of local) byId.set(s.id, s)
   for (const s of api) byId.set(s.id, s)
   return [...byId.values()].sort((a, b) => b.completed_at.localeCompare(a.completed_at))
+}
+
+/** Merge API sessions into the local store and notify all subscribers. */
+export function syncSessionsFromApi(apiSessions: WorkoutSession[]) {
+  const merged = mergeSessions(apiSessions, loadAll())
+  saveAll(merged)
+  notify()
 }

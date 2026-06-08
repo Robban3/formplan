@@ -12,13 +12,19 @@ import {
   ChevronRightIcon,
   TargetIcon,
   BookOpenIcon,
+  BarChartIcon,
+  TrophyIcon,
+  BotIcon,
 } from '../components/ui/Icons'
 
 type IconComponent = React.ComponentType<{ className?: string }>
 
 const rows: { label: string; Icon: IconComponent; to: string }[] = [
-  { label: 'Mina mål',      Icon: TargetIcon,      to: '/mer/mina-mal' },
-  { label: 'Recept',        Icon: BookOpenIcon,    to: '/mer/recept' },
+  { label: 'Mina mål',          Icon: TargetIcon,      to: '/mer/mina-mal' },
+  { label: 'Utmaningar',        Icon: TrophyIcon,      to: '/mer/utmaningar' },
+  { label: 'AI-coach',          Icon: BotIcon,         to: '/mer/ai-coach' },
+  { label: 'Kroppsmätningar',   Icon: BarChartIcon,    to: '/mer/matningar' },
+  { label: 'Recept',            Icon: BookOpenIcon,    to: '/mer/recept' },
   { label: 'Profil',        Icon: UserIcon,        to: '/mer/profil' },
   { label: 'Inställningar', Icon: SettingsIcon,    to: '/mer/installningar' },
   { label: 'Notiser',       Icon: BellIcon,        to: '/mer/notiser' },

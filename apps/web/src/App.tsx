@@ -8,11 +8,13 @@ import { PlanPage } from './pages/PlanPage'
 import { Toaster } from './components/ui/Toaster'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { useNotificationScheduler } from './hooks/useNotificationScheduler'
+import { useSessionsSync } from './hooks/useSessionsSync'
 import { WeeklySessionsProvider } from './contexts/WeeklySessionsContext'
 
 export default function App() {
   const { user, loading } = useAuth()
   useNotificationScheduler()
+  useSessionsSync()
 
   if (loading) {
     return (

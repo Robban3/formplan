@@ -9,7 +9,7 @@ import {
   mealTotals,
 } from '../../lib/customMeals'
 import { toast } from '../../lib/toast'
-import { XIcon, PlusIcon } from '../../components/ui/Icons'
+import { XIcon, PlusIcon, UtensilsIcon } from '../../components/ui/Icons'
 
 export function CreateMealPage() {
   const navigate = useNavigate()
@@ -108,8 +108,8 @@ export function CreateMealPage() {
 
       <div className="px-5 py-5 space-y-5">
         <div className="flex flex-col items-center">
-          <div className="w-28 h-28 rounded-full bg-stone-100 flex items-center justify-center text-4xl">
-            🥗
+          <div className="w-28 h-28 rounded-full bg-stone-100 flex items-center justify-center">
+            <UtensilsIcon className="w-12 h-12 stroke-stone-300" />
           </div>
         </div>
 
@@ -204,7 +204,7 @@ export function CreateMealPage() {
       </div>
 
       {ingredients.length > 0 && (
-        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg px-5 py-4 bg-white border-t border-stone-100 safe-bottom">
+        <div className="fixed bottom-[calc(64px+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 w-full max-w-lg px-5 py-4 bg-white border-t border-stone-100">
           <div className="grid grid-cols-4 gap-2 text-center text-xs">
             <div>
               <p className="font-bold text-stone-900">{totals.kcal}</p>

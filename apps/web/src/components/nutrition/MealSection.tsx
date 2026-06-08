@@ -15,18 +15,13 @@ const SLOT_COLORS: Record<MealSlot, string> = {
   mellanmar: 'bg-purple-100 text-purple-700',
 }
 
-function foodEmoji(name: string): string {
-  const n = name.toLowerCase()
-  if (n.includes('kyckling') || n.includes('chicken')) return '🍗'
-  if (n.includes('ägg') || n.includes('egg')) return '🥚'
-  if (n.includes('havre') || n.includes('gröt') || n.includes('oat')) return '🥣'
-  if (n.includes('yoghurt') || n.includes('kvarg')) return '🥛'
-  if (n.includes('banan')) return '🍌'
-  if (n.includes('ris') || n.includes('rice')) return '🍚'
-  if (n.includes('avokado') || n.includes('avocado')) return '🥑'
-  if (n.includes('sallad') || n.includes('salad')) return '🥗'
-  if (n.includes('nöt') || n.includes('nut')) return '🥜'
-  return '🍽️'
+function FoodAvatar({ name, slot }: { name: string; slot: MealSlot }) {
+  const initial = name.trim()[0]?.toUpperCase() ?? '?'
+  return (
+    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 ${SLOT_COLORS[slot]}`}>
+      {initial}
+    </div>
+  )
 }
 
 interface Props {
@@ -55,9 +50,7 @@ export function MealSection({ slot, entries, onAdd, onTapEntry }: Props) {
           className="w-full flex items-center justify-between px-4 py-3 border-b border-stone-50 hover:bg-stone-50 active:bg-stone-100 transition-colors"
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 ${SLOT_COLORS[slot]}`}>
-              {foodEmoji(entry.food_name)}
-            </div>
+            <FoodAvatar name={entry.food_name} slot={slot} />
             <div className="text-left min-w-0">
               <p className="text-sm font-medium text-stone-800 truncate">{entry.food_name}</p>
               <p className="text-xs text-stone-400">{entry.amount_g} g</p>

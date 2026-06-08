@@ -5,8 +5,11 @@ import { useSettings } from '../../hooks/useSettings'
 import { useUnits } from '../../hooks/useUnits'
 import { workoutStore } from '../../store/workoutStore'
 import { workoutApi } from '../../lib/workoutApi'
+import { addLocalSession } from '../../lib/workoutSessionStore'
+import { saveRpe } from '../../lib/rpeStore'
+import { checkAndUpdatePR } from '../../lib/prStore'
 import { toast } from '../../lib/toast'
-import { PauseIcon, PlayIcon, CheckIcon, XIcon, ChevronLeftIcon, ChevronRightIcon } from '../../components/ui/Icons'
+import { PauseIcon, PlayIcon, CheckIcon, XIcon, ChevronLeftIcon, ChevronRightIcon, ShareIcon, DumbbellIcon, ZapIcon } from '../../components/ui/Icons'
 import { ExerciseVideo } from '../../components/training/ExerciseVideo'
 import { exerciseUsesWeight } from '../../lib/exerciseLog'
 
@@ -27,6 +30,8 @@ export function ActiveWorkout() {
   const [paused, setPaused] = useState(false)
   const [restTimer, setRestTimer] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
+  const [showRpe, setShowRpe] = useState(false)
+  const [pendingWorkoutName, setPendingWorkoutName] = useState('')
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const restRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const advanceToRef = useRef<number | null>(null)
@@ -113,6 +118,72 @@ export function ActiveWorkout() {
     }
   }, [keep_screen_on])
 
+  function shareWorkout(name: string, durationSec: number, doneSet: number, totalSet: number) {
+    const mins = Math.round(durationSec / 60)
+    const text = `💪 Jag klarade ${name} på FormPlan!\n⏱ ${mins} min · ${doneSet}/${totalSet} set klara\n\nLadda ner FormPlan och träna med mig!`
+    if (navigator.share) {
+      navigator.share({ title: 'Mitt träningspass', text }).catch(() => {})
+    } else {
+      navigator.clipboard?.writeText(text).then(() => toast.success('Kopierat till urklipp!')).catch(() => {})
+    }
+  }
+
+  // RPE modal (shown after finishing, before navigating home)
+  if (showRpe) {
+    const doneSetCount = workoutStore.get()?.exercises.reduce((n, e) => n + e.sets.filter((s) => s.done).length, 0) ?? 0
+    const totalSetCount = workoutStore.get()?.exercises.reduce((n, e) => n + e.sets.length, 0) ?? 0
+    return (
+      <div className="min-h-[100dvh] bg-stone-50 flex flex-col items-center justify-center px-5 gap-6">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-forest-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <DumbbellIcon className="w-8 h-8 stroke-forest-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-stone-900">Bra jobbat!</h2>
+          <p className="text-stone-500 mt-1">{pendingWorkoutName}</p>
+        </div>
+
+        {/* Dela pass */}
+        <button
+          onClick={() => shareWorkout(pendingWorkoutName, elapsed, doneSetCount, totalSetCount)}
+          className="flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-stone-200 text-sm font-medium text-stone-700 shadow-sm"
+        >
+          <ShareIcon className="w-4 h-4 stroke-stone-500" />
+          Dela passet
+        </button>
+
+        <div className="w-full max-w-sm bg-white rounded-2xl border border-stone-100 p-5">
+          <p className="font-semibold text-stone-800 text-center mb-4">Hur ansträngande var passet?</p>
+          <div className="grid grid-cols-5 gap-2 mb-4">
+            {[1,2,3,4,5,6,7,8,9,10].map((n) => (
+              <button
+                key={n}
+                onClick={() => {
+                  saveRpe(pendingWorkoutName, n)
+                  setShowRpe(false)
+                  navigate('/', { replace: true })
+                }}
+                className={`aspect-square rounded-xl text-sm font-bold transition-colors ${
+                  n <= 3 ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                  : n <= 6 ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                  : 'bg-red-100 text-red-700 hover:bg-red-200'
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-stone-400 text-center">1 = Extremt lätt · 10 = Maximalt</p>
+        </div>
+        <button
+          onClick={() => { setShowRpe(false); navigate('/', { replace: true }) }}
+          className="text-sm text-stone-400"
+        >
+          Hoppa över
+        </button>
+      </div>
+    )
+  }
+
   if (!state) return null
 
   const workout = state
@@ -150,8 +221,26 @@ export function ActiveWorkout() {
     ? 'grid-cols-[2rem_1fr_1fr_2.5rem]'
     : 'grid-cols-[2rem_1fr_2.5rem]'
 
+  /** Epley formula: 1RM ≈ weight × (1 + reps/30) */
+  function calc1RM(weightKg: number, reps: number): number {
+    if (reps <= 0 || weightKg <= 0) return 0
+    if (reps === 1) return weightKg
+    return Math.round(weightKg * (1 + reps / 30))
+  }
+
   function markSetDone(setIndex: number) {
     const fallbackReps = defaultRepsFor(ex)
+    const set = ex.sets[setIndex]
+
+    // PR check before state update
+    if (set && showWeight && set.weight_kg && set.weight_kg > 0) {
+      const reps = set.reps || fallbackReps
+      const isNewPR = checkAndUpdatePR(ex.name, toStore(set.weight_kg), reps)
+      if (isNewPR) {
+        setTimeout(() => toast.success(`🏆 Nytt personbästa på ${ex.name}!`), 100)
+      }
+    }
+
     workoutStore.update((s) => {
       const exercises = s.exercises.map((e, ei) => {
         if (ei !== s.currentExerciseIndex) return e
@@ -253,34 +342,41 @@ export function ActiveWorkout() {
 
     setSaving(true)
     finishingRef.current = true
-    try {
-      const completed = snapshot.exercises.reduce(
-        (n, e) => n + e.sets.filter((x) => x.done).length,
-        0
-      )
-      await workoutApi.logSession({
-        plan_day_id: snapshot.planDayId,
-        workout_name: snapshot.workoutName,
-        started_at: new Date(snapshot.startedAt).toISOString(),
-        duration_seconds: elapsed,
-        exercises: snapshot.exercises.map((e) => ({
-          name: e.name,
-          sets: e.sets.map((x) => ({ reps: x.reps, weight_kg: x.weight_kg, done: x.done })),
-        })),
-      })
-      toast.success(
-        completed > 0
-          ? 'Pass sparat!'
-          : 'Pass avslutat — bocka av set nästa gång för att logga reps.'
-      )
-      workoutStore.finish()
-      navigate('/hem', { replace: true })
-    } catch {
-      finishingRef.current = false
-      toast.error('Kunde inte spara passet — försök igen.')
-    } finally {
-      setSaving(false)
+
+    const input = {
+      plan_day_id: snapshot.planDayId,
+      workout_name: snapshot.workoutName,
+      started_at: new Date(snapshot.startedAt).toISOString(),
+      duration_seconds: elapsed,
+      exercises: snapshot.exercises.map((e) => ({
+        name: e.name,
+        sets: e.sets.map((x) => ({ reps: x.reps, weight_kg: x.weight_kg, done: x.done })),
+      })),
     }
+
+    const completed = snapshot.exercises.reduce(
+      (n, e) => n + e.sets.filter((x) => x.done).length,
+      0
+    )
+
+    // Always save locally first — this updates Hem and Analys immediately
+    addLocalSession(input)
+
+    toast.success(completed > 0 ? 'Pass sparat!' : 'Pass avslutat!')
+    const name = snapshot.workoutName
+    workoutStore.finish()
+    setSaving(false)
+
+    // Show RPE rating before navigating
+    if (completed > 0) {
+      setPendingWorkoutName(name)
+      setShowRpe(true)
+    } else {
+      navigate('/', { replace: true })
+    }
+
+    // Sync to API in background (best-effort)
+    workoutApi.logSession(input).catch(() => {})
   }
 
   const nextIncompleteIndex = currentExerciseComplete
@@ -346,7 +442,12 @@ export function ActiveWorkout() {
             <p className="text-xs text-stone-400">
               Övning {workout.currentExerciseIndex + 1} av {workout.exercises.length}
             </p>
-            <h2 className="text-xl font-bold text-stone-900 mt-0.5">{ex.name}</h2>
+            <div className="flex items-center gap-2 justify-center">
+              <h2 className="text-xl font-bold text-stone-900 mt-0.5">{ex.name}</h2>
+              {ex.supersetGroup !== undefined && (
+                <span className="text-[10px] font-bold bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">SS</span>
+              )}
+            </div>
             {(() => {
               const prev = previousSets[ex.name]
               if (!prev || prev.length === 0) return null
@@ -386,14 +487,23 @@ export function ActiveWorkout() {
             </p>
           )}
 
-          {ex.sets.map((set, si) => (
+          {ex.sets.map((set, si) => {
+            const oneRM = set.done && set.weight_kg && set.reps > 1
+              ? calc1RM(toStore(set.weight_kg), set.reps)
+              : null
+            return (
             <div
               key={si}
               className={`grid ${setGrid} gap-2 items-center px-4 py-3 border-t border-stone-100 ${
-                set.done ? 'opacity-50' : ''
+                set.done ? 'bg-stone-50' : ''
               }`}
             >
-              <span className="text-sm font-mono text-stone-500">{si + 1}</span>
+              <div className="flex flex-col">
+                <span className="text-sm font-mono text-stone-500">{si + 1}</span>
+                {oneRM && (
+                  <span className="text-[9px] text-forest-600 font-semibold">1RM~{oneRM}</span>
+                )}
+              </div>
               <input
                 type="number"
                 inputMode="numeric"
@@ -430,7 +540,8 @@ export function ActiveWorkout() {
                 <CheckIcon className="w-4 h-4 stroke-white" />
               </button>
             </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Progress */}
@@ -465,6 +576,37 @@ export function ActiveWorkout() {
 
       {/* Bottom action */}
       <div className="px-5 pb-8 bg-white border-t border-stone-100 pt-4 space-y-3">
+        {/* Superset toggle */}
+        {workout.currentExerciseIndex < workout.exercises.length - 1 && (
+          <button
+            onClick={() => {
+              workoutStore.update((s) => {
+                const nextIdx = s.currentExerciseIndex + 1
+                const cur = s.exercises[s.currentExerciseIndex]
+                const next = s.exercises[nextIdx]
+                if (!cur || !next) return s
+                const isSuperset = cur.supersetGroup !== undefined
+                const newGroup = isSuperset ? undefined : s.currentExerciseIndex
+                return {
+                  ...s,
+                  exercises: s.exercises.map((e, i) =>
+                    i === s.currentExerciseIndex || i === nextIdx
+                      ? { ...e, supersetGroup: newGroup }
+                      : e
+                  ),
+                }
+              })
+            }}
+            className={`w-full py-2.5 rounded-2xl text-sm font-medium border transition-colors ${
+              ex.supersetGroup !== undefined
+                ? 'bg-purple-50 border-purple-200 text-purple-700'
+                : 'bg-white border-stone-200 text-stone-500'
+            }`}
+          >
+            <ZapIcon className="w-3.5 h-3.5 inline mr-1" />
+            {ex.supersetGroup !== undefined ? 'Superset aktivt — tryck för att ta bort' : 'Markera som superset med nästa övning'}
+          </button>
+        )}
         {workoutComplete ? (
           <button
             onClick={finishWorkout}

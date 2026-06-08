@@ -9,6 +9,7 @@ import { PlusIcon, DumbbellIcon, PlayIcon } from '../../components/ui/Icons'
 import { WorkoutHero } from '../../components/training/WorkoutHero'
 import { useWorkoutStore } from '../../hooks/useWorkoutStore'
 import { useLoadTimeout } from '../../hooks/useLoadTimeout'
+import { getTrainingStreak, getLongestStreak } from '../../lib/streakStore'
 import { loadActivePlan, type WorkoutPlanDay } from '../../lib/planLoader'
 import { parseMockPlanId } from '../../lib/mockPlan'
 import { ExerciseVideo } from '../../components/training/ExerciseVideo'
@@ -39,6 +40,8 @@ export function TrainingOverview() {
   const [tab, setTab] = useState<'pass' | 'program' | 'ovningar'>('pass')
   const thisWeekDone = useWeeklySessions()
   const [isMock, setIsMock] = useState(false)
+  const streak = getTrainingStreak()
+  const longestStreak = getLongestStreak()
 
   const today = todayWeekday()
   const workoutDays = days.filter((d) => d.type === 'workout')
@@ -165,14 +168,23 @@ export function TrainingOverview() {
             </button>
           )}
 
-          {/* Weekly ring */}
+          {/* Weekly ring + streak */}
           {plan && (
             <div className="bg-stone-100 rounded-2xl p-4 flex items-center gap-4">
               <WeeklyRing done={thisWeekDone} total={totalWeek} />
-              <div>
+              <div className="flex-1">
                 <p className="text-xs text-stone-500">Denna vecka</p>
                 <p className="font-bold text-stone-900 text-lg">{thisWeekDone} av {totalWeek} pass</p>
               </div>
+              {streak > 0 && (
+                <div className="flex flex-col items-center bg-amber-50 rounded-xl px-3 py-2">
+                  <span className="text-lg font-bold text-amber-500">{streak}</span>
+                  <span className="text-[9px] text-amber-400">dag streak</span>
+                  {longestStreak > streak && (
+                    <span className="text-[8px] text-stone-400">rekord: {longestStreak}</span>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -215,33 +227,50 @@ export function TrainingOverview() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
+            <div className="text-center py-10">
               <div className="flex justify-center mb-3">
                 <DumbbellIcon className="w-12 h-12 stroke-stone-300" />
               </div>
               <h2 className="text-lg font-semibold mb-1">Inget schema ännu</h2>
-              <p className="text-stone-400 text-sm mb-6">Generera ett personligt träningsschema med AI.</p>
-              <button
-                onClick={handleGenerate}
-                disabled={generating}
-                className="bg-forest-600 hover:bg-forest-700 disabled:opacity-60 text-white font-semibold px-6 py-3 rounded-xl flex items-center gap-2 mx-auto transition-colors"
-              >
-                <PlusIcon className="w-4 h-4 stroke-white" />
-                {generating ? 'Genererar...' : 'Skapa nytt pass'}
-              </button>
+              <p className="text-stone-400 text-sm mb-6">Generera ett AI-schema eller bygg ett eget pass.</p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={handleGenerate}
+                  disabled={generating}
+                  className="bg-forest-600 hover:bg-forest-700 disabled:opacity-60 text-white font-semibold px-5 py-3 rounded-xl flex items-center gap-2 transition-colors"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  {generating ? 'Genererar...' : 'Generera schema'}
+                </button>
+                <button
+                  onClick={() => navigate('/traning/egna')}
+                  className="border border-stone-200 text-stone-600 font-semibold px-5 py-3 rounded-xl flex items-center gap-2 hover:border-forest-400 hover:text-forest-600 transition-colors"
+                >
+                  <DumbbellIcon className="w-4 h-4" />
+                  Egna pass
+                </button>
+              </div>
             </div>
           )}
 
-          {plan && (
+          {/* Always show quick-access buttons at bottom */}
+          <div className="flex gap-2">
             <button
               onClick={handleGenerate}
               disabled={generating}
-              className="w-full flex items-center justify-center gap-2 border border-stone-200 rounded-xl py-3 text-sm text-stone-500 hover:border-forest-400 hover:text-forest-600 transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 border border-stone-200 rounded-xl py-3 text-sm text-stone-500 hover:border-forest-400 hover:text-forest-600 transition-colors"
             >
               <PlusIcon className="w-4 h-4" />
-              {generating ? 'Genererar...' : 'Skapa nytt pass'}
+              {generating ? 'Genererar...' : 'AI-schema'}
             </button>
-          )}
+            <button
+              onClick={() => navigate('/traning/egna')}
+              className="flex-1 flex items-center justify-center gap-2 border border-stone-200 rounded-xl py-3 text-sm text-stone-500 hover:border-forest-400 hover:text-forest-600 transition-colors"
+            >
+              <DumbbellIcon className="w-4 h-4" />
+              Egna pass
+            </button>
+          </div>
         </div>
       )}
 

@@ -4,17 +4,17 @@ import { nutritionApi, type FoodItem, type MealSlot } from '../../lib/nutritionA
 import { dateKey } from '../../lib/derive'
 import { loadCustomMeals, mealTotals, type CustomMeal } from '../../lib/customMeals'
 import { toast } from '../../lib/toast'
-import { ChevronLeftIcon, XIcon, PlusIcon } from '../../components/ui/Icons'
+import { ChevronLeftIcon, XIcon, PlusIcon, UtensilsIcon } from '../../components/ui/Icons'
+import { recordFoodUsed } from '../../lib/foodFavoritesStore'
 
 type SearchTab = 'alla' | 'mina' | 'maltider'
 
-function foodEmoji(name: string): string {
-  const n = name.toLowerCase()
-  if (n.includes('kyckling') || n.includes('chicken')) return '🍗'
-  if (n.includes('ris') || n.includes('rice')) return '🍚'
-  if (n.includes('avokado') || n.includes('avocado')) return '🥑'
-  if (n.includes('ägg') || n.includes('egg')) return '🥚'
-  return '🍽️'
+function FoodInitial({ name }: { name: string }) {
+  return (
+    <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center font-bold text-sm text-stone-500 flex-shrink-0">
+      {name.trim()[0]?.toUpperCase() ?? '?'}
+    </div>
+  )
 }
 
 export function FoodSearch() {
@@ -107,6 +107,15 @@ export function FoodSearch() {
         fat_g: Math.round(selected.fat_per_100g * factor * 10) / 10,
         carbs_g: Math.round(selected.carbs_per_100g * factor * 10) / 10,
       })
+      recordFoodUsed({
+        food_id: selected.id,
+        food_name: selected.name,
+        default_amount_g: g,
+        kcal_per_100g: selected.kcal_per_100g,
+        protein_per_100g: selected.protein_per_100g,
+        fat_per_100g: selected.fat_per_100g,
+        carbs_per_100g: selected.carbs_per_100g,
+      })
       navigate(-1)
     } catch (e) {
       alert((e as Error).message)
@@ -197,8 +206,8 @@ export function FoodSearch() {
                     disabled={adding}
                     className="w-full flex items-center gap-3 p-3 bg-white rounded-2xl border border-stone-100 hover:bg-stone-50 active:bg-stone-100 transition-colors text-left disabled:opacity-60"
                   >
-                    <div className="w-11 h-11 rounded-xl bg-forest-50 flex items-center justify-center text-xl flex-shrink-0">
-                      🥗
+                    <div className="w-11 h-11 rounded-xl bg-forest-50 flex items-center justify-center flex-shrink-0">
+                      <UtensilsIcon className="w-5 h-5 stroke-forest-600" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-stone-800 truncate">{meal.name}</p>
@@ -227,9 +236,7 @@ export function FoodSearch() {
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 border-b border-stone-50 hover:bg-stone-50 active:bg-stone-100 transition-colors"
               >
-                <div className="w-11 h-11 rounded-xl bg-stone-100 flex items-center justify-center text-xl flex-shrink-0">
-                  {foodEmoji(item.name)}
-                </div>
+                <FoodInitial name={item.name} />
                 <div className="flex-1 text-left min-w-0">
                   <p className="text-sm font-medium text-stone-800 truncate">{item.name}</p>
                   <p className="text-xs text-stone-400">

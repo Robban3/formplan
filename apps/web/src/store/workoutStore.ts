@@ -13,6 +13,7 @@ export interface ExerciseLog {
   targetReps: string
   restSeconds: number
   sets: SetLog[]
+  supersetGroup?: number // exercises with same group number run alternately
 }
 
 export interface ActiveWorkoutState {

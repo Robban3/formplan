@@ -4,10 +4,22 @@ import { nutritionApi, type FoodLogEntry, type DailyGoals, type MealSlot } from 
 import { dateKey } from '../../lib/derive'
 import { MacroSummary } from '../../components/nutrition/MacroSummary'
 import { MealSection } from '../../components/nutrition/MealSection'
-import { ChevronLeftIcon, ChevronRightIcon, DropletIcon } from '../../components/ui/Icons'
+import { ChevronLeftIcon, ChevronRightIcon, DropletIcon, StarIcon } from '../../components/ui/Icons'
+import { getTopFavorites, type FoodFavorite } from '../../lib/foodFavoritesStore'
 
 const MEALS: MealSlot[] = ['frukost', 'lunch', 'middag', 'mellanmar']
 const DEFAULT_GOALS: DailyGoals = { kcal: 2000, protein_g: 150, fat_g: 67, carbs_g: 250 }
+
+const MEAL_LABELS: Record<MealSlot, string> = {
+  frukost: 'Frukost', lunch: 'Lunch', middag: 'Middag', mellanmar: 'Mellanmål',
+}
+
+function mealMacros(entries: FoodLogEntry[]) {
+  return {
+    kcal: entries.reduce((s, e) => s + e.kcal, 0),
+    protein_g: entries.reduce((s, e) => s + e.protein_g, 0),
+  }
+}
 
 export function FoodDiary() {
   const navigate = useNavigate()
@@ -15,6 +27,8 @@ export function FoodDiary() {
   const [entries, setEntries] = useState<FoodLogEntry[]>([])
   const [goals, setGoals] = useState<DailyGoals>(DEFAULT_GOALS)
   const [loading, setLoading] = useState(true)
+  const [showMealMacros, setShowMealMacros] = useState(false)
+  const favorites = getTopFavorites()
 
   const load = useCallback(async (d: Date) => {
     setLoading(true)
@@ -73,6 +87,18 @@ export function FoodDiary() {
           <h1 className="text-2xl font-bold text-stone-900">Kostdagbok</h1>
           <div className="flex items-center gap-2">
             <button
+              onClick={() => navigate('/kost/kostschema')}
+              className="px-3 h-9 rounded-xl bg-forest-50 text-forest-700 text-xs font-semibold hover:bg-forest-100 transition-colors"
+            >
+              Kostschema
+            </button>
+            <button
+              onClick={() => navigate('/kost/veckoplan')}
+              className="px-3 h-9 rounded-xl bg-stone-100 text-stone-600 text-xs font-semibold hover:bg-stone-200 transition-colors"
+            >
+              Veckoplan
+            </button>
+            <button
               onClick={() => navigate('/kost/vatten')}
               className="w-9 h-9 rounded-xl bg-sky-50 flex items-center justify-center hover:bg-sky-100 transition-colors"
               aria-label="Vatten"
@@ -116,6 +142,58 @@ export function FoodDiary() {
             />
             <p className="text-xs text-forest-600 font-medium text-center mt-2">Se makrotracker →</p>
           </button>
+
+          {/* Makro per måltid */}
+          {entries.length > 0 && (
+            <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
+              <button
+                onClick={() => setShowMealMacros((v) => !v)}
+                className="w-full flex items-center justify-between px-4 py-3"
+              >
+                <span className="text-sm font-semibold text-stone-800">Makro per måltid</span>
+                <span className="text-xs text-forest-600">{showMealMacros ? 'Dölj ▲' : 'Visa ▼'}</span>
+              </button>
+              {showMealMacros && (
+                <div className="border-t border-stone-50">
+                  {MEALS.map((slot) => {
+                    const m = mealMacros(entriesFor(slot))
+                    if (m.kcal === 0) return null
+                    return (
+                      <div key={slot} className="flex items-center justify-between px-4 py-2.5 border-b border-stone-50 last:border-0">
+                        <span className="text-sm text-stone-700">{MEAL_LABELS[slot]}</span>
+                        <div className="text-right">
+                          <span className="text-sm font-semibold text-stone-800">{m.kcal} kcal</span>
+                          <span className="text-xs text-stone-400 ml-2">{m.protein_g.toFixed(0)}g protein</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Snabblogg favoriter */}
+          {favorites.length > 0 && (
+            <div className="bg-white rounded-2xl border border-stone-100 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <StarIcon className="w-4 h-4 stroke-amber-400" />
+                <p className="text-sm font-semibold text-stone-800">Snabblogg</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {favorites.map((fav: FoodFavorite) => (
+                  <button
+                    key={fav.food_id}
+                    onClick={() => navigate(`/kost/sok?slot=frukost&date=${dateKey(date)}&prefill=${fav.food_id}`)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-50 rounded-full border border-stone-100 text-xs text-stone-700 hover:bg-forest-50 hover:border-forest-200 transition-colors"
+                  >
+                    <span>{fav.food_name}</span>
+                    <span className="text-stone-400">{Math.round(fav.kcal_per_100g * fav.default_amount_g / 100)} kcal</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Meal sections */}
           {MEALS.map((slot) => (

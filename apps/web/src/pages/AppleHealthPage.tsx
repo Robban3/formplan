@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeftIcon } from '../components/ui/Icons'
+import { ChevronLeftIcon, HeartIcon } from '../components/ui/Icons'
 
 export function AppleHealthPage() {
   const navigate = useNavigate()
@@ -12,7 +12,9 @@ export function AppleHealthPage() {
       <h1 className="text-2xl font-bold text-stone-900 mb-2">Apple Health</h1>
 
       <div className="bg-white rounded-2xl border border-stone-100 p-6 text-center space-y-4">
-        <div className="text-5xl">❤️</div>
+        <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mx-auto">
+          <HeartIcon className="w-8 h-8 stroke-red-500" />
+        </div>
         <p className="font-semibold text-stone-800">Kommer i native-appen</p>
         <p className="text-stone-400 text-sm leading-relaxed">
           Apple Health-integrationen kräver en native iOS-app och är inte tillgänglig i

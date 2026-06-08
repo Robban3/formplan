@@ -137,8 +137,8 @@ export function WorkoutDetail() {
         ))}
       </div>
 
-      {/* Start button — fixed */}
-      <div className="fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-lg px-5">
+      {/* Start button — fixed above footer nav (~64px) */}
+      <div className="fixed bottom-[calc(64px+env(safe-area-inset-bottom,0px)+8px)] left-1/2 -translate-x-1/2 w-full max-w-lg px-5">
         <button
           onClick={startWorkout}
           className="w-full bg-forest-600 hover:bg-forest-700 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-colors"

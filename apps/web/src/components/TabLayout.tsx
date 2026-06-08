@@ -15,6 +15,15 @@ import { AppleHealthPage } from '../pages/AppleHealthPage'
 import { HelpPage } from '../pages/HelpPage'
 import { GoalsPage } from '../pages/GoalsPage'
 import { RecipesPage } from '../pages/RecipesPage'
+import { MealPlanPage } from '../pages/nutrition/MealPlanPage'
+import { MeasurementsPage } from '../pages/MeasurementsPage'
+import { ChallengesPage } from '../pages/ChallengesPage'
+import { AiCoachPage } from '../pages/AiCoachPage'
+import { MealWeekPage } from '../pages/nutrition/MealWeekPage'
+import { CustomWorkoutPage } from '../pages/training/CustomWorkoutPage'
+import { FoodDiary } from '../pages/nutrition/FoodDiary'
+import { WaterPage } from '../pages/nutrition/WaterPage'
+import { FoodSearch } from '../pages/nutrition/FoodSearch'
 
 const tabs = [
   { to: '/hem',      label: 'Hem',      Icon: HomeIcon },
@@ -31,9 +40,15 @@ export function TabLayout() {
       <div className="flex-1 overflow-y-auto scrollbar-hide">
         <Routes>
           <Route path="/hem"            element={<HomePage />} />
-          <Route path="/kost/*"         element={<NutritionHome />} />
+          <Route path="/kost"               element={<NutritionHome />} />
+          <Route path="/kost/dagbok"        element={<FoodDiary />} />
+          <Route path="/kost/vatten"        element={<WaterPage />} />
+          <Route path="/kost/sok"           element={<FoodSearch />} />
+          <Route path="/kost/kostschema"    element={<MealPlanPage />} />
+          <Route path="/kost/veckoplan"     element={<MealWeekPage />} />
           <Route path="/traning"        element={<TrainingOverview />} />
           <Route path="/traning/:id"    element={<WorkoutDetail />} />
+          <Route path="/traning/egna"   element={<CustomWorkoutPage />} />
           <Route path="/analys"         element={<AnalyticsPage />} />
           <Route path="/mer"                element={<MorePage />} />
           <Route path="/mer/profil"         element={<ProfilePage />} />
@@ -45,6 +60,9 @@ export function TabLayout() {
           <Route path="/mer/om"             element={<AboutPage />} />
           <Route path="/mer/mina-mal"       element={<GoalsPage />} />
           <Route path="/mer/recept"         element={<RecipesPage />} />
+          <Route path="/mer/matningar"      element={<MeasurementsPage />} />
+          <Route path="/mer/utmaningar"     element={<ChallengesPage />} />
+          <Route path="/mer/ai-coach"       element={<AiCoachPage />} />
           <Route path="*"               element={<Navigate to="/hem" replace />} />
         </Routes>
       </div>

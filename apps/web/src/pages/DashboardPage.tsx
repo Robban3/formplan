@@ -67,7 +67,11 @@ export function DashboardPage() {
 
         {plans.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-5xl mb-4">💪</div>
+            <div className="w-16 h-16 bg-slate-700 rounded-2xl flex items-center justify-center mb-4 mx-auto">
+            <svg className="w-8 h-8 stroke-white" viewBox="0 0 24 24" fill="none" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 5v14M18 5v14M6 12h12M4 7h4M16 7h4M4 17h4M16 17h4" />
+            </svg>
+          </div>
             <h2 className="text-xl font-semibold mb-2">Redo att börja?</h2>
             <p className="text-slate-400 mb-8">Generera ditt personliga tränings- och kostschema.</p>
             <button
