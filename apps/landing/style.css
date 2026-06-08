@@ -1,13 +1,17 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  --brand: #22e6c6;
+  --brand-dark: #10c4a8;
+  --brand-dim: rgba(34,230,198,0.12);
+
   --bg: #0d1117;
   --card: #111827;
   --card2: #1a2332;
   --border: rgba(255,255,255,0.08);
-  --green: #22e6c6;
-  --green-dark: #10c4a8;
-  --green-dim: rgba(34,230,198,0.12);
+  --green: var(--brand);
+  --green-dark: var(--brand-dark);
+  --green-dim: var(--brand-dim);
   --text: #f5f5f5;
   --muted: #888;
   --subtle: #4b5563;

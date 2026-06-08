@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --brand: #22e6c6;
+  --brand-dark: #10c4a8;
+  --brand-dim: rgba(34, 230, 198, 0.15);
+  --brand-glow: rgba(34, 230, 198, 0.2);
+}
+
 @layer base {
   html {
     @apply bg-stone-50 text-stone-900;

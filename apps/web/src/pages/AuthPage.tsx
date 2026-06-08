@@ -60,7 +60,7 @@ export function AuthPage() {
           {/* Hero text */}
           <div className="mb-16">
             <h1 className="font-extrabold leading-tight mb-4" style={{ fontSize: '44px' }}>
-              <span className="text-[#22e6c6]">AI-genererat</span>{' '}
+              <span style={{ color: 'var(--brand)' }}>AI-genererat</span>{' '}
               <span className="text-white">tränings-<br />&amp; kostschema</span>
             </h1>
             <p className="text-slate-300 text-base leading-relaxed max-w-sm">
@@ -74,7 +74,7 @@ export function AuthPage() {
           background: 'rgba(15,23,42,0.85)',
           border: '1px solid rgba(255,255,255,0.1)',
           backdropFilter: 'blur(20px)',
-          boxShadow: '0 0 60px rgba(34,230,198,0.2), 0 0 120px rgba(34,230,198,0.08), 0 25px 50px rgba(0,0,0,0.5)',
+          boxShadow: '0 0 60px var(--brand-glow), 0 0 120px rgba(34, 230, 198, 0.08), 0 25px 50px rgba(0,0,0,0.5)',
           borderRadius: '20px',
           padding: '40px',
           display: 'flex',
@@ -128,14 +128,14 @@ export function AuthPage() {
                       </div>
                       <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                         placeholder="din@epost.se" required
-                        className="w-full pl-11 pr-4 py-4 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-[#22e6c6]/50 transition-all"
+                        className="w-full pl-11 pr-4 py-4 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:outline-[var(--brand)] transition-all"
                         style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
                       />
                     </div>
                     {error && <p className="text-red-400 text-xs">{error}</p>}
                     <button type="submit" disabled={loading}
                       className="w-full flex items-center justify-between px-5 py-4 rounded-xl text-sm font-semibold text-slate-900 transition-all disabled:opacity-60"
-                      style={{ background: 'linear-gradient(135deg, #22e6c6 0%, #10c4a8 100%)' }}>
+                      style={{ background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%)' }}>
                       <span>{loading ? 'Skickar...' : 'Skicka inloggningslänk'}</span>
                       {!loading && (
                         <svg className="w-4 h-4 stroke-slate-900" fill="none" viewBox="0 0 24 24" strokeWidth={2}>
@@ -171,8 +171,8 @@ export function AuthPage() {
           ].map((f) => (
             <div key={f.title} className="flex items-start gap-3 flex-1">
               <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-                style={{ background: 'rgba(34,230,198,0.15)' }}>
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#22e6c6">
+                style={{ background: 'var(--brand-dim)' }}>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="var(--brand)">
                   <path strokeLinecap="round" strokeLinejoin="round" d={f.d} />
                 </svg>
               </div>
