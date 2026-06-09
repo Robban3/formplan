@@ -40,7 +40,7 @@ export function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{
+    <div className="relative min-h-screen flex flex-col bg-[#0d1117]" style={{
       backgroundImage: `url('/image-1780947666657.webp')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
@@ -70,7 +70,7 @@ export function AuthPage() {
         </div>
 
         {/* Right — login card */}
-        <div className="w-full p-6 lg:p-10 lg:flex-shrink-0 lg:w-[580px]" style={{
+        <div className="w-full mx-4 p-6 lg:mx-0 lg:p-10 lg:flex-shrink-0 lg:w-[580px]" style={{
           background: 'rgba(15,23,42,0.85)',
           border: '1px solid rgba(255,255,255,0.1)',
           backdropFilter: 'blur(20px)',
@@ -155,9 +155,9 @@ export function AuthPage() {
         </div>
       </div>
 
-      {/* Bottom feature bar — mobile: 2-col grid, desktop: exactly as before */}
-      <div className="relative z-10 border-t px-6 py-5 lg:px-10" style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.5)' }}>
-        <div className="grid grid-cols-2 gap-4 max-w-5xl mx-auto sm:grid-cols-3 lg:flex lg:items-start lg:justify-between lg:gap-6">
+      {/* Bottom feature bar — hidden on mobile, exactly as before on desktop */}
+      <div className="hidden lg:block relative z-10 border-t px-10 py-5" style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.5)' }}>
+        <div className="flex items-start justify-between gap-6 max-w-5xl mx-auto">
           {[
             { d: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z', title: 'Sparar tid', desc: 'AI skapar ditt schema på några sekunder' },
             { d: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z', title: '100% personligt', desc: 'Anpassat efter dina mål, förutsättningar och preferenser' },
@@ -165,7 +165,7 @@ export function AuthPage() {
             { d: 'M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z', title: 'Säkert & tryggt', desc: 'Din data är alltid skyddad' },
             { d: 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z', title: 'Byggt för resultat', desc: 'Fokus på långsiktiga resultat' },
           ].map((f) => (
-            <div key={f.title} className="flex items-start gap-3 lg:flex-1">
+            <div key={f.title} className="flex items-start gap-3 flex-1">
               <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
                 style={{ background: 'var(--brand-dim)' }}>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="var(--brand)">
