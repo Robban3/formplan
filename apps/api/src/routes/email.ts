@@ -12,32 +12,6 @@ import { supabaseAdmin } from '../lib/supabase'
 
 export const emailRouter = new Hono<AppContext>()
 
-/**
- * POST /email/test  — TEMPORÄR, ta bort efter test
- * Skickar alla mailtyper till en given adress.
- */
-emailRouter.post('/test', async (c) => {
-  const { to, secret } = await c.req.json<{ to: string; secret: string }>()
-  if (secret !== c.env.WEBHOOK_SECRET) return c.json({ error: 'Forbidden' }, 403)
-
-  const results: Record<string, string> = {}
-
-  const send = async (name: string, subject: string, html: string) => {
-    try {
-      await sendEmail(c.env.RESEND_API_KEY, { to, subject, html })
-      results[name] = 'ok'
-    } catch (e) {
-      results[name] = String(e)
-    }
-  }
-
-  await send('welcome',    'Välkommen till FormPlan! 🎉',         await welcomeEmail('Robin'))
-  await send('magic-link', 'Din inloggningslänk',                  await magicLinkEmail('https://app.formplan.app/auth'))
-  await send('progress',   'Din veckorapport — 4 pass 💪',         await progressEmail({ name: 'Robin', workouts: 4, volumeKg: 8200, weightDelta: -0.8, streak: 5 }))
-  await send('newsletter', 'Nyhet från FormPlan 📣',               await newsletterEmail({ subject: 'Nyhet', heading: 'Ny funktion: AI-coach', body: 'Vi har lanserat en AI-coach som hjälper dig med träning och kost.' }))
-
-  return c.json(results)
-})
 
 /**
  * POST /email/webhook/new-user
