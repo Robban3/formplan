@@ -12,6 +12,41 @@ import { supabaseAdmin } from '../lib/supabase'
 export const emailRouter = new Hono<AppContext>()
 
 /**
+ * POST /email/webhook/new-user
+ * Triggas av Supabase Database Webhook när en ny rad skapas i auth.users.
+ * Valideras med WEBHOOK_SECRET istället för JWT.
+ *
+ * Supabase skickar: { type: "INSERT", table: "users", schema: "auth", record: { email, raw_user_meta_data, ... } }
+ */
+emailRouter.post('/webhook/new-user', async (c) => {
+  // Validera hemlig nyckel
+  const secret = c.req.header('x-webhook-secret')
+  if (!secret || secret !== c.env.WEBHOOK_SECRET) {
+    return c.json({ error: 'Forbidden' }, 403)
+  }
+
+  const payload = await c.req.json<{
+    record?: { email?: string; raw_user_meta_data?: { full_name?: string; name?: string } }
+  }>()
+
+  const email = payload.record?.email
+  if (!email) return c.json({ error: 'No email in payload' }, 400)
+
+  const name =
+    payload.record?.raw_user_meta_data?.full_name ??
+    payload.record?.raw_user_meta_data?.name ??
+    email.split('@')[0]
+
+  await sendEmail(c.env.RESEND_API_KEY, {
+    to: email,
+    subject: 'Välkommen till FormPlan! 🎉',
+    html: welcomeEmail(name),
+  })
+
+  return c.json({ ok: true })
+})
+
+/**
  * POST /email/welcome
  * Skickas automatiskt när en ny användare skapas (kallas från Supabase webhook eller manuellt).
  */
