@@ -234,7 +234,14 @@ export function OnboardingPage() {
               <ChevronLeftIcon className="w-5 h-5 stroke-stone-600" />
             </button>
           ) : (
-            <div className="w-8" />
+            <button
+              type="button"
+              onClick={() => navigate('/auth')}
+              className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 active:bg-stone-200 transition-colors"
+              aria-label="Avbryt"
+            >
+              <ChevronLeftIcon className="w-5 h-5 stroke-stone-400" />
+            </button>
           )}
           <div className="flex-1 text-center">
             <p className="text-xs font-medium text-stone-400 uppercase tracking-wide">
