@@ -63,8 +63,19 @@ export async function sendWeeklyReports(env: Env): Promise<void> {
 
       await sendEmail(env.RESEND_API_KEY, {
         to: user.email,
-        subject: `Din veckorapport — ${workouts} pass den här veckan 💪`,
-        html: await progressEmail({ name, workouts, volumeKg, weightDelta, streak }),
+        subject: `Din veckorapport — ${workouts} pass genomförda 💪`,
+        html: await progressEmail({
+          firstName: name,
+          workoutsCompleted: workouts,
+          workoutsTotal: 5,
+          mealDaysCompleted: 0,
+          mealDaysTotal: 7,
+          weightChange: weightDelta,
+          calorieDeficit: null,
+          personalBests: 0,
+          streak,
+          motivationalMessage: 'Din kontinuitet placerar dig bland de mest aktiva användarna. Grymt jobbat!',
+        }),
       })
 
       // Liten paus mellan varje mail för att inte överbelasta Resend

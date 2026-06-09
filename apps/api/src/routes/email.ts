@@ -113,8 +113,19 @@ emailRouter.post('/progress', requireAuth, async (c) => {
 
   await sendEmail(c.env.RESEND_API_KEY, {
     to: user.email,
-    subject: `Din veckorapport — ${workouts} pass den här veckan 💪`,
-    html: await progressEmail({ name, workouts, volumeKg, weightDelta, streak }),
+    subject: `Din veckorapport — ${workouts} pass genomförda 💪`,
+    html: await progressEmail({
+      firstName: name,
+      workoutsCompleted: workouts,
+      workoutsTotal: 5,
+      mealDaysCompleted: 0,
+      mealDaysTotal: 7,
+      weightChange: weightDelta,
+      calorieDeficit: null,
+      personalBests: 0,
+      streak,
+      motivationalMessage: 'Din kontinuitet placerar dig bland de mest aktiva användarna. Grymt jobbat!',
+    }),
   })
 
   return c.json({ ok: true })
@@ -135,13 +146,22 @@ emailRouter.post('/newsletter', requireAuth, async (c) => {
   const body = await c.req.json<{
     emails: string[]
     subject: string
-    heading: string
-    body: string
+    title: string
+    subtitle: string
+    sections: { title: string; items: string[] }[]
+    footerText?: string
     ctaText?: string
     ctaUrl?: string
   }>()
 
-  const html = await newsletterEmail({ subject: body.subject, heading: body.heading, body: body.body })
+  const html = await newsletterEmail({
+    title: body.title,
+    subtitle: body.subtitle,
+    sections: body.sections,
+    ...(body.footerText ? { footerText: body.footerText } : {}),
+    ...(body.ctaText ? { ctaText: body.ctaText } : {}),
+    ...(body.ctaUrl ? { ctaUrl: body.ctaUrl } : {}),
+  })
   const results = await Promise.allSettled(
     body.emails.map((to) =>
       sendEmail(c.env.RESEND_API_KEY, { to, subject: body.subject, html })

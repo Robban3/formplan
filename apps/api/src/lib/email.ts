@@ -29,37 +29,47 @@ export async function sendEmail(apiKey: string, opts: SendOptions): Promise<void
       reply_to: opts.replyTo,
     }),
   })
-
   if (!res.ok) {
     const err = await res.text()
     throw new Error(`Resend error ${res.status}: ${err}`)
   }
 }
 
-/* ─── Renderhjälpare ─────────────────────────────────────── */
+export async function magicLinkEmail(loginUrl: string): Promise<string> {
+  return render(MagicLinkEmail({ loginUrl }))
+}
 
-export async function welcomeEmail(name: string): Promise<string> {
-  return render(WelcomeEmail({ firstName: name }))
+export async function verifyEmail(verifyUrl: string): Promise<string> {
+  const VerifyEmail = (await import('../emails/verify-email')).default
+  return render(VerifyEmail({ verifyUrl }))
+}
+
+export async function welcomeEmail(firstName: string): Promise<string> {
+  return render(WelcomeEmail({ firstName }))
 }
 
 export async function progressEmail(opts: {
-  name: string
-  workouts: number
-  volumeKg: number
-  weightDelta: number | null
+  firstName: string
+  workoutsCompleted: number
+  workoutsTotal: number
+  mealDaysCompleted: number
+  mealDaysTotal: number
+  weightChange: number | null
+  calorieDeficit: number | null
+  personalBests: number
   streak: number
+  motivationalMessage?: string
 }): Promise<string> {
-  return render(ProgressReport({ workouts: opts.workouts, weightChange: opts.weightDelta, streak: opts.streak }))
-}
-
-export async function magicLinkEmail(link: string): Promise<string> {
-  return render(MagicLinkEmail({ loginUrl: link }))
+  return render(ProgressReport(opts))
 }
 
 export async function newsletterEmail(opts: {
-  subject: string
-  heading: string
-  body: string
+  title: string
+  subtitle: string
+  sections: { title: string; items: string[] }[]
+  footerText?: string
+  ctaText?: string
+  ctaUrl?: string
 }): Promise<string> {
-  return render(Newsletter({ title: opts.heading, content: opts.body }))
+  return render(Newsletter(opts))
 }
