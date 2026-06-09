@@ -12,6 +12,17 @@ import { supabaseAdmin } from '../lib/supabase'
 
 export const emailRouter = new Hono<AppContext>()
 
+emailRouter.post('/test-newsletter', async (c) => {
+  const { to, secret } = await c.req.json<{ to: string; secret: string }>()
+  if (secret !== c.env.WEBHOOK_SECRET) return c.json({ error: 'Forbidden' }, 403)
+  const html = await newsletterEmail({ subject: 'Nyhet', heading: 'Ny funktion: AI-coach', body: 'Vi har lanserat en AI-coach.' })
+  try {
+    await sendEmail(c.env.RESEND_API_KEY, { to, subject: 'Nyhet från FormPlan 📣', html })
+    return c.json({ ok: true, htmlLength: html.length })
+  } catch (e) {
+    return c.json({ error: String(e) }, 500)
+  }
+})
 
 /**
  * POST /email/webhook/new-user
