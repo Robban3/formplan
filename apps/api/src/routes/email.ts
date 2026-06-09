@@ -41,7 +41,7 @@ emailRouter.post('/webhook/new-user', async (c) => {
   await sendEmail(c.env.RESEND_API_KEY, {
     to: email,
     subject: 'Välkommen till FormPlan! 🎉',
-    html: welcomeEmail(name),
+    html: await welcomeEmail(name),
   })
 
   return c.json({ ok: true })
@@ -58,7 +58,7 @@ emailRouter.post('/welcome', requireAuth, async (c) => {
   await sendEmail(c.env.RESEND_API_KEY, {
     to: user.email,
     subject: 'Välkommen till FormPlan! 🎉',
-    html: welcomeEmail(name),
+    html: await welcomeEmail(name),
   })
 
   return c.json({ ok: true })
@@ -112,7 +112,7 @@ emailRouter.post('/progress', requireAuth, async (c) => {
   await sendEmail(c.env.RESEND_API_KEY, {
     to: user.email,
     subject: `Din veckorapport — ${workouts} pass den här veckan 💪`,
-    html: progressEmail({ name, workouts, volumeKg, weightDelta, streak }),
+    html: await progressEmail({ name, workouts, volumeKg, weightDelta, streak }),
   })
 
   return c.json({ ok: true })
@@ -139,19 +139,10 @@ emailRouter.post('/newsletter', requireAuth, async (c) => {
     ctaUrl?: string
   }>()
 
+  const html = await newsletterEmail({ subject: body.subject, heading: body.heading, body: body.body })
   const results = await Promise.allSettled(
     body.emails.map((to) =>
-      sendEmail(c.env.RESEND_API_KEY, {
-        to,
-        subject: body.subject,
-        html: newsletterEmail({
-          subject: body.subject,
-          heading: body.heading,
-          body: body.body,
-          ...(body.ctaText ? { ctaText: body.ctaText } : {}),
-          ...(body.ctaUrl ? { ctaUrl: body.ctaUrl } : {}),
-        }),
-      })
+      sendEmail(c.env.RESEND_API_KEY, { to, subject: body.subject, html })
     )
   )
 
