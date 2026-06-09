@@ -13,4 +13,8 @@ ENVIRONMENT = "production"
 # STRIPE_SECRET_KEY
 # STRIPE_WEBHOOK_SECRET
 # RESEND_API_KEY
+# WEBHOOK_SECRET
+
+[triggers]
+crons = ["0 7 * * 1"]  # Varje måndag kl 07:00 UTC
 

@@ -35,7 +35,8 @@ emailRouter.post('/webhook/new-user', async (c) => {
   const name =
     payload.record?.raw_user_meta_data?.full_name ??
     payload.record?.raw_user_meta_data?.name ??
-    email.split('@')[0]
+    email.split('@')[0] ??
+    'där'
 
   await sendEmail(c.env.RESEND_API_KEY, {
     to: email,

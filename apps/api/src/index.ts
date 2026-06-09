@@ -8,6 +8,7 @@ import { nutritionRouter } from './routes/nutrition'
 import { workoutRouter } from './routes/workout'
 import { emailRouter } from './routes/email'
 import type { Env } from './lib/types'
+import { sendWeeklyReports } from './jobs/weeklyReport'
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -36,4 +37,12 @@ app.route('/nutrition', nutritionRouter)
 app.route('/workout', workoutRouter)
 app.route('/email', emailRouter)
 
-export default app
+const worker = {
+  fetch: app.fetch.bind(app),
+  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+    ctx.waitUntil(sendWeeklyReports(env))
+  },
+}
+
+export { app }
+export default worker
