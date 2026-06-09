@@ -12,6 +12,33 @@ import { supabaseAdmin } from '../lib/supabase'
 
 export const emailRouter = new Hono<AppContext>()
 
+emailRouter.post('/test-all', async (c) => {
+  const { to, secret } = await c.req.json<{ to: string; secret: string }>()
+  if (secret !== c.env.WEBHOOK_SECRET) return c.json({ error: 'Forbidden' }, 403)
+  const results: Record<string, string> = {}
+  const send = async (name: string, subject: string, html: string) => {
+    try { await sendEmail(c.env.RESEND_API_KEY, { to, subject, html }); results[name] = 'ok' }
+    catch (e) { results[name] = String(e) }
+  }
+  await send('magic-link', 'Din inloggningslänk till FormPlan', await magicLinkEmail('https://app.formplan.app/auth'))
+  await send('welcome', 'Välkommen till FormPlan! 🎉', await welcomeEmail('Robin'))
+  await send('progress', 'Din veckorapport — 4 pass genomförda 💪', await progressEmail({
+    firstName: 'Robin', workoutsCompleted: 4, workoutsTotal: 5,
+    mealDaysCompleted: 6, mealDaysTotal: 7, weightChange: -0.7,
+    calorieDeficit: 2350, personalBests: 3, streak: 12,
+    motivationalMessage: 'Din kontinuitet den här veckan placerar dig bland de 20 % mest aktiva användarna. Grymt jobbat!',
+  }))
+  await send('newsletter', 'Nytt i FormPlan 📣', await newsletterEmail({
+    title: 'Nytt i FormPlan', subtitle: 'Här är vad som är nytt sedan sist.',
+    sections: [
+      { title: 'Nya funktioner', items: ['AI-genererade kostplaner', 'Förbättrad makrospårning', 'Smartare träningsprogression', 'Nya visualiseringar av din utveckling'] },
+      { title: 'På gång', items: ['Streckkodsskanning av livsmedel', 'Receptgenerator med AI', 'Träningsbibliotek med videor'] },
+    ],
+    footerText: 'Vi jobbar ständigt på att göra din träningsresa smartare, enklare och mer effektiv.',
+  }))
+  return c.json(results)
+})
+
 
 /**
  * POST /email/webhook/new-user
