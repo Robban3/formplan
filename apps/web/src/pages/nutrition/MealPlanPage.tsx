@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeftIcon, LeafIcon } from '../../components/ui/Icons'
+import { ChevronLeftIcon, LeafIcon, ShoppingCartIcon } from '../../components/ui/Icons'
 import { useSettings } from '../../hooks/useSettings'
 import {
   generateMealPlan,
@@ -235,6 +235,15 @@ export function MealPlanPage() {
               className="w-full py-3 border border-stone-200 rounded-2xl text-sm text-stone-500 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
             >
               Generera nytt förslag
+            </button>
+
+            {/* Shopping list */}
+            <button
+              onClick={() => navigate('/kost/inkopslista')}
+              className="w-full py-3 bg-stone-100 rounded-2xl text-sm text-stone-700 font-semibold flex items-center justify-center gap-2 hover:bg-stone-200 transition-colors"
+            >
+              <ShoppingCartIcon className="w-4 h-4 stroke-stone-600" />
+              Skapa inköpslista för veckan
             </button>
           </div>
         )}

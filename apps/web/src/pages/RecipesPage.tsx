@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeftIcon, ClockIcon, FireIcon } from '../components/ui/Icons'
+import { ChevronLeftIcon, ClockIcon, FireIcon, ZapIcon } from '../components/ui/Icons'
+import { api, type GeneratedRecipe } from '../lib/api'
 
 type IllustrationKey = 'bowl' | 'wok' | 'salmon' | 'balls' | 'oats'
 
@@ -186,6 +187,199 @@ const RECIPES: Recipe[] = [
 const MEAL_TABS = ['Alla', 'Frukost', 'Lunch', 'Middag', 'Mellanmål'] as const
 type MealTab = typeof MEAL_TABS[number]
 
+const RECIPE_PROMPTS = [
+  'En middag med minst 50 g protein',
+  'Snabb frukost under 400 kcal',
+  'Vegetarisk lunch som mättar',
+  'Proteinrikt mellanmål utan nötter',
+]
+
+// AI-generated recipe based on the user's calorie/macro goals and allergies.
+function AiRecipeGenerator() {
+  const [prompt, setPrompt] = useState('')
+  const [kcal, setKcal] = useState<string>('')
+  const [minProtein, setMinProtein] = useState<string>('')
+  const [allergies, setAllergies] = useState<string[]>([])
+  const [recipe, setRecipe] = useState<GeneratedRecipe | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Prefill calorie target + allergies from the user's profile.
+  useEffect(() => {
+    api
+      .getProfile()
+      .then(({ profile }) => {
+        const p = profile as { calorie_goal?: number | null; allergies?: string[] } | null
+        if (p?.calorie_goal) setKcal(String(p.calorie_goal))
+        if (p?.allergies?.length) setAllergies(p.allergies)
+      })
+      .catch(() => {})
+  }, [])
+
+  async function generate(text?: string) {
+    const p = (text ?? prompt).trim()
+    if (!p || loading) return
+    if (text) setPrompt(text)
+    setLoading(true)
+    setError(null)
+    try {
+      const { recipe } = await api.generateRecipe({
+        prompt: p,
+        calorie_target: kcal ? Number(kcal) : null,
+        min_protein_g: minProtein ? Number(minProtein) : null,
+        allergies,
+      })
+      setRecipe(recipe)
+    } catch {
+      setError('Kunde inte generera recept just nu. Försök igen.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const macros = recipe
+    ? [
+        { label: 'Kalorier', value: recipe.kcal, unit: 'kcal', color: 'bg-forest-50 text-forest-700' },
+        { label: 'Protein', value: recipe.protein_g, unit: 'g', color: 'bg-blue-50 text-blue-700' },
+        { label: 'Fett', value: recipe.fat_g, unit: 'g', color: 'bg-amber-50 text-amber-700' },
+        { label: 'Kolhyd.', value: recipe.carbs_g, unit: 'g', color: 'bg-teal-50 text-teal-700' },
+      ]
+    : []
+
+  return (
+    <div className="bg-white rounded-2xl border border-stone-100 p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-8 h-8 rounded-xl bg-forest-50 flex items-center justify-center">
+          <ZapIcon className="w-4 h-4 stroke-forest-600" />
+        </div>
+        <div>
+          <p className="font-semibold text-stone-900 text-sm">Skapa recept med AI</p>
+          <p className="text-[11px] text-stone-400">Anpassat efter dina mål och allergier</p>
+        </div>
+      </div>
+
+      <textarea
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        placeholder="Beskriv vad du är sugen på, t.ex. ”Ge mig en middag med 700 kcal och minst 50 g protein”"
+        rows={2}
+        className="w-full bg-stone-100 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 resize-none"
+      />
+
+      <div className="flex flex-wrap gap-2 mt-2">
+        {RECIPE_PROMPTS.map((s) => (
+          <button
+            key={s}
+            onClick={() => generate(s)}
+            disabled={loading}
+            className="text-[11px] bg-stone-50 border border-stone-200 rounded-full px-3 py-1.5 text-stone-600 hover:border-forest-300 hover:text-forest-700 transition-colors disabled:opacity-50"
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex gap-2 mt-3">
+        <div className="flex-1">
+          <label className="text-[10px] text-stone-400 font-medium">Kcal/portion</label>
+          <input
+            type="number"
+            inputMode="numeric"
+            value={kcal}
+            onChange={(e) => setKcal(e.target.value)}
+            placeholder="valfritt"
+            className="w-full bg-stone-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+          />
+        </div>
+        <div className="flex-1">
+          <label className="text-[10px] text-stone-400 font-medium">Min. protein (g)</label>
+          <input
+            type="number"
+            inputMode="numeric"
+            value={minProtein}
+            onChange={(e) => setMinProtein(e.target.value)}
+            placeholder="valfritt"
+            className="w-full bg-stone-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+          />
+        </div>
+      </div>
+
+      {allergies.length > 0 && (
+        <p className="text-[11px] text-stone-400 mt-2">Undviker: {allergies.join(', ')}</p>
+      )}
+
+      <button
+        onClick={() => generate()}
+        disabled={!prompt.trim() || loading}
+        className="w-full mt-3 bg-forest-600 hover:bg-forest-700 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+      >
+        {loading ? 'Skapar recept…' : 'Generera recept'}
+      </button>
+
+      {error && <p className="text-xs text-red-500 mt-2 text-center">{error}</p>}
+
+      {recipe && (
+        <div className="mt-4 border-t border-stone-100 pt-4">
+          <h3 className="text-lg font-bold text-stone-900">{recipe.name}</h3>
+          <div className="flex items-center gap-3 text-xs text-stone-400 mt-1 mb-3">
+            <span className="flex items-center gap-1">
+              <ClockIcon className="w-3.5 h-3.5 stroke-stone-400" />
+              {recipe.prep_minutes} min
+            </span>
+            <span>·</span>
+            <span>{recipe.servings} {recipe.servings === 1 ? 'portion' : 'portioner'}</span>
+            {recipe.tags?.slice(0, 2).map((t) => (
+              <span key={t} className="text-[10px] bg-forest-50 text-forest-700 px-2 py-0.5 rounded-full font-medium">
+                {t}
+              </span>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            {macros.map((m) => (
+              <div key={m.label} className={`${m.color} rounded-xl p-2.5 text-center`}>
+                <p className="font-bold text-sm">{m.value}</p>
+                <p className="text-[10px] opacity-70">{m.unit}</p>
+                <p className="text-[10px] font-medium mt-0.5">{m.label}</p>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Ingredienser</p>
+          <ul className="space-y-1.5 mb-4">
+            {recipe.ingredients.map((ing, i) => (
+              <li key={i} className="flex items-center gap-2 text-sm text-stone-700">
+                <span className="w-1.5 h-1.5 rounded-full bg-forest-400 flex-shrink-0" />
+                {ing}
+              </li>
+            ))}
+          </ul>
+
+          <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Tillagning</p>
+          <ol className="space-y-2">
+            {recipe.steps.map((step, i) => (
+              <li key={i} className="flex gap-3 text-sm text-stone-700">
+                <span className="w-5 h-5 rounded-full bg-forest-600 text-white text-xs flex items-center justify-center flex-shrink-0 font-semibold">
+                  {i + 1}
+                </span>
+                {step}
+              </li>
+            ))}
+          </ol>
+
+          <button
+            onClick={() => generate()}
+            disabled={loading}
+            className="w-full mt-4 py-2.5 border border-stone-200 rounded-xl text-sm text-stone-500 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors disabled:opacity-50"
+          >
+            Generera nytt förslag
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function RecipesPage() {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
@@ -238,6 +432,8 @@ export function RecipesPage() {
       </div>
 
       <div className="px-5 mt-4 space-y-3">
+        <AiRecipeGenerator />
+
         {filtered.length === 0 && (
           <p className="text-center text-stone-400 text-sm py-8">Inga recept hittades.</p>
         )}

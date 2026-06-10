@@ -38,6 +38,7 @@ import {
   ChevronUp,
   ChevronDown,
   Ruler,
+  ShoppingCart,
 } from 'lucide-react'
 
 interface IconProps {
@@ -91,3 +92,4 @@ export const SendIcon = wrap(Send, 2)
 export const ChevronUpIcon = wrap(ChevronUp, 2)
 export const ChevronDownIcon = wrap(ChevronDown, 2)
 export const RulerIcon = wrap(Ruler)
+export const ShoppingCartIcon = wrap(ShoppingCart)

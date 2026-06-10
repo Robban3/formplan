@@ -90,6 +90,20 @@ export interface RestDay {
   notes: string
 }
 
+export interface GeneratedRecipe {
+  name: string
+  meal_type: string
+  kcal: number
+  protein_g: number
+  fat_g: number
+  carbs_g: number
+  prep_minutes: number
+  servings: number
+  ingredients: string[]
+  steps: string[]
+  tags: string[]
+}
+
 export type MealSlot = 'frukost' | 'lunch' | 'middag' | 'mellanmar'
 
 export interface FoodItemRow {

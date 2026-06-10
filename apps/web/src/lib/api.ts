@@ -25,6 +25,28 @@ export interface PlanSummary {
   created_at: string
 }
 
+export interface GeneratedRecipe {
+  name: string
+  meal_type: string
+  kcal: number
+  protein_g: number
+  fat_g: number
+  carbs_g: number
+  prep_minutes: number
+  servings: number
+  ingredients: string[]
+  steps: string[]
+  tags: string[]
+}
+
+export interface RecipeRequest {
+  prompt: string
+  calorie_target?: number | null
+  min_protein_g?: number | null
+  allergies?: string[]
+  meal_type?: string | null
+}
+
 export const api = {
   getProfile: () => request<{ profile: unknown }>('/profile'),
 
@@ -53,6 +75,12 @@ export const api = {
   },
 
   listPlans: () => request<{ plans: PlanSummary[] }>('/plan/list'),
+
+  generateRecipe: (body: RecipeRequest) =>
+    request<{ recipe: GeneratedRecipe }>('/ai/recipe', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
 }
 
 // Shared request helper for sibling API clients.

@@ -20,6 +20,7 @@ import { MeasurementsPage } from '../pages/MeasurementsPage'
 import { ChallengesPage } from '../pages/ChallengesPage'
 import { AiCoachPage } from '../pages/AiCoachPage'
 import { MealWeekPage } from '../pages/nutrition/MealWeekPage'
+import { ShoppingListPage } from '../pages/nutrition/ShoppingListPage'
 import { CustomWorkoutPage } from '../pages/training/CustomWorkoutPage'
 import { FoodDiary } from '../pages/nutrition/FoodDiary'
 import { WaterPage } from '../pages/nutrition/WaterPage'
@@ -46,6 +47,7 @@ export function TabLayout() {
           <Route path="/kost/sok"           element={<FoodSearch />} />
           <Route path="/kost/kostschema"    element={<MealPlanPage />} />
           <Route path="/kost/veckoplan"     element={<MealWeekPage />} />
+          <Route path="/kost/inkopslista"   element={<ShoppingListPage />} />
           <Route path="/traning"        element={<TrainingOverview />} />
           <Route path="/traning/:id"    element={<WorkoutDetail />} />
           <Route path="/traning/egna"   element={<CustomWorkoutPage />} />

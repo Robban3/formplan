@@ -4,7 +4,7 @@ import { nutritionApi, type FoodLogEntry, type DailyGoals, type MealSlot } from 
 import { dateKey } from '../../lib/derive'
 import { MacroSummary } from '../../components/nutrition/MacroSummary'
 import { MealSection } from '../../components/nutrition/MealSection'
-import { ChevronLeftIcon, ChevronRightIcon, DropletIcon, StarIcon } from '../../components/ui/Icons'
+import { ChevronLeftIcon, ChevronRightIcon, DropletIcon, StarIcon, ShoppingCartIcon } from '../../components/ui/Icons'
 import { getTopFavorites, type FoodFavorite } from '../../lib/foodFavoritesStore'
 
 const MEALS: MealSlot[] = ['frukost', 'lunch', 'middag', 'mellanmar']
@@ -97,6 +97,13 @@ export function FoodDiary() {
               className="px-3 h-9 rounded-xl bg-stone-100 text-stone-600 text-xs font-semibold hover:bg-stone-200 transition-colors"
             >
               Veckoplan
+            </button>
+            <button
+              onClick={() => navigate('/kost/inkopslista')}
+              className="w-9 h-9 rounded-xl bg-forest-50 flex items-center justify-center hover:bg-forest-100 transition-colors"
+              aria-label="Inköpslista"
+            >
+              <ShoppingCartIcon className="w-4 h-4 stroke-forest-600" />
             </button>
             <button
               onClick={() => navigate('/kost/vatten')}

@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { supabaseAdmin } from './supabase'
-import type { Env, FitnessProfile, WorkoutDay, NutritionDay, RestDay } from './types'
+import type { Env, FitnessProfile, WorkoutDay, NutritionDay, RestDay, GeneratedRecipe } from './types'
 
 function buildPrompt(profile: FitnessProfile): string {
   const goalMap: Record<string, string> = {
@@ -240,4 +240,64 @@ Riktlinjer:
     .map((b) => b.text)
     .join('')
     .trim()
+}
+
+// ── AI-genererade recept ────────────────────────────────────────────────────
+
+export interface RecipeRequest {
+  prompt: string
+  calorie_target?: number | null | undefined
+  min_protein_g?: number | null | undefined
+  allergies?: string[] | undefined
+  meal_type?: string | null | undefined
+}
+
+// Tolerate the model occasionally wrapping JSON in prose/code fences.
+function extractJson(text: string): string {
+  const start = text.indexOf('{')
+  const end = text.lastIndexOf('}')
+  return start >= 0 && end > start ? text.slice(start, end + 1) : text
+}
+
+export async function generateRecipe(req: RecipeRequest, env: Env): Promise<GeneratedRecipe> {
+  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY })
+
+  const constraints: string[] = []
+  if (req.calorie_target) constraints.push(`Kalorimål: ca ${req.calorie_target} kcal per portion`)
+  if (req.min_protein_g) constraints.push(`Minst ${req.min_protein_g} g protein per portion`)
+  if (req.meal_type) constraints.push(`Måltidstyp: ${req.meal_type}`)
+  if (req.allergies?.length)
+    constraints.push(`MÅSTE undvikas (allergier/kosthänsyn): ${req.allergies.join(', ')}`)
+
+  const user = `Skapa ett recept utifrån önskemålet: "${req.prompt}".
+${constraints.length ? `Krav:\n- ${constraints.join('\n- ')}\n` : ''}
+Svara ENDAST med giltig JSON enligt exakt detta schema (på svenska, med realistiska näringsvärden per portion):
+{
+  "name": "string",
+  "meal_type": "frukost|lunch|middag|mellanmål",
+  "kcal": number,
+  "protein_g": number,
+  "fat_g": number,
+  "carbs_g": number,
+  "prep_minutes": number,
+  "servings": number,
+  "ingredients": ["mängd + ingrediens, t.ex. '150 g kycklingfilé'"],
+  "steps": ["tydligt tillagningssteg"],
+  "tags": ["kort etikett, t.ex. 'Högt protein'"]
+}`
+
+  const message = await client.messages.create({
+    model: 'claude-opus-4-8',
+    max_tokens: 1500,
+    system:
+      'Du är en svensk kock och nutritionist. Svara alltid med enbart giltig JSON — ingen markdown, ingen förklaring.',
+    messages: [{ role: 'user', content: user }],
+  })
+
+  const rawText = message.content
+    .filter((b) => b.type === 'text')
+    .map((b) => b.text)
+    .join('')
+
+  return JSON.parse(extractJson(rawText)) as GeneratedRecipe
 }
