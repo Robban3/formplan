@@ -43,7 +43,7 @@ export function TabLayout() {
       <div className="flex-1 overflow-y-auto scrollbar-hide">
         <Routes>
           <Route path="/hem"            element={<HomePage />} />
-          <Route path="/kost"               element={<NutritionHome />} />
+          <Route path="/kost/*"             element={<NutritionHome />} />
           <Route path="/kost/dagbok"        element={<FoodDiary />} />
           <Route path="/kost/vatten"        element={<WaterPage />} />
           <Route path="/kost/sok"           element={<FoodSearch />} />

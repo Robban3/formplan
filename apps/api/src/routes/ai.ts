@@ -32,10 +32,7 @@ aiRouter.post(
       return c.json({ reply })
     } catch (err) {
       console.error('AI coach failed:', err)
-      // TEMP-DIAGNOSTIK: visa det underliggande Anthropic-felet i svaret.
-      const detail = err instanceof Error ? err.message : String(err)
-      const status = (err as { status?: number }).status
-      return c.json({ error: 'AI coach unavailable', detail, status }, 502)
+      return c.json({ error: 'AI coach unavailable' }, 502)
     }
   }
 )
