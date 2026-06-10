@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronLeftIcon, ScanBarcodeIcon } from '../../components/ui/Icons'
 import { lookupBarcode, type ScannedProduct } from '../../lib/openFoodFacts'
+import { startBarcodeScanner, type ScannerHandle } from '../../lib/barcodeScanner'
 import { nutritionApi, type MealSlot } from '../../lib/nutritionApi'
 import { dateKey } from '../../lib/derive'
 import { toast } from '../../lib/toast'
@@ -13,33 +14,17 @@ const SLOT_LABELS: Record<MealSlot, string> = {
   mellanmar: 'Mellanmål',
 }
 
-// BarcodeDetector is not in the TS DOM lib yet — declare the bits we use.
-interface DetectedBarcode {
-  rawValue: string
-}
-interface BarcodeDetectorInstance {
-  detect(source: CanvasImageSource): Promise<DetectedBarcode[]>
-}
-interface BarcodeDetectorCtor {
-  new (opts?: { formats?: string[] }): BarcodeDetectorInstance
-}
-
-const BARCODE_FORMATS = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39']
-
 export function BarcodeScanPage() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const slot = (params.get('slot') ?? 'frukost') as MealSlot
   const date = params.get('date') ?? dateKey()
 
-  const supported = typeof window !== 'undefined' && 'BarcodeDetector' in window
-
   const videoRef = useRef<HTMLVideoElement>(null)
-  const streamRef = useRef<MediaStream | null>(null)
-  const intervalRef = useRef<number | null>(null)
-  const detectorRef = useRef<BarcodeDetectorInstance | null>(null)
+  const handleRef = useRef<ScannerHandle | null>(null)
+  const handledRef = useRef(false)
 
-  const [scanning, setScanning] = useState(false)
+  const [scanning, setScanning] = useState(true)
   const [looking, setLooking] = useState(false)
   const [product, setProduct] = useState<ScannedProduct | null>(null)
   const [amount, setAmount] = useState('100')
@@ -47,61 +32,39 @@ export function BarcodeScanPage() {
   const [error, setError] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
 
-  function stopScan() {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
-    }
-    streamRef.current?.getTracks().forEach((t) => t.stop())
-    streamRef.current = null
-    setScanning(false)
-  }
-
-  async function startScan() {
-    setError(null)
-    setProduct(null)
-    if (!supported) return
-    try {
-      const Ctor = (window as unknown as { BarcodeDetector: BarcodeDetectorCtor }).BarcodeDetector
-      detectorRef.current = new Ctor({ formats: BARCODE_FORMATS })
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-      streamRef.current = stream
-      setScanning(true)
-      intervalRef.current = window.setInterval(async () => {
-        const v = videoRef.current
-        const d = detectorRef.current
-        if (!v || !d || v.readyState < 2) return
-        try {
-          const codes = await d.detect(v)
-          const code = codes[0]?.rawValue
-          if (code) {
-            stopScan()
-            void doLookup(code)
-          }
-        } catch {
-          /* transient detector errors — keep scanning */
-        }
-      }, 400)
-    } catch {
-      setError('Kunde inte starta kameran. Ange streckkoden manuellt nedan.')
-      setScanning(false)
-    }
-  }
-
-  // Attach the live stream once the <video> is mounted.
+  // Run the scanner whenever the camera viewport is showing. Works with the
+  // native Barcode Detection API or, on iOS Safari, the ZXing fallback.
   useEffect(() => {
-    if (scanning && videoRef.current && streamRef.current) {
-      videoRef.current.srcObject = streamRef.current
-      videoRef.current.play().catch(() => {})
+    if (!scanning) return
+    const video = videoRef.current
+    if (!video) return
+
+    let cancelled = false
+    handledRef.current = false
+
+    startBarcodeScanner(video, (code) => {
+      if (handledRef.current) return
+      handledRef.current = true
+      setScanning(false) // cleanup below stops the camera
+      void doLookup(code)
+    })
+      .then((h) => {
+        if (cancelled) h.stop()
+        else handleRef.current = h
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setError('Kunde inte starta kameran. Tillåt kameraåtkomst eller ange streckkoden manuellt nedan.')
+          setScanning(false)
+        }
+      })
+
+    return () => {
+      cancelled = true
+      handleRef.current?.stop()
+      handleRef.current = null
     }
   }, [scanning])
-
-  // Auto-start the scanner on mount; always clean up the camera on unmount.
-  useEffect(() => {
-    if (supported) void startScan()
-    return () => stopScan()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   async function doLookup(code: string) {
     setLooking(true)
@@ -144,6 +107,12 @@ export function BarcodeScanPage() {
     } finally {
       setAdding(false)
     }
+  }
+
+  function rescan() {
+    setProduct(null)
+    setError(null)
+    setScanning(true)
   }
 
   return (
@@ -220,20 +189,14 @@ export function BarcodeScanPage() {
         )}
 
         {/* Rescan */}
-        {supported && !scanning && (
+        {!scanning && (
           <button
-            onClick={() => void startScan()}
+            onClick={rescan}
             className="w-full py-3 bg-forest-600 text-white font-semibold rounded-2xl flex items-center justify-center gap-2"
           >
             <ScanBarcodeIcon className="w-5 h-5 stroke-white" />
             {product || error ? 'Skanna igen' : 'Starta skanning'}
           </button>
-        )}
-
-        {!supported && !product && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-800">
-            Kameraskanning stöds inte i den här webbläsaren. Ange streckkoden manuellt nedan.
-          </div>
         )}
 
         {/* Manual entry */}
@@ -249,7 +212,7 @@ export function BarcodeScanPage() {
             />
             <button
               onClick={() => {
-                stopScan()
+                setScanning(false)
                 void doLookup(manual)
               }}
               disabled={manual.length < 6 || looking}
