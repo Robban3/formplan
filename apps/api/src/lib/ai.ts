@@ -12,6 +12,31 @@ import type {
 
 export type ImageMediaType = 'image/jpeg' | 'image/png' | 'image/webp'
 
+const PRIMARY_MODEL = 'claude-opus-4-8'
+// Widely-available model used if the configured one isn't accessible.
+const FALLBACK_MODEL = 'claude-3-5-sonnet-latest'
+
+function resolveModel(env: Env): string {
+  return env.ANTHROPIC_MODEL ?? PRIMARY_MODEL
+}
+
+// Call Claude, retrying once on a stable model if the configured model is
+// rejected (404/400 — e.g. the account lacks access to it).
+async function createMessage(
+  client: Anthropic,
+  params: Anthropic.MessageCreateParamsNonStreaming
+): Promise<Anthropic.Message> {
+  try {
+    return await client.messages.create(params)
+  } catch (err) {
+    const status = (err as { status?: number }).status
+    if ((status === 404 || status === 400) && params.model !== FALLBACK_MODEL) {
+      return client.messages.create({ ...params, model: FALLBACK_MODEL })
+    }
+    throw err
+  }
+}
+
 function buildPrompt(profile: FitnessProfile): string {
   const goalMap: Record<string, string> = {
     lose_weight: 'lose weight / cut fat',
@@ -81,8 +106,8 @@ export async function generatePlan(
   const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY })
   const db = supabaseAdmin(env)
 
-  const message = await client.messages.create({
-    model: 'claude-opus-4-8',
+  const message = await createMessage(client, {
+    model: resolveModel(env),
     max_tokens: 8192,
     system:
       'You are a certified personal trainer and nutritionist. Always respond with valid JSON only — no markdown, no explanation.',
@@ -238,8 +263,8 @@ Riktlinjer:
 - Hitta inte på siffror — använd bara data som finns ovan. Saknas data, uppmuntra användaren att logga pass/kost.
 - Var ärlig, evidensbaserad och uppmuntrande.`
 
-  const msg = await client.messages.create({
-    model: 'claude-opus-4-8',
+  const msg = await createMessage(client, {
+    model: resolveModel(env),
     max_tokens: 700,
     system,
     messages: history.map((m) => ({ role: m.role, content: m.content })),
@@ -296,8 +321,8 @@ Svara ENDAST med giltig JSON enligt exakt detta schema (på svenska, med realist
   "tags": ["kort etikett, t.ex. 'Högt protein'"]
 }`
 
-  const message = await client.messages.create({
-    model: 'claude-opus-4-8',
+  const message = await createMessage(client, {
+    model: resolveModel(env),
     max_tokens: 1500,
     system:
       'Du är en svensk kock och nutritionist. Svara alltid med enbart giltig JSON — ingen markdown, ingen förklaring.',
@@ -332,8 +357,8 @@ Svara ENDAST med giltig JSON enligt detta schema (svenska livsmedelsnamn, gram o
 }
 Om bilden inte föreställer mat: returnera tomma "items", nollställd "total" och description "Ingen mat hittades".`
 
-  const message = await client.messages.create({
-    model: 'claude-opus-4-8',
+  const message = await createMessage(client, {
+    model: resolveModel(env),
     max_tokens: 1024,
     system: 'Svara alltid med enbart giltig JSON — ingen markdown, ingen förklaring.',
     messages: [
