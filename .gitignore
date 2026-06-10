@@ -10,6 +10,8 @@ dist/
 .env.local
 *.local
 !.env.local.example
+.dev.vars
+.dev.vars.*
 
 # Editor / OS
 .DS_Store
