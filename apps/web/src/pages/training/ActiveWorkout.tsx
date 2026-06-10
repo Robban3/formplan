@@ -12,6 +12,8 @@ import { toast } from '../../lib/toast'
 import { PauseIcon, PlayIcon, CheckIcon, XIcon, ChevronLeftIcon, ChevronRightIcon, ShareIcon, DumbbellIcon, ZapIcon } from '../../components/ui/Icons'
 import { ExerciseVideo } from '../../components/training/ExerciseVideo'
 import { exerciseUsesWeight } from '../../lib/exerciseLog'
+import { getExerciseHistory } from '../../lib/exerciseHistoryStore'
+import { recommendNextWeight, type ProgressionAdvice } from '../../lib/progression'
 
 function formatTime(seconds: number) {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
@@ -38,11 +40,22 @@ export function ActiveWorkout() {
   const finishingRef = useRef(false)
   // previousSets[exerciseName] = last logged sets for that exercise
   const [previousSets, setPreviousSets] = useState<Record<string, PrevSet[]>>({})
+  // recommendations[exerciseName] = automatic progression suggestion (or null)
+  const [recommendations, setRecommendations] = useState<Record<string, ProgressionAdvice | null>>({})
 
   // Fetch exercise history for all exercises in this workout once on mount.
   useEffect(() => {
     if (!state) return
     const names = [...new Set(state.exercises.map((e) => e.name))]
+
+    // Automatic progression from locally tracked history (offline-friendly).
+    const recs: Record<string, ProgressionAdvice | null> = {}
+    for (const name of names) {
+      const targetReps = state.exercises.find((e) => e.name === name)?.targetReps ?? ''
+      recs[name] = recommendNextWeight(getExerciseHistory(name), targetReps)
+    }
+    setRecommendations(recs)
+
     Promise.all(
       names.map((name) =>
         workoutApi
@@ -302,6 +315,18 @@ export function ActiveWorkout() {
     })
   }
 
+  // Prefill the recommended weight on all not-yet-completed sets of the current exercise.
+  function applyRecommendation(weightKg: number) {
+    workoutStore.update((s) => ({
+      ...s,
+      exercises: s.exercises.map((e, ei) =>
+        ei === s.currentExerciseIndex
+          ? { ...e, sets: e.sets.map((st) => (st.done ? st : { ...st, weight_kg: weightKg })) }
+          : e
+      ),
+    }))
+  }
+
   function goToExercise(delta: number) {
     goToExerciseIndex(workout.currentExerciseIndex + delta)
   }
@@ -470,6 +495,32 @@ export function ActiveWorkout() {
         </div>
 
         <ExerciseVideo exerciseName={ex.name} variant="inline" />
+
+        {/* Automatic progression suggestion */}
+        {showWeight && recommendations[ex.name] && (() => {
+          const rec = recommendations[ex.name]!
+          const applied = ex.sets.some((s) => !s.done && s.weight_kg === rec.recommendedWeight_kg)
+          return (
+            <div className="flex items-center gap-3 bg-forest-50 border border-forest-200 rounded-2xl px-4 py-3 mb-4">
+              <ZapIcon className="w-5 h-5 stroke-forest-600 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-forest-800">
+                  Dags att öka till {formatWeight(rec.recommendedWeight_kg)}
+                </p>
+                <p className="text-[11px] text-forest-600 mt-0.5">
+                  Du klarade {rec.reachedReps} reps på {formatWeight(rec.lastWeight_kg)} två pass i rad.
+                </p>
+              </div>
+              <button
+                onClick={() => applyRecommendation(rec.recommendedWeight_kg)}
+                disabled={applied}
+                className="text-xs font-semibold bg-forest-600 text-white px-3 py-2 rounded-xl flex-shrink-0 disabled:opacity-50"
+              >
+                {applied ? 'Tillämpad' : 'Använd'}
+              </button>
+            </div>
+          )
+        })()}
 
         {/* Set rows */}
         <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden mb-4">

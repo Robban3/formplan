@@ -7,6 +7,7 @@ import { stripeRouter } from './routes/stripe'
 import { nutritionRouter } from './routes/nutrition'
 import { workoutRouter } from './routes/workout'
 import { emailRouter } from './routes/email'
+import { aiRouter } from './routes/ai'
 import type { Env } from './lib/types'
 import { sendWeeklyReports } from './jobs/weeklyReport'
 
@@ -36,6 +37,7 @@ app.route('/stripe', stripeRouter)
 app.route('/nutrition', nutritionRouter)
 app.route('/workout', workoutRouter)
 app.route('/email', emailRouter)
+app.route('/ai', aiRouter)
 
 const worker = {
   fetch: app.fetch.bind(app),

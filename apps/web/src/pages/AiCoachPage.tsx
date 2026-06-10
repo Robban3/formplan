@@ -40,7 +40,7 @@ async function askCoach(messages: Message[]): Promise<string> {
   try {
     const { reply } = await request<{ reply: string }>('/ai/coach', {
       method: 'POST',
-      body: JSON.stringify({ messages }),
+      body: JSON.stringify({ messages, context: buildContext() }),
     })
     return reply
   } catch {

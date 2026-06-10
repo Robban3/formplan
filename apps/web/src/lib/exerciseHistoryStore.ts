@@ -3,6 +3,7 @@ const KEY = 'formplan_exercise_history'
 export interface ExerciseEntry {
   date: string
   maxWeight_kg: number
+  repsAtMax: number // best reps achieved on the heaviest set — drives progression
   totalVolume_kg: number
   totalReps: number
 }
@@ -36,6 +37,9 @@ export function recordExerciseSession(
   if (doneSets.length === 0) return
 
   const maxWeight = Math.max(...doneSets.map((s) => s.weight_kg!))
+  const repsAtMax = Math.max(
+    ...doneSets.filter((s) => s.weight_kg === maxWeight).map((s) => s.reps)
+  )
   const totalVolume = doneSets.reduce((sum, s) => sum + s.reps * (s.weight_kg ?? 0), 0)
   const totalReps = doneSets.reduce((sum, s) => sum + s.reps, 0)
 
@@ -45,6 +49,7 @@ export function recordExerciseSession(
   const entry: ExerciseEntry = {
     date,
     maxWeight_kg: maxWeight,
+    repsAtMax,
     totalVolume_kg: Math.round(totalVolume * 10) / 10,
     totalReps,
   }

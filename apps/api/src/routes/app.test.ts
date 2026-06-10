@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import app from '../index'
+import { app } from '../index'
 
 // The API routes hit Supabase and Anthropic. For unit-level tests we only verify
 // the handler wiring and auth guard — not the Supabase responses.
