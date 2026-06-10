@@ -40,7 +40,12 @@ export async function verifyJwt(token: string, env: Env): Promise<JwtPayload | n
       },
     })
     if (!res.ok) return null
-    return (await res.json()) as JwtPayload
+    // GoTrue's /auth/v1/user returns the user id in `id`, but the rest of the
+    // app reads `sub` (the JWT claim name). Normalise so `user.sub` is set.
+    const user = (await res.json()) as JwtPayload & { id?: string }
+    if (!user.sub && user.id) user.sub = user.id
+    if (!user.sub) return null
+    return user
   } catch {
     return null
   }
