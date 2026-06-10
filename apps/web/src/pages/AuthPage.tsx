@@ -49,7 +49,7 @@ export function AuthPage() {
       <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.55)' }} />
 
       {/* Main content */}
-      <div className="relative flex flex-1 z-10 items-center justify-center gap-16 px-6 py-10 flex-col lg:flex-row">
+      <div className="relative flex flex-1 z-10 items-center justify-center gap-16 py-10 px-6 flex-col lg:flex-row lg:px-12">
         {/* Left — logo + text — dölj på mobil */}
         <div className="hidden lg:flex flex-col justify-between" style={{ width: '380px' }}>
           {/* Logo */}
@@ -70,18 +70,17 @@ export function AuthPage() {
         </div>
 
         {/* Right — login card */}
-        <div className="w-full lg:w-auto" style={{ maxWidth: '480px',
+        <div className="w-full max-w-[480px] px-6 py-8 lg:w-[580px] lg:max-w-none lg:p-10 lg:flex lg:items-center lg:justify-center" style={{
           background: 'rgba(15,23,42,0.85)',
           border: '1px solid rgba(255,255,255,0.1)',
           backdropFilter: 'blur(20px)',
           boxShadow: '0 0 60px var(--brand-glow), 0 0 120px rgba(34, 230, 198, 0.08), 0 25px 50px rgba(0,0,0,0.5)',
           borderRadius: '20px',
-          padding: '32px 24px',
           flexShrink: 0,
         }}>
-          <div style={{ width: '100%' }}>
+          <div className="w-full lg:max-w-[380px]">
             <div>
-              <div>
+              <div className="lg:max-w-[380px] lg:mx-auto">
               {/* Icon */}
               <div className="flex justify-center mb-6">
                 <img src="/logo.png" alt="FormPlan" style={{ height: '210px', width: 'auto' }} />
@@ -158,8 +157,8 @@ export function AuthPage() {
       </div>
 
       {/* Bottom feature bar */}
-      <div className="relative z-10 border-t px-6 py-5 hidden sm:block" style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.5)' }}>
-        <div className="flex items-start justify-between gap-4 max-w-5xl mx-auto overflow-x-auto">
+      <div className="relative z-10 border-t px-6 py-5 hidden sm:block lg:px-10" style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.5)' }}>
+        <div className="flex items-start justify-between gap-4 lg:gap-6 max-w-5xl mx-auto overflow-x-auto lg:overflow-visible">
           {[
             { d: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z', title: 'Sparar tid', desc: 'AI skapar ditt schema på några sekunder' },
             { d: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z', title: '100% personligt', desc: 'Anpassat efter dina mål, förutsättningar och preferenser' },
