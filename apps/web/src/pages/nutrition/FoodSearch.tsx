@@ -4,7 +4,7 @@ import { nutritionApi, type FoodItem, type MealSlot } from '../../lib/nutritionA
 import { dateKey } from '../../lib/derive'
 import { loadCustomMeals, mealTotals, type CustomMeal } from '../../lib/customMeals'
 import { toast } from '../../lib/toast'
-import { ChevronLeftIcon, XIcon, PlusIcon, UtensilsIcon } from '../../components/ui/Icons'
+import { ChevronLeftIcon, XIcon, PlusIcon, UtensilsIcon, CameraIcon, ScanBarcodeIcon } from '../../components/ui/Icons'
 import { recordFoodUsed } from '../../lib/foodFavoritesStore'
 
 type SearchTab = 'alla' | 'mina' | 'maltider'
@@ -152,6 +152,24 @@ export function FoodSearch() {
           )}
         </div>
         <p className="text-xs text-stone-400 mt-2">Lägger till i {SLOT_LABELS[slot].toLowerCase()}</p>
+
+        {/* Quick add: scan barcode or photo */}
+        <div className="flex gap-2 mt-3">
+          <button
+            onClick={() => navigate(`/kost/skanna?slot=${slot}&date=${date}`)}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest-50 text-forest-700 text-sm font-semibold hover:bg-forest-100 transition-colors"
+          >
+            <ScanBarcodeIcon className="w-4 h-4 stroke-forest-600" />
+            Skanna streckkod
+          </button>
+          <button
+            onClick={() => navigate(`/kost/foto?slot=${slot}&date=${date}`)}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest-50 text-forest-700 text-sm font-semibold hover:bg-forest-100 transition-colors"
+          >
+            <CameraIcon className="w-4 h-4 stroke-forest-600" />
+            Fotografera
+          </button>
+        </div>
       </div>
 
       <div className="px-4 flex gap-4 border-b border-stone-100">

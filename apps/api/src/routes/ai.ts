@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { requireAuth } from '../middleware/auth'
-import { coachReply, generateRecipe } from '../lib/ai'
+import { coachReply, generateRecipe, analyzeFoodPhoto } from '../lib/ai'
 import type { AppContext } from '../lib/types'
 
 export const aiRouter = new Hono<AppContext>()
@@ -58,6 +58,28 @@ aiRouter.post(
     } catch (err) {
       console.error('Recipe generation failed:', err)
       return c.json({ error: 'Kunde inte generera recept' }, 502)
+    }
+  }
+)
+
+// POST /ai/food-photo — estimate a meal's nutrition from a photo (base64).
+aiRouter.post(
+  '/food-photo',
+  zValidator(
+    'json',
+    z.object({
+      image: z.string().min(1).max(8_000_000),
+      media_type: z.enum(['image/jpeg', 'image/png', 'image/webp']),
+    })
+  ),
+  async (c) => {
+    const b = c.req.valid('json')
+    try {
+      const analysis = await analyzeFoodPhoto(b.image, b.media_type, c.env)
+      return c.json({ analysis })
+    } catch (err) {
+      console.error('Food photo analysis failed:', err)
+      return c.json({ error: 'Kunde inte analysera bilden' }, 502)
     }
   }
 )

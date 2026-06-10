@@ -104,6 +104,21 @@ export interface GeneratedRecipe {
   tags: string[]
 }
 
+export interface FoodPhotoItem {
+  name: string
+  amount_g: number
+  kcal: number
+  protein_g: number
+  fat_g: number
+  carbs_g: number
+}
+
+export interface FoodPhotoAnalysis {
+  description: string
+  items: FoodPhotoItem[]
+  total: { kcal: number; protein_g: number; fat_g: number; carbs_g: number }
+}
+
 export type MealSlot = 'frukost' | 'lunch' | 'middag' | 'mellanmar'
 
 export interface FoodItemRow {

@@ -47,6 +47,21 @@ export interface RecipeRequest {
   meal_type?: string | null
 }
 
+export interface FoodPhotoItem {
+  name: string
+  amount_g: number
+  kcal: number
+  protein_g: number
+  fat_g: number
+  carbs_g: number
+}
+
+export interface FoodPhotoAnalysis {
+  description: string
+  items: FoodPhotoItem[]
+  total: { kcal: number; protein_g: number; fat_g: number; carbs_g: number }
+}
+
 export const api = {
   getProfile: () => request<{ profile: unknown }>('/profile'),
 
@@ -80,6 +95,12 @@ export const api = {
     request<{ recipe: GeneratedRecipe }>('/ai/recipe', {
       method: 'POST',
       body: JSON.stringify(body),
+    }),
+
+  analyzeFoodPhoto: (image: string, media_type: 'image/jpeg' | 'image/png' | 'image/webp') =>
+    request<{ analysis: FoodPhotoAnalysis }>('/ai/food-photo', {
+      method: 'POST',
+      body: JSON.stringify({ image, media_type }),
     }),
 }
 

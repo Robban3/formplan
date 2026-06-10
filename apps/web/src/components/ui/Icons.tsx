@@ -39,6 +39,8 @@ import {
   ChevronDown,
   Ruler,
   ShoppingCart,
+  Camera,
+  ScanBarcode,
 } from 'lucide-react'
 
 interface IconProps {
@@ -93,3 +95,5 @@ export const ChevronUpIcon = wrap(ChevronUp, 2)
 export const ChevronDownIcon = wrap(ChevronDown, 2)
 export const RulerIcon = wrap(Ruler)
 export const ShoppingCartIcon = wrap(ShoppingCart)
+export const CameraIcon = wrap(Camera)
+export const ScanBarcodeIcon = wrap(ScanBarcode)

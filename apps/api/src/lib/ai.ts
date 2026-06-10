@@ -1,6 +1,16 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { supabaseAdmin } from './supabase'
-import type { Env, FitnessProfile, WorkoutDay, NutritionDay, RestDay, GeneratedRecipe } from './types'
+import type {
+  Env,
+  FitnessProfile,
+  WorkoutDay,
+  NutritionDay,
+  RestDay,
+  GeneratedRecipe,
+  FoodPhotoAnalysis,
+} from './types'
+
+export type ImageMediaType = 'image/jpeg' | 'image/png' | 'image/webp'
 
 function buildPrompt(profile: FitnessProfile): string {
   const goalMap: Record<string, string> = {
@@ -300,4 +310,47 @@ Svara ENDAST med giltig JSON enligt exakt detta schema (på svenska, med realist
     .join('')
 
   return JSON.parse(extractJson(rawText)) as GeneratedRecipe
+}
+
+// ── Fotoanalys av mat ───────────────────────────────────────────────────────
+
+export async function analyzeFoodPhoto(
+  imageBase64: string,
+  mediaType: ImageMediaType,
+  env: Env
+): Promise<FoodPhotoAnalysis> {
+  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY })
+
+  const prompt = `Du är en svensk nutritionist. Analysera måltiden på bilden och uppskatta näringsinnehållet så gott det går utifrån synliga portioner.
+Svara ENDAST med giltig JSON enligt detta schema (svenska livsmedelsnamn, gram och realistiska värden):
+{
+  "description": "kort beskrivning av måltiden",
+  "items": [
+    { "name": "string", "amount_g": number, "kcal": number, "protein_g": number, "fat_g": number, "carbs_g": number }
+  ],
+  "total": { "kcal": number, "protein_g": number, "fat_g": number, "carbs_g": number }
+}
+Om bilden inte föreställer mat: returnera tomma "items", nollställd "total" och description "Ingen mat hittades".`
+
+  const message = await client.messages.create({
+    model: 'claude-opus-4-8',
+    max_tokens: 1024,
+    system: 'Svara alltid med enbart giltig JSON — ingen markdown, ingen förklaring.',
+    messages: [
+      {
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } },
+          { type: 'text', text: prompt },
+        ],
+      },
+    ],
+  })
+
+  const rawText = message.content
+    .filter((b) => b.type === 'text')
+    .map((b) => b.text)
+    .join('')
+
+  return JSON.parse(extractJson(rawText)) as FoodPhotoAnalysis
 }
