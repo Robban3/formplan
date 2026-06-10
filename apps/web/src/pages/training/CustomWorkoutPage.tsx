@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon, PlusIcon, XIcon, PlayIcon, DumbbellIcon } from '../../components/ui/Icons'
 import { workoutStore } from '../../store/workoutStore'
 import type { ExerciseLog } from '../../store/workoutStore'
+import { isCardioExercise } from '../../lib/exerciseLog'
 
 interface Exercise { name: string; sets: number; reps: string; rest_seconds: number }
 interface CustomWorkout { id: string; name: string; exercises: Exercise[]; createdAt: string }
@@ -20,6 +21,9 @@ const EXERCISE_PRESETS = [
   'Bicep curl','Triceps dips','Utfallsgång','Hip thrust','Vadpress',
   'Push-ups','Pull-ups','Plankan','Rygglyft','Sit-ups',
   'Kettlebell swings','Farmer walk','Goblet squat','Romanian deadlift',
+  // Kondition (loggas med tid/distans)
+  'Löpning','Löpband','Cykling','Spinning','Roddmaskin','Crosstrainer',
+  'Stairmaster','Promenad','Hopprep','Simning',
 ]
 
 export function CustomWorkoutPage() {
@@ -151,7 +155,7 @@ export function CustomWorkoutPage() {
                 {search && filtered.length > 0 && (
                   <div className="max-h-32 overflow-y-auto space-y-1">
                     {filtered.slice(0, 8).map((ex) => (
-                      <button key={ex} onClick={() => { setExName(ex); setSearch('') }}
+                      <button key={ex} onClick={() => { setExName(ex); setSearch(''); if (isCardioExercise(ex)) { setExSets('1'); setExReps('20') } }}
                         className="w-full text-left text-sm text-stone-700 py-1.5 px-2 hover:bg-white rounded-lg">
                         {ex}
                       </button>
@@ -166,7 +170,7 @@ export function CustomWorkoutPage() {
                         className="mt-1 w-full bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
                     </div>
                     <div>
-                      <label className="text-xs text-stone-500">Reps</label>
+                      <label className="text-xs text-stone-500">{isCardioExercise(exName) ? 'Tid (min)' : 'Reps'}</label>
                       <input value={exReps} onChange={(e) => setExReps(e.target.value)}
                         className="mt-1 w-full bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
                     </div>

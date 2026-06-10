@@ -11,7 +11,7 @@ import { checkAndUpdatePR } from '../../lib/prStore'
 import { toast } from '../../lib/toast'
 import { PauseIcon, PlayIcon, CheckIcon, XIcon, ChevronLeftIcon, ChevronRightIcon, ShareIcon, DumbbellIcon, ZapIcon } from '../../components/ui/Icons'
 import { ExerciseVideo } from '../../components/training/ExerciseVideo'
-import { exerciseUsesWeight } from '../../lib/exerciseLog'
+import { exerciseUsesWeight, isCardioExercise } from '../../lib/exerciseLog'
 import { getExerciseHistory } from '../../lib/exerciseHistoryStore'
 import { recommendNextWeight, type ProgressionAdvice } from '../../lib/progression'
 
@@ -229,8 +229,9 @@ export function ActiveWorkout() {
     const n = parseInt(exercise.targetReps.replace(/\D/g, ''), 10)
     return Number.isFinite(n) && n > 0 ? n : 0
   }
+  const isCardio = isCardioExercise(ex.name)
   const showWeight = exerciseUsesWeight(ex.name, ex.targetReps)
-  const setGrid = showWeight
+  const setGrid = showWeight || isCardio
     ? 'grid-cols-[2rem_1fr_1fr_2.5rem]'
     : 'grid-cols-[2rem_1fr_2.5rem]'
 
@@ -261,7 +262,7 @@ export function ActiveWorkout() {
           ...e,
           sets: e.sets.map((st, si) =>
             si === setIndex
-              ? { ...st, done: true, reps: st.reps || fallbackReps }
+              ? { ...st, done: true, ...(isCardio ? {} : { reps: st.reps || fallbackReps }) }
               : st
           ),
         }
@@ -295,9 +296,13 @@ export function ActiveWorkout() {
     }
   }
 
-  function updateSet(setIndex: number, field: 'reps' | 'weight_kg', value: string) {
+  function updateSet(
+    setIndex: number,
+    field: 'reps' | 'weight_kg' | 'duration_min' | 'distance_km',
+    value: string
+  ) {
     const num = value === ''
-      ? (field === 'weight_kg' ? null : 0)
+      ? (field === 'reps' ? 0 : null)
       : field === 'weight_kg'
       ? toStore(Number(value))
       : Number(value)
@@ -375,7 +380,13 @@ export function ActiveWorkout() {
       duration_seconds: elapsed,
       exercises: snapshot.exercises.map((e) => ({
         name: e.name,
-        sets: e.sets.map((x) => ({ reps: x.reps, weight_kg: x.weight_kg, done: x.done })),
+        sets: e.sets.map((x) => ({
+          reps: x.reps,
+          weight_kg: x.weight_kg,
+          done: x.done,
+          duration_min: x.duration_min ?? null,
+          distance_km: x.distance_km ?? null,
+        })),
       })),
     }
 
@@ -474,6 +485,7 @@ export function ActiveWorkout() {
               )}
             </div>
             {(() => {
+              if (isCardio) return null
               const prev = previousSets[ex.name]
               if (!prev || prev.length === 0) return null
               const kg = prev[0]?.weight_kg
@@ -527,12 +539,16 @@ export function ActiveWorkout() {
           {/* Header */}
           <div className={`grid ${setGrid} gap-2 px-4 py-2 bg-stone-50 text-xs text-stone-400 font-medium`}>
             <span>Set</span>
-            <span>Reps</span>
-            {showWeight && <span>Vikt ({weightLabel})</span>}
+            <span>{isCardio ? 'Tid (min)' : 'Reps'}</span>
+            {isCardio ? <span>Distans (km)</span> : showWeight && <span>Vikt ({weightLabel})</span>}
             <span />
           </div>
 
-          {!showWeight && (
+          {isCardio ? (
+            <p className="px-4 py-2 text-xs text-stone-400 border-b border-stone-50">
+              Kondition — fyll i tid och distans per pass.
+            </p>
+          ) : !showWeight && (
             <p className="px-4 py-2 text-xs text-stone-400 border-b border-stone-50">
               Kroppsvikt — fyll i antal reps per set.
             </p>
@@ -555,27 +571,52 @@ export function ActiveWorkout() {
                   <span className="text-[9px] text-forest-600 font-semibold">1RM~{oneRM}</span>
                 )}
               </div>
-              <input
-                type="number"
-                inputMode="numeric"
-                placeholder={ex.targetReps.replace(/\D/g, '') || '8'}
-                value={set.reps || ''}
-                onChange={(e) => updateSet(si, 'reps', e.target.value)}
-                disabled={set.done}
-                className="w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
-              />
-              {showWeight && (
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  placeholder={previousSets[ex.name]?.[si]?.weight_kg != null
-                    ? String(toDisplay(previousSets[ex.name]![si]!.weight_kg!))
-                    : 'Valfritt'}
-                  value={set.weight_kg != null ? toDisplay(set.weight_kg) : ''}
-                  onChange={(e) => updateSet(si, 'weight_kg', e.target.value)}
-                  disabled={set.done}
-                  className="w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
-                />
+              {isCardio ? (
+                <>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    placeholder={ex.targetReps.replace(/\D/g, '') || 'min'}
+                    value={set.duration_min ?? ''}
+                    onChange={(e) => updateSet(si, 'duration_min', e.target.value)}
+                    disabled={set.done}
+                    className="w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
+                  />
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    placeholder="km"
+                    value={set.distance_km ?? ''}
+                    onChange={(e) => updateSet(si, 'distance_km', e.target.value)}
+                    disabled={set.done}
+                    className="w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
+                  />
+                </>
+              ) : (
+                <>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    placeholder={ex.targetReps.replace(/\D/g, '') || '8'}
+                    value={set.reps || ''}
+                    onChange={(e) => updateSet(si, 'reps', e.target.value)}
+                    disabled={set.done}
+                    className="w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
+                  />
+                  {showWeight && (
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      placeholder={previousSets[ex.name]?.[si]?.weight_kg != null
+                        ? String(toDisplay(previousSets[ex.name]![si]!.weight_kg!))
+                        : 'Valfritt'}
+                      value={set.weight_kg != null ? toDisplay(set.weight_kg) : ''}
+                      onChange={(e) => updateSet(si, 'weight_kg', e.target.value)}
+                      disabled={set.done}
+                      className="w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
+                    />
+                  )}
+                </>
               )}
               <button
                 onClick={() => markSetDone(si)}

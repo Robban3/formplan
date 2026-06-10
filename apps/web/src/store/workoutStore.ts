@@ -5,6 +5,9 @@ export interface SetLog {
   reps: number
   weight_kg: number | null
   done: boolean
+  // Cardio exercises log time/distance instead of reps/weight.
+  duration_min?: number | null
+  distance_km?: number | null
 }
 
 export interface ExerciseLog {

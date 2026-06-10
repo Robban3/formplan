@@ -6,6 +6,8 @@ export interface SessionSetInput {
   reps: number
   weight_kg: number | null
   done: boolean
+  duration_min?: number | null
+  distance_km?: number | null
 }
 
 export interface SessionExerciseInput {

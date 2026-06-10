@@ -13,6 +13,8 @@ const setSchema = z.object({
   reps: z.number().int().nonnegative(),
   weight_kg: z.number().nonnegative().nullable(),
   done: z.boolean(),
+  duration_min: z.number().nonnegative().nullable().optional(),
+  distance_km: z.number().nonnegative().nullable().optional(),
 })
 
 const exerciseSchema = z.object({
