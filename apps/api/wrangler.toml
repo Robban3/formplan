@@ -6,7 +6,7 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 ENVIRONMENT = "production"
 # AI-provider: "anthropic" (standard) eller "gemini" (gratis nivå för test).
-# AI_PROVIDER = "gemini"
+AI_PROVIDER = "gemini"
 
 # Secrets (set via `wrangler secret put`):
 # SUPABASE_URL
