@@ -21,7 +21,10 @@ function resolveModel(env: Env): string {
 }
 
 // Call Claude, retrying once on a stable model if the configured model is
-// rejected (404/400 — e.g. the account lacks access to it).
+// unavailable for this account. We retry on any error (not just 404/400) as
+// long as we haven't already tried the fallback — a misconfigured or
+// not-yet-released primary model can surface as 403/404/400/etc., and a single
+// retry on a known-good model is cheap insurance against a hard outage.
 async function createMessage(
   client: Anthropic,
   params: Anthropic.MessageCreateParamsNonStreaming
@@ -29,8 +32,11 @@ async function createMessage(
   try {
     return await client.messages.create(params)
   } catch (err) {
-    const status = (err as { status?: number }).status
-    if ((status === 404 || status === 400) && params.model !== FALLBACK_MODEL) {
+    if (params.model !== FALLBACK_MODEL) {
+      const status = (err as { status?: number }).status
+      console.warn(
+        `Claude model "${params.model}" failed (status ${status ?? 'unknown'}); retrying on ${FALLBACK_MODEL}`
+      )
       return client.messages.create({ ...params, model: FALLBACK_MODEL })
     }
     throw err
@@ -359,7 +365,7 @@ Om bilden inte föreställer mat: returnera tomma "items", nollställd "total" o
 
   const message = await createMessage(client, {
     model: resolveModel(env),
-    max_tokens: 1024,
+    max_tokens: 2048,
     system: 'Svara alltid med enbart giltig JSON — ingen markdown, ingen förklaring.',
     messages: [
       {
@@ -377,5 +383,15 @@ Om bilden inte föreställer mat: returnera tomma "items", nollställd "total" o
     .map((b) => b.text)
     .join('')
 
-  return JSON.parse(extractJson(rawText)) as FoodPhotoAnalysis
+  try {
+    return JSON.parse(extractJson(rawText)) as FoodPhotoAnalysis
+  } catch (err) {
+    // Log the actual model output so a parse failure is diagnosable instead of
+    // surfacing as an opaque 502.
+    console.error(
+      `Food photo: could not parse model JSON (stop_reason=${message.stop_reason}). Raw response:`,
+      rawText.slice(0, 1000)
+    )
+    throw new Error(`Food photo analysis returned unparseable output: ${(err as Error).message}`)
+  }
 }

@@ -37,7 +37,10 @@ export function FoodPhotoPage() {
       setAnalyzing(true)
       const { analysis } = await api.analyzeFoodPhoto(base64, mediaType)
       setAnalysis(analysis)
-    } catch {
+    } catch (e) {
+      // Surface the real cause in the console to aid debugging; keep the
+      // on-screen message friendly.
+      console.error('Food photo analysis failed:', e)
       setError('Kunde inte analysera bilden. Försök igen med en tydligare bild.')
     } finally {
       setAnalyzing(false)

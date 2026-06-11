@@ -78,8 +78,10 @@ aiRouter.post(
       const analysis = await analyzeFoodPhoto(b.image, b.media_type, c.env)
       return c.json({ analysis })
     } catch (err) {
-      console.error('Food photo analysis failed:', err)
-      return c.json({ error: 'Kunde inte analysera bilden' }, 502)
+      const status = (err as { status?: number }).status
+      const detail = err instanceof Error ? err.message : String(err)
+      console.error(`Food photo analysis failed (status ${status ?? 'n/a'}):`, detail)
+      return c.json({ error: 'Kunde inte analysera bilden', detail }, 502)
     }
   }
 )
