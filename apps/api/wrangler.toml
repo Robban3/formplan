@@ -3,6 +3,13 @@ main = "src/index.ts"
 compatibility_date = "2025-06-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Custom domain — måste finnas här, annars raderar `wrangler deploy` den
+# routning som satts via Cloudflare-dashboarden. En custom domain dirigerar
+# all trafik (alla paths) för värdnamnet till workern.
+routes = [
+  { pattern = "api.formplan.app", custom_domain = true }
+]
+
 [vars]
 ENVIRONMENT = "production"
 # AI-provider: "anthropic" (standard) eller "gemini" (gratis nivå för test).
