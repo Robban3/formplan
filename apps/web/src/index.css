@@ -59,6 +59,12 @@ html.dark {
   * {
     @apply box-border;
   }
+  /* Lås layouten i sidled — ingen sida ska kunna panoreras horisontellt på
+     mobil. Inre containrar med egen overflow-x-auto (t.ex. veckoschemat)
+     har sin egen scroll och påverkas inte. */
+  html, body, #root {
+    overflow-x: hidden;
+  }
 }
 
 @layer utilities {

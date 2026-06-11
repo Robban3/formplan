@@ -164,17 +164,17 @@ export function CustomWorkoutPage() {
                 )}
                 {exName && !search && (
                   <div className="grid grid-cols-3 gap-2">
-                    <div>
+                    <div className="min-w-0">
                       <label className="text-xs text-stone-500">Set</label>
                       <input type="number" value={exSets} onChange={(e) => setExSets(e.target.value)}
                         className="mt-1 w-full bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <label className="text-xs text-stone-500">{isCardioExercise(exName) ? 'Tid (min)' : 'Reps'}</label>
                       <input value={exReps} onChange={(e) => setExReps(e.target.value)}
                         className="mt-1 w-full bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <label className="text-xs text-stone-500">Vila (sek)</label>
                       <input type="number" value={exRest} onChange={(e) => setExRest(e.target.value)}
                         className="mt-1 w-full bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />

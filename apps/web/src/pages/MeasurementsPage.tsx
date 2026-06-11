@@ -112,7 +112,7 @@ export function MeasurementsPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               {FIELDS.map((f) => (
-                <div key={f.key}>
+                <div key={f.key} className="min-w-0">
                   <label className="text-xs text-stone-500 font-medium">{f.label}</label>
                   <div className="flex items-center gap-1 mt-1">
                     <input
@@ -120,7 +120,7 @@ export function MeasurementsPage() {
                       placeholder={f.placeholder}
                       value={form[f.key] ?? ''}
                       onChange={(e) => setForm((prev) => ({ ...prev, [f.key]: e.target.value }))}
-                      className="flex-1 bg-stone-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+                      className="flex-1 min-w-0 bg-stone-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
                     />
                     <span className="text-xs text-stone-400 w-6">{f.unit}</span>
                   </div>
