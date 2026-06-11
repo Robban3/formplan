@@ -126,7 +126,7 @@ export function FoodSearch() {
 
   return (
     <div className="flex flex-col min-h-full bg-white pb-4">
-      <div className="flex items-center gap-3 px-4 pt-12 pb-3">
+      <div className="flex items-center gap-3 px-4 pt-header pb-3">
         <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100">
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-600" />
         </button>
@@ -233,7 +233,7 @@ export function FoodSearch() {
                         {meal.ingredients.length} livsmedel · {t.kcal} kcal
                       </p>
                     </div>
-                    <div className="w-8 h-8 rounded-full bg-forest-600 flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-forest-700 flex items-center justify-center flex-shrink-0">
                       <PlusIcon className="w-4 h-4 stroke-white" />
                     </div>
                   </button>
@@ -261,7 +261,7 @@ export function FoodSearch() {
                     {item.serving_size_g ?? 100} g · {item.kcal_per_100g} kcal
                   </p>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-forest-600 flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-forest-700 flex items-center justify-center flex-shrink-0">
                   <PlusIcon className="w-4 h-4 stroke-white" />
                 </div>
               </button>
@@ -307,7 +307,7 @@ export function FoodSearch() {
           <button
             onClick={handleAdd}
             disabled={adding || !amount || parseFloat(amount) <= 0}
-            className="w-full bg-forest-600 hover:bg-forest-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors"
+            className="w-full bg-forest-700 hover:bg-forest-800 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors"
           >
             {adding ? 'Lägger till...' : 'Lägg till'}
           </button>

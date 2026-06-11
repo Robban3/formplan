@@ -262,8 +262,8 @@ function AiRecipeGenerator() {
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         placeholder="Beskriv vad du är sugen på, t.ex. ”Ge mig en middag med 700 kcal och minst 50 g protein”"
-        rows={2}
-        className="w-full bg-stone-100 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 resize-none"
+        rows={3}
+        className="w-full bg-stone-100 rounded-xl px-4 py-3 text-sm text-stone-900 leading-relaxed focus:outline-none focus:ring-2 focus:ring-forest-400 resize-none"
       />
 
       <div className="flex flex-wrap gap-2 mt-2">
@@ -311,7 +311,7 @@ function AiRecipeGenerator() {
       <button
         onClick={() => generate()}
         disabled={!prompt.trim() || loading}
-        className="w-full mt-3 bg-forest-600 hover:bg-forest-700 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+        className="w-full mt-3 bg-forest-700 hover:bg-forest-800 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
       >
         {loading ? 'Skapar recept…' : 'Generera recept'}
       </button>
@@ -359,7 +359,7 @@ function AiRecipeGenerator() {
           <ol className="space-y-2">
             {recipe.steps.map((step, i) => (
               <li key={i} className="flex gap-3 text-sm text-stone-700">
-                <span className="w-5 h-5 rounded-full bg-forest-600 text-white text-xs flex items-center justify-center flex-shrink-0 font-semibold">
+                <span className="w-5 h-5 rounded-full bg-forest-700 text-white text-xs flex items-center justify-center flex-shrink-0 font-semibold">
                   {i + 1}
                 </span>
                 {step}
@@ -395,7 +395,7 @@ export function RecipesPage() {
   return (
     <div className="pb-6">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4 bg-white border-b border-stone-100">
+      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100">
         <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 text-sm mb-3">
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
           Mer
@@ -422,7 +422,7 @@ export function RecipesPage() {
               key={t}
               onClick={() => setActiveTab(t)}
               className={`flex-shrink-0 text-xs px-4 py-1.5 rounded-full font-medium transition-colors ${
-                activeTab === t ? 'bg-forest-600 text-white' : 'bg-stone-100 text-stone-600'
+                activeTab === t ? 'bg-forest-700 text-white' : 'bg-stone-100 text-stone-600'
               }`}
             >
               {t}
@@ -489,7 +489,7 @@ export function RecipesPage() {
                 <ol className="space-y-2">
                   {recipe.instructions.map((step, i) => (
                     <li key={i} className="flex gap-3 text-sm text-stone-700">
-                      <span className="w-5 h-5 rounded-full bg-forest-600 text-white text-xs flex items-center justify-center flex-shrink-0 font-semibold">
+                      <span className="w-5 h-5 rounded-full bg-forest-700 text-white text-xs flex items-center justify-center flex-shrink-0 font-semibold">
                         {i + 1}
                       </span>
                       {step}

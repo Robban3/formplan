@@ -68,7 +68,7 @@ function PrimaryButton({ children, onClick, disabled }: { children: React.ReactN
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="w-full bg-forest-600 hover:bg-forest-700 active:bg-forest-800 disabled:opacity-50 text-white font-semibold py-3.5 rounded-xl transition-colors"
+      className="w-full bg-forest-700 hover:bg-forest-800 active:bg-forest-800 disabled:opacity-50 text-white font-semibold py-3.5 rounded-xl transition-colors"
     >
       {children}
     </button>
@@ -222,7 +222,7 @@ export function OnboardingPage() {
   return (
     <div className="min-h-[100dvh] bg-white text-stone-900 max-w-lg mx-auto flex flex-col">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4 border-b border-stone-100">
+      <div className="px-5 pt-header pb-4 border-b border-stone-100">
         <div className="flex items-center gap-3 mb-4">
           {stepIndex > 0 ? (
             <button
@@ -254,7 +254,7 @@ export function OnboardingPage() {
 
         <div className="w-full bg-stone-100 rounded-full h-1.5">
           <div
-            className="bg-forest-600 h-1.5 rounded-full transition-all duration-500"
+            className="bg-forest-700 h-1.5 rounded-full transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -264,7 +264,7 @@ export function OnboardingPage() {
             <div
               key={s}
               className={`h-1.5 rounded-full transition-all ${
-                i <= stepIndex ? 'bg-forest-600 w-5' : 'bg-stone-200 w-1.5'
+                i <= stepIndex ? 'bg-forest-700 w-5' : 'bg-stone-200 w-1.5'
               }`}
             />
           ))}
@@ -344,7 +344,7 @@ export function OnboardingPage() {
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 ${
-                      selected ? 'bg-forest-600 border-forest-600' : 'border-stone-300 bg-white'
+                      selected ? 'bg-forest-700 border-forest-600' : 'border-stone-300 bg-white'
                     }`}>
                       {selected && <CheckIcon className="w-3 h-3 stroke-white" />}
                     </div>
@@ -369,7 +369,7 @@ export function OnboardingPage() {
                   onClick={() => setForm((f) => ({ ...f, days_per_week: d }))}
                   className={`aspect-square rounded-xl font-bold text-base transition-all ${
                     form.days_per_week === d
-                      ? 'bg-forest-600 text-white ring-2 ring-forest-600 ring-offset-1'
+                      ? 'bg-forest-700 text-white ring-2 ring-forest-600 ring-offset-1'
                       : 'bg-stone-50 border border-stone-100 text-stone-600 hover:bg-stone-100'
                   }`}
                 >
@@ -394,7 +394,7 @@ export function OnboardingPage() {
                   onClick={() => toggle('allergies', a)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                     form.allergies.includes(a)
-                      ? 'bg-forest-600 text-white'
+                      ? 'bg-forest-700 text-white'
                       : 'bg-stone-50 border border-stone-100 text-stone-600 hover:bg-stone-100'
                   }`}
                 >

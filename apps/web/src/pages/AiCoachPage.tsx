@@ -99,9 +99,9 @@ export function AiCoachPage() {
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-stone-50 max-w-lg mx-auto">
+    <div className="flex flex-col h-[100dvh] bg-canvas max-w-lg mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-3 px-5 pt-12 pb-4 bg-white border-b border-stone-100 flex-shrink-0">
+      <div className="flex items-center gap-3 px-5 pt-header pb-4 bg-white border-b border-stone-100 flex-shrink-0">
         <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100">
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-600" />
         </button>
@@ -128,7 +128,7 @@ export function AiCoachPage() {
             <div
               className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                 msg.role === 'user'
-                  ? 'bg-forest-600 text-white rounded-tr-sm'
+                  ? 'bg-forest-700 text-white rounded-tr-sm'
                   : 'bg-white border border-stone-100 text-stone-800 rounded-tl-sm'
               }`}
             >
@@ -184,7 +184,7 @@ export function AiCoachPage() {
           <button
             onClick={() => send()}
             disabled={!input.trim() || loading}
-            className="w-11 h-11 bg-forest-600 rounded-2xl flex items-center justify-center disabled:opacity-40 transition-opacity"
+            className="w-11 h-11 bg-forest-700 rounded-2xl flex items-center justify-center disabled:opacity-40 transition-opacity"
           >
             <SendIcon className="w-4 h-4 stroke-white" />
           </button>

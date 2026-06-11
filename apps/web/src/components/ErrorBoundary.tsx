@@ -23,7 +23,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <p className="text-stone-400 text-sm mb-6">{this.state.error.message}</p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-forest-600 text-white font-semibold px-6 py-3 rounded-xl"
+            className="bg-forest-700 text-white font-semibold px-6 py-3 rounded-xl"
           >
             Ladda om appen
           </button>

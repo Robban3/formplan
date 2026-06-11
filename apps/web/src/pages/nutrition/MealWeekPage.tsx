@@ -55,7 +55,7 @@ export function MealWeekPage() {
 
   return (
     <div className="pb-10">
-      <div className="px-5 pt-12 pb-4 bg-white border-b border-stone-100">
+      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-400 text-sm mb-3">
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
           Kost
@@ -71,7 +71,7 @@ export function MealWeekPage() {
             <div className="text-xs text-stone-400 font-medium" />
             {DAY_LABELS.map((d, i) => (
               <div key={d} className={`text-center text-xs font-semibold rounded-lg py-1.5 ${
-                i + 1 === today ? 'bg-forest-600 text-white' : 'text-stone-500'
+                i + 1 === today ? 'bg-forest-700 text-white' : 'text-stone-500'
               }`}>
                 {d}
               </div>
@@ -114,7 +114,7 @@ export function MealWeekPage() {
 
       {/* Legend */}
       <div className="px-5 mt-4 flex items-center gap-2">
-        <div className="w-3 h-3 rounded bg-forest-600" />
+        <div className="w-3 h-3 rounded bg-forest-700" />
         <span className="text-xs text-stone-400">Idag</span>
       </div>
 
@@ -147,7 +147,7 @@ export function MealWeekPage() {
                   Ta bort
                 </button>
               )}
-              <button onClick={saveEdit} className="flex-1 py-3 rounded-xl bg-forest-600 text-white font-semibold">
+              <button onClick={saveEdit} className="flex-1 py-3 rounded-xl bg-forest-700 text-white font-semibold">
                 Spara
               </button>
             </div>

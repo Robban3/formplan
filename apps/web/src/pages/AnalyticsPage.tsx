@@ -124,7 +124,7 @@ function WeeklyBars({ weekly }: { weekly: number[] }) {
             {count > 0 && <span className="text-[9px] font-bold text-forest-600">{count}</span>}
             <div className="w-full bg-stone-100 rounded-sm flex items-end" style={{ height: '72px' }}>
               <div
-                className={`w-full rounded-sm transition-all ${isNow ? 'bg-forest-600' : 'bg-forest-300'}`}
+                className={`w-full rounded-sm transition-all ${isNow ? 'bg-forest-700' : 'bg-forest-300'}`}
                 style={{ height: `${Math.max((count / max) * 100, count > 0 ? 6 : 0)}%` }}
               />
             </div>
@@ -402,7 +402,7 @@ export function AnalyticsPage() {
   ]
 
   return (
-    <div className="pt-12 pb-6">
+    <div className="pt-header pb-6">
       {/* Header */}
       <div className="px-5 mb-4">
         <h1 className="text-2xl font-bold text-stone-900">Analys</h1>
@@ -529,7 +529,7 @@ export function AnalyticsPage() {
                   className="flex-1 bg-stone-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
                 />
                 <span className="flex items-center text-sm text-stone-400">kg</span>
-                <button onClick={logWeight} className="px-3 py-2 bg-forest-600 text-white text-sm font-semibold rounded-xl">
+                <button onClick={logWeight} className="px-3 py-2 bg-forest-700 text-white text-sm font-semibold rounded-xl">
                   Spara
                 </button>
               </div>

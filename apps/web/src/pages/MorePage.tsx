@@ -38,7 +38,7 @@ export function MorePage() {
   const navigate = useNavigate()
 
   return (
-    <div className="px-5 pt-12 pb-4">
+    <div className="px-5 pt-header pb-4">
       <h1 className="text-2xl font-bold text-stone-900 mb-6">Mer</h1>
 
       <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">

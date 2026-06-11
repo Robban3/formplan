@@ -141,7 +141,7 @@ export function WorkoutDetail() {
       <div className="fixed bottom-[calc(64px+env(safe-area-inset-bottom,0px)+8px)] left-1/2 -translate-x-1/2 w-full max-w-lg px-5">
         <button
           onClick={startWorkout}
-          className="w-full bg-forest-600 hover:bg-forest-700 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-colors"
+          className="w-full bg-forest-700 hover:bg-forest-800 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-colors"
         >
           <PlayIcon className="w-5 h-5" />
           Starta pass

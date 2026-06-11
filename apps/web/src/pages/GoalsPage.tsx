@@ -85,7 +85,7 @@ function GoalCard({
         <button
           onClick={onToggle}
           className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
-            goal.done ? 'bg-forest-600' : 'bg-forest-50'
+            goal.done ? 'bg-forest-700' : 'bg-forest-50'
           }`}
         >
           <TargetIcon className={`w-5 h-5 ${goal.done ? 'text-white' : 'text-forest-600'}`} />
@@ -125,7 +125,7 @@ function GoalCard({
             </div>
             <div className="w-full bg-stone-100 rounded-full h-2">
               <div
-                className={`h-2 rounded-full transition-all ${goal.done ? 'bg-forest-400' : 'bg-forest-600'}`}
+                className={`h-2 rounded-full transition-all ${goal.done ? 'bg-forest-400' : 'bg-forest-700'}`}
                 style={{ width: `${pct}%` }}
               />
             </div>
@@ -141,7 +141,7 @@ function GoalCard({
               <div className="flex-1 text-center text-sm font-semibold text-stone-900">{goal.progress}%</div>
               <button
                 onClick={() => onSetProgress(Math.min(100, goal.progress + 10))}
-                className="w-8 h-8 rounded-lg bg-forest-600 text-white font-bold text-sm flex items-center justify-center"
+                className="w-8 h-8 rounded-lg bg-forest-700 text-white font-bold text-sm flex items-center justify-center"
               >+</button>
             </div>
           )}
@@ -202,7 +202,7 @@ export function GoalsPage() {
 
   return (
     <div className="pb-24">
-      <div className="px-5 pt-12 pb-4 bg-white border-b border-stone-100">
+      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100">
         <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 text-sm mb-3">
           <ChevronLeftIcon className="w-4 h-4 text-stone-400" />
           Mer
@@ -285,7 +285,7 @@ export function GoalsPage() {
               <button onClick={() => setAdding(false)} className="flex-1 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-sm font-medium">
                 Avbryt
               </button>
-              <button onClick={() => addGoal(text)} className="flex-1 py-2.5 rounded-xl bg-forest-600 text-white text-sm font-semibold">
+              <button onClick={() => addGoal(text)} className="flex-1 py-2.5 rounded-xl bg-forest-700 text-white text-sm font-semibold">
                 Lägg till
               </button>
             </div>
@@ -297,7 +297,7 @@ export function GoalsPage() {
         <div className="fixed bottom-[calc(64px+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 w-full max-w-lg px-5 pb-4 pt-3 bg-gradient-to-t from-stone-50">
           <button
             onClick={() => setAdding(true)}
-            className="w-full flex items-center justify-center gap-2 py-3.5 bg-forest-600 text-white rounded-2xl text-sm font-semibold shadow-lg"
+            className="w-full flex items-center justify-center gap-2 py-3.5 bg-forest-700 text-white rounded-2xl text-sm font-semibold shadow-lg"
           >
             <PlusIcon className="w-4 h-4" />
             Lägg till nytt mål

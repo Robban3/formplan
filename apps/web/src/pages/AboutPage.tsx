@@ -59,7 +59,7 @@ export function AboutPage() {
   const navigate = useNavigate()
   return (
     <div className="pb-10">
-      <div className="px-5 pt-12 pb-4">
+      <div className="px-5 pt-header pb-4">
         <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 text-sm mb-4">
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
           Mer
@@ -69,7 +69,7 @@ export function AboutPage() {
       </div>
 
       {/* Hero */}
-      <div className="mx-5 bg-forest-600 rounded-2xl p-6 text-white mb-5">
+      <div className="mx-5 bg-forest-700 rounded-2xl p-6 text-white mb-5">
         <div className="w-12 h-12 bg-white/15 rounded-2xl flex items-center justify-center mb-4">
           <DumbbellIcon className="w-6 h-6 stroke-white" />
         </div>

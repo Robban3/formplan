@@ -77,7 +77,7 @@ export function MealPlanPage() {
   return (
     <div className="pb-10">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4 bg-white border-b border-stone-100">
+      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-400 text-sm mb-3">
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
           Kost
@@ -109,7 +109,7 @@ export function MealPlanPage() {
                 key={k}
                 onClick={() => setKcal(k)}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  kcal === k ? 'bg-forest-600 text-white' : 'bg-stone-100 text-stone-600'
+                  kcal === k ? 'bg-forest-700 text-white' : 'bg-stone-100 text-stone-600'
                 }`}
               >
                 {k}
@@ -128,7 +128,7 @@ export function MealPlanPage() {
                 onClick={() => setMealCount(n)}
                 className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-colors ${
                   mealCount === n
-                    ? 'bg-forest-600 text-white'
+                    ? 'bg-forest-700 text-white'
                     : 'bg-stone-100 text-stone-600'
                 }`}
               >
@@ -164,7 +164,7 @@ export function MealPlanPage() {
         {/* Generate button */}
         <button
           onClick={generate}
-          className="w-full bg-forest-600 hover:bg-forest-700 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-colors"
+          className="w-full bg-forest-700 hover:bg-forest-800 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-colors"
         >
           <LeafIcon className="w-5 h-5 stroke-white" />
           Generera kostschema
@@ -174,7 +174,7 @@ export function MealPlanPage() {
         {plan && (
           <div className="space-y-4">
             {/* Summary card */}
-            <div className="bg-forest-600 rounded-2xl p-4 text-white">
+            <div className="bg-forest-700 rounded-2xl p-4 text-white">
               <div className="flex items-baseline justify-between mb-3">
                 <p className="font-bold text-lg">{plan.totalKcal.toLocaleString('sv-SE')} kcal</p>
                 <p className="text-forest-200 text-sm">{plan.meals.length} måltider</p>

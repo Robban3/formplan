@@ -40,7 +40,7 @@ export function TabLayout() {
   return (
     <div className="flex flex-col h-[100dvh] max-w-lg mx-auto">
       {/* Page content */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
         <Routes>
           <Route path="/hem"            element={<HomePage />} />
           <Route path="/kost/*"             element={<NutritionHome />} />

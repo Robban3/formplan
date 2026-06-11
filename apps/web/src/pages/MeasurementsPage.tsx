@@ -81,7 +81,7 @@ export function MeasurementsPage() {
 
   return (
     <div className="pb-10">
-      <div className="px-5 pt-12 pb-4 bg-white border-b border-stone-100">
+      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-400 text-sm mb-3">
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
           Mer
@@ -93,7 +93,7 @@ export function MeasurementsPage() {
           </div>
           <button
             onClick={() => setAdding(true)}
-            className="w-10 h-10 bg-forest-600 rounded-xl flex items-center justify-center"
+            className="w-10 h-10 bg-forest-700 rounded-xl flex items-center justify-center"
           >
             <PlusIcon className="w-5 h-5 stroke-white" />
           </button>
@@ -129,7 +129,7 @@ export function MeasurementsPage() {
             </div>
             <button
               onClick={handleSave}
-              className="w-full py-3 bg-forest-600 text-white text-sm font-semibold rounded-xl"
+              className="w-full py-3 bg-forest-700 text-white text-sm font-semibold rounded-xl"
             >
               Spara mätning
             </button>

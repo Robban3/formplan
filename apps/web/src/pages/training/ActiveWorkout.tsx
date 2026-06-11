@@ -146,7 +146,7 @@ export function ActiveWorkout() {
     const doneSetCount = workoutStore.get()?.exercises.reduce((n, e) => n + e.sets.filter((s) => s.done).length, 0) ?? 0
     const totalSetCount = workoutStore.get()?.exercises.reduce((n, e) => n + e.sets.length, 0) ?? 0
     return (
-      <div className="min-h-[100dvh] bg-stone-50 flex flex-col items-center justify-center px-5 gap-6">
+      <div className="min-h-[100dvh] bg-canvas flex flex-col items-center justify-center px-5 gap-6">
         <div className="text-center">
           <div className="w-16 h-16 bg-forest-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <DumbbellIcon className="w-8 h-8 stroke-forest-600" />
@@ -422,9 +422,9 @@ export function ActiveWorkout() {
     nextIncompleteIndex !== null ? workout.exercises[nextIncompleteIndex] : null
 
   return (
-    <div className="min-h-[100dvh] bg-stone-50 flex flex-col max-w-lg mx-auto">
+    <div className="min-h-[100dvh] bg-canvas flex flex-col max-w-lg mx-auto">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-5 pt-12 pb-4 bg-white border-b border-stone-100">
+      <div className="flex items-center justify-between px-5 pt-header pb-4 bg-white border-b border-stone-100">
         <button onClick={requestFinish} className="flex items-center gap-1 text-stone-400 text-sm">
           <XIcon className="w-4 h-4 stroke-stone-400" /> Avsluta
         </button>
@@ -526,7 +526,7 @@ export function ActiveWorkout() {
               <button
                 onClick={() => applyRecommendation(rec.recommendedWeight_kg)}
                 disabled={applied}
-                className="text-xs font-semibold bg-forest-600 text-white px-3 py-2 rounded-xl flex-shrink-0 disabled:opacity-50"
+                className="text-xs font-semibold bg-forest-700 text-white px-3 py-2 rounded-xl flex-shrink-0 disabled:opacity-50"
               >
                 {applied ? 'Tillämpad' : 'Använd'}
               </button>
@@ -623,9 +623,9 @@ export function ActiveWorkout() {
                 disabled={set.done || si !== nextSetIndex}
                 className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
                   set.done
-                    ? 'bg-forest-600'
+                    ? 'bg-forest-700'
                     : si === nextSetIndex
-                    ? 'bg-forest-600 active:bg-forest-700'
+                    ? 'bg-forest-700 active:bg-forest-700'
                     : 'bg-stone-200'
                 }`}
               >
@@ -645,7 +645,7 @@ export function ActiveWorkout() {
         </p>
         <div className="w-full bg-stone-200 rounded-full h-1.5 mb-6">
           <div
-            className="bg-forest-600 h-1.5 rounded-full transition-all"
+            className="bg-forest-700 h-1.5 rounded-full transition-all"
             style={{ width: `${workoutTotalSets > 0 ? (workoutDoneSets / workoutTotalSets) * 100 : 0}%` }}
           />
         </div>
@@ -703,14 +703,14 @@ export function ActiveWorkout() {
           <button
             onClick={finishWorkout}
             disabled={saving}
-            className="w-full bg-forest-600 text-white font-bold py-4 rounded-2xl disabled:opacity-60"
+            className="w-full bg-forest-700 text-white font-bold py-4 rounded-2xl disabled:opacity-60"
           >
             {saving ? 'Sparar…' : 'Avsluta pass ✓'}
           </button>
         ) : currentExerciseComplete && nextIncompleteIndex !== null ? (
           <button
             onClick={() => goToExerciseIndex(nextIncompleteIndex)}
-            className="w-full bg-forest-600 text-white font-bold py-4 rounded-2xl"
+            className="w-full bg-forest-700 text-white font-bold py-4 rounded-2xl"
           >
             Nästa övning →
           </button>

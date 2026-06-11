@@ -72,7 +72,7 @@ export function LandingPage() {
       {/* Nav */}
       <nav className="flex items-center justify-between px-5 py-4 bg-white border-b border-stone-100 sticky top-0 z-10">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-forest-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-forest-700 rounded-lg flex items-center justify-center">
             <DumbbellIcon className="w-4 h-4 stroke-white" />
           </div>
           <span className="font-bold text-stone-900">FormPlan</span>
@@ -86,7 +86,7 @@ export function LandingPage() {
           </button>
           <button
             onClick={() => navigate('/auth')}
-            className="text-sm font-semibold bg-forest-600 text-white px-4 py-2 rounded-xl"
+            className="text-sm font-semibold bg-forest-700 text-white px-4 py-2 rounded-xl"
           >
             Kom igång
           </button>
@@ -109,7 +109,7 @@ export function LandingPage() {
         </p>
         <button
           onClick={() => navigate('/auth')}
-          className="w-full max-w-xs mx-auto block bg-forest-600 hover:bg-forest-700 text-white font-bold py-4 rounded-2xl text-base transition-colors shadow-sm shadow-forest-200"
+          className="w-full max-w-xs mx-auto block bg-forest-700 hover:bg-forest-800 text-white font-bold py-4 rounded-2xl text-base transition-colors shadow-sm shadow-forest-200"
         >
           Skapa konto gratis
         </button>
@@ -120,7 +120,7 @@ export function LandingPage() {
       <section className="px-5 pb-12">
         <div className="bg-white rounded-3xl border border-stone-100 shadow-sm overflow-hidden mx-auto max-w-xs">
           {/* Fake status bar */}
-          <div className="bg-forest-600 px-5 pt-10 pb-6 text-white">
+          <div className="bg-forest-700 px-5 pt-10 pb-6 text-white">
             <p className="text-xs text-forest-200 mb-1">God morgon, Alex</p>
             <h2 className="text-xl font-bold">Ditt schema idag</h2>
           </div>
@@ -160,7 +160,7 @@ export function LandingPage() {
       </section>
 
       {/* What's included */}
-      <section className="mx-5 mb-12 bg-forest-600 rounded-3xl p-6 text-white">
+      <section className="mx-5 mb-12 bg-forest-700 rounded-3xl p-6 text-white">
         <p className="text-xs font-semibold text-forest-200 uppercase tracking-wide mb-1">Gratisversionen inkluderar</p>
         <h2 className="text-xl font-bold mb-4">Allt för att komma igång</h2>
         <div className="space-y-2.5">
@@ -184,7 +184,7 @@ export function LandingPage() {
       {/* Footer */}
       <footer className="px-5 py-8 text-center border-t border-stone-100 bg-white">
         <div className="flex items-center justify-center gap-2 mb-3">
-          <div className="w-7 h-7 bg-forest-600 rounded-lg flex items-center justify-center">
+          <div className="w-7 h-7 bg-forest-700 rounded-lg flex items-center justify-center">
             <DumbbellIcon className="w-3.5 h-3.5 stroke-white" />
           </div>
           <span className="font-bold text-stone-900">FormPlan</span>

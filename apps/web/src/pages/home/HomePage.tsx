@@ -307,7 +307,7 @@ export function HomePage() {
 
   return (
     <div className="pb-4">
-      <div className="px-5 pt-12 pb-3">
+      <div className="px-5 pt-header pb-3">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold text-stone-900">{greeting}</h1>
@@ -358,7 +358,7 @@ export function HomePage() {
         {activeWorkout && (
           <button
             onClick={() => navigate(`/workout/${activeWorkout.planDayId}/active`)}
-            className="w-full flex items-center justify-between bg-forest-600 text-white rounded-2xl px-4 py-3 active:scale-[0.98] transition-transform"
+            className="w-full flex items-center justify-between bg-forest-700 text-white rounded-2xl px-4 py-3 active:scale-[0.98] transition-transform"
           >
             <div className="text-left">
               <p className="text-xs text-forest-200">Pågående pass</p>
@@ -403,7 +403,7 @@ export function HomePage() {
               </div>
               <button
                 onClick={() => navigate(`/traning/${todayWorkout.id}`)}
-                className="w-full flex items-center justify-center gap-2 bg-forest-600 hover:bg-forest-700 text-white font-semibold py-3.5 transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-forest-700 hover:bg-forest-800 text-white font-semibold py-3.5 transition-colors"
               >
                 <PlayIcon className="w-4 h-4 stroke-white" />
                 Starta pass
@@ -510,7 +510,7 @@ export function HomePage() {
                     </div>
                     <div className="w-full bg-stone-100 rounded-full h-1.5">
                       <div
-                        className="bg-forest-600 h-1.5 rounded-full transition-all"
+                        className="bg-forest-700 h-1.5 rounded-full transition-all"
                         style={{ width: `${pct}%` }}
                       />
                     </div>

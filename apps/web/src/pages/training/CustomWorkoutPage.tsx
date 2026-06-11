@@ -88,7 +88,7 @@ export function CustomWorkoutPage() {
 
   return (
     <div className="pb-10">
-      <div className="px-5 pt-12 pb-4 bg-white border-b border-stone-100">
+      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-400 text-sm mb-3">
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
           Träning
@@ -99,7 +99,7 @@ export function CustomWorkoutPage() {
             <p className="text-sm text-stone-400 mt-0.5">Bygg dina egna träningspass</p>
           </div>
           {!creating && (
-            <button onClick={() => setCreating(true)} className="w-10 h-10 bg-forest-600 rounded-xl flex items-center justify-center">
+            <button onClick={() => setCreating(true)} className="w-10 h-10 bg-forest-700 rounded-xl flex items-center justify-center">
               <PlusIcon className="w-5 h-5 stroke-white" />
             </button>
           )}
@@ -187,7 +187,7 @@ export function CustomWorkoutPage() {
                     Avbryt
                   </button>
                   <button onClick={addExercise} disabled={!exName.trim()}
-                    className="flex-1 py-2 rounded-xl bg-forest-600 text-white text-sm font-semibold disabled:opacity-40">
+                    className="flex-1 py-2 rounded-xl bg-forest-700 text-white text-sm font-semibold disabled:opacity-40">
                     Lägg till
                   </button>
                 </div>
@@ -203,7 +203,7 @@ export function CustomWorkoutPage() {
             <button
               onClick={saveWorkout}
               disabled={!name.trim() || exercises.length === 0}
-              className="w-full py-3 bg-forest-600 text-white font-bold rounded-xl disabled:opacity-40"
+              className="w-full py-3 bg-forest-700 text-white font-bold rounded-xl disabled:opacity-40"
             >
               Spara pass
             </button>
@@ -242,7 +242,7 @@ export function CustomWorkoutPage() {
             </div>
             <button
               onClick={() => startWorkout(w)}
-              className="w-full flex items-center justify-center gap-2 bg-forest-600 hover:bg-forest-700 text-white font-semibold py-3 transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-forest-700 hover:bg-forest-800 text-white font-semibold py-3 transition-colors"
             >
               <PlayIcon className="w-4 h-4" />
               Starta pass

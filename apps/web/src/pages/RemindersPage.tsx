@@ -56,7 +56,7 @@ export function RemindersPage() {
   }
 
   return (
-    <div className="px-5 pt-12 pb-4">
+    <div className="px-5 pt-header pb-4">
       <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 text-sm mb-4">
         <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
         Mer
@@ -77,7 +77,7 @@ export function RemindersPage() {
             </div>
             <button
               onClick={() => toggleReminder(r.id, !r.enabled)}
-              className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${r.enabled ? 'bg-forest-600' : 'bg-stone-200'}`}
+              className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${r.enabled ? 'bg-forest-700' : 'bg-stone-200'}`}
             >
               <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${r.enabled ? 'translate-x-5' : 'translate-x-0'}`} />
             </button>
@@ -109,7 +109,7 @@ export function RemindersPage() {
                     key={day}
                     onClick={() => toggleDay(day)}
                     className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-colors ${
-                      newDays.includes(day) ? 'bg-forest-600 text-white' : 'bg-stone-100 text-stone-500'
+                      newDays.includes(day) ? 'bg-forest-700 text-white' : 'bg-stone-100 text-stone-500'
                     }`}
                   >
                     {label}
@@ -138,7 +138,7 @@ export function RemindersPage() {
             </button>
             <button
               onClick={addReminder}
-              className="flex-1 py-3 rounded-xl bg-forest-600 text-white font-semibold text-sm"
+              className="flex-1 py-3 rounded-xl bg-forest-700 text-white font-semibold text-sm"
             >
               Spara
             </button>

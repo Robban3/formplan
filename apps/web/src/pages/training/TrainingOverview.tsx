@@ -156,7 +156,7 @@ export function TrainingOverview() {
           {activeWorkout && (
             <button
               onClick={() => navigate(`/workout/${activeWorkout.planDayId}/active`)}
-              className="w-full flex items-center justify-between bg-forest-600 text-white rounded-2xl px-4 py-3"
+              className="w-full flex items-center justify-between bg-forest-700 text-white rounded-2xl px-4 py-3"
             >
               <div className="text-left">
                 <p className="text-xs text-forest-200">Pågående pass</p>
@@ -199,13 +199,13 @@ export function TrainingOverview() {
                   <div
                     key={wd}
                     className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs font-medium ${
-                      isToday ? 'bg-forest-600 text-white' : 'text-stone-400'
+                      isToday ? 'bg-forest-700 text-white' : 'text-stone-400'
                     }`}
                   >
                     {s}
                     <div className={`w-1.5 h-1.5 rounded-full ${
                       hasWorkout
-                        ? isToday ? 'bg-white' : 'bg-forest-600'
+                        ? isToday ? 'bg-white' : 'bg-forest-700'
                         : 'bg-transparent'
                     }`} />
                   </div>
@@ -237,7 +237,7 @@ export function TrainingOverview() {
                 <button
                   onClick={handleGenerate}
                   disabled={generating}
-                  className="bg-forest-600 hover:bg-forest-700 disabled:opacity-60 text-white font-semibold px-5 py-3 rounded-xl flex items-center gap-2 transition-colors"
+                  className="bg-forest-700 hover:bg-forest-800 disabled:opacity-60 text-white font-semibold px-5 py-3 rounded-xl flex items-center gap-2 transition-colors"
                 >
                   <PlusIcon className="w-4 h-4" />
                   {generating ? 'Genererar...' : 'Generera schema'}
@@ -375,7 +375,7 @@ function WorkoutCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             {isToday && (
-              <span className="text-xs bg-forest-600 text-white px-2 py-0.5 rounded-full font-medium">
+              <span className="text-xs bg-forest-700 text-white px-2 py-0.5 rounded-full font-medium">
                 Idag
               </span>
             )}

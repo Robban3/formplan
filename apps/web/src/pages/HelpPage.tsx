@@ -108,7 +108,7 @@ export function HelpPage() {
   }
 
   return (
-    <div className="px-5 pt-12 pb-10">
+    <div className="px-5 pt-header pb-10">
       <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 text-sm mb-4">
         <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
         Mer
@@ -156,7 +156,7 @@ export function HelpPage() {
         <p className="text-stone-400 text-xs mb-3">Vi svarar inom 24 timmar på vardagar.</p>
         <a
           href="mailto:support@formplan.app"
-          className="inline-block bg-forest-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl"
+          className="inline-block bg-forest-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl"
         >
           Kontakta support
         </a>

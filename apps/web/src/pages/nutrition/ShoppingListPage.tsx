@@ -55,7 +55,7 @@ export function ShoppingListPage() {
   return (
     <div className="pb-10">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4 bg-white border-b border-stone-100">
+      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100">
         <button onClick={() => navigate('/kost')} className="flex items-center gap-1 text-stone-400 text-sm mb-3">
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
           Kost
@@ -92,7 +92,7 @@ export function ShoppingListPage() {
                 key={n}
                 onClick={() => setMealCount(n)}
                 className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
-                  mealCount === n ? 'bg-forest-600 text-white' : 'bg-stone-100 text-stone-600'
+                  mealCount === n ? 'bg-forest-700 text-white' : 'bg-stone-100 text-stone-600'
                 }`}
               >
                 {n} måltider
@@ -131,7 +131,7 @@ export function ShoppingListPage() {
                 >
                   <span
                     className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 border transition-colors ${
-                      isChecked ? 'bg-forest-600 border-forest-600' : 'border-stone-300'
+                      isChecked ? 'bg-forest-700 border-forest-600' : 'border-stone-300'
                     }`}
                   >
                     {isChecked && <CheckIcon className="w-3.5 h-3.5 stroke-white" />}

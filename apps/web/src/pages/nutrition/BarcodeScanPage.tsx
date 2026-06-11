@@ -116,9 +116,9 @@ export function BarcodeScanPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-full bg-stone-50 pb-6">
+    <div className="flex flex-col min-h-full bg-canvas pb-6">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 pt-12 pb-3 bg-white border-b border-stone-100">
+      <div className="flex items-center gap-3 px-4 pt-header pb-3 bg-white border-b border-stone-100">
         <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100">
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-600" />
         </button>
@@ -181,7 +181,7 @@ export function BarcodeScanPage() {
             <button
               onClick={add}
               disabled={adding || !amount || parseFloat(amount) <= 0}
-              className="w-full mt-4 bg-forest-600 hover:bg-forest-700 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60"
+              className="w-full mt-4 bg-forest-700 hover:bg-forest-800 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60"
             >
               {adding ? 'Lägger till…' : 'Lägg till i kostdagbok'}
             </button>
@@ -192,7 +192,7 @@ export function BarcodeScanPage() {
         {!scanning && (
           <button
             onClick={rescan}
-            className="w-full py-3 bg-forest-600 text-white font-semibold rounded-2xl flex items-center justify-center gap-2"
+            className="w-full py-3 bg-forest-700 text-white font-semibold rounded-2xl flex items-center justify-center gap-2"
           >
             <ScanBarcodeIcon className="w-5 h-5 stroke-white" />
             {product || error ? 'Skanna igen' : 'Starta skanning'}
@@ -216,7 +216,7 @@ export function BarcodeScanPage() {
                 void doLookup(manual)
               }}
               disabled={manual.length < 6 || looking}
-              className="px-4 rounded-xl bg-forest-600 text-white text-sm font-semibold disabled:opacity-50"
+              className="px-4 rounded-xl bg-forest-700 text-white text-sm font-semibold disabled:opacity-50"
             >
               Sök
             </button>

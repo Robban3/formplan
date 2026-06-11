@@ -64,7 +64,7 @@ export function ProfilePage() {
     : []
 
   return (
-    <div className="px-5 pt-12 pb-4">
+    <div className="px-5 pt-header pb-4">
       <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 text-sm mb-4">
         <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
         Mer

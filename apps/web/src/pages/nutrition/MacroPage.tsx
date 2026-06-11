@@ -51,7 +51,7 @@ export function MacroPage() {
 
   return (
     <div className="pb-6">
-      <div className="px-4 pt-12 pb-3 flex items-center gap-3">
+      <div className="px-4 pt-header pb-3 flex items-center gap-3">
         <button onClick={() => navigate('/kost')} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100">
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-600" />
         </button>

@@ -96,7 +96,7 @@ export function CreateMealPage() {
 
   return (
     <div className="flex flex-col min-h-full bg-white pb-28">
-      <div className="flex items-center justify-between px-4 pt-12 pb-4 border-b border-stone-100">
+      <div className="flex items-center justify-between px-4 pt-header pb-4 border-b border-stone-100">
         <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100">
           <XIcon className="w-5 h-5 stroke-stone-500" />
         </button>
@@ -191,7 +191,7 @@ export function CreateMealPage() {
                     </button>
                     <button
                       onClick={addIngredient}
-                      className="flex-1 py-2 rounded-xl bg-forest-600 text-white text-sm font-semibold"
+                      className="flex-1 py-2 rounded-xl bg-forest-700 text-white text-sm font-semibold"
                     >
                       Lägg till
                     </button>

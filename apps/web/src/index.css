@@ -7,18 +7,24 @@
   --brand-dark: #10c4a8;
   --brand-dim: rgba(34, 230, 198, 0.15);
   --brand-glow: rgba(34, 230, 198, 0.2);
+  /* App-bakgrund (Mintbris). Flippar till stone-900 i mörkt läge. */
+  --canvas: #edf6f1;
+}
+html.dark {
+  --canvas: #1c1917; /* stone-900 */
 }
 
 @layer base {
   html {
-    @apply bg-stone-50 text-stone-900;
+    background-color: var(--canvas);
+    @apply text-stone-900;
     -webkit-tap-highlight-color: transparent;
   }
   html.dark {
-    @apply bg-stone-900 text-stone-100;
+    @apply text-stone-100;
   }
   html.dark body {
-    @apply bg-stone-900;
+    background-color: var(--canvas);
   }
   /* Tab-layout cards + nav */
   html.dark .bg-white   { @apply bg-stone-800 !important; }
@@ -30,6 +36,7 @@
   html.dark .text-stone-900 { @apply text-stone-100 !important; }
   html.dark .text-stone-800 { @apply text-stone-200 !important; }
   html.dark .text-stone-700 { @apply text-stone-300 !important; }
+  html.dark .text-stone-600 { @apply text-stone-300 !important; }
   html.dark .text-stone-500 { @apply text-stone-400 !important; }
   html.dark nav.bg-white    { @apply bg-stone-800 border-stone-700 !important; }
   /* Inputs & selects */
@@ -57,6 +64,22 @@
 @layer utilities {
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
+  }
+  /* App-bakgrund för helskärmssidor som annars hårdkodar bg-stone-50.
+     Följer --canvas så den blir mint i ljust läge och stone-900 i mörkt. */
+  .bg-canvas {
+    background-color: var(--canvas);
+  }
+  /* Push content below the status bar / notch. Falls back gracefully on
+     devices without a safe-area inset (env() resolves to 0). */
+  .safe-top {
+    padding-top: calc(env(safe-area-inset-top) + 0.75rem);
+  }
+  /* Page-header top padding. Equals 3rem (the old pt-12) on devices without a
+     notch, and grows by the safe-area inset in standalone/PWA mode so header
+     content never hides under the status bar or Dynamic Island. */
+  .pt-header {
+    padding-top: calc(env(safe-area-inset-top) + 3rem);
   }
   .scrollbar-hide {
     -ms-overflow-style: none;

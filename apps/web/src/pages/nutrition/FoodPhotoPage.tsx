@@ -73,9 +73,9 @@ export function FoodPhotoPage() {
   const hasItems = !!analysis && analysis.items.length > 0
 
   return (
-    <div className="flex flex-col min-h-full bg-stone-50 pb-6">
+    <div className="flex flex-col min-h-full bg-canvas pb-6">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 pt-12 pb-3 bg-white border-b border-stone-100">
+      <div className="flex items-center gap-3 px-4 pt-header pb-3 bg-white border-b border-stone-100">
         <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100">
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-600" />
         </button>
@@ -169,7 +169,7 @@ export function FoodPhotoPage() {
                 <button
                   onClick={logAll}
                   disabled={saving}
-                  className="w-full mt-3 bg-forest-600 hover:bg-forest-700 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60"
+                  className="w-full mt-3 bg-forest-700 hover:bg-forest-800 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60"
                 >
                   {saving ? 'Lägger till…' : 'Lägg till i kostdagbok'}
                 </button>

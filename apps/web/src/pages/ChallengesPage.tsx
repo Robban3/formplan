@@ -86,7 +86,7 @@ function ChallengeCard({ challenge, onAbandon }: { challenge: Challenge; onAband
       </div>
       <div className="w-full bg-stone-100 rounded-full h-2 mb-3">
         <div
-          className="bg-forest-600 h-2 rounded-full transition-all"
+          className="bg-forest-700 h-2 rounded-full transition-all"
           style={{ width: `${challenge.progress}%` }}
         />
       </div>
@@ -123,7 +123,7 @@ export function ChallengesPage() {
 
   return (
     <div className="pb-8">
-      <div className="px-5 pt-12 pb-4 bg-white border-b border-stone-100 flex items-center gap-3">
+      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100">
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-600" />
         </button>
@@ -170,7 +170,7 @@ export function ChallengesPage() {
                     <p className="text-xs text-stone-400">{c.durationDays} dagar · Mål: {c.targetValue} {c.unit}</p>
                     <button
                       onClick={() => handleStart(c.id)}
-                      className="px-4 py-1.5 bg-forest-600 text-white text-xs font-semibold rounded-full"
+                      className="px-4 py-1.5 bg-forest-700 text-white text-xs font-semibold rounded-full"
                     >
                       Starta
                     </button>

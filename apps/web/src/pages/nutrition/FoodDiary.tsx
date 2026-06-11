@@ -82,37 +82,35 @@ export function FoodDiary() {
   return (
     <div className="pb-6">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4 bg-white border-b border-stone-100">
-        <div className="flex items-center justify-between mb-1">
-          <h1 className="text-2xl font-bold text-stone-900">Kostdagbok</h1>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate('/kost/kostschema')}
-              className="px-3 h-9 rounded-xl bg-forest-50 text-forest-700 text-xs font-semibold hover:bg-forest-100 transition-colors"
-            >
-              Kostschema
-            </button>
-            <button
-              onClick={() => navigate('/kost/veckoplan')}
-              className="px-3 h-9 rounded-xl bg-stone-100 text-stone-600 text-xs font-semibold hover:bg-stone-200 transition-colors"
-            >
-              Veckoplan
-            </button>
-            <button
-              onClick={() => navigate('/kost/inkopslista')}
-              className="w-9 h-9 rounded-xl bg-forest-50 flex items-center justify-center hover:bg-forest-100 transition-colors"
-              aria-label="Inköpslista"
-            >
-              <ShoppingCartIcon className="w-4 h-4 stroke-forest-600" />
-            </button>
-            <button
-              onClick={() => navigate('/kost/vatten')}
-              className="w-9 h-9 rounded-xl bg-sky-50 flex items-center justify-center hover:bg-sky-100 transition-colors"
-              aria-label="Vatten"
-            >
-              <DropletIcon className="w-4 h-4 stroke-sky-500" />
-            </button>
-          </div>
+      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100">
+        <h1 className="text-2xl font-bold text-stone-900 mb-3">Kostdagbok</h1>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate('/kost/kostschema')}
+            className="flex-1 min-w-0 h-9 rounded-xl bg-forest-50 text-forest-700 text-xs font-semibold hover:bg-forest-100 transition-colors truncate px-2"
+          >
+            Kostschema
+          </button>
+          <button
+            onClick={() => navigate('/kost/veckoplan')}
+            className="flex-1 min-w-0 h-9 rounded-xl bg-stone-100 text-stone-600 text-xs font-semibold hover:bg-stone-200 transition-colors truncate px-2"
+          >
+            Veckoplan
+          </button>
+          <button
+            onClick={() => navigate('/kost/inkopslista')}
+            className="w-9 h-9 flex-shrink-0 rounded-xl bg-forest-50 flex items-center justify-center hover:bg-forest-100 transition-colors"
+            aria-label="Inköpslista"
+          >
+            <ShoppingCartIcon className="w-4 h-4 stroke-forest-600" />
+          </button>
+          <button
+            onClick={() => navigate('/kost/vatten')}
+            className="w-9 h-9 flex-shrink-0 rounded-xl bg-sky-50 flex items-center justify-center hover:bg-sky-100 transition-colors"
+            aria-label="Vatten"
+          >
+            <DropletIcon className="w-4 h-4 stroke-sky-500" />
+          </button>
         </div>
 
         {/* Date nav */}

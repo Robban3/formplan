@@ -50,7 +50,7 @@ export function NotificationsPage() {
   ]
 
   return (
-    <div className="px-5 pt-12 pb-4">
+    <div className="px-5 pt-header pb-4">
       <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 text-sm mb-4">
         <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
         Mer
@@ -71,7 +71,7 @@ export function NotificationsPage() {
               <p className="font-semibold text-forest-700 text-sm">Tillåt notiser för att fortsätta</p>
               <button
                 onClick={requestPermission}
-                className="mt-2 bg-forest-600 text-white text-sm font-medium px-4 py-2 rounded-xl"
+                className="mt-2 bg-forest-700 text-white text-sm font-medium px-4 py-2 rounded-xl"
               >
                 Aktivera notiser
               </button>
@@ -94,7 +94,7 @@ export function NotificationsPage() {
               disabled={permState !== 'granted'}
               onClick={() => settingsStore.set(row.key, !settings[row.key])}
               className={`relative w-11 h-6 rounded-full transition-colors disabled:opacity-40 ${
-                settings[row.key] && permState === 'granted' ? 'bg-forest-600' : 'bg-stone-200'
+                settings[row.key] && permState === 'granted' ? 'bg-forest-700' : 'bg-stone-200'
               }`}
             >
               <span

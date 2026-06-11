@@ -23,7 +23,7 @@ function Toggle({ label, sub, settingKey }: { label: string; sub: string; settin
       </div>
       <button
         onClick={() => settingsStore.set(settingKey, !on)}
-        className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors ${on ? 'bg-forest-600' : 'bg-stone-200'}`}
+        className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors ${on ? 'bg-forest-700' : 'bg-stone-200'}`}
         aria-pressed={on}
       >
         <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${on ? 'translate-x-5' : 'translate-x-0'}`} />
@@ -144,7 +144,7 @@ function NotificationToggle() {
       </div>
       <button
         onClick={handleToggle}
-        className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors ${on ? 'bg-forest-600' : 'bg-stone-200'}`}
+        className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors ${on ? 'bg-forest-700' : 'bg-stone-200'}`}
         aria-pressed={on}
       >
         <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${on ? 'translate-x-5' : 'translate-x-0'}`} />
@@ -183,7 +183,7 @@ export function SettingsPage() {
 
   return (
     <div className="pb-10">
-      <div className="px-5 pt-12 pb-4 bg-white border-b border-stone-100">
+      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100">
         <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 text-sm mb-3">
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
           Mer

@@ -172,7 +172,7 @@ export function RecipeDetailPage() {
   }
 
   return (
-    <div className="pb-10 bg-stone-50 min-h-screen">
+    <div className="pb-10 bg-canvas min-h-screen">
       {/* Hero image */}
       <div className="relative h-56 bg-stone-200">
         <img src={recipe.image} alt={recipe.name} className="w-full h-full object-cover" />
@@ -237,7 +237,7 @@ export function RecipeDetailPage() {
           </div>
           {recipe.steps.map((step, i) => (
             <div key={i} className={`flex items-start gap-3 px-4 py-3 ${i > 0 ? 'border-t border-stone-50' : ''}`}>
-              <div className="w-6 h-6 rounded-full bg-forest-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-6 h-6 rounded-full bg-forest-700 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                 {i + 1}
               </div>
               <p className="text-sm text-stone-700 leading-relaxed">{step}</p>
@@ -246,7 +246,7 @@ export function RecipeDetailPage() {
         </div>
 
         {/* Add to diary */}
-        <button className="mt-5 w-full bg-forest-600 hover:bg-forest-700 text-white font-semibold py-4 rounded-2xl transition-colors">
+        <button className="mt-5 w-full bg-forest-700 hover:bg-forest-800 text-white font-semibold py-4 rounded-2xl transition-colors">
           Lägg till i kostdagbok
         </button>
       </div>
