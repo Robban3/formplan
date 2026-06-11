@@ -15,9 +15,56 @@ export type ImageMediaType = 'image/jpeg' | 'image/png' | 'image/webp'
 const PRIMARY_MODEL = 'claude-opus-4-8'
 // Widely-available model used if the configured one isn't accessible.
 const FALLBACK_MODEL = 'claude-3-5-sonnet-latest'
+// Gemini har en gratis nivå och stödjer både vision och JSON-läge.
+const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash'
 
-function resolveModel(env: Env): string {
-  return env.ANTHROPIC_MODEL ?? PRIMARY_MODEL
+// ── Provider-neutral AI-abstraktion ─────────────────────────────────────────
+// Stödjer Anthropic (standard) och Google Gemini. Välj med env.AI_PROVIDER.
+// Båda normaliseras till { text, stopReason } så resten av koden är
+// provider-oberoende.
+
+type AiContent =
+  | string
+  | Array<{ text: string } | { image: { mediaType: ImageMediaType; data: string } }>
+
+interface AiMessage {
+  role: 'user' | 'assistant'
+  content: AiContent
+}
+
+interface AiRequest {
+  system?: string
+  messages: AiMessage[]
+  maxTokens: number
+  /** Be modellen svara med ren JSON (Gemini sätter responseMimeType). */
+  json?: boolean
+}
+
+interface AiResult {
+  text: string
+  stopReason: string | null
+}
+
+function aiProvider(env: Env): 'anthropic' | 'gemini' {
+  return env.AI_PROVIDER === 'gemini' ? 'gemini' : 'anthropic'
+}
+
+async function callAi(req: AiRequest, env: Env): Promise<AiResult> {
+  return aiProvider(env) === 'gemini' ? callGemini(req, env) : callAnthropic(req, env)
+}
+
+// ── Anthropic ────────────────────────────────────────────────────────────────
+
+function toAnthropicContent(content: AiContent): string | Anthropic.ContentBlockParam[] {
+  if (typeof content === 'string') return content
+  return content.map((p) =>
+    'text' in p
+      ? { type: 'text' as const, text: p.text }
+      : {
+          type: 'image' as const,
+          source: { type: 'base64' as const, media_type: p.image.mediaType, data: p.image.data },
+        }
+  )
 }
 
 // Call Claude, retrying once on a stable model if the configured model is
@@ -25,22 +72,86 @@ function resolveModel(env: Env): string {
 // long as we haven't already tried the fallback — a misconfigured or
 // not-yet-released primary model can surface as 403/404/400/etc., and a single
 // retry on a known-good model is cheap insurance against a hard outage.
-async function createMessage(
-  client: Anthropic,
-  params: Anthropic.MessageCreateParamsNonStreaming
-): Promise<Anthropic.Message> {
-  try {
-    return await client.messages.create(params)
-  } catch (err) {
-    if (params.model !== FALLBACK_MODEL) {
-      const status = (err as { status?: number }).status
-      console.warn(
-        `Claude model "${params.model}" failed (status ${status ?? 'unknown'}); retrying on ${FALLBACK_MODEL}`
-      )
-      return client.messages.create({ ...params, model: FALLBACK_MODEL })
-    }
-    throw err
+async function callAnthropic(req: AiRequest, env: Env): Promise<AiResult> {
+  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY })
+  const params: Anthropic.MessageCreateParamsNonStreaming = {
+    model: env.ANTHROPIC_MODEL ?? PRIMARY_MODEL,
+    max_tokens: req.maxTokens,
+    ...(req.system ? { system: req.system } : {}),
+    messages: req.messages.map((m) => ({ role: m.role, content: toAnthropicContent(m.content) })),
   }
+
+  let message: Anthropic.Message
+  try {
+    message = await client.messages.create(params)
+  } catch (err) {
+    if (params.model === FALLBACK_MODEL) throw err
+    const status = (err as { status?: number }).status
+    console.warn(
+      `Claude model "${params.model}" failed (status ${status ?? 'unknown'}); retrying on ${FALLBACK_MODEL}`
+    )
+    message = await client.messages.create({ ...params, model: FALLBACK_MODEL })
+  }
+
+  const text = message.content
+    .filter((b) => b.type === 'text')
+    .map((b) => b.text)
+    .join('')
+  return { text, stopReason: message.stop_reason }
+}
+
+// ── Google Gemini ─────────────────────────────────────────────────────────────
+
+interface GeminiPart {
+  text?: string
+  inline_data?: { mime_type: string; data: string }
+}
+interface GeminiResponse {
+  candidates?: Array<{ content?: { parts?: GeminiPart[] }; finishReason?: string }>
+  error?: { message?: string }
+}
+
+function toGeminiParts(content: AiContent): GeminiPart[] {
+  if (typeof content === 'string') return [{ text: content }]
+  return content.map((p) =>
+    'text' in p ? { text: p.text } : { inline_data: { mime_type: p.image.mediaType, data: p.image.data } }
+  )
+}
+
+async function callGemini(req: AiRequest, env: Env): Promise<AiResult> {
+  const apiKey = env.GEMINI_API_KEY
+  if (!apiKey) throw new Error('GEMINI_API_KEY saknas (krävs när AI_PROVIDER=gemini)')
+  const model = env.GEMINI_MODEL ?? GEMINI_DEFAULT_MODEL
+
+  const body = {
+    ...(req.system ? { system_instruction: { parts: [{ text: req.system }] } } : {}),
+    // Gemini använder rollen 'model' i stället för 'assistant'.
+    contents: req.messages.map((m) => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: toGeminiParts(m.content),
+    })),
+    generationConfig: {
+      maxOutputTokens: req.maxTokens,
+      ...(req.json ? { responseMimeType: 'application/json' } : {}),
+    },
+  }
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+      body: JSON.stringify(body),
+    }
+  )
+
+  const data = (await res.json()) as GeminiResponse
+  if (!res.ok) {
+    throw new Error(`Gemini ${res.status}: ${data.error?.message ?? res.statusText}`)
+  }
+  const candidate = data.candidates?.[0]
+  const text = (candidate?.content?.parts ?? []).map((p) => p.text ?? '').join('')
+  return { text, stopReason: candidate?.finishReason ?? null }
 }
 
 function buildPrompt(profile: FitnessProfile): string {
@@ -109,23 +220,20 @@ export async function generatePlan(
   profile: FitnessProfile,
   env: Env
 ): Promise<void> {
-  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY })
   const db = supabaseAdmin(env)
 
-  const message = await createMessage(client, {
-    model: resolveModel(env),
-    max_tokens: 8192,
-    system:
-      'You are a certified personal trainer and nutritionist. Always respond with valid JSON only — no markdown, no explanation.',
-    messages: [{ role: 'user', content: buildPrompt(profile) }],
-  })
+  const { text: rawText } = await callAi(
+    {
+      system:
+        'You are a certified personal trainer and nutritionist. Always respond with valid JSON only — no markdown, no explanation.',
+      messages: [{ role: 'user', content: buildPrompt(profile) }],
+      maxTokens: 8192,
+      json: true,
+    },
+    env
+  )
 
-  const rawText = message.content
-    .filter((b) => b.type === 'text')
-    .map((b) => b.text)
-    .join('')
-
-  const parsed = JSON.parse(rawText) as {
+  const parsed = JSON.parse(extractJson(rawText)) as {
     days: Array<{
       weekday: number
       type: 'workout' | 'rest'
@@ -248,7 +356,6 @@ export async function coachReply(
   clientContext: string,
   env: Env
 ): Promise<string> {
-  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY })
   const serverContext = await buildUserContext(userId, env)
   const context = [serverContext, clientContext.trim()].filter(Boolean).join('\n')
 
@@ -269,18 +376,16 @@ Riktlinjer:
 - Hitta inte på siffror — använd bara data som finns ovan. Saknas data, uppmuntra användaren att logga pass/kost.
 - Var ärlig, evidensbaserad och uppmuntrande.`
 
-  const msg = await createMessage(client, {
-    model: resolveModel(env),
-    max_tokens: 700,
-    system,
-    messages: history.map((m) => ({ role: m.role, content: m.content })),
-  })
+  const { text } = await callAi(
+    {
+      system,
+      messages: history.map((m) => ({ role: m.role, content: m.content })),
+      maxTokens: 700,
+    },
+    env
+  )
 
-  return msg.content
-    .filter((b) => b.type === 'text')
-    .map((b) => b.text)
-    .join('')
-    .trim()
+  return text.trim()
 }
 
 // ── AI-genererade recept ────────────────────────────────────────────────────
@@ -301,8 +406,6 @@ function extractJson(text: string): string {
 }
 
 export async function generateRecipe(req: RecipeRequest, env: Env): Promise<GeneratedRecipe> {
-  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY })
-
   const constraints: string[] = []
   if (req.calorie_target) constraints.push(`Kalorimål: ca ${req.calorie_target} kcal per portion`)
   if (req.min_protein_g) constraints.push(`Minst ${req.min_protein_g} g protein per portion`)
@@ -327,18 +430,16 @@ Svara ENDAST med giltig JSON enligt exakt detta schema (på svenska, med realist
   "tags": ["kort etikett, t.ex. 'Högt protein'"]
 }`
 
-  const message = await createMessage(client, {
-    model: resolveModel(env),
-    max_tokens: 1500,
-    system:
-      'Du är en svensk kock och nutritionist. Svara alltid med enbart giltig JSON — ingen markdown, ingen förklaring.',
-    messages: [{ role: 'user', content: user }],
-  })
-
-  const rawText = message.content
-    .filter((b) => b.type === 'text')
-    .map((b) => b.text)
-    .join('')
+  const { text: rawText } = await callAi(
+    {
+      system:
+        'Du är en svensk kock och nutritionist. Svara alltid med enbart giltig JSON — ingen markdown, ingen förklaring.',
+      messages: [{ role: 'user', content: user }],
+      maxTokens: 1500,
+      json: true,
+    },
+    env
+  )
 
   return JSON.parse(extractJson(rawText)) as GeneratedRecipe
 }
@@ -350,8 +451,6 @@ export async function analyzeFoodPhoto(
   mediaType: ImageMediaType,
   env: Env
 ): Promise<FoodPhotoAnalysis> {
-  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY })
-
   const prompt = `Du är en svensk nutritionist. Analysera måltiden på bilden och uppskatta näringsinnehållet så gott det går utifrån synliga portioner.
 Svara ENDAST med giltig JSON enligt detta schema (svenska livsmedelsnamn, gram och realistiska värden):
 {
@@ -363,25 +462,20 @@ Svara ENDAST med giltig JSON enligt detta schema (svenska livsmedelsnamn, gram o
 }
 Om bilden inte föreställer mat: returnera tomma "items", nollställd "total" och description "Ingen mat hittades".`
 
-  const message = await createMessage(client, {
-    model: resolveModel(env),
-    max_tokens: 2048,
-    system: 'Svara alltid med enbart giltig JSON — ingen markdown, ingen förklaring.',
-    messages: [
-      {
-        role: 'user',
-        content: [
-          { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } },
-          { type: 'text', text: prompt },
-        ],
-      },
-    ],
-  })
-
-  const rawText = message.content
-    .filter((b) => b.type === 'text')
-    .map((b) => b.text)
-    .join('')
+  const { text: rawText, stopReason } = await callAi(
+    {
+      system: 'Svara alltid med enbart giltig JSON — ingen markdown, ingen förklaring.',
+      messages: [
+        {
+          role: 'user',
+          content: [{ image: { mediaType, data: imageBase64 } }, { text: prompt }],
+        },
+      ],
+      maxTokens: 2048,
+      json: true,
+    },
+    env
+  )
 
   try {
     return JSON.parse(extractJson(rawText)) as FoodPhotoAnalysis
@@ -389,7 +483,7 @@ Om bilden inte föreställer mat: returnera tomma "items", nollställd "total" o
     // Log the actual model output so a parse failure is diagnosable instead of
     // surfacing as an opaque 502.
     console.error(
-      `Food photo: could not parse model JSON (stop_reason=${message.stop_reason}). Raw response:`,
+      `Food photo: could not parse model JSON (stop_reason=${stopReason}). Raw response:`,
       rawText.slice(0, 1000)
     )
     throw new Error(`Food photo analysis returned unparseable output: ${(err as Error).message}`)

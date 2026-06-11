@@ -5,11 +5,15 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 ENVIRONMENT = "production"
+# AI-provider: "anthropic" (standard) eller "gemini" (gratis nivå för test).
+# AI_PROVIDER = "gemini"
 
 # Secrets (set via `wrangler secret put`):
 # SUPABASE_URL
 # SUPABASE_SERVICE_ROLE_KEY
 # ANTHROPIC_API_KEY
+# GEMINI_API_KEY        # krävs när AI_PROVIDER=gemini (hämtas på aistudio.google.com)
+# GEMINI_MODEL          # valfri, standard: gemini-2.5-flash
 # STRIPE_SECRET_KEY
 # STRIPE_WEBHOOK_SECRET
 # RESEND_API_KEY

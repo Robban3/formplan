@@ -3,6 +3,10 @@ export interface Env {
   SUPABASE_SERVICE_ROLE_KEY: string
   ANTHROPIC_API_KEY: string
   ANTHROPIC_MODEL?: string
+  // AI-provider: 'anthropic' (standard) eller 'gemini' (gratis nivå för test).
+  AI_PROVIDER?: 'anthropic' | 'gemini'
+  GEMINI_API_KEY?: string
+  GEMINI_MODEL?: string
   STRIPE_SECRET_KEY: string
   STRIPE_WEBHOOK_SECRET: string
   RESEND_API_KEY: string
