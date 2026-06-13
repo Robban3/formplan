@@ -20,6 +20,12 @@ html.dark {
     @apply text-stone-900;
     -webkit-tap-highlight-color: transparent;
   }
+  /* Hindra att hela appen kan dras i sidled om någon sida har ett element
+     som är någon pixel bredare än skärmen (gäller även helskärmssidor). */
+  html, body, #root {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
   html.dark {
     @apply text-stone-100;
   }
