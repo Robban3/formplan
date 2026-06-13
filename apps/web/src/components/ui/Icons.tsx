@@ -41,6 +41,7 @@ import {
   ShoppingCart,
   Camera,
   ScanBarcode,
+  Search,
 } from 'lucide-react'
 
 interface IconProps {
@@ -97,3 +98,4 @@ export const RulerIcon = wrap(Ruler)
 export const ShoppingCartIcon = wrap(ShoppingCart)
 export const CameraIcon = wrap(Camera)
 export const ScanBarcodeIcon = wrap(ScanBarcode)
+export const SearchIcon = wrap(Search)

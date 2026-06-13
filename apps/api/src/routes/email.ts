@@ -105,25 +105,18 @@ emailRouter.post('/progress', requireAuth, async (c) => {
   // Hämta träningspass senaste 7 dagarna
   const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
   const { data: sessions } = await db.query<{ total_volume_kg: number; completed_at: string }[]>(
-    `/workout_sessions?user_id=eq.${user.sub}&completed_at=gte.${since}&select=total_volume_kg,completed_at`
+    `/workout_session?user_id=eq.${user.sub}&completed_at=gte.${since}&select=total_volume_kg,completed_at`
   )
 
   const workouts = sessions?.length ?? 0
   const volumeKg = sessions?.reduce((s, r) => s + (r.total_volume_kg ?? 0), 0) ?? 0
 
-  // Senaste viktutveckling
-  const { data: weights } = await db.query<{ weight_kg: number; measured_at: string }[]>(
-    `/measurements?user_id=eq.${user.sub}&select=weight_kg,measured_at&order=measured_at.desc&limit=2`
-  )
-
-  const weightDelta =
-    weights && weights.length === 2
-      ? ((weights[0]?.weight_kg ?? 0) - (weights[1]?.weight_kg ?? 0))
-      : null
+  // Viktutveckling lagras klientsidan (ingen server-tabell ännu).
+  const weightDelta = null
 
   // Streak (antal dagar i rad med aktivitet)
   const { data: logs } = await db.query<{ completed_at: string }[]>(
-    `/workout_sessions?user_id=eq.${user.sub}&select=completed_at&order=completed_at.desc&limit=30`
+    `/workout_session?user_id=eq.${user.sub}&select=completed_at&order=completed_at.desc&limit=30`
   )
 
   let streak = 0

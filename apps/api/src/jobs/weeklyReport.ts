@@ -9,10 +9,20 @@ import { sendEmail, progressEmail } from '../lib/email'
 export async function sendWeeklyReports(env: Env): Promise<void> {
   const db = supabaseAdmin(env)
 
-  // Hämta alla användare med e-post
-  const { data: users } = await db.query<{ id: string; email: string; raw_user_meta_data: Record<string, string> }[]>(
-    '/auth/users?select=id,email,raw_user_meta_data&limit=1000'
-  )
+  // Hämta alla användare via GoTrue Admin API (auth.users nås inte via PostgREST).
+  const usersRes = await fetch(`${env.SUPABASE_URL}/auth/v1/admin/users?per_page=1000`, {
+    headers: {
+      apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+    },
+  })
+  if (!usersRes.ok) {
+    console.error('Veckorapport: kunde inte hämta användare', await usersRes.text())
+    return
+  }
+  const { users } = (await usersRes.json()) as {
+    users: { id: string; email?: string; user_metadata?: Record<string, string> }[]
+  }
 
   if (!users?.length) return
 
@@ -20,30 +30,24 @@ export async function sendWeeklyReports(env: Env): Promise<void> {
 
   // Skicka rapport till varje användare (med liten fördröjning för att undvika rate limiting)
   for (const user of users) {
+    if (!user.email) continue
     try {
       // Hämta träningspass senaste 7 dagarna
       const { data: sessions } = await db.query<{ total_volume_kg: number; completed_at: string }[]>(
-        `/workout_sessions?user_id=eq.${user.id}&completed_at=gte.${since}&select=total_volume_kg,completed_at`
+        `/workout_session?user_id=eq.${user.id}&completed_at=gte.${since}&select=total_volume_kg,completed_at`
       )
 
       // Hoppa över användare som inte tränat alls denna vecka
       if (!sessions?.length) continue
 
       const workouts = sessions.length
-      const volumeKg = sessions.reduce((s, r) => s + (r.total_volume_kg ?? 0), 0)
 
-      // Viktutveckling
-      const { data: weights } = await db.query<{ weight_kg: number }[]>(
-        `/measurements?user_id=eq.${user.id}&select=weight_kg,measured_at&order=measured_at.desc&limit=2`
-      )
-      const weightDelta =
-        weights && weights.length === 2
-          ? ((weights[0]?.weight_kg ?? 0) - (weights[1]?.weight_kg ?? 0))
-          : null
+      // Viktutveckling lagras klientsidan (ingen server-tabell ännu).
+      const weightDelta = null
 
       // Streak
       const { data: logs } = await db.query<{ completed_at: string }[]>(
-        `/workout_sessions?user_id=eq.${user.id}&select=completed_at&order=completed_at.desc&limit=30`
+        `/workout_session?user_id=eq.${user.id}&select=completed_at&order=completed_at.desc&limit=30`
       )
       let streak = 0
       if (logs?.length) {
@@ -56,8 +60,8 @@ export async function sendWeeklyReports(env: Env): Promise<void> {
       }
 
       const name =
-        user.raw_user_meta_data?.full_name ??
-        user.raw_user_meta_data?.name ??
+        user.user_metadata?.full_name ??
+        user.user_metadata?.name ??
         user.email.split('@')[0] ??
         'där'
 

@@ -5,7 +5,7 @@ import { dateKey } from '../../lib/derive'
 import { loadCustomMeals, mealTotals, type CustomMeal } from '../../lib/customMeals'
 import { toast } from '../../lib/toast'
 import { ChevronLeftIcon, XIcon, PlusIcon, UtensilsIcon, CameraIcon, ScanBarcodeIcon } from '../../components/ui/Icons'
-import { recordFoodUsed } from '../../lib/foodFavoritesStore'
+import { recordFoodUsed, getTopFavorites } from '../../lib/foodFavoritesStore'
 
 type SearchTab = 'alla' | 'mina' | 'maltider'
 
@@ -22,6 +22,7 @@ export function FoodSearch() {
   const [params] = useSearchParams()
   const slot = (params.get('slot') ?? 'frukost') as MealSlot
   const date = params.get('date') ?? dateKey()
+  const prefillId = params.get('prefill')
 
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<FoodItem[]>([])
@@ -47,6 +48,24 @@ export function FoodSearch() {
   useEffect(() => {
     inputRef.current?.focus()
   }, [])
+
+  // Snabblogg: preselect the favorite passed via ?prefill=<food_id>.
+  useEffect(() => {
+    if (!prefillId) return
+    const fav = getTopFavorites().find((f) => f.food_id === prefillId)
+    if (!fav) return
+    setSelected({
+      id: fav.food_id,
+      name: fav.food_name,
+      kcal_per_100g: fav.kcal_per_100g,
+      protein_per_100g: fav.protein_per_100g,
+      fat_per_100g: fav.fat_per_100g,
+      carbs_per_100g: fav.carbs_per_100g,
+      serving_size_g: fav.default_amount_g,
+    })
+    setAmount(String(fav.default_amount_g))
+    setTab('alla')
+  }, [prefillId])
 
   useEffect(() => {
     if (query.length < 2) { setResults([]); return }
@@ -258,7 +277,7 @@ export function FoodSearch() {
                 <div className="flex-1 text-left min-w-0">
                   <p className="text-sm font-medium text-stone-800 truncate">{item.name}</p>
                   <p className="text-xs text-stone-400">
-                    {item.serving_size_g ?? 100} g · {item.kcal_per_100g} kcal
+                    Per 100 g: {item.kcal_per_100g} kcal · P {item.protein_per_100g}g · F {item.fat_per_100g}g · K {item.carbs_per_100g}g
                   </p>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-forest-700 flex items-center justify-center flex-shrink-0">
@@ -286,11 +305,18 @@ export function FoodSearch() {
       {selected && tab === 'alla' && (
         <div className="sticky bottom-0 border-t border-stone-100 px-4 py-4 bg-white">
           <div className="flex items-center gap-3 mb-3">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-stone-800 truncate">{selected.name}</p>
-              <p className="text-xs text-stone-400">
-                {amount ? Math.round(selected.kcal_per_100g * parseFloat(amount) / 100) : 0} kcal
-              </p>
+              {(() => {
+                const f = (parseFloat(amount) || 0) / 100
+                const kcal = Math.round(selected.kcal_per_100g * f)
+                return (
+                  <p className="text-xs text-stone-400">
+                    {kcal} kcal · {Math.round(kcal * 4.184)} kJ · P {Math.round(selected.protein_per_100g * f * 10) / 10}g · F{' '}
+                    {Math.round(selected.fat_per_100g * f * 10) / 10}g · K {Math.round(selected.carbs_per_100g * f * 10) / 10}g
+                  </p>
+                )
+              })()}
             </div>
             <div className="flex items-center gap-2 bg-stone-100 rounded-xl px-3 py-2">
               <input

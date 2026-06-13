@@ -54,7 +54,7 @@ nutritionRouter.get('/foods/search', async (c) => {
   const q = (c.req.query('q') ?? '').trim()
   if (!q) return c.json({ items: [] })
   const db = supabaseAdmin(c.env)
-  const pattern = `*${q}*`
+  const pattern = encodeURIComponent(`*${q}*`)
   const { data } = await db.query<FoodItemRow[]>(
     `/food_item?name=ilike.${pattern}&select=*&order=name.asc&limit=20`
   )
@@ -70,7 +70,7 @@ nutritionRouter.get('/log', async (c) => {
 
   const [{ data: entries }, goals] = await Promise.all([
     db.query<FoodLogRow[]>(
-      `/food_log?user_id=eq.${user.sub}&log_date=eq.${date}&select=*&order=created_at.asc`
+      `/food_log?user_id=eq.${user.sub}&log_date=eq.${encodeURIComponent(date)}&select=*&order=created_at.asc`
     ),
     resolveDailyGoals(c, user.sub, date),
   ])
@@ -145,7 +145,7 @@ nutritionRouter.get('/water/summary', async (c) => {
   const db = supabaseAdmin(c.env)
 
   const { data } = await db.query<Pick<WaterLogRow, 'log_date' | 'amount_ml'>[]>(
-    `/water_log?user_id=eq.${user.sub}&log_date=gte.${from}&log_date=lte.${to}&select=log_date,amount_ml`
+    `/water_log?user_id=eq.${user.sub}&log_date=gte.${encodeURIComponent(from)}&log_date=lte.${encodeURIComponent(to)}&select=log_date,amount_ml`
   )
 
   const map = new Map<string, number>()
@@ -167,7 +167,7 @@ nutritionRouter.get('/water', async (c) => {
   const user = c.get('user')
   const db = supabaseAdmin(c.env)
   const { data } = await db.query<WaterLogRow[]>(
-    `/water_log?user_id=eq.${user.sub}&log_date=eq.${date}&select=*&order=logged_at.asc`
+    `/water_log?user_id=eq.${user.sub}&log_date=eq.${encodeURIComponent(date)}&select=*&order=logged_at.asc`
   )
   const entries = (data ?? []).map((e) => ({ ...e, date: e.log_date }))
   const total_ml = entries.reduce((s, e) => s + e.amount_ml, 0)
@@ -214,7 +214,7 @@ nutritionRouter.get('/summary', async (c) => {
   const db = supabaseAdmin(c.env)
 
   const { data } = await db.query<Pick<FoodLogRow, 'log_date' | 'kcal' | 'protein_g' | 'fat_g' | 'carbs_g'>[]>(
-    `/food_log?user_id=eq.${user.sub}&log_date=gte.${from}&log_date=lte.${to}&select=log_date,kcal,protein_g,fat_g,carbs_g`
+    `/food_log?user_id=eq.${user.sub}&log_date=gte.${encodeURIComponent(from)}&log_date=lte.${encodeURIComponent(to)}&select=log_date,kcal,protein_g,fat_g,carbs_g`
   )
 
   // Aggregate per date in the worker (PostgREST has no GROUP BY).

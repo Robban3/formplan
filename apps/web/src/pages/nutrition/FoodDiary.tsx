@@ -4,7 +4,7 @@ import { nutritionApi, type FoodLogEntry, type DailyGoals, type MealSlot } from 
 import { dateKey } from '../../lib/derive'
 import { MacroSummary } from '../../components/nutrition/MacroSummary'
 import { MealSection } from '../../components/nutrition/MealSection'
-import { ChevronLeftIcon, ChevronRightIcon, DropletIcon, StarIcon, ShoppingCartIcon } from '../../components/ui/Icons'
+import { ChevronLeftIcon, ChevronRightIcon, DropletIcon, StarIcon, ShoppingCartIcon, SearchIcon } from '../../components/ui/Icons'
 import { getTopFavorites, type FoodFavorite } from '../../lib/foodFavoritesStore'
 
 const MEALS: MealSlot[] = ['frukost', 'lunch', 'middag', 'mellanmar']
@@ -112,6 +112,15 @@ export function FoodDiary() {
             <DropletIcon className="w-4 h-4 stroke-sky-500" />
           </button>
         </div>
+
+        {/* Sök livsmedel & näringsvärden */}
+        <button
+          onClick={() => navigate(`/kost/sok?slot=frukost&date=${dateKey(date)}`)}
+          className="w-full mt-2 flex items-center gap-3 bg-stone-100 rounded-xl px-4 py-2.5 text-sm text-stone-500 hover:bg-stone-200 transition-colors"
+        >
+          <SearchIcon className="w-4 h-4 stroke-stone-400 flex-shrink-0" />
+          Sök livsmedel & näringsvärden
+        </button>
 
         {/* Date nav */}
         <div className="flex items-center justify-center gap-4 mt-3">

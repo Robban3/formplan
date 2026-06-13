@@ -29,10 +29,10 @@ export function recordFoodUsed(f: Omit<FoodFavorite, 'count' | 'last_used'>) {
   const all = load()
   const existing = all.find((x) => x.food_id === f.food_id)
   if (existing) {
-    existing.count++
-    existing.last_used = new Date().toISOString()
-    existing.default_amount_g = f.default_amount_g
+    // Refresh nutrition/amount first, then bump count so it can't be clobbered.
     Object.assign(existing, f)
+    existing.count += 1
+    existing.last_used = new Date().toISOString()
   } else {
     all.push({ ...f, count: 1, last_used: new Date().toISOString() })
   }
