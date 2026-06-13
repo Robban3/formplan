@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import Stripe from 'stripe'
 import { requireAuth } from '../middleware/auth'
-import { isUserPremium } from '../lib/supabase'
+import { isUserPremium, supabaseAdmin } from '../lib/supabase'
 import type { AppContext } from '../lib/types'
 
 const TRIAL_DAYS = 7
@@ -76,6 +76,40 @@ billingRouter.post(
     } catch (err) {
       console.error('Checkout failed:', err)
       return c.json({ error: 'Kunde inte starta betalningen' }, 502)
+    }
+  }
+)
+
+// POST /billing/portal — open the Stripe customer billing portal (manage/cancel).
+billingRouter.post(
+  '/portal',
+  zValidator('json', z.object({ origin: z.string().url().optional() })),
+  async (c) => {
+    const user = c.get('user')
+    const { origin } = c.req.valid('json')
+    const base = origin ?? 'https://app.formplan.app'
+
+    if (!c.env.STRIPE_SECRET_KEY) {
+      return c.json({ error: 'Billing not configured' }, 503)
+    }
+
+    const db = supabaseAdmin(c.env)
+    const { data } = await db.query<{ stripe_customer_id: string | null }[]>(
+      `/subscriptions?user_id=eq.${user.sub}&select=stripe_customer_id&limit=1`
+    )
+    const customer = data?.[0]?.stripe_customer_id
+    if (!customer) return c.json({ error: 'Ingen prenumeration hittades' }, 404)
+
+    const stripe = new Stripe(c.env.STRIPE_SECRET_KEY)
+    try {
+      const session = await stripe.billingPortal.sessions.create({
+        customer,
+        return_url: `${base}/mer`,
+      })
+      return c.json({ url: session.url })
+    } catch (err) {
+      console.error('Billing portal failed:', err)
+      return c.json({ error: 'Kunde inte öppna prenumerationshanteringen' }, 502)
     }
   }
 )

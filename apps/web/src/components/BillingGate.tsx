@@ -4,7 +4,7 @@ import { PaywallPage } from '../pages/PaywallPage'
 
 function Spinner() {
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-stone-50">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-canvas">
       <div className="w-8 h-8 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
     </div>
   )

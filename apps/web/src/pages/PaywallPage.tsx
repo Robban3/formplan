@@ -56,7 +56,7 @@ export function PaywallPage({ status }: { status: BillingStatus }) {
           <ul className="mt-5 space-y-2.5">
             {FEATURES.map((f) => (
               <li key={f} className="flex items-center gap-3 text-sm text-stone-200">
-                <span className="w-5 h-5 rounded-full bg-forest-600 flex items-center justify-center flex-shrink-0">
+                <span className="w-5 h-5 rounded-full bg-forest-700 flex items-center justify-center flex-shrink-0">
                   <CheckIcon className="w-3 h-3 stroke-white" />
                 </span>
                 {f}
@@ -70,7 +70,7 @@ export function PaywallPage({ status }: { status: BillingStatus }) {
         <button
           onClick={subscribe}
           disabled={loading}
-          className="mt-6 w-full bg-forest-600 hover:bg-forest-700 text-white font-bold py-4 rounded-2xl transition-colors disabled:opacity-60"
+          className="mt-6 w-full bg-forest-700 hover:bg-forest-800 text-white font-bold py-4 rounded-2xl transition-colors disabled:opacity-60"
         >
           {loading ? 'Öppnar betalning…' : `Starta prenumeration – ${price} kr/mån`}
         </button>

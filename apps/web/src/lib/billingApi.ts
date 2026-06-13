@@ -17,4 +17,10 @@ export const billingApi = {
       method: 'POST',
       body: JSON.stringify({ origin: window.location.origin }),
     }),
+
+  openPortal: () =>
+    request<{ url: string }>('/billing/portal', {
+      method: 'POST',
+      body: JSON.stringify({ origin: window.location.origin }),
+    }),
 }
