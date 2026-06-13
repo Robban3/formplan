@@ -18,6 +18,7 @@ export interface JwtPayload {
   sub: string
   email: string
   role: string
+  created_at?: string
   app_metadata: {
     provider: string
   }

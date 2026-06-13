@@ -3,6 +3,7 @@ import { useAuth } from './hooks/useAuth'
 import { AuthPage } from './pages/AuthPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { TabLayout } from './components/TabLayout'
+import { BillingGate } from './components/BillingGate'
 import { ActiveWorkout } from './pages/training/ActiveWorkout'
 import { PlanPage } from './pages/PlanPage'
 import { Toaster } from './components/ui/Toaster'
@@ -28,6 +29,7 @@ export default function App() {
     <ErrorBoundary>
       <Toaster />
       <WeeklySessionsProvider>
+      <BillingGate user={user}>
       <Routes>
         <Route path="/auth" element={user ? <Navigate to="/hem" replace /> : <AuthPage />} />
         <Route path="/onboarding" element={user ? <OnboardingPage /> : <Navigate to="/auth" replace />} />
@@ -44,6 +46,7 @@ export default function App() {
         {/* Everything else lives inside the tab shell */}
         <Route path="/*" element={user ? <TabLayout /> : <Navigate to="/auth" replace />} />
       </Routes>
+      </BillingGate>
       </WeeklySessionsProvider>
     </ErrorBoundary>
   )
