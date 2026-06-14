@@ -474,13 +474,13 @@ export function RecipesPage() {
           />
         </div>
 
-        {/* Meal tabs */}
-        <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide">
+        {/* Meal tabs — wrap so inget kapas (t.ex. "Mellanmål") på smala skärmar */}
+        <div className="flex flex-wrap gap-2 mt-3">
           {MEAL_TABS.map((t) => (
             <button
               key={t}
               onClick={() => setActiveTab(t)}
-              className={`flex-shrink-0 text-xs px-4 py-1.5 rounded-full font-medium transition-colors ${
+              className={`text-xs px-4 py-1.5 rounded-full font-medium transition-colors ${
                 activeTab === t ? 'bg-forest-700 text-white' : 'bg-stone-100 text-stone-600'
               }`}
             >
