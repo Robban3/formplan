@@ -1,5 +1,6 @@
 import type { FoodLogEntry, MealSlot } from '../../lib/nutritionApi'
 import { PlusIcon } from '../ui/Icons'
+import { MealRecipeGenerator } from './MealRecipeGenerator'
 
 const SLOT_LABELS: Record<MealSlot, string> = {
   frukost: 'Frukost',
@@ -67,6 +68,8 @@ export function MealSection({ slot, entries, onAdd, onTapEntry }: Props) {
         <PlusIcon className="w-4 h-4 stroke-forest-600" />
         Lägg till mat
       </button>
+
+      <MealRecipeGenerator slot={slot} />
     </div>
   )
 }
