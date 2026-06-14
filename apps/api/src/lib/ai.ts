@@ -482,6 +482,34 @@ const CATEGORY_RULES: Record<RecipeCategory, string> = {
     'Receptet SKA vara veganskt – inga animaliska produkter alls (inget kött, fisk, ägg, mejeri eller honung).',
 }
 
+// Konkreta huvudråvaror/stilar per kategori. Vi slumpar en per generering och
+// ber modellen bygga runt den, så "Generera nytt recept" faktiskt varierar i
+// stället för att alltid landa på samma standardval (torsk/lax, nötfärs osv).
+const CATEGORY_VARIETY: Record<RecipeCategory, string[]> = {
+  kott: [
+    'nötfärs', 'högrev', 'ryggbiff', 'entrecôte', 'oxfilé', 'fläskfilé', 'fläskkarré',
+    'lammkotlett', 'lammfärs', 'kycklinglårfilé', 'kycklingfilé', 'kalkonfärs', 'köttbullar',
+    'viltfärs', 'älgstek', 'korv', 'pulled pork', 'anka',
+  ],
+  fisk: [
+    'lax', 'torsk', 'sej', 'kolja', 'makrill', 'strömming', 'sill', 'tonfisk', 'räkor',
+    'kräftor', 'blåmusslor', 'abborre', 'regnbågslax', 'rödspätta', 'hoki', 'sik', 'gös', 'kammusslor',
+  ],
+  pasta: [
+    'carbonara', 'bolognese med nötfärs', 'pesto och kyckling', 'arrabiata', 'tomat och basilika',
+    'spaghetti vongole', 'krämig svamppasta', 'spenat och fetaost', 'räkor och vitlök',
+    'lax och dill', 'tryffel och parmesan', 'aubergine och tomat', 'kyckling och soltorkade tomater',
+  ],
+  vegetariskt: [
+    'halloumi', 'fetaost', 'ägg', 'quorn', 'svarta bönor', 'kikärtor', 'röda linser', 'tofu',
+    'paneer', 'portabellosvamp', 'quinoa', 'grönsaksbiff', 'bulgur', 'majs och bönor', 'aubergine',
+  ],
+  veganskt: [
+    'tofu', 'tempeh', 'kikärtor', 'svarta bönor', 'röda linser', 'seitan', 'edamame', 'jackfruit',
+    'quinoa', 'sojafärs', 'stekt svamp', 'cashewnötter', 'bönpasta', 'falafel',
+  ],
+}
+
 export interface RecipeRequest {
   prompt: string
   calorie_target?: number | null | undefined
@@ -503,7 +531,17 @@ export async function generateRecipe(req: RecipeRequest, env: Env): Promise<Gene
   if (req.calorie_target) constraints.push(`Kalorimål: ca ${req.calorie_target} kcal per portion`)
   if (req.min_protein_g) constraints.push(`Minst ${req.min_protein_g} g protein per portion`)
   if (req.meal_type) constraints.push(`Måltidstyp: ${req.meal_type}`)
-  if (req.category) constraints.push(CATEGORY_RULES[req.category])
+  if (req.category) {
+    constraints.push(CATEGORY_RULES[req.category])
+    // Slumpa en konkret råvara/stil så varje nytt recept varierar.
+    const pool = CATEGORY_VARIETY[req.category]
+    const pick = pool[Math.floor(Math.random() * pool.length)]
+    if (pick) {
+      constraints.push(
+        `Variera från gång till gång — bygg DEN HÄR gången runt: ${pick}. Fastna inte i samma standardval.`
+      )
+    }
+  }
   if (req.allergies?.length)
     constraints.push(`MÅSTE undvikas (allergier/kosthänsyn): ${req.allergies.join(', ')}`)
 
