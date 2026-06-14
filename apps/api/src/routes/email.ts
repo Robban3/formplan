@@ -9,12 +9,15 @@ import {
   magicLinkEmail,
 } from '../lib/email'
 import { supabaseAdmin } from '../lib/supabase'
+import { timingSafeEqual } from '../lib/timingSafe'
 
 export const emailRouter = new Hono<AppContext>()
 
 emailRouter.post('/test-all', async (c) => {
   const { to, secret } = await c.req.json<{ to: string; secret: string }>()
-  if (secret !== c.env.WEBHOOK_SECRET) return c.json({ error: 'Forbidden' }, 403)
+  if (!secret || !(await timingSafeEqual(secret, c.env.WEBHOOK_SECRET))) {
+    return c.json({ error: 'Forbidden' }, 403)
+  }
   const results: Record<string, string> = {}
   const send = async (name: string, subject: string, html: string) => {
     try { await sendEmail(c.env.RESEND_API_KEY, { to, subject, html }); results[name] = 'ok' }
@@ -50,7 +53,7 @@ emailRouter.post('/test-all', async (c) => {
 emailRouter.post('/webhook/new-user', async (c) => {
   // Validera hemlig nyckel
   const secret = c.req.header('x-webhook-secret')
-  if (!secret || secret !== c.env.WEBHOOK_SECRET) {
+  if (!secret || !(await timingSafeEqual(secret, c.env.WEBHOOK_SECRET))) {
     return c.json({ error: 'Forbidden' }, 403)
   }
 
