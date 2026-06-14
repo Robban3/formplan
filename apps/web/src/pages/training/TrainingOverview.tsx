@@ -13,6 +13,9 @@ import { getTrainingStreak, getLongestStreak } from '../../lib/streakStore'
 import { loadActivePlan, type WorkoutPlanDay } from '../../lib/planLoader'
 import { parseMockPlanId } from '../../lib/mockPlan'
 import { ExerciseVideo } from '../../components/training/ExerciseVideo'
+import { workoutStore, type ExerciseLog } from '../../store/workoutStore'
+import { EXERCISE_LIBRARY, EXERCISE_CATEGORIES } from '../../lib/exerciseLibrary'
+import { PROGRAM_TEMPLATES, type ProgramTemplate, type TemplateDay } from '../../lib/programTemplates'
 
 type WorkoutDay = WorkoutPlanDay
 
@@ -119,6 +122,24 @@ export function TrainingOverview() {
         <div className="w-7 h-7 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
       </div>
     )
+  }
+
+  function startTemplateDay(templateId: string, day: TemplateDay) {
+    const exercises: ExerciseLog[] = day.exercises.map((ex) => ({
+      name: ex.name,
+      targetSets: ex.sets,
+      targetReps: ex.reps,
+      restSeconds: ex.rest_seconds,
+      sets: Array.from({ length: ex.sets }, () => ({ reps: 0, weight_kg: null, done: false })),
+    }))
+    workoutStore.start({
+      planDayId: `template-${templateId}`,
+      workoutName: day.name,
+      startedAt: Date.now(),
+      exercises,
+      currentExerciseIndex: 0,
+    })
+    navigate(`/workout/template-${templateId}/active`)
   }
 
   return (
@@ -275,11 +296,11 @@ export function TrainingOverview() {
       )}
 
       {tab === 'program' && (
-        <div className="px-5 mt-4">
-          {workoutDays.length === 0 ? (
-            <p className="text-center text-stone-400 mt-12">Generera ett schema för att se programöversikten.</p>
-          ) : (
+        <div className="px-5 mt-4 space-y-5">
+          {/* Ditt AI-schema (om det finns) */}
+          {workoutDays.length > 0 && (
             <div className="space-y-3">
+              <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide">Ditt schema</p>
               {workoutDays.map((day) => (
                 <div key={day.id} className="bg-white rounded-2xl border border-stone-100 p-4">
                   <div className="flex items-center justify-between mb-3">
@@ -296,12 +317,18 @@ export function TrainingOverview() {
               ))}
             </div>
           )}
+
+          {/* Färdiga program — alltid tillgängliga */}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide">Färdiga program</p>
+            {PROGRAM_TEMPLATES.map((t) => (
+              <ProgramTemplateCard key={t.id} template={t} onStartDay={startTemplateDay} />
+            ))}
+          </div>
         </div>
       )}
 
-      {tab === 'ovningar' && (
-        <ExerciseLibrary days={workoutDays} />
-      )}
+      {tab === 'ovningar' && <ExerciseLibrary />}
     </div>
   )
 }
@@ -415,41 +442,18 @@ function WorkoutCard({
   )
 }
 
-function ExerciseLibrary({ days }: { days: WorkoutDay[] }) {
+// Standalone, always-available exercise library grouped by muscle group.
+function ExerciseLibrary() {
   const [query, setQuery] = useState('')
   const [expanded, setExpanded] = useState<string | null>(null)
 
-  // Deduplicate exercises across workout days and enrich with which day they appear in.
-  const all = days.flatMap((day) =>
-    day.content.exercises.map((ex) => ({
-      name: ex.name,
-      sets: ex.sets,
-      reps: ex.reps,
-      dayName: day.content.name,
-      focus: day.content.focus,
-    }))
-  )
-
-  const unique = Array.from(
-    all
-      .reduce((map, ex) => {
-        if (!map.has(ex.name)) map.set(ex.name, ex)
-        return map
-      }, new Map<string, typeof all[number]>())
-      .values()
-  )
-
-  const filtered = query.trim()
-    ? unique.filter((e) => e.name.toLowerCase().includes(query.trim().toLowerCase()))
-    : unique
-
-  if (days.length === 0) {
-    return (
-      <div className="px-5 mt-12 text-center text-stone-400">
-        <p>Generera ett schema för att se övningsbiblioteket.</p>
-      </div>
-    )
-  }
+  const q = query.trim().toLowerCase()
+  const groups = EXERCISE_CATEGORIES.map((category) => ({
+    category,
+    items: EXERCISE_LIBRARY.filter(
+      (ex) => ex.category === category && (!q || ex.name.toLowerCase().includes(q))
+    ),
+  })).filter((g) => g.items.length > 0)
 
   return (
     <div className="px-5 mt-4 space-y-3">
@@ -459,37 +463,91 @@ function ExerciseLibrary({ days }: { days: WorkoutDay[] }) {
         placeholder="Sök övning…"
         className="w-full bg-stone-100 rounded-xl px-4 py-3 text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 text-sm"
       />
-      <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
-        {filtered.length === 0 && (
-          <p className="text-stone-400 text-sm text-center py-6">Inga träffar.</p>
-        )}
-        {filtered.map((ex, i) => (
-          <div key={ex.name} className={i > 0 ? 'border-t border-stone-50' : ''}>
-            <button
-              type="button"
-              onClick={() => setExpanded(expanded === ex.name ? null : ex.name)}
-              className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-stone-50 transition-colors"
-            >
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-stone-800">{ex.name}</p>
-                <p className="text-xs text-stone-400">{ex.dayName} · {ex.focus}</p>
+
+      {groups.length === 0 && (
+        <p className="text-stone-400 text-sm text-center py-6">Inga träffar.</p>
+      )}
+
+      {groups.map((g) => (
+        <div key={g.category}>
+          <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mt-3 mb-1.5 px-1">
+            {g.category}
+          </p>
+          <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
+            {g.items.map((ex, i) => (
+              <div key={ex.name} className={i > 0 ? 'border-t border-stone-50' : ''}>
+                <button
+                  type="button"
+                  onClick={() => setExpanded(expanded === ex.name ? null : ex.name)}
+                  className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-stone-50 transition-colors"
+                >
+                  <p className="text-sm font-medium text-stone-800 min-w-0 flex-1">{ex.name}</p>
+                  <span className="flex items-center gap-1 text-xs font-medium text-forest-600 ml-2 flex-shrink-0">
+                    <PlayIcon className="w-3.5 h-3.5" />
+                    {expanded === ex.name ? 'Stäng' : 'Video'}
+                  </span>
+                </button>
+                {expanded === ex.name && (
+                  <div className="px-4 pb-3">
+                    <ExerciseVideo exerciseName={ex.name} variant="card" />
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-                <span className="text-xs text-stone-500">{ex.sets} × {ex.reps}</span>
-                <span className="flex items-center gap-1 text-xs font-medium text-forest-600">
-                  <PlayIcon className="w-3.5 h-3.5" />
-                  {expanded === ex.name ? 'Stäng' : 'Video'}
-                </span>
-              </div>
-            </button>
-            {expanded === ex.name && (
-              <div className="px-4 pb-3">
-                <ExerciseVideo exerciseName={ex.name} variant="card" />
-              </div>
-            )}
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// A pre-made program: expandable card with its days; each day can be started.
+function ProgramTemplateCard({
+  template,
+  onStartDay,
+}: {
+  template: ProgramTemplate
+  onStartDay: (templateId: string, day: TemplateDay) => void
+}) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
+      <button onClick={() => setOpen((v) => !v)} className="w-full text-left p-4">
+        <div className="flex items-center justify-between">
+          <p className="font-semibold text-stone-900">{template.name}</p>
+          <span className="text-xs text-stone-400 bg-stone-100 px-2 py-1 rounded-lg flex-shrink-0">
+            {template.days_per_week} dgr/v
+          </span>
+        </div>
+        <p className="text-xs text-stone-400 mt-1">{template.description}</p>
+        <p className="text-[11px] text-forest-600 font-medium mt-2">{open ? 'Dölj pass ▲' : 'Visa pass ▼'}</p>
+      </button>
+
+      {open && (
+        <div className="border-t border-stone-50 divide-y divide-stone-50">
+          {template.days.map((day) => (
+            <div key={day.name} className="px-4 py-3">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-semibold text-stone-800">{day.name}</p>
+                <button
+                  onClick={() => onStartDay(template.id, day)}
+                  className="flex items-center gap-1 text-xs font-semibold bg-forest-700 text-white px-3 py-1.5 rounded-lg"
+                >
+                  <PlayIcon className="w-3.5 h-3.5 stroke-white" />
+                  Starta
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {day.exercises.map((ex) => (
+                  <span key={ex.name} className="text-[11px] bg-stone-100 text-stone-500 px-2 py-1 rounded-lg">
+                    {ex.name} {ex.sets}×{ex.reps}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
