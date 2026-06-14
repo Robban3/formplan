@@ -215,8 +215,10 @@ export function FoodDiary() {
               key={slot}
               slot={slot}
               entries={entriesFor(slot)}
+              date={dateKey(date)}
               onAdd={handleAdd}
               onTapEntry={handleTapEntry}
+              onLogged={() => load(date)}
             />
           ))}
         </div>

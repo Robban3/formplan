@@ -28,11 +28,13 @@ function FoodAvatar({ name, slot }: { name: string; slot: MealSlot }) {
 interface Props {
   slot: MealSlot
   entries: FoodLogEntry[]
+  date: string
   onAdd: (slot: MealSlot) => void
   onTapEntry: (entry: FoodLogEntry) => void
+  onLogged?: () => void
 }
 
-export function MealSection({ slot, entries, onAdd, onTapEntry }: Props) {
+export function MealSection({ slot, entries, date, onAdd, onTapEntry, onLogged }: Props) {
   const totalKcal = entries.reduce((s, e) => s + e.kcal, 0)
 
   return (
@@ -69,7 +71,7 @@ export function MealSection({ slot, entries, onAdd, onTapEntry }: Props) {
         Lägg till mat
       </button>
 
-      <MealRecipeGenerator slot={slot} />
+      <MealRecipeGenerator slot={slot} date={date} onLogged={onLogged} />
     </div>
   )
 }

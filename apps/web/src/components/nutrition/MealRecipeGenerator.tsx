@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { api, ApiError, type GeneratedRecipe } from '../../lib/api'
-import type { MealSlot } from '../../lib/nutritionApi'
+import { nutritionApi, type MealSlot } from '../../lib/nutritionApi'
+import { toast } from '../../lib/toast'
 import { ZapIcon, ClockIcon } from '../ui/Icons'
 
 // Slot → meal_type som AI:n förstår (slot-enumet använder 'mellanmar').
@@ -19,12 +20,19 @@ const KCAL_DEFAULT: Record<MealSlot, number> = {
   mellanmar: 250,
 }
 
-export function MealRecipeGenerator({ slot }: { slot: MealSlot }) {
+interface Props {
+  slot: MealSlot
+  date: string // YYYY-MM-DD
+  onLogged?: () => void
+}
+
+export function MealRecipeGenerator({ slot, date, onLogged }: Props) {
   const [open, setOpen] = useState(false)
   const [ingredient, setIngredient] = useState('')
   const [kcal, setKcal] = useState(String(KCAL_DEFAULT[slot]))
   const [recipe, setRecipe] = useState<GeneratedRecipe | null>(null)
   const [loading, setLoading] = useState(false)
+  const [logging, setLogging] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function generate() {
@@ -48,6 +56,35 @@ export function MealRecipeGenerator({ slot }: { slot: MealSlot }) {
       }
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function logMeal() {
+    if (!recipe || logging) return
+    setLogging(true)
+    try {
+      // Logga en portion av receptet som en post. amount_g måste vara > 0; vi
+      // uppskattar portionsvikten från makromassan (kcal/makros lagras absolut).
+      const grams = Math.max(1, Math.round(recipe.protein_g + recipe.fat_g + recipe.carbs_g))
+      await nutritionApi.addLogEntry({
+        date,
+        meal_slot: slot,
+        food_id: null,
+        food_name: recipe.name,
+        amount_g: grams,
+        kcal: recipe.kcal,
+        protein_g: recipe.protein_g,
+        fat_g: recipe.fat_g,
+        carbs_g: recipe.carbs_g,
+      })
+      toast.success('Måltid loggad!')
+      setOpen(false)
+      setRecipe(null)
+      onLogged?.()
+    } catch (e) {
+      toast.error((e as Error).message || 'Kunde inte logga måltiden')
+    } finally {
+      setLogging(false)
     }
   }
 
@@ -149,6 +186,14 @@ export function MealRecipeGenerator({ slot }: { slot: MealSlot }) {
               </li>
             ))}
           </ol>
+
+          <button
+            onClick={logMeal}
+            disabled={logging}
+            className="w-full mt-3 py-2.5 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-sm font-semibold transition-colors disabled:opacity-50"
+          >
+            {logging ? 'Loggar…' : `Logga måltid (${recipe.kcal} kcal)`}
+          </button>
         </div>
       )}
     </div>
