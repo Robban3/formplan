@@ -24,6 +24,7 @@ body {
   color: var(--text);
   line-height: 1.5;
 }
+html, body { overflow-x: hidden; max-width: 100%; }
 
 .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
 
@@ -315,5 +316,5 @@ h1 {
   .hero-right { display: none; }
   .feature-grid { grid-template-columns: 1fr; }
   .included-inner { grid-template-columns: 1fr; }
-  .included-right { grid-template-columns: 1fr 1fr; }
+  .included-right { grid-template-columns: 1fr; }
 }
