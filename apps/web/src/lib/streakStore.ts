@@ -5,7 +5,9 @@ function isoDate(d: Date) {
 }
 
 function startOfDay(iso: string): Date {
-  return new Date(iso + 'T00:00:00')
+  // Parse as UTC so day-stepping stays consistent with isoDate() (also UTC)
+  // and never skips a day across timezones/DST.
+  return new Date(iso + 'T00:00:00Z')
 }
 
 /** Returns current streak (consecutive days with at least one workout, ending today or yesterday). */

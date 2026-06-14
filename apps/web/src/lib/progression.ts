@@ -44,7 +44,8 @@ export function recommendNextWeight(
   const last = usable[usable.length - 1]!
   const prev = usable[usable.length - 2]!
 
-  const sameWeight = last.maxWeight_kg === prev.maxWeight_kg
+  // Tolerant compare so lb→kg rounding doesn't hide "same working weight".
+  const sameWeight = Math.abs(last.maxWeight_kg - prev.maxWeight_kg) < 0.05
   const bothHitTop = last.repsAtMax >= top && prev.repsAtMax >= top
 
   if (sameWeight && bothHitTop) {

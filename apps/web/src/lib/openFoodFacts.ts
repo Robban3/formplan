@@ -53,6 +53,12 @@ export async function lookupBarcode(code: string): Promise<ScannedProduct | null
 
   const n = p.nutriments ?? {}
   const kcal = n['energy-kcal_100g'] ?? (n.energy_100g ? n.energy_100g / 4.184 : 0)
+  const protein = n.proteins_100g ?? 0
+  const fat = n.fat_100g ?? 0
+  const carbs = n.carbohydrates_100g ?? 0
+
+  // No usable nutrition data → treat as not found rather than logging zeros.
+  if (kcal <= 0 && protein <= 0 && fat <= 0 && carbs <= 0) return null
 
   const serving =
     typeof p.serving_quantity === 'number'
@@ -66,9 +72,9 @@ export async function lookupBarcode(code: string): Promise<ScannedProduct | null
     name: p.product_name?.trim() || 'Okänd produkt',
     brand: p.brands?.split(',')[0]?.trim() || null,
     kcal_per_100g: Math.round(kcal),
-    protein_per_100g: r1(n.proteins_100g ?? 0),
-    fat_per_100g: r1(n.fat_100g ?? 0),
-    carbs_per_100g: r1(n.carbohydrates_100g ?? 0),
+    protein_per_100g: r1(protein),
+    fat_per_100g: r1(fat),
+    carbs_per_100g: r1(carbs),
     serving_size_g: serving,
   }
 }

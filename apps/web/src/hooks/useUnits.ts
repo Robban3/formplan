@@ -9,7 +9,7 @@ export function useUnits() {
     toDisplay: (kg: number) =>
       imperial ? Math.round(kg * 2.20462 * 10) / 10 : kg,
     toStore: (displayed: number) =>
-      imperial ? Math.round((displayed / 2.20462) * 10) / 10 : displayed,
+      imperial ? Math.round((displayed / 2.20462) * 10000) / 10000 : displayed,
     formatWeight: (kg: number) => {
       const val = imperial ? Math.round(kg * 2.20462 * 10) / 10 : kg
       return `${val} ${imperial ? 'lbs' : 'kg'}`

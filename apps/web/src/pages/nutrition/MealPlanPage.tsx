@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon, LeafIcon, ShoppingCartIcon } from '../../components/ui/Icons'
 import { useSettings } from '../../hooks/useSettings'
@@ -62,6 +62,13 @@ export function MealPlanPage() {
   const [expanded, setExpanded] = useState<number | null>(null)
   const [variation, setVariation] = useState(0)
 
+  // Settings hydrate from the profile after mount; follow the calorie goal
+  // until the user edits it manually so the target isn't stuck at the default.
+  const kcalTouched = useRef(false)
+  useEffect(() => {
+    if (!kcalTouched.current) setKcal(settings.calorie_goal)
+  }, [settings.calorie_goal])
+
   function generate() {
     setPlan(generateMealPlan(kcal, mealCount, focus, variation))
     setExpanded(null)
@@ -98,7 +105,7 @@ export function MealPlanPage() {
               min={800}
               max={6000}
               step={50}
-              onChange={(e) => setKcal(Math.max(800, Math.min(6000, Number(e.target.value))))}
+              onChange={(e) => { kcalTouched.current = true; setKcal(Math.max(800, Math.min(6000, Number(e.target.value)))) }}
               className="flex-1 bg-stone-100 rounded-xl px-4 py-3 text-stone-900 text-lg font-bold text-center focus:outline-none focus:ring-2 focus:ring-forest-400"
             />
             <span className="text-stone-400 font-medium">kcal</span>
@@ -107,7 +114,7 @@ export function MealPlanPage() {
             {[1500, 1800, 2000, 2500].map((k) => (
               <button
                 key={k}
-                onClick={() => setKcal(k)}
+                onClick={() => { kcalTouched.current = true; setKcal(k) }}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                   kcal === k ? 'bg-forest-700 text-white' : 'bg-stone-100 text-stone-600'
                 }`}
