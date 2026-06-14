@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { api, ApiError, type GeneratedRecipe } from '../../lib/api'
 import { nutritionApi, type MealSlot } from '../../lib/nutritionApi'
+import { addCustomWeekMeal, weekdayOf } from '../../lib/weekMealStore'
 import { toast } from '../../lib/toast'
 import { ZapIcon, ClockIcon } from '../ui/Icons'
 
@@ -35,12 +36,16 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
   const [recipe, setRecipe] = useState<GeneratedRecipe | null>(null)
   const [loading, setLoading] = useState(false)
   const [logging, setLogging] = useState(false)
+  const [logged, setLogged] = useState(false)
+  const [savedWeek, setSavedWeek] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function generate() {
     if (loading) return
     setLoading(true)
     setError(null)
+    setLogged(false)
+    setSavedWeek(false)
     const ing = ingredient.trim()
     const prompt = ing ? `Ett recept som utgår från: ${ing}` : 'Ett gott och varierat recept'
     try {
@@ -62,7 +67,7 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
   }
 
   async function logMeal() {
-    if (!recipe || logging) return
+    if (!recipe || logging || logged) return
     setLogging(true)
     try {
       // Logga en portion av receptet som en post. amount_g måste vara > 0; vi
@@ -80,15 +85,29 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
         fat_g: recipe.fat_g,
         carbs_g: recipe.carbs_g,
       })
+      setLogged(true)
       toast.success('Måltid loggad!')
-      setOpen(false)
-      setRecipe(null)
       onLogged?.()
     } catch (e) {
       toast.error((e as Error).message || 'Kunde inte logga måltiden')
     } finally {
       setLogging(false)
     }
+  }
+
+  // Spara receptet i veckoschemat på rätt veckodag/måltid (separat val).
+  function saveToWeek() {
+    if (!recipe || savedWeek) return
+    addCustomWeekMeal(weekdayOf(new Date(`${date}T00:00:00`)), {
+      slot,
+      name: recipe.name,
+      kcal: recipe.kcal,
+      protein_g: recipe.protein_g,
+      fat_g: recipe.fat_g,
+      carbs_g: recipe.carbs_g,
+    })
+    setSavedWeek(true)
+    toast.success('Sparat till veckoschemat!')
   }
 
   if (!open) {
@@ -193,13 +212,22 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
             ))}
           </ol>
 
-          <button
-            onClick={logMeal}
-            disabled={logging}
-            className="w-full mt-3 py-2.5 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-sm font-semibold transition-colors disabled:opacity-50"
-          >
-            {logging ? 'Loggar…' : `Logga måltid (${recipe.kcal} kcal)`}
-          </button>
+          <div className="grid grid-cols-2 gap-2 mt-3">
+            <button
+              onClick={logMeal}
+              disabled={logging || logged}
+              className="py-2.5 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-sm font-semibold transition-colors disabled:opacity-60"
+            >
+              {logged ? 'Loggad ✓' : logging ? 'Loggar…' : 'Logga måltid'}
+            </button>
+            <button
+              onClick={saveToWeek}
+              disabled={savedWeek}
+              className="py-2.5 rounded-xl border border-forest-200 text-forest-700 text-sm font-semibold hover:bg-forest-50 transition-colors disabled:opacity-60"
+            >
+              {savedWeek ? 'Sparad ✓' : 'Spara till vecka'}
+            </button>
+          </div>
         </div>
       )}
     </div>

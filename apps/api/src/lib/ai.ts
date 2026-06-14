@@ -8,6 +8,7 @@ import type {
   RestDay,
   GeneratedRecipe,
   FoodPhotoAnalysis,
+  MealEstimate,
 } from './types'
 
 export type ImageMediaType = 'image/jpeg' | 'image/png' | 'image/webp'
@@ -643,5 +644,37 @@ Om bilden inte föreställer mat: returnera tomma "items", nollställd "total" o
       rawText.slice(0, 1000)
     )
     throw new Error(`Food photo analysis returned unparseable output: ${(err as Error).message}`)
+  }
+}
+
+// ── Kaloriuppskattning av en fritextmåltid ──────────────────────────────────
+// "kvarg med bär" → { name, kcal, protein_g, fat_g, carbs_g } för en normal
+// portion. Används av veckoplaneringen för egna måltider.
+export async function estimateMeal(description: string, env: Env): Promise<MealEstimate> {
+  const { text } = await callAi(
+    {
+      system: 'Svara alltid med enbart giltig JSON — ingen markdown, ingen förklaring.',
+      messages: [
+        {
+          role: 'user',
+          content: `Du är en svensk nutritionist. Uppskatta näringsinnehållet för måltiden "${description}". Anta en normal portion om inget annat anges. Svara ENDAST med giltig JSON enligt: {"name":"kort namn","kcal":number,"protein_g":number,"fat_g":number,"carbs_g":number}`,
+        },
+      ],
+      maxTokens: 300,
+      json: true,
+      temperature: 0,
+    },
+    env
+  )
+
+  const p = JSON.parse(extractJson(text)) as Partial<MealEstimate>
+  const num = (v: unknown) => (typeof v === 'number' && isFinite(v) && v > 0 ? v : 0)
+  const r1 = (v: unknown) => Math.round(num(v) * 10) / 10
+  return {
+    name: String(p.name ?? description).slice(0, 60),
+    kcal: Math.round(num(p.kcal)),
+    protein_g: r1(p.protein_g),
+    fat_g: r1(p.fat_g),
+    carbs_g: r1(p.carbs_g),
   }
 }

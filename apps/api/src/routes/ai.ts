@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { requireAuth } from '../middleware/auth'
 import { requireAccess } from '../middleware/access'
-import { coachReply, generateRecipe, analyzeFoodPhoto, friendlyAiError } from '../lib/ai'
+import { coachReply, generateRecipe, analyzeFoodPhoto, estimateMeal, friendlyAiError } from '../lib/ai'
 import type { AppContext } from '../lib/types'
 
 export const aiRouter = new Hono<AppContext>()
@@ -85,6 +85,23 @@ aiRouter.post(
       return c.json({ analysis })
     } catch (err) {
       console.error('Food photo analysis failed:', err)
+      const { message, status } = friendlyAiError(err)
+      return c.json({ error: message }, status)
+    }
+  }
+)
+
+// POST /ai/estimate-meal — uppskatta kcal/makros för en fritextmåltid.
+aiRouter.post(
+  '/estimate-meal',
+  zValidator('json', z.object({ description: z.string().min(1).max(200) })),
+  async (c) => {
+    const b = c.req.valid('json')
+    try {
+      const estimate = await estimateMeal(b.description, c.env)
+      return c.json({ estimate })
+    } catch (err) {
+      console.error('Meal estimate failed:', err)
       const { message, status } = friendlyAiError(err)
       return c.json({ error: message }, status)
     }

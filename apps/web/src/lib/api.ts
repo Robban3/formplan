@@ -87,6 +87,14 @@ export interface FoodPhotoAnalysis {
   total: { kcal: number; protein_g: number; fat_g: number; carbs_g: number }
 }
 
+export interface MealEstimate {
+  name: string
+  kcal: number
+  protein_g: number
+  fat_g: number
+  carbs_g: number
+}
+
 export const api = {
   getProfile: () => request<{ profile: unknown }>('/profile'),
 
@@ -126,6 +134,12 @@ export const api = {
     request<{ analysis: FoodPhotoAnalysis }>('/ai/food-photo', {
       method: 'POST',
       body: JSON.stringify({ image, media_type }),
+    }),
+
+  estimateMeal: (description: string) =>
+    request<{ estimate: MealEstimate }>('/ai/estimate-meal', {
+      method: 'POST',
+      body: JSON.stringify({ description }),
     }),
 }
 

@@ -125,6 +125,14 @@ export interface FoodPhotoAnalysis {
   total: { kcal: number; protein_g: number; fat_g: number; carbs_g: number }
 }
 
+export interface MealEstimate {
+  name: string
+  kcal: number
+  protein_g: number
+  fat_g: number
+  carbs_g: number
+}
+
 export type MealSlot = 'frukost' | 'lunch' | 'middag' | 'mellanmar'
 
 export interface FoodItemRow {
