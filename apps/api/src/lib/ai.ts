@@ -530,7 +530,10 @@ export async function generateRecipe(req: RecipeRequest, env: Env): Promise<Gene
   const constraints: string[] = []
   if (req.calorie_target) constraints.push(`Kalorimål: ca ${req.calorie_target} kcal per portion`)
   if (req.min_protein_g) constraints.push(`Minst ${req.min_protein_g} g protein per portion`)
-  if (req.meal_type) constraints.push(`Måltidstyp: ${req.meal_type}`)
+  if (req.meal_type)
+    constraints.push(
+      `Måltidstyp: ${req.meal_type}. Receptet MÅSTE passa som ${req.meal_type} – välj råvaror, portionsstorlek och upplägg som är typiska för den måltiden (t.ex. frukost = frukostmat, inte en middagsrätt).`
+    )
   if (req.category) {
     constraints.push(CATEGORY_RULES[req.category])
     // Slumpa en konkret råvara/stil så varje nytt recept varierar.
@@ -538,7 +541,7 @@ export async function generateRecipe(req: RecipeRequest, env: Env): Promise<Gene
     const pick = pool[Math.floor(Math.random() * pool.length)]
     if (pick) {
       constraints.push(
-        `Variera från gång till gång — bygg DEN HÄR gången runt: ${pick}. Fastna inte i samma standardval.`
+        `Variera från gång till gång — bygg gärna DEN HÄR gången runt: ${pick}, så länge det passar måltidstypen. Fastna inte i samma standardval.`
       )
     }
   }

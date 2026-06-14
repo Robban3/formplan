@@ -207,6 +207,15 @@ const RECIPES: Recipe[] = [
 const MEAL_TABS = ['Alla', 'Frukost', 'Lunch', 'Middag', 'Mellanmål'] as const
 type MealTab = typeof MEAL_TABS[number]
 
+// Vald måltidsflik → meal_type som AI:n får (styr att t.ex. frukost blir
+// frukostmat, inte lammfärsbiffar).
+const MEAL_TYPE_MAP: Record<Exclude<MealTab, 'Alla'>, string> = {
+  Frukost: 'frukost',
+  Lunch: 'lunch',
+  Middag: 'middag',
+  Mellanmål: 'mellanmål',
+}
+
 const RECIPE_PROMPTS = [
   'En middag med minst 50 g protein',
   'Snabb frukost under 400 kcal',
@@ -215,7 +224,7 @@ const RECIPE_PROMPTS = [
 ]
 
 // AI-generated recipe based on the user's calorie/macro goals and allergies.
-function AiRecipeGenerator() {
+function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
   const [prompt, setPrompt] = useState('')
   const [kcal, setKcal] = useState<string>('')
   const [minProtein, setMinProtein] = useState<string>('')
@@ -253,6 +262,7 @@ function AiRecipeGenerator() {
         min_protein_g: minProtein ? Number(minProtein) : null,
         allergies,
         category,
+        meal_type: mealTab !== 'Alla' ? MEAL_TYPE_MAP[mealTab] : null,
       })
       setRecipe(recipe)
     } catch (e) {
@@ -279,7 +289,9 @@ function AiRecipeGenerator() {
         </div>
         <div>
           <p className="font-semibold text-stone-900 text-sm">Skapa recept med AI</p>
-          <p className="text-[11px] text-stone-400">Anpassat efter dina mål och allergier</p>
+          <p className="text-[11px] text-stone-400">
+            {mealTab !== 'Alla' ? `${mealTab} · anpassat efter dina mål` : 'Anpassat efter dina mål och allergier'}
+          </p>
         </div>
       </div>
 
@@ -479,7 +491,7 @@ export function RecipesPage() {
       </div>
 
       <div className="px-5 mt-4 space-y-3">
-        <AiRecipeGenerator />
+        <AiRecipeGenerator mealTab={activeTab} />
 
         {filtered.length === 0 && (
           <p className="text-center text-stone-400 text-sm py-8">Inga recept hittades.</p>
