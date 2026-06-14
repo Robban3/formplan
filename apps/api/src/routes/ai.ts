@@ -2,12 +2,15 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { requireAuth } from '../middleware/auth'
+import { requireAccess } from '../middleware/access'
 import { coachReply, generateRecipe, analyzeFoodPhoto } from '../lib/ai'
 import type { AppContext } from '../lib/types'
 
 export const aiRouter = new Hono<AppContext>()
 
 aiRouter.use('*', requireAuth)
+// AI är en premium-funktion — kräver aktiv provperiod eller prenumeration.
+aiRouter.use('*', requireAccess)
 
 const messageSchema = z.object({
   role: z.enum(['user', 'assistant']),

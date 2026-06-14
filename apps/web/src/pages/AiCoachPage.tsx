@@ -4,7 +4,7 @@ import { ChevronLeftIcon, SendIcon, BotIcon } from '../components/ui/Icons'
 import { getLocalSessions } from '../lib/workoutSessionStore'
 import { getWeightEntries } from '../lib/weightStore'
 import { getTrainingStreak } from '../lib/streakStore'
-import { request } from '../lib/api'
+import { request, ApiError } from '../lib/api'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -43,7 +43,12 @@ async function askCoach(messages: Message[]): Promise<string> {
       body: JSON.stringify({ messages, context: buildContext() }),
     })
     return reply
-  } catch {
+  } catch (e) {
+    // Premium-gate: don't fake an answer — the central toast already fired, so
+    // tell the user to upgrade.
+    if (e instanceof ApiError && e.status === 402) {
+      return 'AI-coachen är en Premium-funktion. Uppgradera under Mer → Premium för att fortsätta chatta.'
+    }
     // Fallback: simple rule-based responses if backend endpoint doesn't exist
     const lastMsg = messages[messages.length - 1]?.content.toLowerCase() ?? ''
     if (lastMsg.includes('vila') || lastMsg.includes('rest')) {

@@ -1,7 +1,19 @@
 import { supabase } from './supabase'
+import { toast } from './toast'
 import { getMockPlanResponse, parseMockPlanId, type MockGoal } from './mockPlan'
 
 const BASE = import.meta.env.VITE_API_URL as string
+
+export class ApiError extends Error {
+  status: number
+  code?: string
+  constructor(message: string, status: number, code?: string) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+    this.code = code
+  }
+}
 
 async function authHeaders(): Promise<HeadersInit> {
   const { data } = await supabase.auth.getSession()
@@ -13,8 +25,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = await authHeaders()
   const res = await fetch(`${BASE}${path}`, { ...init, headers: { ...headers, ...(init?.headers ?? {}) } })
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }))
-    throw new Error((err as { error: string }).error ?? res.statusText)
+    const err = (await res.json().catch(() => ({ error: res.statusText }))) as { error?: string; code?: string }
+    const message = err.error ?? res.statusText
+    // Premium-gate (402): visa en toast centralt så alla AI-funktioner ger
+    // samma tydliga "uppgradera"-meddelande oavsett lokal felhantering.
+    if (res.status === 402) toast.error(message)
+    throw new ApiError(message, res.status, err.code)
   }
   return res.json() as Promise<T>
 }

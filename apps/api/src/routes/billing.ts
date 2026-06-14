@@ -3,14 +3,9 @@ import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import Stripe from 'stripe'
 import { requireAuth } from '../middleware/auth'
-import { isUserPremium, supabaseAdmin } from '../lib/supabase'
+import { supabaseAdmin } from '../lib/supabase'
+import { PRICE_SEK_ORE, resolveAccess } from '../lib/access'
 import type { AppContext } from '../lib/types'
-
-const TRIAL_DAYS = 7
-const PRICE_SEK_ORE = 9900 // 99,00 kr/mån
-
-// Konton som alltid har full åtkomst (test/admin) — kringgår provperiod & paywall.
-const FULL_ACCESS_EMAILS = new Set(['oliver@dronarkompaniet.se', 'rvdv1122@gmail.com'])
 
 export const billingRouter = new Hono<AppContext>()
 
@@ -19,36 +14,8 @@ billingRouter.use('*', requireAuth)
 // GET /billing/status — access = within 7-day trial (from signup) OR active sub.
 billingRouter.get('/status', async (c) => {
   const user = c.get('user')
-
-  // Allowlistade konton får alltid full åtkomst.
-  if (user.email && FULL_ACCESS_EMAILS.has(user.email.toLowerCase())) {
-    return c.json({
-      access: true,
-      premium: true,
-      inTrial: false,
-      trialEndsAt: new Date(0).toISOString(),
-      trialDaysLeft: 0,
-      price_sek: PRICE_SEK_ORE / 100,
-    })
-  }
-
-  const premium = await isUserPremium(user.sub, c.env)
-
-  // No signup date → no trial (avoids granting an indefinite free trial).
-  const created = user.created_at ? new Date(user.created_at) : null
-  const trialEnd = created ? new Date(created.getTime() + TRIAL_DAYS * 86_400_000) : new Date(0)
-  const now = new Date()
-  const inTrial = created ? now < trialEnd : false
-  const trialDaysLeft = Math.max(0, Math.ceil((trialEnd.getTime() - now.getTime()) / 86_400_000))
-
-  return c.json({
-    access: premium || inTrial,
-    premium,
-    inTrial: inTrial && !premium,
-    trialEndsAt: trialEnd.toISOString(),
-    trialDaysLeft: premium ? 0 : trialDaysLeft,
-    price_sek: PRICE_SEK_ORE / 100,
-  })
+  const status = await resolveAccess(user, c.env)
+  return c.json({ ...status, price_sek: PRICE_SEK_ORE / 100 })
 })
 
 // POST /billing/checkout — start a Stripe Checkout session for 99 kr/month.
