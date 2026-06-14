@@ -49,17 +49,91 @@ async function resolveDailyGoals(
   return defaultGoals(profiles?.[0]?.calorie_goal ?? null)
 }
 
-// GET /nutrition/foods/search?q=
+// ── Open Food Facts (server-side proxy) ─────────────────────────────────────
+// Körs i Workern (obegränsad egress + korrekt User-Agent), inte i webbläsaren,
+// så vi slipper CORS/rate-limit-problem. Resultat märks med id "off-<code>" så
+// klienten loggar dem med food_id = null (ingen FK till food_item).
+interface OffNutriments {
+  'energy-kcal_100g'?: number
+  energy_100g?: number
+  proteins_100g?: number
+  fat_100g?: number
+  carbohydrates_100g?: number
+}
+interface OffProduct {
+  code?: string
+  product_name?: string
+  brands?: string
+  nutriments?: OffNutriments
+  serving_quantity?: number | string
+}
+const r1 = (n: number) => Math.round(n * 10) / 10
+
+async function searchOpenFoodFacts(q: string): Promise<FoodItemRow[]> {
+  const url =
+    `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}` +
+    `&search_simple=1&action=process&json=1&page_size=30` +
+    `&fields=code,product_name,brands,nutriments,serving_quantity`
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), 6000)
+  try {
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'FormPlan/1.0 (https://formplan.app)' },
+      signal: ctrl.signal,
+    })
+    if (!res.ok) return []
+    const data = (await res.json()) as { products?: OffProduct[] }
+    const out: FoodItemRow[] = []
+    const seen = new Set<string>()
+    for (const p of data.products ?? []) {
+      const base = p.product_name?.trim()
+      if (!base) continue
+      const n = p.nutriments ?? {}
+      const kcal = n['energy-kcal_100g'] ?? (n.energy_100g ? n.energy_100g / 4.184 : 0)
+      const protein = n.proteins_100g ?? 0
+      const fat = n.fat_100g ?? 0
+      const carbs = n.carbohydrates_100g ?? 0
+      if (kcal <= 0 && protein <= 0 && fat <= 0 && carbs <= 0) continue
+      const brand = p.brands?.split(',')[0]?.trim() || null
+      const name = brand ? `${base} (${brand})` : base
+      const key = name.toLowerCase()
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push({
+        id: `off-${p.code ?? key}`,
+        name,
+        brand,
+        kcal_per_100g: Math.round(kcal),
+        protein_per_100g: r1(protein),
+        fat_per_100g: r1(fat),
+        carbs_per_100g: r1(carbs),
+        serving_size_g: typeof p.serving_quantity === 'number' ? p.serving_quantity : null,
+      })
+    }
+    return out
+  } catch {
+    return []
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+// GET /nutrition/foods/search?q=  — lokala curated-livsmedel + Open Food Facts.
 nutritionRouter.get('/foods/search', async (c) => {
   const q = (c.req.query('q') ?? '').trim()
-  if (!q) return c.json({ items: [] })
+  if (q.length < 2) return c.json({ items: [] })
   const db = supabaseAdmin(c.env)
   // Encode only the user term — keep the * wildcards literal for PostgREST ilike.
   const pattern = `*${encodeURIComponent(q)}*`
-  const { data } = await db.query<FoodItemRow[]>(
-    `/food_item?name=ilike.${pattern}&select=*&order=name.asc&limit=20`
-  )
-  return c.json({ items: data ?? [] })
+
+  const [localRes, off] = await Promise.all([
+    db.query<FoodItemRow[]>(`/food_item?name=ilike.${pattern}&select=*&order=name.asc&limit=20`),
+    searchOpenFoodFacts(q),
+  ])
+  const local = localRes.data ?? []
+  const localNames = new Set(local.map((i) => i.name.toLowerCase()))
+  const items = [...local, ...off.filter((o) => !localNames.has(o.name.toLowerCase()))]
+  return c.json({ items })
 })
 
 // GET /nutrition/log?date=YYYY-MM-DD

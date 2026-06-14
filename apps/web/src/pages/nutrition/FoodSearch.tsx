@@ -6,7 +6,7 @@ import { loadCustomMeals, mealTotals, type CustomMeal } from '../../lib/customMe
 import { toast } from '../../lib/toast'
 import { ChevronLeftIcon, XIcon, PlusIcon, UtensilsIcon, CameraIcon, ScanBarcodeIcon } from '../../components/ui/Icons'
 import { recordFoodUsed, getTopFavorites } from '../../lib/foodFavoritesStore'
-import { searchOpenFoodFacts, isOffId } from '../../lib/openFoodFacts'
+import { isOffId } from '../../lib/openFoodFacts'
 
 type SearchTab = 'alla' | 'mina' | 'maltider'
 
@@ -71,19 +71,17 @@ export function FoodSearch() {
   useEffect(() => {
     if (query.length < 2) { setResults([]); return }
     let cancelled = false
+    // Söket slår ihop lokala curated-livsmedel + Open Food Facts server-side.
     const timer = setTimeout(async () => {
       setSearching(true)
-      // Local curated DB + Open Food Facts (millions of products), in parallel.
-      const [localRes, offRes] = await Promise.allSettled([
-        nutritionApi.searchFoods(query),
-        searchOpenFoodFacts(query),
-      ])
-      if (cancelled) return
-      const local = localRes.status === 'fulfilled' ? localRes.value.items : []
-      const off = offRes.status === 'fulfilled' ? offRes.value : []
-      const localNames = new Set(local.map((i) => i.name.toLowerCase()))
-      setResults([...local, ...off.filter((o) => !localNames.has(o.name.toLowerCase()))])
-      setSearching(false)
+      try {
+        const { items } = await nutritionApi.searchFoods(query)
+        if (!cancelled) setResults(items)
+      } catch {
+        if (!cancelled) setResults([])
+      } finally {
+        if (!cancelled) setSearching(false)
+      }
     }, 350)
     return () => { cancelled = true; clearTimeout(timer) }
   }, [query])
