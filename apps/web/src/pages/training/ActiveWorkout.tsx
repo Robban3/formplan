@@ -422,7 +422,7 @@ export function ActiveWorkout() {
     nextIncompleteIndex !== null ? workout.exercises[nextIncompleteIndex] : null
 
   return (
-    <div className="min-h-[100dvh] bg-canvas flex flex-col max-w-lg mx-auto">
+    <div className="min-h-[100dvh] bg-canvas flex flex-col max-w-lg mx-auto overflow-x-hidden">
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 pt-header pb-4 bg-white border-b border-stone-100">
         <button onClick={requestFinish} className="flex items-center gap-1 text-stone-400 text-sm">
@@ -511,7 +511,7 @@ export function ActiveWorkout() {
         {/* Automatic progression suggestion */}
         {showWeight && recommendations[ex.name] && (() => {
           const rec = recommendations[ex.name]!
-          const applied = ex.sets.some((s) => !s.done && s.weight_kg === rec.recommendedWeight_kg)
+          const applied = ex.sets.some((s) => !s.done && s.weight_kg != null && Math.abs(s.weight_kg - rec.recommendedWeight_kg) < 0.05)
           return (
             <div className="flex items-center gap-3 bg-forest-50 border border-forest-200 rounded-2xl px-4 py-3 mb-4">
               <ZapIcon className="w-5 h-5 stroke-forest-600 flex-shrink-0" />
@@ -580,7 +580,7 @@ export function ActiveWorkout() {
                     value={set.duration_min ?? ''}
                     onChange={(e) => updateSet(si, 'duration_min', e.target.value)}
                     disabled={set.done}
-                    className="w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
+                    className="min-w-0 w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
                   />
                   <input
                     type="number"
@@ -589,7 +589,7 @@ export function ActiveWorkout() {
                     value={set.distance_km ?? ''}
                     onChange={(e) => updateSet(si, 'distance_km', e.target.value)}
                     disabled={set.done}
-                    className="w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
+                    className="min-w-0 w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
                   />
                 </>
               ) : (
@@ -601,7 +601,7 @@ export function ActiveWorkout() {
                     value={set.reps || ''}
                     onChange={(e) => updateSet(si, 'reps', e.target.value)}
                     disabled={set.done}
-                    className="w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
+                    className="min-w-0 w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
                   />
                   {showWeight && (
                     <input
@@ -613,7 +613,7 @@ export function ActiveWorkout() {
                       value={set.weight_kg != null ? toDisplay(set.weight_kg) : ''}
                       onChange={(e) => updateSet(si, 'weight_kg', e.target.value)}
                       disabled={set.done}
-                      className="w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
+                      className="min-w-0 w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
                     />
                   )}
                 </>
