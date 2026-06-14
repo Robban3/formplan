@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon, PlusIcon, XIcon, PlayIcon, DumbbellIcon } from '../../components/ui/Icons'
 import { workoutStore } from '../../store/workoutStore'
 import type { ExerciseLog } from '../../store/workoutStore'
-import { isCardioExercise } from '../../lib/exerciseLog'
+import { isCardioExercise, exerciseUsesWeight } from '../../lib/exerciseLog'
 
-interface Exercise { name: string; sets: number; reps: string; rest_seconds: number }
+interface Exercise { name: string; sets: number; reps: string; rest_seconds: number; weight_kg?: number | null }
 interface CustomWorkout { id: string; name: string; exercises: Exercise[]; createdAt: string }
 
 const KEY = 'formplan_custom_workouts'
@@ -37,19 +37,22 @@ export function CustomWorkoutPage() {
   const [exSets, setExSets] = useState('3')
   const [exReps, setExReps] = useState('10')
   const [exRest, setExRest] = useState('60')
-  const [search, setSearch] = useState('')
+  const [exWeight, setExWeight] = useState('')
 
   function reload() { setWorkouts(loadWorkouts()) }
 
   function addExercise() {
-    if (!exName.trim()) return
+    const n = exName.trim()
+    if (!n) return
+    const w = parseFloat(exWeight)
     setExercises((prev) => [...prev, {
-      name: exName.trim(),
-      sets: parseInt(exSets) || 3,
+      name: n,
+      sets: parseInt(exSets, 10) || 3,
       reps: exReps || '10',
-      rest_seconds: parseInt(exRest) || 60,
+      rest_seconds: parseInt(exRest, 10) || 60,
+      weight_kg: !isCardioExercise(n) && exerciseUsesWeight(n) && w > 0 ? w : null,
     }])
-    setExName(''); setSearch(''); setAddingEx(false)
+    setExName(''); setExWeight(''); setAddingEx(false)
   }
 
   function saveWorkout() {
@@ -72,7 +75,7 @@ export function CustomWorkoutPage() {
       targetSets: ex.sets,
       targetReps: ex.reps,
       restSeconds: ex.rest_seconds,
-      sets: Array.from({ length: ex.sets }, () => ({ reps: 0, weight_kg: null, done: false })),
+      sets: Array.from({ length: ex.sets }, () => ({ reps: 0, weight_kg: ex.weight_kg ?? null, done: false })),
     }))
     workoutStore.start({
       planDayId: `custom-${w.id}`,
@@ -84,7 +87,7 @@ export function CustomWorkoutPage() {
     navigate(`/workout/custom-${w.id}/active`)
   }
 
-  const filtered = EXERCISE_PRESETS.filter((e) => e.toLowerCase().includes(search.toLowerCase()))
+  const suggestions = EXERCISE_PRESETS.filter((e) => e.toLowerCase().includes(exName.trim().toLowerCase()))
 
   return (
     <div className="pb-10">
@@ -148,41 +151,62 @@ export function CustomWorkoutPage() {
                 <input
                   autoFocus
                   placeholder="Sök eller skriv övning…"
-                  value={search || exName}
-                  onChange={(e) => { setSearch(e.target.value); setExName(e.target.value) }}
+                  value={exName}
+                  onChange={(e) => setExName(e.target.value)}
                   className="w-full bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
                 />
-                {search && filtered.length > 0 && (
-                  <div className="max-h-32 overflow-y-auto space-y-1">
-                    {filtered.slice(0, 8).map((ex) => (
-                      <button key={ex} onClick={() => { setExName(ex); setSearch(''); if (isCardioExercise(ex)) { setExSets('1'); setExReps('20') } }}
-                        className="w-full text-left text-sm text-stone-700 py-1.5 px-2 hover:bg-white rounded-lg">
+
+                {/* Alltid synliga förslag att välja bland */}
+                {suggestions.length > 0 && (
+                  <div className="max-h-32 overflow-y-auto flex flex-wrap gap-1.5">
+                    {suggestions.map((ex) => (
+                      <button
+                        key={ex}
+                        onClick={() => { setExName(ex); if (isCardioExercise(ex)) { setExSets('1'); setExReps('20') } }}
+                        className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                          exName === ex
+                            ? 'bg-forest-700 text-white border-forest-700'
+                            : 'bg-white border-stone-200 text-stone-600 hover:border-forest-300'
+                        }`}
+                      >
                         {ex}
                       </button>
                     ))}
                   </div>
                 )}
-                {exName && !search && (
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="min-w-0">
-                      <label className="text-xs text-stone-500">Set</label>
-                      <input type="number" value={exSets} onChange={(e) => setExSets(e.target.value)}
-                        className="mt-1 w-full bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
+
+                {exName.trim() && (
+                  <>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="min-w-0">
+                        <label className="text-xs text-stone-500">Set</label>
+                        <input type="number" value={exSets} onChange={(e) => setExSets(e.target.value)}
+                          className="mt-1 w-full bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <label className="text-xs text-stone-500">{isCardioExercise(exName) ? 'Tid (min)' : 'Reps'}</label>
+                        <input value={exReps} onChange={(e) => setExReps(e.target.value)}
+                          className="mt-1 w-full bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <label className="text-xs text-stone-500">Vila (sek)</label>
+                        <input type="number" value={exRest} onChange={(e) => setExRest(e.target.value)}
+                          className="mt-1 w-full bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <label className="text-xs text-stone-500">{isCardioExercise(exName) ? 'Tid (min)' : 'Reps'}</label>
-                      <input value={exReps} onChange={(e) => setExReps(e.target.value)}
-                        className="mt-1 w-full bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
-                    </div>
-                    <div className="min-w-0">
-                      <label className="text-xs text-stone-500">Vila (sek)</label>
-                      <input type="number" value={exRest} onChange={(e) => setExRest(e.target.value)}
-                        className="mt-1 w-full bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
-                    </div>
-                  </div>
+
+                    {!isCardioExercise(exName) && exerciseUsesWeight(exName) && (
+                      <div>
+                        <label className="text-xs text-stone-500">Vikt (kg, valfritt)</label>
+                        <input type="number" inputMode="decimal" value={exWeight} placeholder="t.ex. 60"
+                          onChange={(e) => setExWeight(e.target.value)}
+                          className="mt-1 w-full bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
+                      </div>
+                    )}
+                  </>
                 )}
                 <div className="flex gap-2">
-                  <button onClick={() => { setAddingEx(false); setExName(''); setSearch('') }}
+                  <button onClick={() => { setAddingEx(false); setExName(''); setExWeight('') }}
                     className="flex-1 py-2 rounded-xl border border-stone-200 text-stone-600 text-sm">
                     Avbryt
                   </button>
