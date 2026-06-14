@@ -26,7 +26,12 @@ stripeRouter.post('/webhook', async (c) => {
     const userId = sub.metadata['supabase_user_id']
     if (!userId) return c.json({ ok: true })
 
-    const premiumUntil = new Date((sub.current_period_end) * 1000).toISOString()
+    // Guard against a missing/invalid period end (would throw on toISOString and
+    // make Stripe retry the webhook forever). Fall back to +31 days.
+    const periodEnd = typeof sub.current_period_end === 'number'
+      ? sub.current_period_end * 1000
+      : Date.now() + 31 * 86_400_000
+    const premiumUntil = new Date(periodEnd).toISOString()
 
     await db.query('/subscriptions', {
       method: 'POST',

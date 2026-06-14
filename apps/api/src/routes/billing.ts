@@ -18,10 +18,11 @@ billingRouter.get('/status', async (c) => {
   const user = c.get('user')
   const premium = await isUserPremium(user.sub, c.env)
 
-  const created = user.created_at ? new Date(user.created_at) : new Date()
-  const trialEnd = new Date(created.getTime() + TRIAL_DAYS * 86_400_000)
+  // No signup date → no trial (avoids granting an indefinite free trial).
+  const created = user.created_at ? new Date(user.created_at) : null
+  const trialEnd = created ? new Date(created.getTime() + TRIAL_DAYS * 86_400_000) : new Date(0)
   const now = new Date()
-  const inTrial = now < trialEnd
+  const inTrial = created ? now < trialEnd : false
   const trialDaysLeft = Math.max(0, Math.ceil((trialEnd.getTime() - now.getTime()) / 86_400_000))
 
   return c.json({
