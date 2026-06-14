@@ -51,6 +51,7 @@ aiRouter.post(
       min_protein_g: z.number().int().nonnegative().max(300).nullable().optional(),
       allergies: z.array(z.string().max(60)).max(30).optional(),
       meal_type: z.string().max(40).nullable().optional(),
+      category: z.enum(['kott', 'fisk', 'pasta', 'vegetariskt', 'veganskt']).nullable().optional(),
     })
   ),
   async (c) => {

@@ -55,12 +55,15 @@ export interface GeneratedRecipe {
   tags: string[]
 }
 
+export type RecipeCategory = 'kott' | 'fisk' | 'pasta' | 'vegetariskt' | 'veganskt'
+
 export interface RecipeRequest {
   prompt: string
   calorie_target?: number | null
   min_protein_g?: number | null
   allergies?: string[]
   meal_type?: string | null
+  category?: RecipeCategory | null
 }
 
 export interface FoodPhotoItem {

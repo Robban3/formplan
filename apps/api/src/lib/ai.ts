@@ -420,12 +420,26 @@ Riktlinjer:
 
 // ── AI-genererade recept ────────────────────────────────────────────────────
 
+export type RecipeCategory = 'kott' | 'fisk' | 'pasta' | 'vegetariskt' | 'veganskt'
+
+// Hård regel per vald kategori — styr huvudråvara/kosthållning.
+const CATEGORY_RULES: Record<RecipeCategory, string> = {
+  kott: 'Receptet SKA byggas på kött (t.ex. nöt, fläsk eller kyckling) – ingen fisk eller skaldjur.',
+  fisk: 'Receptet SKA byggas på fisk eller skaldjur.',
+  pasta: 'Receptet SKA vara en pastarätt med pasta som bas.',
+  vegetariskt:
+    'Receptet SKA vara vegetariskt – inget kött, ingen fisk eller skaldjur (ägg och mejeri är ok).',
+  veganskt:
+    'Receptet SKA vara veganskt – inga animaliska produkter alls (inget kött, fisk, ägg, mejeri eller honung).',
+}
+
 export interface RecipeRequest {
   prompt: string
   calorie_target?: number | null | undefined
   min_protein_g?: number | null | undefined
   allergies?: string[] | undefined
   meal_type?: string | null | undefined
+  category?: RecipeCategory | null | undefined
 }
 
 // Tolerate the model occasionally wrapping JSON in prose/code fences.
@@ -440,6 +454,7 @@ export async function generateRecipe(req: RecipeRequest, env: Env): Promise<Gene
   if (req.calorie_target) constraints.push(`Kalorimål: ca ${req.calorie_target} kcal per portion`)
   if (req.min_protein_g) constraints.push(`Minst ${req.min_protein_g} g protein per portion`)
   if (req.meal_type) constraints.push(`Måltidstyp: ${req.meal_type}`)
+  if (req.category) constraints.push(CATEGORY_RULES[req.category])
   if (req.allergies?.length)
     constraints.push(`MÅSTE undvikas (allergier/kosthänsyn): ${req.allergies.join(', ')}`)
 

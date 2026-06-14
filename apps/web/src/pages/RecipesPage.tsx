@@ -1,7 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon, ClockIcon, FireIcon, ZapIcon } from '../components/ui/Icons'
-import { api, type GeneratedRecipe } from '../lib/api'
+import { api, type GeneratedRecipe, type RecipeCategory } from '../lib/api'
+
+const RECIPE_CATEGORIES: { key: RecipeCategory; label: string }[] = [
+  { key: 'kott', label: '🥩 Kött' },
+  { key: 'fisk', label: '🐟 Fisk' },
+  { key: 'pasta', label: '🍝 Pasta' },
+  { key: 'vegetariskt', label: '🥗 Vegetariskt' },
+  { key: 'veganskt', label: '🌱 Veganskt' },
+]
 
 type IllustrationKey = 'bowl' | 'wok' | 'salmon' | 'balls' | 'oats'
 
@@ -200,6 +208,7 @@ function AiRecipeGenerator() {
   const [kcal, setKcal] = useState<string>('')
   const [minProtein, setMinProtein] = useState<string>('')
   const [allergies, setAllergies] = useState<string[]>([])
+  const [category, setCategory] = useState<RecipeCategory | null>(null)
   const [recipe, setRecipe] = useState<GeneratedRecipe | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -217,7 +226,9 @@ function AiRecipeGenerator() {
   }, [])
 
   async function generate(text?: string) {
-    const p = (text ?? prompt).trim()
+    // Falla tillbaka på vald kategori om inget eget önskemål skrivits.
+    const catLabel = category ? RECIPE_CATEGORIES.find((c) => c.key === category)?.label.replace(/^\S+\s/, '') : ''
+    const p = (text ?? prompt).trim() || (catLabel ? `Ett ${catLabel.toLowerCase()} recept` : '')
     if (!p || loading) return
     if (text) setPrompt(text)
     setLoading(true)
@@ -228,6 +239,7 @@ function AiRecipeGenerator() {
         calorie_target: kcal ? Number(kcal) : null,
         min_protein_g: minProtein ? Number(minProtein) : null,
         allergies,
+        category,
       })
       setRecipe(recipe)
     } catch (e) {
@@ -266,7 +278,28 @@ function AiRecipeGenerator() {
         className="w-full bg-stone-100 rounded-xl px-4 py-3 text-sm text-stone-900 leading-relaxed focus:outline-none focus:ring-2 focus:ring-forest-400 resize-none"
       />
 
-      <div className="flex flex-wrap gap-2 mt-2">
+      {/* Kategori — styr huvudråvara/kosthållning */}
+      <div className="mt-3">
+        <p className="text-[10px] text-stone-400 font-medium mb-1.5">Kategori</p>
+        <div className="flex flex-wrap gap-2">
+          {RECIPE_CATEGORIES.map((c) => (
+            <button
+              key={c.key}
+              onClick={() => setCategory((cur) => (cur === c.key ? null : c.key))}
+              disabled={loading}
+              className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors disabled:opacity-50 ${
+                category === c.key
+                  ? 'bg-forest-700 text-white border-forest-700'
+                  : 'bg-white border-stone-200 text-stone-600 hover:border-forest-300'
+              }`}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mt-3">
         {RECIPE_PROMPTS.map((s) => (
           <button
             key={s}
@@ -310,7 +343,7 @@ function AiRecipeGenerator() {
 
       <button
         onClick={() => generate()}
-        disabled={!prompt.trim() || loading}
+        disabled={(!prompt.trim() && !category) || loading}
         className="w-full mt-3 bg-forest-700 hover:bg-forest-800 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
       >
         {loading ? 'Skapar recept…' : 'Generera recept'}
