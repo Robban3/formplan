@@ -25,6 +25,11 @@ html.dark {
   html, body, #root {
     overflow-x: hidden;
     max-width: 100%;
+    overscroll-behavior-x: none;
+  }
+  body, #root {
+    position: relative;
+    width: 100%;
   }
   html.dark {
     @apply text-stone-100;
