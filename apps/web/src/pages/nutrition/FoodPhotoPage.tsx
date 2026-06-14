@@ -39,13 +39,13 @@ export function FoodPhotoPage() {
       setAnalysis(analysis)
     } catch (e) {
       console.error('Food photo analysis failed:', e)
-      // Surface the real cause so failures are diagnosable. 402 (paywall) gets
-      // its own toast + message; other errors show the server detail if any.
       if (e instanceof ApiError && e.status === 402) {
         setError('Fotoanalys är en Premium-funktion. Uppgradera under Mer → Premium för att fortsätta.')
+      } else if (e instanceof ApiError) {
+        // Server returns a clean, user-friendly message (no links/internal detail).
+        setError(e.message)
       } else {
-        const detail = e instanceof ApiError ? e.detail : e instanceof Error ? e.message : ''
-        setError(`Kunde inte analysera bilden${detail ? ` (${detail})` : ''}. Försök igen med en tydligare bild.`)
+        setError('Kunde inte analysera bilden. Försök igen med en tydligare bild.')
       }
     } finally {
       setAnalyzing(false)

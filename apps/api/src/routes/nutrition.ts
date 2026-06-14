@@ -195,7 +195,10 @@ nutritionRouter.post(
         carbs_g: b.carbs_g,
       }),
     })
-    if (error || !data?.[0]) return c.json({ error: error ?? 'Failed to add entry' }, 500)
+    if (error || !data?.[0]) {
+      console.error('add food log failed:', error)
+      return c.json({ error: 'Kunde inte spara måltiden just nu. Försök igen.' }, 500)
+    }
     return c.json({ entry: { ...data[0], date: data[0].log_date } }, 201)
   }
 )
@@ -209,7 +212,10 @@ nutritionRouter.delete('/log/:id', async (c) => {
     `/food_log?id=eq.${id}&user_id=eq.${user.sub}`,
     { method: 'DELETE', headers: { Prefer: 'return=minimal' } }
   )
-  if (error) return c.json({ error }, 500)
+  if (error) {
+    console.error('delete food log failed:', error)
+    return c.json({ error: 'Kunde inte ta bort posten just nu. Försök igen.' }, 500)
+  }
   return c.body(null, 204)
 })
 
@@ -263,7 +269,10 @@ nutritionRouter.post(
       method: 'POST',
       body: JSON.stringify({ user_id: user.sub, log_date: b.date, amount_ml: b.amount_ml }),
     })
-    if (error || !data?.[0]) return c.json({ error: error ?? 'Failed to add water' }, 500)
+    if (error || !data?.[0]) {
+      console.error('add water log failed:', error)
+      return c.json({ error: 'Kunde inte spara vattnet just nu. Försök igen.' }, 500)
+    }
     return c.json({ entry: { ...data[0], date: data[0].log_date } }, 201)
   }
 )
@@ -277,7 +286,10 @@ nutritionRouter.delete('/water/:id', async (c) => {
     `/water_log?id=eq.${id}&user_id=eq.${user.sub}`,
     { method: 'DELETE', headers: { Prefer: 'return=minimal' } }
   )
-  if (error) return c.json({ error }, 500)
+  if (error) {
+    console.error('delete water log failed:', error)
+    return c.json({ error: 'Kunde inte ta bort posten just nu. Försök igen.' }, 500)
+  }
   return c.body(null, 204)
 })
 

@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { requireAuth } from '../middleware/auth'
 import { requireAccess } from '../middleware/access'
-import { coachReply, generateRecipe, analyzeFoodPhoto } from '../lib/ai'
+import { coachReply, generateRecipe, analyzeFoodPhoto, friendlyAiError } from '../lib/ai'
 import type { AppContext } from '../lib/types'
 
 export const aiRouter = new Hono<AppContext>()
@@ -35,7 +35,8 @@ aiRouter.post(
       return c.json({ reply })
     } catch (err) {
       console.error('AI coach failed:', err)
-      return c.json({ error: 'AI coach unavailable' }, 502)
+      const { message, status } = friendlyAiError(err)
+      return c.json({ error: message }, status)
     }
   }
 )
@@ -61,8 +62,8 @@ aiRouter.post(
       return c.json({ recipe })
     } catch (err) {
       console.error('Recipe generation failed:', err)
-      const detail = err instanceof Error ? err.message : String(err)
-      return c.json({ error: `Kunde inte generera recept: ${detail}` }, 502)
+      const { message, status } = friendlyAiError(err)
+      return c.json({ error: message }, status)
     }
   }
 )
@@ -83,10 +84,9 @@ aiRouter.post(
       const analysis = await analyzeFoodPhoto(b.image, b.media_type, c.env)
       return c.json({ analysis })
     } catch (err) {
-      const status = (err as { status?: number }).status
-      const detail = err instanceof Error ? err.message : String(err)
-      console.error(`Food photo analysis failed (status ${status ?? 'n/a'}):`, detail)
-      return c.json({ error: 'Kunde inte analysera bilden', detail }, 502)
+      console.error('Food photo analysis failed:', err)
+      const { message, status } = friendlyAiError(err)
+      return c.json({ error: message }, status)
     }
   }
 )

@@ -28,7 +28,7 @@ billingRouter.post(
     const base = origin ?? 'https://app.formplan.app'
 
     if (!c.env.STRIPE_SECRET_KEY) {
-      return c.json({ error: 'Billing not configured' }, 503)
+      return c.json({ error: 'Betalning är inte tillgänglig just nu. Försök igen senare.' }, 503)
     }
 
     const stripe = new Stripe(c.env.STRIPE_SECRET_KEY)
@@ -74,7 +74,7 @@ billingRouter.post(
     const base = origin ?? 'https://app.formplan.app'
 
     if (!c.env.STRIPE_SECRET_KEY) {
-      return c.json({ error: 'Billing not configured' }, 503)
+      return c.json({ error: 'Betalning är inte tillgänglig just nu. Försök igen senare.' }, 503)
     }
 
     const db = supabaseAdmin(c.env)

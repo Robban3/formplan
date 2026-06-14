@@ -76,6 +76,22 @@ async function callAi(req: AiRequest, env: Env): Promise<AiResult> {
   throw new Error(`Ingen AI-provider fungerade (förstahandsval: ${preferred}). ${problems.join(' | ')}`)
 }
 
+// Översätt ett (ofta tekniskt) AI-fel till ett kort, begripligt meddelande utan
+// länkar eller intern info. Den råa orsaken loggas separat på servern.
+export function friendlyAiError(err: unknown): { message: string; status: 429 | 503 } {
+  const raw = err instanceof Error ? err.message : String(err)
+  if (/\b429\b|quota|rate.?limit|resource.?exhausted|överbelast/i.test(raw)) {
+    return {
+      message: 'AI-tjänsten är hårt belastad just nu. Vänta en liten stund och försök igen.',
+      status: 429,
+    }
+  }
+  return {
+    message: 'AI-tjänsten är tillfälligt otillgänglig. Försök igen om en stund.',
+    status: 503,
+  }
+}
+
 // ── Anthropic ────────────────────────────────────────────────────────────────
 
 function toAnthropicContent(content: AiContent): string | Anthropic.ContentBlockParam[] {

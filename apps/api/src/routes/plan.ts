@@ -27,7 +27,7 @@ planRouter.post(
       )
       if (existing && existing.length >= 1) {
         return c.json(
-          { error: 'Free tier limit reached. Upgrade to Premium for unlimited plans.' },
+          { error: 'Gratisnivån ger ett schema. Uppgradera till Premium för obegränsat antal.' },
           403
         )
       }
@@ -38,14 +38,17 @@ planRouter.post(
       `/fitness_profile?user_id=eq.${user.sub}&limit=1`
     )
     const profile = profileRows?.[0]
-    if (!profile) return c.json({ error: 'No fitness profile found. Create one first.' }, 400)
+    if (!profile) return c.json({ error: 'Ingen träningsprofil hittades. Skapa en först.' }, 400)
 
     // Create plan record with status=generating
     const { data: planRows, error: planErr } = await db.query<{ id: string }[]>('/plan', {
       method: 'POST',
       body: JSON.stringify({ user_id: user.sub, status: 'generating' }),
     })
-    if (planErr || !planRows?.[0]) return c.json({ error: 'Failed to create plan' }, 500)
+    if (planErr || !planRows?.[0]) {
+      console.error('create plan failed:', planErr)
+      return c.json({ error: 'Kunde inte skapa schemat just nu. Försök igen.' }, 500)
+    }
     const planId = planRows[0].id
 
     // Generate in background — respond immediately with plan id
@@ -80,7 +83,7 @@ planRouter.post('/mock', zValidator('json', mockGoalSchema), async (c) => {
       body: JSON.stringify({ user_id: user.sub, status: 'ready' }),
     }
   )
-  if (planErr || !planRows?.[0]) return c.json({ error: 'Failed to create mock plan' }, 500)
+  if (planErr || !planRows?.[0]) return c.json({ error: 'Kunde inte skapa schemat just nu. Försök igen.' }, 500)
   const plan = planRows[0]
   const dayRows = buildMockPlanDays(plan.id, goal ?? 'maintain')
 
@@ -91,7 +94,7 @@ planRouter.post('/mock', zValidator('json', mockGoalSchema), async (c) => {
   })
   if (daysErr) {
     await db.query(`/plan?id=eq.${plan.id}`, { method: 'DELETE' })
-    return c.json({ error: 'Failed to insert mock plan days' }, 500)
+    return c.json({ error: 'Kunde inte skapa schemat just nu. Försök igen.' }, 500)
   }
 
   return c.json({ plan_id: plan.id, status: 'ready', plan }, 201)
@@ -117,8 +120,8 @@ planRouter.get('/:id', async (c) => {
     `/plan?id=eq.${planId}&limit=1`
   )
   const plan = plans?.[0]
-  if (!plan) return c.json({ error: 'Not found' }, 404)
-  if (plan.user_id !== user.sub) return c.json({ error: 'Forbidden' }, 403)
+  if (!plan) return c.json({ error: 'Schemat hittades inte.' }, 404)
+  if (plan.user_id !== user.sub) return c.json({ error: 'Åtkomst nekad.' }, 403)
 
   const { data: days } = await db.query(
     `/plan_day?plan_id=eq.${planId}&order=weekday.asc`

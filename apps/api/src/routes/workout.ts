@@ -68,7 +68,10 @@ workoutRouter.post(
         exercises: b.exercises,
       }),
     })
-    if (error || !data?.[0]) return c.json({ error: error ?? 'Failed to save session' }, 500)
+    if (error || !data?.[0]) {
+      console.error('save workout session failed:', error)
+      return c.json({ error: 'Kunde inte spara passet just nu. Försök igen.' }, 500)
+    }
     return c.json({ session: data[0] }, 201)
   }
 )

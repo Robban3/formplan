@@ -27,7 +27,10 @@ profileRouter.get('/', async (c) => {
   const { data, error } = await db.query(
     `/fitness_profile?user_id=eq.${user.sub}&limit=1`
   )
-  if (error) return c.json({ error }, 500)
+  if (error) {
+    console.error('profile GET failed:', error)
+    return c.json({ error: 'Kunde inte hämta profilen just nu. Försök igen.' }, 500)
+  }
   return c.json({ profile: Array.isArray(data) ? data[0] ?? null : null })
 })
 
@@ -44,6 +47,9 @@ profileRouter.post('/', zValidator('json', profileSchema), async (c) => {
     headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
   })
 
-  if (error) return c.json({ error }, 500)
+  if (error) {
+    console.error('profile POST failed:', error)
+    return c.json({ error: 'Kunde inte spara profilen just nu. Försök igen.' }, 500)
+  }
   return c.json({ profile: Array.isArray(data) ? data[0] : data })
 })
