@@ -226,10 +226,11 @@ function AiRecipeGenerator() {
   }, [])
 
   async function generate(text?: string) {
-    // Falla tillbaka på vald kategori om inget eget önskemål skrivits.
+    if (loading) return
+    // Kategori och eget önskemål är båda valfria. Faller tillbaka på vald
+    // kategori, annars ett helt fritt ("överraska mig")-recept.
     const catLabel = category ? RECIPE_CATEGORIES.find((c) => c.key === category)?.label.replace(/^\S+\s/, '') : ''
-    const p = (text ?? prompt).trim() || (catLabel ? `Ett ${catLabel.toLowerCase()} recept` : '')
-    if (!p || loading) return
+    const p = (text ?? prompt).trim() || (catLabel ? `Ett ${catLabel.toLowerCase()} recept` : 'Ett gott och varierat recept – överraska mig')
     if (text) setPrompt(text)
     setLoading(true)
     setError(null)
@@ -343,7 +344,7 @@ function AiRecipeGenerator() {
 
       <button
         onClick={() => generate()}
-        disabled={(!prompt.trim() && !category) || loading}
+        disabled={loading}
         className="w-full mt-3 bg-forest-700 hover:bg-forest-800 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
       >
         {loading ? 'Skapar recept…' : 'Generera recept'}
