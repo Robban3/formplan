@@ -13,7 +13,8 @@ export function ExerciseAnimation({ exerciseName, className = '', alt }: Exercis
   const [frame, setFrame] = useState(0)
 
   useEffect(() => {
-    const timer = setInterval(() => setFrame((f) => (f + 1) % frames.length), 550)
+    // Lugnare växling mellan bildrutorna (~1,3 s) så rörelsen inte flimrar.
+    const timer = setInterval(() => setFrame((f) => (f + 1) % frames.length), 1300)
     return () => clearInterval(timer)
   }, [frames.length])
 
