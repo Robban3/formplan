@@ -42,6 +42,11 @@ import {
   Camera,
   ScanBarcode,
   Search,
+  Beef,
+  Fish,
+  Wheat,
+  Salad,
+  Sprout,
 } from 'lucide-react'
 
 interface IconProps {
@@ -99,3 +104,8 @@ export const ShoppingCartIcon = wrap(ShoppingCart)
 export const CameraIcon = wrap(Camera)
 export const ScanBarcodeIcon = wrap(ScanBarcode)
 export const SearchIcon = wrap(Search)
+export const BeefIcon = wrap(Beef)
+export const FishIcon = wrap(Fish)
+export const WheatIcon = wrap(Wheat)
+export const SaladIcon = wrap(Salad)
+export const SproutIcon = wrap(Sprout)

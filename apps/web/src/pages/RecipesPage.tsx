@@ -1,14 +1,26 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeftIcon, ClockIcon, FireIcon, ZapIcon } from '../components/ui/Icons'
+import {
+  ChevronLeftIcon,
+  ClockIcon,
+  FireIcon,
+  ZapIcon,
+  BeefIcon,
+  FishIcon,
+  WheatIcon,
+  SaladIcon,
+  SproutIcon,
+} from '../components/ui/Icons'
 import { api, type GeneratedRecipe, type RecipeCategory } from '../lib/api'
 
-const RECIPE_CATEGORIES: { key: RecipeCategory; label: string }[] = [
-  { key: 'kott', label: '🥩 Kött' },
-  { key: 'fisk', label: '🐟 Fisk' },
-  { key: 'pasta', label: '🍝 Pasta' },
-  { key: 'vegetariskt', label: '🥗 Vegetariskt' },
-  { key: 'veganskt', label: '🌱 Veganskt' },
+type IconComponent = React.ComponentType<{ className?: string }>
+
+const RECIPE_CATEGORIES: { key: RecipeCategory; label: string; Icon: IconComponent }[] = [
+  { key: 'kott', label: 'Kött', Icon: BeefIcon },
+  { key: 'fisk', label: 'Fisk', Icon: FishIcon },
+  { key: 'pasta', label: 'Pasta', Icon: WheatIcon },
+  { key: 'vegetariskt', label: 'Vegetariskt', Icon: SaladIcon },
+  { key: 'veganskt', label: 'Veganskt', Icon: SproutIcon },
 ]
 
 type IllustrationKey = 'bowl' | 'wok' | 'salmon' | 'balls' | 'oats'
@@ -229,7 +241,7 @@ function AiRecipeGenerator() {
     if (loading) return
     // Kategori och eget önskemål är båda valfria. Faller tillbaka på vald
     // kategori, annars ett helt fritt ("överraska mig")-recept.
-    const catLabel = category ? RECIPE_CATEGORIES.find((c) => c.key === category)?.label.replace(/^\S+\s/, '') : ''
+    const catLabel = category ? RECIPE_CATEGORIES.find((c) => c.key === category)?.label : ''
     const p = (text ?? prompt).trim() || (catLabel ? `Ett ${catLabel.toLowerCase()} recept` : 'Ett gott och varierat recept – överraska mig')
     if (text) setPrompt(text)
     setLoading(true)
@@ -288,12 +300,13 @@ function AiRecipeGenerator() {
               key={c.key}
               onClick={() => setCategory((cur) => (cur === c.key ? null : c.key))}
               disabled={loading}
-              className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors disabled:opacity-50 ${
+              className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border font-medium transition-colors disabled:opacity-50 ${
                 category === c.key
                   ? 'bg-forest-700 text-white border-forest-700'
                   : 'bg-white border-stone-200 text-stone-600 hover:border-forest-300'
               }`}
             >
+              <c.Icon className="w-3.5 h-3.5" />
               {c.label}
             </button>
           ))}
