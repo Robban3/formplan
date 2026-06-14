@@ -27,6 +27,15 @@ const FOCUS_OPTIONS: { key: DietFocus; label: string }[] = [
 ]
 const KCAL_PRESETS = [1500, 1800, 2000, 2500]
 
+// Faktiskt datum för en veckodag (1–7) i innevarande vecka.
+function dateForWeekday(weekday: number): Date {
+  const now = new Date()
+  const d = new Date(now)
+  d.setHours(0, 0, 0, 0)
+  d.setDate(d.getDate() + (weekday - weekdayOf(now)))
+  return d
+}
+
 export function MealWeekPage() {
   const navigate = useNavigate()
   const [plan, setPlan] = useState<WeekMealPlan>(loadWeekPlan)
@@ -188,12 +197,13 @@ export function MealWeekPage() {
               <button
                 key={d}
                 onClick={() => setSelected(d)}
-                className={`rounded-xl py-2 flex flex-col items-center gap-0.5 border transition-colors ${
+                className={`rounded-xl py-1.5 flex flex-col items-center border transition-colors ${
                   isSel ? 'bg-forest-700 border-forest-700 text-white' : 'bg-white border-stone-100 text-stone-600'
                 } ${d === today && !isSel ? 'ring-1 ring-forest-300' : ''}`}
               >
-                <span className="text-[11px] font-semibold">{DAY_SHORT[d - 1]}</span>
-                <span className={`text-[10px] ${isSel ? 'text-forest-100' : 'text-stone-400'}`}>
+                <span className="text-[10px] font-medium">{DAY_SHORT[d - 1]}</span>
+                <span className="text-sm font-bold leading-tight">{dateForWeekday(d).getDate()}</span>
+                <span className={`text-[9px] ${isSel ? 'text-forest-100' : 'text-stone-400'}`}>
                   {total > 0 ? total : '–'}
                 </span>
               </button>
@@ -205,7 +215,9 @@ export function MealWeekPage() {
         <div className="bg-white rounded-2xl border border-stone-100 p-4">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="font-bold text-stone-900">{DAY_FULL[selected - 1]}</p>
+              <p className="font-bold text-stone-900">
+                {DAY_FULL[selected - 1]} {dateForWeekday(selected).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long' })}
+              </p>
               <p className="text-xs text-stone-400">{dayKcal} kcal totalt</p>
             </div>
             <button
@@ -263,7 +275,9 @@ export function MealWeekPage() {
         <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center">
           <div className="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-stone-900">Egen måltid · {DAY_FULL[selected - 1]}</h3>
+              <h3 className="font-bold text-stone-900">
+                Egen måltid · {DAY_FULL[selected - 1]} {dateForWeekday(selected).getDate()}
+              </h3>
               <button onClick={() => { setAddSlot(null); setAddText('') }}>
                 <XIcon className="w-5 h-5 stroke-stone-400" />
               </button>
