@@ -150,6 +150,9 @@ async function callGemini(req: AiRequest, env: Env): Promise<AiResult> {
     })),
     generationConfig: {
       maxOutputTokens: req.maxTokens,
+      // Gemini 2.5 räknar "thinking"-tokens mot maxOutputTokens och kan annars
+      // hugga av/tömma svaret. Stäng av thinking så hela budgeten går till svaret.
+      thinkingConfig: { thinkingBudget: 0 },
       ...(req.json ? { responseMimeType: 'application/json' } : {}),
     },
   }
@@ -169,6 +172,11 @@ async function callGemini(req: AiRequest, env: Env): Promise<AiResult> {
   }
   const candidate = data.candidates?.[0]
   const text = (candidate?.content?.parts ?? []).map((p) => p.text ?? '').join('')
+  // Throw on empty output (safety block, MAX_TOKENS with no text, …) so callAi
+  // can fall back to the other provider instead of returning '' → JSON.parse fail.
+  if (!text.trim()) {
+    throw new Error(`Gemini gav inget användbart svar (finishReason: ${candidate?.finishReason ?? 'okänd'})`)
+  }
   return { text, stopReason: candidate?.finishReason ?? null }
 }
 
