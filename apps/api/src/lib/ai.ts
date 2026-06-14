@@ -306,6 +306,41 @@ export interface CoachMessage {
   content: string
 }
 
+// Svar när användaren frågar om något utanför träning/kost.
+export const COACH_OFF_TOPIC_REPLY =
+  'Jag är din tränings- och kostcoach, så jag håller mig till träning, kost, näring, återhämtning och hälsa. Vad kan jag hjälpa dig med där — t.ex. ett upplägg, en kostfråga eller hur du tar dig förbi en platå?'
+
+// Snabb nyckelords-koll: matchar uppenbart tränings-/kost-relaterade meddelanden
+// så vanliga frågor släpps igenom utan ett extra klassificeringsanrop.
+const ON_TOPIC_RE =
+  /\b(trän|gym|\bpass\b|övning|\bset\b|reps|repetition|\bvikt|\bkilo|\bkg\b|muskel|styrk|kondition|löp|spring|jogg|cykl|simn|simma|promenad|stretch|rörlighet|kost|\bmat\b|\bäta\b|\bät\b|måltid|kalori|kcal|protein|kolhydrat|\bfett\b|makro|näring|recept|vatten|sömn|sova|\bvila|återhämt|\bdeff\b|\bbulk\b|viktnedgång|viktuppgång|hälsa|skada|värk|\bont\b|\böm|\bpuls|deload|progression|\bmage\b|magmuskler|bröst|\brygg\b|\bben\b|biceps|triceps|axlar|rumpa|knäböj|marklyft|bänkpress|kreatin|kosttillskott|fasta|motivation|deload|\bdiet\b|gå ner|gå upp)/i
+
+// Klassificerar tvetydiga meddelanden via modellen (fail-open vid fel). Får med
+// lite kontext så korta följdfrågor ("varför då?") inte felaktigt blockeras.
+async function isCoachMessageOnTopic(history: CoachMessage[], env: Env): Promise<boolean> {
+  const transcript = history
+    .slice(-4)
+    .map((m) => `${m.role === 'user' ? 'Användare' : 'Coach'}: ${m.content}`)
+    .join('\n')
+    .slice(0, 1500)
+  try {
+    const { text } = await callAi(
+      {
+        system:
+          'Du är ett filter för en tränings- och kostcoach. Avgör om det SISTA användarmeddelandet hör hemma i coachning om träning, kost, näring, återhämtning, sömn, motivation eller hälsa kopplad till detta (korta följdfrågor i ett sådant samtal räknas som på ämnet). Svara med EXAKT ett ord: JA eller NEJ.',
+        messages: [{ role: 'user', content: transcript }],
+        maxTokens: 4,
+        temperature: 0,
+      },
+      env
+    )
+    // Fail-open: blockera bara när modellen tydligt säger NEJ.
+    return !/\bnej\b/i.test(text)
+  } catch {
+    return true
+  }
+}
+
 const GOAL_LABELS: Record<string, string> = {
   lose_weight: 'gå ner i vikt / minska fett',
   build_muscle: 'bygga muskler',
@@ -394,6 +429,15 @@ export async function coachReply(
   const history = messages.slice(-20)
   while (history.length && history[0]!.role !== 'user') history.shift()
   if (history.length === 0) return 'Ställ gärna en fråga om din träning eller kost!'
+
+  // Pre-filter: keep the coach on training/nutrition. Obvious on-topic messages
+  // (keyword match) skip the extra call; ambiguous ones are classified by the
+  // model. Off-topic → return the redirect without spending a full reply.
+  const lastUser = [...history].reverse().find((m) => m.role === 'user')?.content ?? ''
+  if (lastUser && !ON_TOPIC_RE.test(lastUser)) {
+    const onTopic = await isCoachMessageOnTopic(history, env)
+    if (!onTopic) return COACH_OFF_TOPIC_REPLY
+  }
 
   const system = `Du är FormPlans AI-coach — en kunnig, peppande och konkret personlig tränare och nutritionist. Du svarar alltid på svenska, kort och praktiskt (max ~150 ord), och du använder användarens faktiska data nedan för att ge personliga svar.
 

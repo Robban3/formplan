@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronLeftIcon, CameraIcon, FireIcon } from '../../components/ui/Icons'
-import { api, type FoodPhotoAnalysis } from '../../lib/api'
+import { api, ApiError, type FoodPhotoAnalysis } from '../../lib/api'
 import { compressImage } from '../../lib/image'
 import { nutritionApi, type MealSlot } from '../../lib/nutritionApi'
 import { dateKey } from '../../lib/derive'
@@ -38,10 +38,15 @@ export function FoodPhotoPage() {
       const { analysis } = await api.analyzeFoodPhoto(base64, mediaType)
       setAnalysis(analysis)
     } catch (e) {
-      // Surface the real cause in the console to aid debugging; keep the
-      // on-screen message friendly.
       console.error('Food photo analysis failed:', e)
-      setError('Kunde inte analysera bilden. Försök igen med en tydligare bild.')
+      // Surface the real cause so failures are diagnosable. 402 (paywall) gets
+      // its own toast + message; other errors show the server detail if any.
+      if (e instanceof ApiError && e.status === 402) {
+        setError('Fotoanalys är en Premium-funktion. Uppgradera under Mer → Premium för att fortsätta.')
+      } else {
+        const detail = e instanceof ApiError ? e.detail : e instanceof Error ? e.message : ''
+        setError(`Kunde inte analysera bilden${detail ? ` (${detail})` : ''}. Försök igen med en tydligare bild.`)
+      }
     } finally {
       setAnalyzing(false)
     }
