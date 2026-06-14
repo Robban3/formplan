@@ -50,7 +50,25 @@ function aiProvider(env: Env): 'anthropic' | 'gemini' {
 }
 
 async function callAi(req: AiRequest, env: Env): Promise<AiResult> {
-  return aiProvider(env) === 'gemini' ? callGemini(req, env) : callAnthropic(req, env)
+  // Try the selected provider first, then fall back to the other on ANY failure
+  // (missing key, bad key, unavailable model …). As long as one provider has a
+  // working key, AI keeps working.
+  const preferred = aiProvider(env)
+  const order: Array<'gemini' | 'anthropic'> =
+    preferred === 'gemini' ? ['gemini', 'anthropic'] : ['anthropic', 'gemini']
+
+  let lastErr: unknown
+  for (const p of order) {
+    if (p === 'gemini' && !env.GEMINI_API_KEY) continue
+    if (p === 'anthropic' && !env.ANTHROPIC_API_KEY) continue
+    try {
+      return p === 'gemini' ? await callGemini(req, env) : await callAnthropic(req, env)
+    } catch (err) {
+      console.warn(`AI provider "${p}" failed; trying next if available.`, err)
+      lastErr = err
+    }
+  }
+  throw lastErr ?? new Error('Ingen AI-provider konfigurerad (sätt GEMINI_API_KEY eller ANTHROPIC_API_KEY).')
 }
 
 // ── Anthropic ────────────────────────────────────────────────────────────────

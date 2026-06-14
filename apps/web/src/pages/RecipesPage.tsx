@@ -230,8 +230,8 @@ function AiRecipeGenerator() {
         allergies,
       })
       setRecipe(recipe)
-    } catch {
-      setError('Kunde inte generera recept just nu. Försök igen.')
+    } catch (e) {
+      setError((e as Error).message || 'Kunde inte generera recept just nu. Försök igen.')
     } finally {
       setLoading(false)
     }

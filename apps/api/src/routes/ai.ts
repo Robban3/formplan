@@ -57,7 +57,8 @@ aiRouter.post(
       return c.json({ recipe })
     } catch (err) {
       console.error('Recipe generation failed:', err)
-      return c.json({ error: 'Kunde inte generera recept' }, 502)
+      const detail = err instanceof Error ? err.message : String(err)
+      return c.json({ error: `Kunde inte generera recept: ${detail}` }, 502)
     }
   }
 )
