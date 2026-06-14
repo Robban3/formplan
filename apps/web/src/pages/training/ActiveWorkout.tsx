@@ -173,7 +173,7 @@ export function ActiveWorkout() {
                 onClick={() => {
                   saveRpe(pendingWorkoutName, n)
                   setShowRpe(false)
-                  navigate('/', { replace: true })
+                  navigate('/hem', { replace: true })
                 }}
                 className={`aspect-square rounded-xl text-sm font-bold transition-colors ${
                   n <= 3 ? 'bg-teal-100 text-teal-700 hover:bg-teal-200'
@@ -188,7 +188,7 @@ export function ActiveWorkout() {
           <p className="text-xs text-stone-400 text-center">1 = Extremt lätt · 10 = Maximalt</p>
         </div>
         <button
-          onClick={() => { setShowRpe(false); navigate('/', { replace: true }) }}
+          onClick={() => { setShowRpe(false); navigate('/hem', { replace: true }) }}
           className="text-sm text-stone-400"
         >
           Hoppa över
@@ -408,7 +408,7 @@ export function ActiveWorkout() {
       setPendingWorkoutName(name)
       setShowRpe(true)
     } else {
-      navigate('/', { replace: true })
+      navigate('/hem', { replace: true })
     }
 
     // Sync to API in background (best-effort)

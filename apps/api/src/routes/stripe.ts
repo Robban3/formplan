@@ -26,10 +26,13 @@ stripeRouter.post('/webhook', async (c) => {
     const userId = sub.metadata['supabase_user_id']
     if (!userId) return c.json({ ok: true })
 
-    // Guard against a missing/invalid period end (would throw on toISOString and
-    // make Stripe retry the webhook forever). Fall back to +31 days.
-    const periodEnd = typeof sub.current_period_end === 'number'
-      ? sub.current_period_end * 1000
+    // I Stripes Basil-API (SDK v17) ligger current_period_end på prenumerations-
+    // posten, inte på toppnivån. Läs båda, fall tillbaka på +31 dagar.
+    const itemPeriodEnd = (sub.items?.data?.[0] as { current_period_end?: number } | undefined)
+      ?.current_period_end
+    const periodEndSec = sub.current_period_end ?? itemPeriodEnd
+    const periodEnd = typeof periodEndSec === 'number'
+      ? periodEndSec * 1000
       : Date.now() + 31 * 86_400_000
     const premiumUntil = new Date(periodEnd).toISOString()
 

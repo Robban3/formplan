@@ -162,7 +162,12 @@ export function CustomWorkoutPage() {
                     {suggestions.map((ex) => (
                       <button
                         key={ex}
-                        onClick={() => { setExName(ex); if (isCardioExercise(ex)) { setExSets('1'); setExReps('20') } }}
+                        onClick={() => {
+                          setExName(ex)
+                          setExWeight('')
+                          if (isCardioExercise(ex)) { setExSets('1'); setExReps('20') }
+                          else { setExSets('3'); setExReps('10') }
+                        }}
                         className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
                           exName === ex
                             ? 'bg-forest-700 text-white border-forest-700'

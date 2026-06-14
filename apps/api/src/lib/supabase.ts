@@ -7,25 +7,31 @@ export function supabaseAdmin(env: Env) {
     path: string,
     options?: RequestInit
   ): Promise<{ data: T | null; error: string | null }> {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1${path}`, {
-      ...options,
-      headers: {
-        apikey: SUPABASE_SERVICE_ROLE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=representation',
-        ...(options?.headers ?? {}),
-      },
-    })
+    // Never throw — network/parse errors are returned as { error } so callers
+    // (and Promise.all sites like food search) degrade gracefully instead of 500.
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1${path}`, {
+        ...options,
+        headers: {
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=representation',
+          ...(options?.headers ?? {}),
+        },
+      })
 
-    if (!res.ok) {
+      if (!res.ok) {
+        const text = await res.text()
+        return { data: null, error: text }
+      }
+
       const text = await res.text()
-      return { data: null, error: text }
+      const data = text ? (JSON.parse(text) as T) : null
+      return { data, error: null }
+    } catch (e) {
+      return { data: null, error: e instanceof Error ? e.message : String(e) }
     }
-
-    const text = await res.text()
-    const data = text ? (JSON.parse(text) as T) : null
-    return { data, error: null }
   }
 
   return { query }

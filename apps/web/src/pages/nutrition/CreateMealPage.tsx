@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { nutritionApi, type FoodItem } from '../../lib/nutritionApi'
+import { isOffId } from '../../lib/openFoodFacts'
 import {
   type MealIngredient,
   type CustomMeal,
@@ -59,7 +60,7 @@ export function CreateMealPage() {
     setIngredients((prev) => [
       ...prev,
       {
-        food_id: pick.id,
+        food_id: isOffId(pick.id) ? null : pick.id,
         food_name: pick.name,
         amount_g: g,
         kcal: Math.round(pick.kcal_per_100g * f),

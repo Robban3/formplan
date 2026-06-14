@@ -38,6 +38,8 @@ interface AiRequest {
   maxTokens: number
   /** Be modellen svara med ren JSON (Gemini sätter responseMimeType). */
   json?: boolean
+  /** 0–1; högre = mer variation/kreativitet. */
+  temperature?: number
 }
 
 interface AiResult {
@@ -95,6 +97,7 @@ async function callAnthropic(req: AiRequest, env: Env): Promise<AiResult> {
   const params: Anthropic.MessageCreateParamsNonStreaming = {
     model: env.ANTHROPIC_MODEL ?? PRIMARY_MODEL,
     max_tokens: req.maxTokens,
+    ...(req.temperature !== undefined ? { temperature: req.temperature } : {}),
     ...(req.system ? { system: req.system } : {}),
     messages: req.messages.map((m) => ({ role: m.role, content: toAnthropicContent(m.content) })),
   }
@@ -153,6 +156,7 @@ async function callGemini(req: AiRequest, env: Env): Promise<AiResult> {
       // Gemini 2.5 räknar "thinking"-tokens mot maxOutputTokens och kan annars
       // hugga av/tömma svaret. Stäng av thinking så hela budgeten går till svaret.
       thinkingConfig: { thinkingBudget: 0 },
+      ...(req.temperature !== undefined ? { temperature: req.temperature } : {}),
       ...(req.json ? { responseMimeType: 'application/json' } : {}),
     },
   }
@@ -441,6 +445,7 @@ export async function generateRecipe(req: RecipeRequest, env: Env): Promise<Gene
 
   const user = `Skapa ett recept utifrån önskemålet: "${req.prompt}".
 ${constraints.length ? `Krav:\n- ${constraints.join('\n- ')}\n` : ''}
+Var kreativ och variera — välj gärna olika proteinkällor och kök mellan gångerna (inte alltid lax eller kyckling). Slumpfrö: ${crypto.randomUUID()}.
 Svara ENDAST med giltig JSON enligt exakt detta schema (på svenska, med realistiska näringsvärden per portion):
 {
   "name": "string",
@@ -463,6 +468,7 @@ Svara ENDAST med giltig JSON enligt exakt detta schema (på svenska, med realist
       messages: [{ role: 'user', content: user }],
       maxTokens: 1500,
       json: true,
+      temperature: 1,
     },
     env
   )

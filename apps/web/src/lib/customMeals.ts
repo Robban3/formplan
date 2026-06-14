@@ -1,5 +1,5 @@
 export interface MealIngredient {
-  food_id?: string
+  food_id?: string | null
   food_name: string
   amount_g: number
   kcal: number

@@ -97,7 +97,7 @@ export function MorePage() {
                 disabled={busy}
                 className="mt-3 w-full py-2.5 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-sm font-semibold transition-colors disabled:opacity-60"
               >
-                Uppgradera till Premium – {billing.price_sek} kr/mån
+                Uppgradera till Premium – {billing.price_sek || 99} kr/mån
               </button>
             </>
           ) : (
@@ -109,7 +109,7 @@ export function MorePage() {
                 disabled={busy}
                 className="mt-3 w-full py-2.5 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-sm font-semibold transition-colors disabled:opacity-60"
               >
-                Bli Premium – {billing.price_sek} kr/mån
+                Bli Premium – {billing.price_sek || 99} kr/mån
               </button>
             </>
           )}
