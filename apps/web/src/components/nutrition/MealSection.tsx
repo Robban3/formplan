@@ -1,6 +1,7 @@
 import type { FoodLogEntry, MealSlot } from '../../lib/nutritionApi'
 import { PlusIcon } from '../ui/Icons'
 import { MealRecipeGenerator } from './MealRecipeGenerator'
+import { isPortionEntry } from '../../lib/portionEntryStore'
 
 const SLOT_LABELS: Record<MealSlot, string> = {
   frukost: 'Frukost',
@@ -56,7 +57,7 @@ export function MealSection({ slot, entries, date, onAdd, onTapEntry, onLogged }
             <FoodAvatar name={entry.food_name} slot={slot} />
             <div className="text-left min-w-0">
               <p className="text-sm font-medium text-stone-800 truncate">{entry.food_name}</p>
-              <p className="text-xs text-stone-400">{entry.amount_g} g</p>
+              <p className="text-xs text-stone-400">{isPortionEntry(entry.id) ? '1 portion' : `${entry.amount_g} g`}</p>
             </div>
           </div>
           <span className="text-sm font-medium text-stone-500 flex-shrink-0 ml-2">{entry.kcal} kcal</span>

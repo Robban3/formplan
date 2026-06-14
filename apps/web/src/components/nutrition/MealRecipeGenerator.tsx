@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { api, ApiError, type GeneratedRecipe } from '../../lib/api'
 import { nutritionApi, type MealSlot } from '../../lib/nutritionApi'
+import { markPortionEntry } from '../../lib/portionEntryStore'
 import { toast } from '../../lib/toast'
 import { ZapIcon, ClockIcon } from '../ui/Icons'
 
@@ -66,7 +67,7 @@ export function MealRecipeGenerator({ slot, date, onLogged }: Props) {
       // Logga en portion av receptet som en post. amount_g måste vara > 0; vi
       // uppskattar portionsvikten från makromassan (kcal/makros lagras absolut).
       const grams = Math.max(1, Math.round(recipe.protein_g + recipe.fat_g + recipe.carbs_g))
-      await nutritionApi.addLogEntry({
+      const { entry } = await nutritionApi.addLogEntry({
         date,
         meal_slot: slot,
         food_id: null,
@@ -77,6 +78,7 @@ export function MealRecipeGenerator({ slot, date, onLogged }: Props) {
         fat_g: recipe.fat_g,
         carbs_g: recipe.carbs_g,
       })
+      markPortionEntry(entry.id)
       toast.success('Måltid loggad!')
       setOpen(false)
       setRecipe(null)
