@@ -1,0 +1,48 @@
+name: Deploy
+
+# Deployar både API (Cloudflare Workers) och webben (Cloudflare Pages) vid varje
+# push till main. Kräver GitHub-secret: CLOUDFLARE_API_TOKEN (med behörighet
+# "Edit Cloudflare Workers" + "Cloudflare Pages: Edit").
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: 7ee493414851833cc5f68b0fab8186bb
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web
+        run: npm run build
+
+      - name: Deploy API (Workers)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 7ee493414851833cc5f68b0fab8186bb
+          workingDirectory: apps/api
+          command: deploy
+
+      - name: Deploy Web (Pages)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 7ee493414851833cc5f68b0fab8186bb
+          command: pages deploy apps/web/dist --project-name=formplan-app --branch=main
