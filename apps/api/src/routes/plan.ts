@@ -110,7 +110,7 @@ planRouter.get('/list', async (c) => {
 
 planRouter.get('/:id', async (c) => {
   const user = c.get('user')
-  const planId = c.req.param('id')
+  const planId = encodeURIComponent(c.req.param('id'))
   const db = supabaseAdmin(c.env)
 
   const { data: plans } = await db.query<{ id: string; user_id: string; status: string; created_at: string }[]>(

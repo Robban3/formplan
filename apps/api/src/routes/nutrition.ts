@@ -201,7 +201,7 @@ nutritionRouter.post(
 // DELETE /nutrition/log/:id
 nutritionRouter.delete('/log/:id', async (c) => {
   const user = c.get('user')
-  const id = c.req.param('id')
+  const id = encodeURIComponent(c.req.param('id'))
   const db = supabaseAdmin(c.env)
   const { error } = await db.query(
     `/food_log?id=eq.${id}&user_id=eq.${user.sub}`,
@@ -269,7 +269,7 @@ nutritionRouter.post(
 // DELETE /nutrition/water/:id
 nutritionRouter.delete('/water/:id', async (c) => {
   const user = c.get('user')
-  const id = c.req.param('id')
+  const id = encodeURIComponent(c.req.param('id'))
   const db = supabaseAdmin(c.env)
   const { error } = await db.query(
     `/water_log?id=eq.${id}&user_id=eq.${user.sub}`,

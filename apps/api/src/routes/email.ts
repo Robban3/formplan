@@ -174,6 +174,11 @@ emailRouter.post('/newsletter', requireAuth, async (c) => {
     ctaUrl?: string
   }>()
 
+  // Bound the blast: dedupe, keep only plausible addresses, cap the batch so a
+  // malformed/oversized payload can't trigger an unbounded send.
+  const recipients = [...new Set((body.emails ?? []).filter((e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)))].slice(0, 500)
+  if (recipients.length === 0) return c.json({ error: 'No valid recipients' }, 400)
+
   const html = await newsletterEmail({
     title: body.title,
     subtitle: body.subtitle,
@@ -183,11 +188,11 @@ emailRouter.post('/newsletter', requireAuth, async (c) => {
     ...(body.ctaUrl ? { ctaUrl: body.ctaUrl } : {}),
   })
   const results = await Promise.allSettled(
-    body.emails.map((to) =>
+    recipients.map((to) =>
       sendEmail(c.env.RESEND_API_KEY, { to, subject: body.subject, html })
     )
   )
 
   const failed = results.filter((r) => r.status === 'rejected').length
-  return c.json({ sent: body.emails.length - failed, failed })
+  return c.json({ sent: recipients.length - failed, failed })
 })

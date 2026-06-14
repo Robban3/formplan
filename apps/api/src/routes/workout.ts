@@ -107,8 +107,8 @@ workoutRouter.get('/sessions', async (c) => {
   const db = supabaseAdmin(c.env)
 
   let path = `/workout_session?user_id=eq.${user.sub}&select=*&order=completed_at.desc`
-  if (from) path += `&completed_at=gte.${from}`
-  if (to) path += `&completed_at=lte.${to}`
+  if (from) path += `&completed_at=gte.${encodeURIComponent(from)}`
+  if (to) path += `&completed_at=lte.${encodeURIComponent(to)}`
 
   const { data } = await db.query<WorkoutSessionRow[]>(path)
   return c.json({ sessions: data ?? [] })
