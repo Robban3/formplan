@@ -86,6 +86,7 @@ create table if not exists food_log (
   meal_slot  text not null check (meal_slot in ('frukost','lunch','middag','mellanmar')),
   food_id    uuid references food_item(id) on delete set null,
   food_name  text not null,
+  serving_label text,
   amount_g   numeric(7,1) not null,
   kcal       numeric(7,1) not null,
   protein_g  numeric(6,1) not null default 0,
@@ -93,6 +94,10 @@ create table if not exists food_log (
   carbs_g    numeric(6,1) not null default 0,
   created_at timestamptz not null default now()
 );
+
+-- Idempotent: lägg till kolumnen i befintliga databaser (visningsetikett som
+-- "1 portion" för loggade recept; null = visa gram).
+alter table food_log add column if not exists serving_label text;
 
 alter table food_log enable row level security;
 create policy "owner" on food_log using (auth.uid() = user_id);

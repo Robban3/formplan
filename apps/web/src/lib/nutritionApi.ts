@@ -42,6 +42,7 @@ export interface FoodLogEntry {
   meal_slot: MealSlot
   food_id: string | null
   food_name: string
+  serving_label?: string | null
   amount_g: number
   kcal: number
   protein_g: number

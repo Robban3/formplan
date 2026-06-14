@@ -150,6 +150,7 @@ export interface FoodLogRow {
   protein_g: number
   fat_g: number
   carbs_g: number
+  serving_label: string | null
 }
 
 export interface WaterLogRow {
