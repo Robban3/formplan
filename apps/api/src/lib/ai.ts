@@ -59,18 +59,21 @@ async function callAi(req: AiRequest, env: Env): Promise<AiResult> {
   const order: Array<'gemini' | 'anthropic'> =
     preferred === 'gemini' ? ['gemini', 'anthropic'] : ['anthropic', 'gemini']
 
-  let lastErr: unknown
+  // Samla varför varje provider hoppades över/misslyckades så felet pekar ut
+  // grundorsaken (t.ex. "GEMINI_API_KEY saknas") i stället för bara den sista.
+  const problems: string[] = []
   for (const p of order) {
-    if (p === 'gemini' && !env.GEMINI_API_KEY) continue
-    if (p === 'anthropic' && !env.ANTHROPIC_API_KEY) continue
+    if (p === 'gemini' && !env.GEMINI_API_KEY) { problems.push('gemini: GEMINI_API_KEY saknas'); continue }
+    if (p === 'anthropic' && !env.ANTHROPIC_API_KEY) { problems.push('anthropic: ANTHROPIC_API_KEY saknas'); continue }
     try {
       return p === 'gemini' ? await callGemini(req, env) : await callAnthropic(req, env)
     } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      problems.push(`${p}: ${msg}`)
       console.warn(`AI provider "${p}" failed; trying next if available.`, err)
-      lastErr = err
     }
   }
-  throw lastErr ?? new Error('Ingen AI-provider konfigurerad (sätt GEMINI_API_KEY eller ANTHROPIC_API_KEY).')
+  throw new Error(`Ingen AI-provider fungerade (förstahandsval: ${preferred}). ${problems.join(' | ')}`)
 }
 
 // ── Anthropic ────────────────────────────────────────────────────────────────
