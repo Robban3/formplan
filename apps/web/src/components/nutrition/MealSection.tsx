@@ -74,7 +74,12 @@ export function MealSection({ slot, entries, date, onAdd, onTapEntry, onLogged }
         Lägg till mat
       </button>
 
-      <MealRecipeGenerator slot={slot} date={date} onLogged={onLogged} />
+      <MealRecipeGenerator
+        slot={slot}
+        date={date}
+        defaultIngredient={entries.map((e) => e.food_name).join(', ')}
+        onLogged={onLogged}
+      />
     </div>
   )
 }

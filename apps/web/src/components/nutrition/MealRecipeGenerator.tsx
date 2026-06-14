@@ -23,12 +23,14 @@ const KCAL_DEFAULT: Record<MealSlot, number> = {
 interface Props {
   slot: MealSlot
   date: string // YYYY-MM-DD
+  // Livsmedel som redan ligger i måltiden — receptet utgår från dessa.
+  defaultIngredient?: string
   onLogged?: () => void
 }
 
-export function MealRecipeGenerator({ slot, date, onLogged }: Props) {
+export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogged }: Props) {
   const [open, setOpen] = useState(false)
-  const [ingredient, setIngredient] = useState('')
+  const [ingredient, setIngredient] = useState(defaultIngredient)
   const [kcal, setKcal] = useState(String(KCAL_DEFAULT[slot]))
   const [recipe, setRecipe] = useState<GeneratedRecipe | null>(null)
   const [loading, setLoading] = useState(false)
@@ -40,7 +42,7 @@ export function MealRecipeGenerator({ slot, date, onLogged }: Props) {
     setLoading(true)
     setError(null)
     const ing = ingredient.trim()
-    const prompt = ing ? `Ett recept med ${ing}` : 'Ett gott och varierat recept'
+    const prompt = ing ? `Ett recept som utgår från: ${ing}` : 'Ett gott och varierat recept'
     try {
       const { recipe } = await api.generateRecipe({
         prompt,
@@ -92,7 +94,7 @@ export function MealRecipeGenerator({ slot, date, onLogged }: Props) {
   if (!open) {
     return (
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => { setOpen(true); if (!ingredient.trim() && defaultIngredient) setIngredient(defaultIngredient) }}
         className="w-full flex items-center justify-center gap-2 py-3 border-t border-stone-50 text-sm text-forest-600 font-medium hover:bg-forest-50 transition-colors"
       >
         <ZapIcon className="w-4 h-4 stroke-forest-600" />
@@ -103,6 +105,9 @@ export function MealRecipeGenerator({ slot, date, onLogged }: Props) {
 
   return (
     <div className="border-t border-stone-50 p-4 space-y-3 bg-stone-50/60">
+      {defaultIngredient && (
+        <p className="text-[11px] text-stone-400">Utgår från måltidens livsmedel — ändra fritt</p>
+      )}
       <div className="flex items-center gap-2">
         <input
           value={ingredient}
