@@ -9,6 +9,9 @@ import type { AppContext } from '../lib/types'
 const TRIAL_DAYS = 7
 const PRICE_SEK_ORE = 9900 // 99,00 kr/mån
 
+// Konton som alltid har full åtkomst (test/admin) — kringgår provperiod & paywall.
+const FULL_ACCESS_EMAILS = new Set(['oliver@dronarkompaniet.se', 'rvdv1122@gmail.com'])
+
 export const billingRouter = new Hono<AppContext>()
 
 billingRouter.use('*', requireAuth)
@@ -16,6 +19,19 @@ billingRouter.use('*', requireAuth)
 // GET /billing/status — access = within 7-day trial (from signup) OR active sub.
 billingRouter.get('/status', async (c) => {
   const user = c.get('user')
+
+  // Allowlistade konton får alltid full åtkomst.
+  if (user.email && FULL_ACCESS_EMAILS.has(user.email.toLowerCase())) {
+    return c.json({
+      access: true,
+      premium: true,
+      inTrial: false,
+      trialEndsAt: new Date(0).toISOString(),
+      trialDaysLeft: 0,
+      price_sek: PRICE_SEK_ORE / 100,
+    })
+  }
+
   const premium = await isUserPremium(user.sub, c.env)
 
   // No signup date → no trial (avoids granting an indefinite free trial).
