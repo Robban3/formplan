@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { api } from '../lib/api'
 import { billingApi, type BillingStatus } from '../lib/billingApi'
 import { toast } from '../lib/toast'
 import {
@@ -65,6 +66,19 @@ export function MorePage() {
     } catch {
       toast.error('Kunde inte öppna prenumerationen')
       setBusy(false)
+    }
+  }
+
+  async function deleteAccount() {
+    if (!confirm('Radera ditt konto permanent? All din data (profil, träning, kost, prenumeration) tas bort och går inte att återställa.')) return
+    if (!confirm('Är du helt säker? Detta går inte att ångra.')) return
+    try {
+      await api.deleteAccount()
+      await supabase.auth.signOut()
+      toast.success('Ditt konto har raderats.')
+      window.location.href = '/auth'
+    } catch {
+      toast.error('Kunde inte radera kontot. Försök igen.')
     }
   }
 
@@ -138,6 +152,13 @@ export function MorePage() {
       >
         <LogOutIcon className="w-4 h-4 stroke-red-500" />
         Logga ut
+      </button>
+
+      <button
+        onClick={deleteAccount}
+        className="w-full text-center text-xs text-stone-400 underline py-2"
+      >
+        Radera konto
       </button>
     </div>
   )

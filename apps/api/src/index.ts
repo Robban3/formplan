@@ -9,6 +9,7 @@ import { workoutRouter } from './routes/workout'
 import { emailRouter } from './routes/email'
 import { aiRouter } from './routes/ai'
 import { billingRouter } from './routes/billing'
+import { accountRouter } from './routes/account'
 import type { Env } from './lib/types'
 import { sendWeeklyReports } from './jobs/weeklyReport'
 
@@ -40,6 +41,7 @@ app.route('/workout', workoutRouter)
 app.route('/email', emailRouter)
 app.route('/ai', aiRouter)
 app.route('/billing', billingRouter)
+app.route('/account', accountRouter)
 
 const worker = {
   fetch: app.fetch.bind(app),

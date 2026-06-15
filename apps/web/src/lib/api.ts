@@ -141,6 +141,8 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ description }),
     }),
+
+  deleteAccount: () => request<{ ok: true }>('/account', { method: 'DELETE' }),
 }
 
 // Shared request helper for sibling API clients.
