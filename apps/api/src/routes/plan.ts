@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { requireAuth } from '../middleware/auth'
-import { requireAccess } from '../middleware/access'
+import { requireAccess, requireVerifiedEmail } from '../middleware/access'
 import { supabaseAdmin, isUserPremium } from '../lib/supabase'
 import { generatePlan } from '../lib/ai'
 import { buildMockPlanDays } from '../lib/mockPlan'
@@ -19,6 +19,9 @@ planRouter.use('*', requireAccess)
 
 planRouter.post(
   '/generate',
+  // Kräv bekräftad e-post — /generate är en dyr AI-operation (gate:as bara här,
+  // inte list/get, så vanlig navigering aldrig blockeras).
+  requireVerifiedEmail,
   // Plangenerering är den dyraste AI-operationen — hård gräns per användare.
   rateLimit('plan-generate', 3),
   zValidator('json', z.object({ profile_snapshot: z.record(z.unknown()).optional() }), validationHook),

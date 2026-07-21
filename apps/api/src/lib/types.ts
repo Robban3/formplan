@@ -15,6 +15,9 @@ export interface Env {
   // Kommaseparerad lista med admin-mejladresser (t.ex. nyhetsbrevsutskick).
   // Osatt ⇒ inga admins ⇒ admin-endpoints svarar alltid 403.
   ADMIN_EMAILS?: string
+  // Valfri KV-namespace för distribuerad rate limiting. Osatt ⇒ limitern
+  // faller tillbaka på in-memory per isolate (se lib/rateLimit.ts).
+  RATE_LIMIT_KV?: KVNamespace
 }
 
 export interface JwtPayload {
@@ -22,6 +25,13 @@ export interface JwtPayload {
   email: string
   role: string
   created_at?: string
+  // GoTrue-fält från /auth/v1/user — sätts när e-posten bekräftats (eller vid
+  // första magic-link/OTP-inloggningen). Används för att härleda email_verified.
+  email_confirmed_at?: string | null
+  confirmed_at?: string | null
+  // Härlett fält (email_confirmed_at != null) satt av verifyJwt. Styr åtkomst
+  // till dyra AI-endpoints via requireVerifiedEmail.
+  email_verified: boolean
   app_metadata: {
     provider: string
   }

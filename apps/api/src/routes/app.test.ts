@@ -52,7 +52,13 @@ describe('server-side paywall (requireAccess)', () => {
       const url = String(input)
       if (url.includes('/auth/v1/user')) {
         return new Response(
-          JSON.stringify({ id: 'user-1', email: 'test@example.com', created_at: '2020-01-01T00:00:00Z' }),
+          JSON.stringify({
+            id: 'user-1',
+            email: 'test@example.com',
+            created_at: '2020-01-01T00:00:00Z',
+            // Bekräftad e-post → requireVerifiedEmail släpper igenom (annars 403).
+            email_confirmed_at: '2020-01-01T00:00:00Z',
+          }),
           { status: 200, headers: { 'Content-Type': 'application/json' } }
         )
       }
@@ -79,6 +85,53 @@ describe('server-side paywall (requireAccess)', () => {
     // DELETE /account går förbi paywallen (fetch-mocken raderar "lyckat").
     const res = await app.request('/account', { method: 'DELETE', headers: { Authorization: 'Bearer token' } }, mockEnv)
     expect(res.status, '/account delete should not be paywalled').toBe(200)
+  })
+})
+
+describe('verified-email gate (requireVerifiedEmail)', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  // Användare med aktiv provperiod (nyligen skapad) men OBEKRÄFTAD e-post.
+  function mockUnverifiedTrialUser() {
+    const recent = new Date(Date.now() - 86_400_000).toISOString()
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url.includes('/auth/v1/user')) {
+        return new Response(
+          // Inget email_confirmed_at ⇒ email_verified = false.
+          JSON.stringify({ id: 'user-2', email: 'unverified@example.com', created_at: recent }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      return new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } })
+    })
+  }
+
+  it('returns 403 email_unverified on AI routes and /plan/generate for unconfirmed email', async () => {
+    mockUnverifiedTrialUser()
+    const targets: [string, RequestInit][] = [
+      ['/ai/estimate-meal', { method: 'POST', body: JSON.stringify({ description: 'ägg' }) }],
+      ['/plan/generate', { method: 'POST', body: JSON.stringify({}) }],
+    ]
+    for (const [path, init] of targets) {
+      const res = await app.request(
+        path,
+        { ...init, headers: { Authorization: 'Bearer token', 'Content-Type': 'application/json' } },
+        mockEnv
+      )
+      expect(res.status, `${path} should be 403`).toBe(403)
+      const body = (await res.json()) as { code?: string }
+      expect(body.code).toBe('email_unverified')
+    }
+  })
+
+  it('does not gate non-AI premium routes on email confirmation', async () => {
+    mockUnverifiedTrialUser()
+    // /plan/list är premium men ska INTE kräva bekräftad e-post.
+    const res = await app.request('/plan/list', { headers: { Authorization: 'Bearer token' } }, mockEnv)
+    expect(res.status).not.toBe(403)
   })
 })
 

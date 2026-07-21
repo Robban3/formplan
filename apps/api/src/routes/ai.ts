@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { requireAuth } from '../middleware/auth'
-import { requireAccess } from '../middleware/access'
+import { requireAccess, requireVerifiedEmail } from '../middleware/access'
 import { coachReply, generateRecipe, analyzeFoodPhoto, estimateMeal, friendlyAiError } from '../lib/ai'
 import { rateLimit } from '../lib/rateLimit'
 import { validationHook } from '../lib/validation'
@@ -13,6 +13,9 @@ export const aiRouter = new Hono<AppContext>()
 aiRouter.use('*', requireAuth)
 // AI är en premium-funktion — kräver aktiv provperiod eller prenumeration.
 aiRouter.use('*', requireAccess)
+// Kräv bekräftad e-post — blockerar massregistrerade obekräftade konton från
+// att dra AI-kostnader. Körs efter paywallen (obetalda ser 402 först).
+aiRouter.use('*', requireVerifiedEmail)
 
 const messageSchema = z.object({
   role: z.enum(['user', 'assistant']),

@@ -51,6 +51,11 @@ export async function verifyJwt(token: string, env: Env): Promise<JwtPayload | n
     const user = (await res.json()) as JwtPayload & { id?: string }
     if (!user.sub && user.id) user.sub = user.id
     if (!user.sub) return null
+    // GoTrue markerar bekräftad e-post via email_confirmed_at (confirmed_at som
+    // fallback). Magic-link/OTP-användare får detta satt vid första inloggningen,
+    // så vanliga användare räknas som verifierade — bara oskapade/obekräftade
+    // konton (huvudsaklig AI-kostnadsmissbruksvektor) blockeras.
+    user.email_verified = user.email_confirmed_at != null || user.confirmed_at != null
     return user
   } catch {
     return null
