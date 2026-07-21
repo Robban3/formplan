@@ -6,12 +6,22 @@ import { MacroSummary } from '../../components/nutrition/MacroSummary'
 import { MealSection } from '../../components/nutrition/MealSection'
 import { ChevronLeftIcon, ChevronRightIcon, DropletIcon, StarIcon, ShoppingCartIcon, SearchIcon } from '../../components/ui/Icons'
 import { getTopFavorites, type FoodFavorite } from '../../lib/foodFavoritesStore'
+import { toast } from '../../lib/toast'
 
 const MEALS: MealSlot[] = ['frukost', 'lunch', 'middag', 'mellanmar']
 const DEFAULT_GOALS: DailyGoals = { kcal: 2000, protein_g: 150, fat_g: 67, carbs_g: 250 }
 
 const MEAL_LABELS: Record<MealSlot, string> = {
   frukost: 'Frukost', lunch: 'Lunch', middag: 'Middag', mellanmar: 'Mellanmål',
+}
+
+/** Rimlig måltid utifrån klockslaget — snabblogg ska inte alltid bli frukost. */
+function slotForNow(): MealSlot {
+  const h = new Date().getHours()
+  if (h < 10) return 'frukost'
+  if (h < 14) return 'lunch'
+  if (h < 17) return 'mellanmar'
+  return 'middag'
 }
 
 function mealMacros(entries: FoodLogEntry[]) {
@@ -75,8 +85,12 @@ export function FoodDiary() {
 
   async function handleTapEntry(entry: FoodLogEntry) {
     if (!confirm(`Ta bort ${entry.food_name}?`)) return
-    await nutritionApi.deleteLogEntry(entry.id)
-    load(date)
+    try {
+      await nutritionApi.deleteLogEntry(entry.id)
+      load(date)
+    } catch {
+      toast.error('Kunde inte ta bort posten. Försök igen.')
+    }
   }
 
   return (
@@ -198,7 +212,7 @@ export function FoodDiary() {
                 {favorites.map((fav: FoodFavorite) => (
                   <button
                     key={fav.food_id}
-                    onClick={() => navigate(`/kost/sok?slot=frukost&date=${dateKey(date)}&prefill=${fav.food_id}`)}
+                    onClick={() => navigate(`/kost/sok?slot=${slotForNow()}&date=${dateKey(date)}&prefill=${encodeURIComponent(fav.food_id)}`)}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-50 rounded-full border border-stone-100 text-xs text-stone-700 hover:bg-forest-50 hover:border-forest-200 transition-colors"
                   >
                     <span>{fav.food_name}</span>

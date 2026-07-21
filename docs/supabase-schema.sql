@@ -54,8 +54,16 @@ create table if not exists subscriptions (
   stripe_customer_id     text,
   status                 text not null,
   premium_until          timestamptz not null,
+  -- Stripe event.created för den senast tillämpade webhook-händelsen. API:t
+  -- ignorerar äldre händelser så en försenad "updated" inte kan återuppliva
+  -- premium efter "deleted".
+  last_event_at          timestamptz,
   updated_at             timestamptz not null default now()
 );
+
+-- Idempotent: lägg till kolumnerna i befintliga databaser.
+alter table subscriptions add column if not exists status text;
+alter table subscriptions add column if not exists last_event_at timestamptz;
 
 alter table subscriptions enable row level security;
 create policy "owner_read" on subscriptions for select using (auth.uid() = user_id);
@@ -77,6 +85,13 @@ create table if not exists food_item (
 alter table food_item enable row level security;
 create policy "read_authenticated" on food_item for select using (auth.role() = 'authenticated');
 create index if not exists food_item_name_idx on food_item using gin (to_tsvector('simple', name));
+
+-- Unika namn (skiftlägesokänsligt). Tidigare seed-körningar kan ha skapat
+-- dubbletter — rensa dem innan indexet skapas. (Namnet food_item_name_idx är
+-- upptaget av GIN-sökindexet ovan.)
+delete from food_item a using food_item b
+  where a.ctid > b.ctid and lower(a.name) = lower(b.name);
+create unique index if not exists food_item_name_unique_idx on food_item ((lower(name)));
 
 -- Food log (per-user meal entries)
 create table if not exists food_log (
@@ -134,6 +149,9 @@ create table if not exists workout_session (
 alter table workout_session enable row level security;
 create policy "owner" on workout_session using (auth.uid() = user_id);
 create index if not exists workout_session_user_idx on workout_session(user_id, completed_at desc);
+-- Idempotenta inserts: en re-POST av samma pass (samma användare, starttid och
+-- passnamn) upsertas i stället för att skapa en dubblettrad.
+create unique index if not exists workout_session_dedup_idx on workout_session(user_id, started_at, workout_name);
 
 -- Body measurements (weight + girths, per-user time series)
 create table if not exists body_measurement (
@@ -176,4 +194,4 @@ values
   ('Cheddarost',              402, 25.0, 33.0, 1.3,  30),
   ('Linser (kokta)',          116, 9.0,  0.4,  20.0, 150),
   ('Mandlar',                 579, 21.0, 50.0, 22.0, 30)
-on conflict do nothing;
+on conflict ((lower(name))) do nothing;

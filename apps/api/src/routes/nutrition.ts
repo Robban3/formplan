@@ -2,7 +2,10 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { requireAuth } from '../middleware/auth'
+import { requireAccess } from '../middleware/access'
 import { supabaseAdmin } from '../lib/supabase'
+import { rateLimit } from '../lib/rateLimit'
+import { validationHook } from '../lib/validation'
 import { isoWeekday, defaultGoals, goalsFromNutritionDay } from '../lib/derive'
 import { sanitizeSearchTerm, isUuid, isDateString, DATE_RE } from '../lib/sanitize'
 import type {
@@ -18,8 +21,17 @@ import type {
 export const nutritionRouter = new Hono<AppContext>()
 
 nutritionRouter.use('*', requireAuth)
+// Kostloggning är en premium-funktion — kräver aktiv provperiod eller prenumeration.
+nutritionRouter.use('*', requireAccess)
 
 const mealSlot = z.enum(['frukost', 'lunch', 'middag', 'mellanmar'])
+
+// Största tillåtna datumintervall för summeringar (skyddar mot orimligt stora
+// PostgREST-svar). Returnerar antal dagar mellan två YYYY-MM-DD-strängar.
+const MAX_SUMMARY_DAYS = 400
+function rangeDays(from: string, to: string): number {
+  return Math.round((Date.parse(to) - Date.parse(from)) / 86_400_000)
+}
 
 // Resolve the user's daily macro goals for a given date. Prefers the nutrition
 // day from their latest ready plan that matches the weekday, then falls back to
@@ -120,7 +132,8 @@ async function searchOpenFoodFacts(q: string): Promise<FoodItemRow[]> {
 }
 
 // GET /nutrition/foods/search?q=  — lokala curated-livsmedel + Open Food Facts.
-nutritionRouter.get('/foods/search', async (c) => {
+// Rate-limitad: proxyn gör externa OFF-anrop och får inte gå att hamra.
+nutritionRouter.get('/foods/search', rateLimit('foods-search', 120), async (c) => {
   // Strip PostgREST metacharacters (* , ( ) & =) from the term — several of
   // them pass through encodeURIComponent untouched and could otherwise alter
   // the ilike pattern or the filter tree.
@@ -134,8 +147,16 @@ nutritionRouter.get('/foods/search', async (c) => {
     db.query<FoodItemRow[]>(`/food_item?name=ilike.${pattern}&select=*&order=name.asc&limit=20`),
     searchOpenFoodFacts(q),
   ])
-  const local = localRes.data ?? []
-  const localNames = new Set(local.map((i) => i.name.toLowerCase()))
+  // Dedupa lokala rader på gemener-namn (tidigare seed-körningar kan ha skapat
+  // dubbletter) innan de slås ihop med OFF-resultaten.
+  const local: FoodItemRow[] = []
+  const localNames = new Set<string>()
+  for (const item of localRes.data ?? []) {
+    const key = item.name.toLowerCase()
+    if (localNames.has(key)) continue
+    localNames.add(key)
+    local.push(item)
+  }
   const items = [...local, ...off.filter((o) => !localNames.has(o.name.toLowerCase()))]
   return c.json({ items })
 })
@@ -149,63 +170,75 @@ nutritionRouter.get('/log', async (c) => {
   const user = c.get('user')
   const db = supabaseAdmin(c.env)
 
-  const [{ data: entries }, goals] = await Promise.all([
+  const [logRes, goals] = await Promise.all([
     db.query<FoodLogRow[]>(
       `/food_log?user_id=eq.${user.sub}&log_date=eq.${encodeURIComponent(date)}&select=*&order=created_at.asc`
     ),
     resolveDailyGoals(c, user.sub, date),
   ])
+  if (logRes.error) {
+    console.error('get food log failed:', logRes.error)
+    return c.json({ error: 'Kunde inte hämta måltiderna just nu. Försök igen.' }, 500)
+  }
 
   return c.json({
-    entries: (entries ?? []).map((e) => ({ ...e, date: e.log_date })),
+    entries: (logRes.data ?? []).map((e) => ({ ...e, date: e.log_date })),
     goals,
   })
 })
 
-// POST /nutrition/log
+// En loggpost. Beloppen är hårt begränsade — orimliga värden (t.ex. 1e9 kcal)
+// skulle annars förstöra summeringar och veckorapporter.
+const logEntrySchema = z.object({
+  date: z.string().regex(DATE_RE),
+  meal_slot: mealSlot,
+  food_id: z.string().uuid().nullable().optional(),
+  food_name: z.string().min(1).max(200),
+  serving_label: z.string().max(40).nullable().optional(),
+  amount_g: z.number().positive().max(5000),
+  kcal: z.number().nonnegative().max(10_000),
+  protein_g: z.number().nonnegative().max(1000),
+  fat_g: z.number().nonnegative().max(1000),
+  carbs_g: z.number().nonnegative().max(1000),
+})
+
+// POST /nutrition/log — ett objekt ELLER en array (batch, t.ex. "logga hela
+// fotoanalysen"). Batch skrivs som EN PostgREST-insert så allt-eller-inget gäller.
 nutritionRouter.post(
   '/log',
-  zValidator(
-    'json',
-    z.object({
-      date: z.string().regex(DATE_RE),
-      meal_slot: mealSlot,
-      food_id: z.string().uuid().nullable().optional(),
-      food_name: z.string().min(1).max(200),
-      serving_label: z.string().max(40).nullable().optional(),
-      amount_g: z.number().positive(),
-      kcal: z.number().nonnegative(),
-      protein_g: z.number().nonnegative(),
-      fat_g: z.number().nonnegative(),
-      carbs_g: z.number().nonnegative(),
-    })
-  ),
+  zValidator('json', z.union([logEntrySchema, z.array(logEntrySchema).min(1).max(30)]), validationHook),
   async (c) => {
     const user = c.get('user')
-    const b = c.req.valid('json')
+    const body = c.req.valid('json')
     const db = supabaseAdmin(c.env)
+
+    const isBatch = Array.isArray(body)
+    const rows = (isBatch ? body : [body]).map((b) => ({
+      user_id: user.sub,
+      log_date: b.date,
+      meal_slot: b.meal_slot,
+      food_id: b.food_id ?? null,
+      food_name: b.food_name,
+      serving_label: b.serving_label ?? null,
+      amount_g: b.amount_g,
+      kcal: b.kcal,
+      protein_g: b.protein_g,
+      fat_g: b.fat_g,
+      carbs_g: b.carbs_g,
+    }))
 
     const { data, error } = await db.query<FoodLogRow[]>('/food_log', {
       method: 'POST',
-      body: JSON.stringify({
-        user_id: user.sub,
-        log_date: b.date,
-        meal_slot: b.meal_slot,
-        food_id: b.food_id ?? null,
-        food_name: b.food_name,
-        serving_label: b.serving_label ?? null,
-        amount_g: b.amount_g,
-        kcal: b.kcal,
-        protein_g: b.protein_g,
-        fat_g: b.fat_g,
-        carbs_g: b.carbs_g,
-      }),
+      body: JSON.stringify(rows),
     })
-    if (error || !data?.[0]) {
+    if (error || !data || data.length !== rows.length) {
       console.error('add food log failed:', error)
       return c.json({ error: 'Kunde inte spara måltiden just nu. Försök igen.' }, 500)
     }
-    return c.json({ entry: { ...data[0], date: data[0].log_date } }, 201)
+    const entries = data.map((e) => ({ ...e, date: e.log_date }))
+    // Enkelobjekt behåller sin gamla svarsform ({ entry }) för kompatibilitet.
+    if (!isBatch) return c.json({ entry: entries[0] }, 201)
+    return c.json({ entries }, 201)
   }
 )
 
@@ -233,12 +266,19 @@ nutritionRouter.get('/water/summary', async (c) => {
   if (!from || !to || !isDateString(from) || !isDateString(to)) {
     return c.json({ error: 'Ogiltigt eller saknat datumintervall — använd formatet YYYY-MM-DD.' }, 400)
   }
+  if (rangeDays(from, to) > MAX_SUMMARY_DAYS) {
+    return c.json({ error: 'Datumintervallet är för stort — max 400 dagar.' }, 400)
+  }
   const user = c.get('user')
   const db = supabaseAdmin(c.env)
 
-  const { data } = await db.query<Pick<WaterLogRow, 'log_date' | 'amount_ml'>[]>(
+  const { data, error } = await db.query<Pick<WaterLogRow, 'log_date' | 'amount_ml'>[]>(
     `/water_log?user_id=eq.${user.sub}&log_date=gte.${encodeURIComponent(from)}&log_date=lte.${encodeURIComponent(to)}&select=log_date,amount_ml`
   )
+  if (error) {
+    console.error('water summary failed:', error)
+    return c.json({ error: 'Kunde inte hämta vattenhistoriken just nu. Försök igen.' }, 500)
+  }
 
   const map = new Map<string, number>()
   for (const row of data ?? []) {
@@ -260,9 +300,13 @@ nutritionRouter.get('/water', async (c) => {
   }
   const user = c.get('user')
   const db = supabaseAdmin(c.env)
-  const { data } = await db.query<WaterLogRow[]>(
+  const { data, error } = await db.query<WaterLogRow[]>(
     `/water_log?user_id=eq.${user.sub}&log_date=eq.${encodeURIComponent(date)}&select=*&order=logged_at.asc`
   )
+  if (error) {
+    console.error('get water log failed:', error)
+    return c.json({ error: 'Kunde inte hämta vattenloggen just nu. Försök igen.' }, 500)
+  }
   const entries = (data ?? []).map((e) => ({ ...e, date: e.log_date }))
   const total_ml = entries.reduce((s, e) => s + e.amount_ml, 0)
   return c.json({ entries, total_ml })
@@ -271,7 +315,7 @@ nutritionRouter.get('/water', async (c) => {
 // POST /nutrition/water
 nutritionRouter.post(
   '/water',
-  zValidator('json', z.object({ date: z.string().regex(DATE_RE), amount_ml: z.number().int().positive().max(10_000) })),
+  zValidator('json', z.object({ date: z.string().regex(DATE_RE), amount_ml: z.number().int().positive().max(10_000) }), validationHook),
   async (c) => {
     const user = c.get('user')
     const b = c.req.valid('json')
@@ -313,12 +357,19 @@ nutritionRouter.get('/summary', async (c) => {
   if (!from || !to || !isDateString(from) || !isDateString(to)) {
     return c.json({ error: 'Ogiltigt eller saknat datumintervall — använd formatet YYYY-MM-DD.' }, 400)
   }
+  if (rangeDays(from, to) > MAX_SUMMARY_DAYS) {
+    return c.json({ error: 'Datumintervallet är för stort — max 400 dagar.' }, 400)
+  }
   const user = c.get('user')
   const db = supabaseAdmin(c.env)
 
-  const { data } = await db.query<Pick<FoodLogRow, 'log_date' | 'kcal' | 'protein_g' | 'fat_g' | 'carbs_g'>[]>(
+  const { data, error } = await db.query<Pick<FoodLogRow, 'log_date' | 'kcal' | 'protein_g' | 'fat_g' | 'carbs_g'>[]>(
     `/food_log?user_id=eq.${user.sub}&log_date=gte.${encodeURIComponent(from)}&log_date=lte.${encodeURIComponent(to)}&select=log_date,kcal,protein_g,fat_g,carbs_g`
   )
+  if (error) {
+    console.error('nutrition summary failed:', error)
+    return c.json({ error: 'Kunde inte hämta kosthistoriken just nu. Försök igen.' }, 500)
+  }
 
   // Aggregate per date in the worker (PostgREST has no GROUP BY).
   const map = new Map<string, { kcal: number; protein_g: number; fat_g: number; carbs_g: number; entries: number }>()

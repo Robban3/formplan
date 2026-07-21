@@ -2,12 +2,16 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { requireAuth } from '../middleware/auth'
+import { requireAccess } from '../middleware/access'
 import { supabaseAdmin } from '../lib/supabase'
+import { validationHook } from '../lib/validation'
 import type { AppContext, WorkoutSessionRow } from '../lib/types'
 
 export const workoutRouter = new Hono<AppContext>()
 
 workoutRouter.use('*', requireAuth)
+// Träningsloggning är en premium-funktion — kräver aktiv provperiod eller prenumeration.
+workoutRouter.use('*', requireAccess)
 
 const setSchema = z.object({
   reps: z.number().int().nonnegative(),
@@ -23,6 +27,8 @@ const exerciseSchema = z.object({
 })
 
 // POST /workout/session — persist a completed (or partial) workout session.
+// Idempotent: samma (user, started_at, workout_name) upsertas i stället för
+// att skapa en dubblettrad vid re-POST (offline-retry, dubbelklick).
 workoutRouter.post(
   '/session',
   zValidator(
@@ -31,9 +37,19 @@ workoutRouter.post(
       plan_day_id: z.string().uuid().nullable().optional(),
       workout_name: z.string().min(1).max(120),
       started_at: z.string().max(64),
+      // Klienten får ange när passet faktiskt avslutades (offline-synk) —
+      // dock max 5 min in i framtiden.
+      completed_at: z
+        .string()
+        .datetime({ offset: true })
+        .refine((v) => Date.parse(v) <= Date.now() + 5 * 60_000, {
+          message: 'completed_at får inte ligga i framtiden.',
+        })
+        .optional(),
       duration_seconds: z.number().int().nonnegative(),
       exercises: z.array(exerciseSchema).max(50),
-    })
+    }),
+    validationHook
   ),
   async (c) => {
     const user = c.get('user')
@@ -53,21 +69,25 @@ workoutRouter.post(
       }
     }
 
-    const { data, error } = await db.query<WorkoutSessionRow[]>('/workout_session', {
-      method: 'POST',
-      body: JSON.stringify({
-        user_id: user.sub,
-        plan_day_id: b.plan_day_id ?? null,
-        workout_name: b.workout_name,
-        started_at: b.started_at,
-        completed_at: new Date().toISOString(),
-        duration_seconds: b.duration_seconds,
-        total_sets: totalSets,
-        completed_sets: completedSets,
-        total_volume_kg: Math.round(totalVolume * 10) / 10,
-        exercises: b.exercises,
-      }),
-    })
+    const { data, error } = await db.query<WorkoutSessionRow[]>(
+      '/workout_session?on_conflict=user_id,started_at,workout_name',
+      {
+        method: 'POST',
+        headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+        body: JSON.stringify({
+          user_id: user.sub,
+          plan_day_id: b.plan_day_id ?? null,
+          workout_name: b.workout_name,
+          started_at: b.started_at,
+          completed_at: b.completed_at ?? new Date().toISOString(),
+          duration_seconds: b.duration_seconds,
+          total_sets: totalSets,
+          completed_sets: completedSets,
+          total_volume_kg: Math.round(totalVolume * 10) / 10,
+          exercises: b.exercises,
+        }),
+      }
+    )
     if (error || !data?.[0]) {
       console.error('save workout session failed:', error)
       return c.json({ error: 'Kunde inte spara passet just nu. Försök igen.' }, 500)

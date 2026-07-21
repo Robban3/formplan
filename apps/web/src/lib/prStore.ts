@@ -1,3 +1,5 @@
+import { dateKey } from './derive'
+
 const KEY = 'formplan_personal_records'
 
 export interface PersonalRecord {
@@ -38,7 +40,7 @@ export function checkAndUpdatePR(exercise: string, weight_kg: number, reps: numb
     weight_kg,
     reps,
     estimated_1rm: est1rm,
-    date: new Date().toISOString().slice(0, 10),
+    date: dateKey(),
   }
   save([...records.filter((r) => r.exercise !== exercise), newRecord])
   return true

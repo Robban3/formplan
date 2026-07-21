@@ -33,6 +33,9 @@ export function ActiveWorkout() {
   const [saving, setSaving] = useState(false)
   const [showRpe, setShowRpe] = useState(false)
   const [pendingWorkoutName, setPendingWorkoutName] = useState('')
+  // Snapshot of the finished workout for the RPE screen — the store is cleared
+  // by finishWorkout, so live reads would show 0/0 and a still-ticking timer.
+  const [pendingStats, setPendingStats] = useState({ done: 0, total: 0, elapsed: 0 })
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const restRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const advanceToRef = useRef<number | null>(null)
@@ -142,8 +145,7 @@ export function ActiveWorkout() {
 
   // RPE modal (shown after finishing, before navigating home)
   if (showRpe) {
-    const doneSetCount = workoutStore.get()?.exercises.reduce((n, e) => n + e.sets.filter((s) => s.done).length, 0) ?? 0
-    const totalSetCount = workoutStore.get()?.exercises.reduce((n, e) => n + e.sets.length, 0) ?? 0
+    const { done: doneSetCount, total: totalSetCount, elapsed: finalElapsed } = pendingStats
     return (
       <div className="min-h-[100dvh] bg-canvas flex flex-col items-center justify-center px-5 gap-6">
         <div className="text-center">
@@ -156,7 +158,7 @@ export function ActiveWorkout() {
 
         {/* Dela pass */}
         <button
-          onClick={() => shareWorkout(pendingWorkoutName, elapsed, doneSetCount, totalSetCount)}
+          onClick={() => shareWorkout(pendingWorkoutName, finalElapsed, doneSetCount, totalSetCount)}
           className="flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-stone-200 text-sm font-medium text-stone-700 shadow-sm"
         >
           <ShareIcon className="w-4 h-4 stroke-stone-500" />
@@ -245,10 +247,11 @@ export function ActiveWorkout() {
     const fallbackReps = defaultRepsFor(ex)
     const set = ex.sets[setIndex]
 
-    // PR check before state update
+    // PR check before state update. set.weight_kg is already stored in kg —
+    // converting again would corrupt PRs for imperial users.
     if (set && showWeight && set.weight_kg && set.weight_kg > 0) {
       const reps = set.reps || fallbackReps
-      const isNewPR = checkAndUpdatePR(ex.name, toStore(set.weight_kg), reps)
+      const isNewPR = checkAndUpdatePR(ex.name, set.weight_kg, reps)
       if (isNewPR) {
         setTimeout(() => toast.success(`🏆 Nytt personbästa på ${ex.name}!`), 100)
       }
@@ -393,11 +396,15 @@ export function ActiveWorkout() {
       (n, e) => n + e.sets.filter((x) => x.done).length,
       0
     )
+    const totalSetCount = snapshot.exercises.reduce((n, e) => n + e.sets.length, 0)
 
     // logSession writes the local row synchronously (updates Hem and Analys
     // immediately) and syncs to the API in the background — one single write,
-    // so the session is never counted twice.
-    workoutApi.logSession(input).catch(() => {})
+    // so the session is never counted twice. A workout with zero completed sets
+    // is never logged — empty sessions must not count toward streaks/challenges.
+    if (completed > 0) {
+      workoutApi.logSession(input).catch(() => {})
+    }
 
     toast.success(completed > 0 ? 'Pass sparat!' : 'Pass avslutat!')
     const name = snapshot.workoutName
@@ -407,6 +414,7 @@ export function ActiveWorkout() {
     // Show RPE rating before navigating
     if (completed > 0) {
       setPendingWorkoutName(name)
+      setPendingStats({ done: completed, total: totalSetCount, elapsed })
       setShowRpe(true)
     } else {
       navigate('/hem', { replace: true })
@@ -554,8 +562,9 @@ export function ActiveWorkout() {
           )}
 
           {ex.sets.map((set, si) => {
+            // set.weight_kg is already kg — no unit conversion here.
             const oneRM = set.done && set.weight_kg && set.reps > 1
-              ? calc1RM(toStore(set.weight_kg), set.reps)
+              ? calc1RM(set.weight_kg, set.reps)
               : null
             return (
             <div
@@ -567,7 +576,7 @@ export function ActiveWorkout() {
               <div className="flex flex-col">
                 <span className="text-sm font-mono text-stone-500">{si + 1}</span>
                 {oneRM && (
-                  <span className="text-[9px] text-forest-600 font-semibold">1RM~{oneRM}</span>
+                  <span className="text-[9px] text-forest-600 font-semibold">1RM~{formatWeight(oneRM)}</span>
                 )}
               </div>
               {isCardio ? (

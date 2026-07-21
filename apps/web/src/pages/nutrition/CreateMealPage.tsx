@@ -54,7 +54,8 @@ export function CreateMealPage() {
 
   function addIngredient() {
     if (!pick) return
-    const g = parseFloat(amount)
+    // Komma-normalisering: "1,5" ska tolkas som 1.5 (som i AnalyticsPage).
+    const g = parseFloat(amount.replace(',', '.'))
     if (!g || g <= 0) return
     const f = g / 100
     setIngredients((prev) => [

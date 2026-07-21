@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { app } from '../index'
 
 // The API routes hit Supabase and Anthropic. For unit-level tests we only verify
@@ -37,6 +37,48 @@ describe('auth guard', () => {
     }, mockEnv)
     // verifyJwt calls Supabase; since we're offline it will fail → 401
     expect(res.status).toBe(401)
+  })
+})
+
+describe('server-side paywall (requireAccess)', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  // Autentiserad användare vars provperiod gått ut och som saknar prenumeration:
+  // GoTrue svarar med en gammal användare, PostgREST med tomma listor.
+  function mockExpiredTrialUser() {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url.includes('/auth/v1/user')) {
+        return new Response(
+          JSON.stringify({ id: 'user-1', email: 'test@example.com', created_at: '2020-01-01T00:00:00Z' }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      return new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } })
+    })
+  }
+
+  it('returns 402 on premium routers when trial expired and no subscription', async () => {
+    mockExpiredTrialUser()
+    for (const path of ['/nutrition/log?date=2024-01-01', '/workout/sessions', '/measurements', '/plan/list']) {
+      const res = await app.request(path, { headers: { Authorization: 'Bearer token' } }, mockEnv)
+      expect(res.status, `${path} should be 402`).toBe(402)
+      const body = (await res.json()) as { code?: string }
+      expect(body.code).toBe('premium_required')
+    }
+  })
+
+  it('keeps /profile, /billing/status and /account reachable without premium', async () => {
+    mockExpiredTrialUser()
+    for (const path of ['/profile', '/billing/status']) {
+      const res = await app.request(path, { headers: { Authorization: 'Bearer token' } }, mockEnv)
+      expect(res.status, `${path} should not be paywalled`).toBe(200)
+    }
+    // DELETE /account går förbi paywallen (fetch-mocken raderar "lyckat").
+    const res = await app.request('/account', { method: 'DELETE', headers: { Authorization: 'Bearer token' } }, mockEnv)
+    expect(res.status, '/account delete should not be paywalled').toBe(200)
   })
 })
 

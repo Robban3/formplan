@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronLeftIcon, ScanBarcodeIcon } from '../../components/ui/Icons'
 import { lookupBarcode, type ScannedProduct } from '../../lib/openFoodFacts'
 import { startBarcodeScanner, type ScannerHandle } from '../../lib/barcodeScanner'
-import { nutritionApi, type MealSlot } from '../../lib/nutritionApi'
+import { nutritionApi, toMealSlot, type MealSlot } from '../../lib/nutritionApi'
 import { dateKey } from '../../lib/derive'
 import { toast } from '../../lib/toast'
 
@@ -17,7 +17,7 @@ const SLOT_LABELS: Record<MealSlot, string> = {
 export function BarcodeScanPage() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
-  const slot = (params.get('slot') ?? 'frukost') as MealSlot
+  const slot = toMealSlot(params.get('slot'))
   const date = params.get('date') ?? dateKey()
 
   const videoRef = useRef<HTMLVideoElement>(null)

@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { z } from 'zod'
 import { supabaseAdmin } from './supabase'
 import type {
   Env,
@@ -8,6 +9,7 @@ import type {
   RestDay,
   GeneratedRecipe,
   FoodPhotoAnalysis,
+  FoodPhotoItem,
   MealEstimate,
 } from './types'
 
@@ -77,9 +79,14 @@ async function callAi(req: AiRequest, env: Env): Promise<AiResult> {
   throw new Error(`Ingen AI-provider fungerade (förstahandsval: ${preferred}). ${problems.join(' | ')}`)
 }
 
+// Fel vars message är skrivet för slutanvändaren (svenska, ingen intern info)
+// och kan visas som det är i stället för det generiska 503-meddelandet.
+export class AiResponseError extends Error {}
+
 // Översätt ett (ofta tekniskt) AI-fel till ett kort, begripligt meddelande utan
 // länkar eller intern info. Den råa orsaken loggas separat på servern.
 export function friendlyAiError(err: unknown): { message: string; status: 429 | 503 } {
+  if (err instanceof AiResponseError) return { message: err.message, status: 503 }
   const raw = err instanceof Error ? err.message : String(err)
   if (/\b429\b|quota|rate.?limit|resource.?exhausted|överbelast/i.test(raw)) {
     return {
@@ -546,6 +553,24 @@ function extractJson(text: string): string {
   return start >= 0 && end > start ? text.slice(start, end + 1) : text
 }
 
+// Modellens JSON valideras/koerceras innan den returneras — tal kan komma som
+// strängar ("450"), fält kan saknas eller vara orimliga. Trasiga recept ska
+// ge ett tydligt fel i stället för att spridas till klienten.
+const recipeNumber = z.coerce.number().finite().nonnegative()
+const recipeSchema = z.object({
+  name: z.string().min(1).max(200),
+  meal_type: z.string().min(1).max(40).catch('middag'),
+  kcal: recipeNumber.max(10_000),
+  protein_g: recipeNumber.max(1000),
+  fat_g: recipeNumber.max(1000),
+  carbs_g: recipeNumber.max(1000),
+  prep_minutes: z.coerce.number().finite().positive().max(24 * 60).catch(30),
+  servings: z.coerce.number().finite().positive().max(50).catch(1),
+  ingredients: z.array(z.string().min(1).max(300)).min(1).max(60),
+  steps: z.array(z.string().min(1).max(1000)).min(1).max(60),
+  tags: z.array(z.string().max(60)).max(15).catch([]),
+})
+
 export async function generateRecipe(req: RecipeRequest, env: Env): Promise<GeneratedRecipe> {
   const constraints: string[] = []
   if (req.calorie_target) constraints.push(`Kalorimål: ca ${req.calorie_target} kcal per portion`)
@@ -586,19 +611,45 @@ Svara ENDAST med giltig JSON enligt exakt detta schema (på svenska, med realist
   "tags": ["kort etikett, t.ex. 'Högt protein'"]
 }`
 
-  const { text: rawText } = await callAi(
+  const { text: rawText, stopReason } = await callAi(
     {
       system:
         'Du är en svensk kock och nutritionist. Svara alltid med enbart giltig JSON — ingen markdown, ingen förklaring.',
       messages: [{ role: 'user', content: user }],
-      maxTokens: 1500,
+      maxTokens: 2500,
       json: true,
       temperature: 1,
     },
     env
   )
 
-  return JSON.parse(extractJson(rawText)) as GeneratedRecipe
+  // Avhugget svar (max_tokens) ⇒ trunkerad JSON. Säg det begripligt i stället
+  // för ett generiskt 503. (Anthropic: 'max_tokens', Gemini: 'MAX_TOKENS'.)
+  const truncated = (stopReason ?? '').toLowerCase() === 'max_tokens'
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(extractJson(rawText))
+  } catch (err) {
+    if (truncated) throw new AiResponseError('Receptet blev för långt — försök igen.')
+    console.error(
+      `Recipe: could not parse model JSON (stop_reason=${stopReason}). Raw response:`,
+      rawText.slice(0, 1000)
+    )
+    throw new Error(`Recipe generation returned unparseable output: ${(err as Error).message}`)
+  }
+
+  const result = recipeSchema.safeParse(parsed)
+  if (!result.success) {
+    if (truncated) throw new AiResponseError('Receptet blev för långt — försök igen.')
+    console.error(
+      'Recipe: model JSON failed validation:',
+      JSON.stringify(result.error.issues.slice(0, 3)),
+      rawText.slice(0, 500)
+    )
+    throw new Error('Recipe generation returned invalid fields')
+  }
+  return result.data
 }
 
 // ── Fotoanalys av mat ───────────────────────────────────────────────────────
@@ -634,8 +685,9 @@ Om bilden inte föreställer mat: returnera tomma "items", nollställd "total" o
     env
   )
 
+  let raw: { description?: unknown; items?: unknown }
   try {
-    return JSON.parse(extractJson(rawText)) as FoodPhotoAnalysis
+    raw = JSON.parse(extractJson(rawText)) as { description?: unknown; items?: unknown }
   } catch (err) {
     // Log the actual model output so a parse failure is diagnosable instead of
     // surfacing as an opaque 502.
@@ -644,6 +696,65 @@ Om bilden inte föreställer mat: returnera tomma "items", nollställd "total" o
       rawText.slice(0, 1000)
     )
     throw new Error(`Food photo analysis returned unparseable output: ${(err as Error).message}`)
+  }
+
+  // Koercera/validera varje posts numeriska fält (samma mönster som
+  // estimateMeal): tal kan komma som strängar, och poster med ogiltiga fält
+  // släpps i stället för att spridas till klienten. Totalen räknas om från de
+  // poster som klarade valideringen.
+  const num = (v: unknown): number | null => {
+    const n = typeof v === 'string' ? Number(v) : v
+    return typeof n === 'number' && isFinite(n) && n >= 0 ? Math.min(n, 10_000) : null
+  }
+  const round1 = (n: number) => Math.round(n * 10) / 10
+
+  const items: FoodPhotoItem[] = []
+  for (const it of Array.isArray(raw.items) ? raw.items : []) {
+    const o = (it ?? {}) as Record<string, unknown>
+    const name = typeof o.name === 'string' ? o.name.trim().slice(0, 100) : ''
+    const amount_g = num(o.amount_g)
+    const kcal = num(o.kcal)
+    const protein_g = num(o.protein_g)
+    const fat_g = num(o.fat_g)
+    const carbs_g = num(o.carbs_g)
+    if (!name || amount_g === null || kcal === null || protein_g === null || fat_g === null || carbs_g === null) {
+      console.warn('Food photo: dropping invalid item:', JSON.stringify(it).slice(0, 200))
+      continue
+    }
+    items.push({
+      name,
+      amount_g: round1(amount_g),
+      kcal: Math.round(kcal),
+      protein_g: round1(protein_g),
+      fat_g: round1(fat_g),
+      carbs_g: round1(carbs_g),
+    })
+  }
+
+  const total = items.reduce(
+    (acc, i) => ({
+      kcal: acc.kcal + i.kcal,
+      protein_g: acc.protein_g + i.protein_g,
+      fat_g: acc.fat_g + i.fat_g,
+      carbs_g: acc.carbs_g + i.carbs_g,
+    }),
+    { kcal: 0, protein_g: 0, fat_g: 0, carbs_g: 0 }
+  )
+
+  return {
+    description:
+      typeof raw.description === 'string' && raw.description.trim()
+        ? raw.description.trim().slice(0, 300)
+        : items.length
+          ? 'Måltid'
+          : 'Ingen mat hittades',
+    items,
+    total: {
+      kcal: Math.round(total.kcal),
+      protein_g: round1(total.protein_g),
+      fat_g: round1(total.fat_g),
+      carbs_g: round1(total.carbs_g),
+    },
   }
 }
 

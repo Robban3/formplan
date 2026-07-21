@@ -90,12 +90,12 @@ export function OnboardingPage() {
       try {
         const { profile } = await api.getProfile()
         if (cancelled) return
-        if (profile && typeof profile === 'object') {
-          setForm(profileToForm(profile as Record<string, unknown>))
-          if (draft?.step) setStep(draft.step)
-        } else if (draft) {
+        // Ett lokalt utkast är nyare än serverprofilen — det får företräde.
+        if (draft) {
           setForm(draft.form)
           setStep(draft.step)
+        } else if (profile && typeof profile === 'object') {
+          setForm(profileToForm(profile as Record<string, unknown>))
         }
       } catch {
         if (!cancelled && draft) {
@@ -432,7 +432,9 @@ export function OnboardingPage() {
                       value={form[key] ?? ''}
                       onChange={(e) => {
                         const raw = e.target.value
-                        setForm((f) => ({ ...f, [key]: raw === '' ? null : Number(raw) }))
+                        const n = Number(raw)
+                        // NaN får aldrig lagras — behåll null tills värdet är giltigt.
+                        setForm((f) => ({ ...f, [key]: raw === '' || !Number.isFinite(n) ? null : n }))
                       }}
                       className="flex-1 bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-forest-400"
                     />
@@ -455,7 +457,9 @@ export function OnboardingPage() {
                     value={form.calorie_goal ?? ''}
                     onChange={(e) => {
                       const raw = e.target.value
-                      setForm((f) => ({ ...f, calorie_goal: raw === '' ? null : Number(raw) }))
+                      const n = Number(raw)
+                      // NaN får aldrig lagras — behåll null tills värdet är giltigt.
+                      setForm((f) => ({ ...f, calorie_goal: raw === '' || !Number.isFinite(n) ? null : n }))
                     }}
                     className="flex-1 bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-forest-400"
                   />

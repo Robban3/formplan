@@ -2,22 +2,26 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { requireAuth } from '../middleware/auth'
+import { requireAccess } from '../middleware/access'
 import { supabaseAdmin, isUserPremium } from '../lib/supabase'
 import { generatePlan } from '../lib/ai'
 import { buildMockPlanDays } from '../lib/mockPlan'
 import { rateLimit } from '../lib/rateLimit'
+import { validationHook } from '../lib/validation'
 import { isUuid } from '../lib/sanitize'
 import type { AppContext, FitnessProfile, Plan } from '../lib/types'
 
 export const planRouter = new Hono<AppContext>()
 
 planRouter.use('*', requireAuth)
+// Scheman är en premium-funktion — kräver aktiv provperiod eller prenumeration.
+planRouter.use('*', requireAccess)
 
 planRouter.post(
   '/generate',
   // Plangenerering är den dyraste AI-operationen — hård gräns per användare.
   rateLimit('plan-generate', 3),
-  zValidator('json', z.object({ profile_snapshot: z.record(z.unknown()).optional() })),
+  zValidator('json', z.object({ profile_snapshot: z.record(z.unknown()).optional() }), validationHook),
   async (c) => {
     const user = c.get('user')
     const db = supabaseAdmin(c.env)
@@ -76,7 +80,7 @@ const mockGoalSchema = z.object({
 
 // Dev-friendly: insert a ready plan with realistic Swedish mock data (no AI).
 // Inte tillgänglig i produktion — svarar 404 som om routen inte fanns.
-planRouter.post('/mock', zValidator('json', mockGoalSchema), async (c) => {
+planRouter.post('/mock', zValidator('json', mockGoalSchema, validationHook), async (c) => {
   if (c.env.ENVIRONMENT === 'production') return c.json({ error: 'Hittades inte.' }, 404)
   const user = c.get('user')
   const db = supabaseAdmin(c.env)

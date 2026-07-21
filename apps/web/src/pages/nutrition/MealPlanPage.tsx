@@ -69,15 +69,20 @@ export function MealPlanPage() {
     if (!kcalTouched.current) setKcal(settings.calorie_goal)
   }, [settings.calorie_goal])
 
+  // Skyddsnät om generering triggas innan blur-klampningen hunnit köra.
+  function clampedKcal() {
+    return Math.max(800, Math.min(6000, Number.isFinite(kcal) && kcal > 0 ? kcal : 800))
+  }
+
   function generate() {
-    setPlan(generateMealPlan(kcal, mealCount, focus, variation))
+    setPlan(generateMealPlan(clampedKcal(), mealCount, focus, variation))
     setExpanded(null)
   }
 
   function regenerate() {
     const next = variation + 1
     setVariation(next)
-    setPlan(generateMealPlan(kcal, mealCount, focus, next))
+    setPlan(generateMealPlan(clampedKcal(), mealCount, focus, next))
     setExpanded(null)
   }
 
@@ -105,7 +110,13 @@ export function MealPlanPage() {
               min={800}
               max={6000}
               step={50}
-              onChange={(e) => { kcalTouched.current = true; setKcal(Math.max(800, Math.min(6000, Number(e.target.value)))) }}
+              onChange={(e) => { kcalTouched.current = true; setKcal(Number(e.target.value)) }}
+              onBlur={(e) => {
+                // Klampa först när fältet lämnas — klamp per tangenttryck gör
+                // det omöjligt att skriva t.ex. "2500" (första "2" → 800).
+                const v = Number(e.target.value)
+                setKcal(Math.max(800, Math.min(6000, Number.isFinite(v) && v > 0 ? v : 800)))
+              }}
               className="flex-1 bg-stone-100 rounded-xl px-4 py-3 text-stone-900 text-lg font-bold text-center focus:outline-none focus:ring-2 focus:ring-forest-400"
             />
             <span className="text-stone-400 font-medium">kcal</span>

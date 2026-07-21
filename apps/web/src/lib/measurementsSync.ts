@@ -29,8 +29,17 @@ async function backfillOnce(): Promise<void> {
     const serverWeightDates = new Set(
       server.filter((m) => typeof m.weight_kg === 'number').map((m) => m.measured_on)
     )
+    // Girth rows are classified by their girth fields (same predicate as
+    // mergeServerMeasurements) — a combined weight+girth row counts as both,
+    // otherwise it would be re-uploaded on every retry.
     const serverGirthDates = new Set(
-      server.filter((m) => typeof m.weight_kg !== 'number').map((m) => m.measured_on)
+      server
+        .filter((m) =>
+          [m.waist_cm, m.chest_cm, m.hips_cm, m.arm_cm, m.thigh_cm].some(
+            (v) => typeof v === 'number'
+          )
+        )
+        .map((m) => m.measured_on)
     )
 
     for (const w of weights) {

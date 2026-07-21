@@ -2,9 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon, PlusIcon, XIcon } from '../components/ui/Icons'
 import { useSettings } from '../hooks/useSettings'
-import { settingsStore, type Reminder } from '../lib/settings'
+import { settingsStore } from '../lib/settings'
 import { toast } from '../lib/toast'
-import { scheduleReminderNotification } from '../lib/notifications'
 
 const DAY_LABELS = ['M', 'Ti', 'O', 'To', 'F', 'L', 'S']
 
@@ -27,22 +26,19 @@ export function RemindersPage() {
       toast.error('Välj minst en dag.')
       return
     }
-    if (Notification.permission !== 'granted') {
+    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
       toast.error('Aktivera notiser under Notiser-sidan först.')
       return
     }
-    const r = settingsStore.addReminder({ days: newDays, time: newTime, label: newLabel, enabled: true })
-    scheduleReminderNotification(r)
+    // useNotificationScheduler (mounted i App) schemalägger om automatiskt när
+    // settings-storen ändras — manuell schemaläggning här skulle dubbeltrigga.
+    settingsStore.addReminder({ days: newDays, time: newTime, label: newLabel, enabled: true })
     setAdding(false)
     toast.success('Påminnelse skapad!')
   }
 
   function toggleReminder(id: string, enabled: boolean) {
     settingsStore.updateReminder(id, { enabled })
-    if (enabled) {
-      const r = settings.reminders.find((r) => r.id === id)
-      if (r) scheduleReminderNotification({ ...r, enabled: true })
-    }
   }
 
   function removeReminder(id: string) {

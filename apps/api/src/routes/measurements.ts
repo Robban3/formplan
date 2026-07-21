@@ -2,13 +2,17 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { requireAuth } from '../middleware/auth'
+import { requireAccess } from '../middleware/access'
 import { supabaseAdmin } from '../lib/supabase'
+import { validationHook } from '../lib/validation'
 import { isUuid, isDateString, DATE_RE } from '../lib/sanitize'
 import type { AppContext, BodyMeasurementRow } from '../lib/types'
 
 export const measurementsRouter = new Hono<AppContext>()
 
 measurementsRouter.use('*', requireAuth)
+// Mätningar är en premium-funktion — kräver aktiv provperiod eller prenumeration.
+measurementsRouter.use('*', requireAccess)
 
 // Omkretsmått i cm — positivt och rimligt begränsat.
 const girth = z.number().positive().max(400).nullable().optional()
@@ -52,7 +56,7 @@ measurementsRouter.get('/', async (c) => {
 })
 
 // POST /measurements — log a new body measurement (≥1 numeric field required).
-measurementsRouter.post('/', zValidator('json', measurementSchema), async (c) => {
+measurementsRouter.post('/', zValidator('json', measurementSchema, validationHook), async (c) => {
   const user = c.get('user')
   const b = c.req.valid('json')
   const db = supabaseAdmin(c.env)

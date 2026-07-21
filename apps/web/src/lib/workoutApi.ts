@@ -25,6 +25,8 @@ export interface LogSessionInput {
   plan_day_id: string | null
   workout_name: string
   started_at: string // ISO
+  /** ISO — when set, the server keeps this instead of stamping "now" (needed for offline flush). */
+  completed_at?: string
   duration_seconds: number
   exercises: SessionExerciseInput[]
 }
@@ -43,10 +45,15 @@ export interface WorkoutSession {
   exercises?: SessionExerciseInput[]
 }
 
+// The API validates plan_day_id as a UUID. Anything else (mock-…, custom-…,
+// template-… ids) must be sent as null or the POST is rejected with a 400 and
+// the offline flush retries forever.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 function apiPlanDayId(planDayId: string | null): string | null {
   if (!planDayId) return null
-  if (parseMockPlanId(planDayId) || planDayId.startsWith('mock-')) return null
-  return planDayId
+  if (parseMockPlanId(planDayId)) return null
+  return UUID_RE.test(planDayId) ? planDayId : null
 }
 
 async function postSession(input: LogSessionInput): Promise<WorkoutSession> {
@@ -57,13 +64,40 @@ async function postSession(input: LogSessionInput): Promise<WorkoutSession> {
   return session
 }
 
+async function doFlushLocalSessions(): Promise<void> {
+  const pending = getLocalSessions().filter(
+    (s) => s.id.startsWith('local-') && Array.isArray(s.exercises)
+  )
+  for (const s of pending) {
+    try {
+      const session = await postSession({
+        plan_day_id: s.plan_day_id,
+        workout_name: s.workout_name,
+        started_at: s.started_at,
+        // Preserve the true completion time — the server would otherwise stamp
+        // "now", shifting streaks/weekly counts for offline-logged sessions.
+        completed_at: s.completed_at,
+        duration_seconds: s.duration_seconds,
+        exercises: s.exercises!,
+      })
+      replaceLocalSession(s.id, session)
+    } catch {
+      /* still offline / API down — keep the local row and retry later */
+    }
+  }
+}
+
+// Concurrent callers (e.g. React StrictMode double-effects) share one run so
+// the same local session is never POSTed twice in parallel.
+let flushInFlight: Promise<void> | null = null
+
 export const workoutApi = {
   logSession: async (input: LogSessionInput) => {
     // Single owner of the local write: exactly one local insert per finished workout.
     const local = addLocalSession(input)
     notifyWorkoutLogged()
     try {
-      const session = await postSession(input)
+      const session = await postSession({ ...input, completed_at: local.completed_at })
       // Reconcile: swap the optimistic local- row for the server row.
       replaceLocalSession(local.id, session)
       return { session }
@@ -77,24 +111,13 @@ export const workoutApi = {
    * replace them with the server rows. Failures are ignored silently — the
    * rows stay local and are retried on next app start.
    */
-  flushLocalSessions: async () => {
-    const pending = getLocalSessions().filter(
-      (s) => s.id.startsWith('local-') && Array.isArray(s.exercises)
-    )
-    for (const s of pending) {
-      try {
-        const session = await postSession({
-          plan_day_id: s.plan_day_id,
-          workout_name: s.workout_name,
-          started_at: s.started_at,
-          duration_seconds: s.duration_seconds,
-          exercises: s.exercises!,
-        })
-        replaceLocalSession(s.id, session)
-      } catch {
-        /* still offline / API down — keep the local row and retry later */
-      }
+  flushLocalSessions: (): Promise<void> => {
+    if (!flushInFlight) {
+      flushInFlight = doFlushLocalSessions().finally(() => {
+        flushInFlight = null
+      })
     }
+    return flushInFlight
   },
 
   getSessions: async (from?: string, to?: string) => {

@@ -51,10 +51,16 @@ export function MealWeekPage() {
     saveWeekPlan(p)
   }
 
+  // Skyddsnät om generering triggas innan blur-klampningen hunnit köra.
+  function clampedKcal() {
+    const v = plan.kcal
+    return Math.max(800, Math.min(6000, Number.isFinite(v) && v > 0 ? v : 800))
+  }
+
   function generateWeek() {
     const days = { ...plan.days }
     for (let d = 1; d <= 7; d++) {
-      days[d] = { ...days[d]!, generated: generateMealPlan(plan.kcal, plan.mealCount, plan.focus, d) }
+      days[d] = { ...days[d]!, generated: generateMealPlan(clampedKcal(), plan.mealCount, plan.focus, d) }
     }
     update({ ...plan, days })
     toast.success('Veckan genererades!')
@@ -63,7 +69,7 @@ export function MealWeekPage() {
   function regenerateDay(day: number) {
     const days = { ...plan.days }
     const seed = day * 1000 + Math.floor(Math.random() * 1000)
-    days[day] = { ...days[day]!, generated: generateMealPlan(plan.kcal, plan.mealCount, plan.focus, seed) }
+    days[day] = { ...days[day]!, generated: generateMealPlan(clampedKcal(), plan.mealCount, plan.focus, seed) }
     update({ ...plan, days })
   }
 
@@ -130,7 +136,13 @@ export function MealWeekPage() {
               type="number"
               inputMode="numeric"
               value={plan.kcal}
-              onChange={(e) => update({ ...plan, kcal: Math.max(800, Math.min(6000, Number(e.target.value) || 0)) })}
+              onChange={(e) => update({ ...plan, kcal: Number(e.target.value) || 0 })}
+              onBlur={(e) => {
+                // Klampa först när fältet lämnas — klamp per tangenttryck gör
+                // det omöjligt att skriva t.ex. "2500" (första "2" → 800).
+                const v = Number(e.target.value)
+                update({ ...plan, kcal: Math.max(800, Math.min(6000, Number.isFinite(v) && v > 0 ? v : 800)) })
+              }}
               className="flex-1 bg-stone-100 rounded-xl px-4 py-2.5 text-stone-900 font-bold text-center focus:outline-none focus:ring-2 focus:ring-forest-400"
             />
             <span className="text-stone-400 text-sm">kcal</span>

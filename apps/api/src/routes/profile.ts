@@ -3,6 +3,7 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import { requireAuth } from '../middleware/auth'
 import { supabaseAdmin } from '../lib/supabase'
+import { validationHook } from '../lib/validation'
 import type { AppContext } from '../lib/types'
 
 export const profileRouter = new Hono<AppContext>()
@@ -34,7 +35,7 @@ profileRouter.get('/', async (c) => {
   return c.json({ profile: Array.isArray(data) ? data[0] ?? null : null })
 })
 
-profileRouter.post('/', zValidator('json', profileSchema), async (c) => {
+profileRouter.post('/', zValidator('json', profileSchema, validationHook), async (c) => {
   const user = c.get('user')
   const body = c.req.valid('json')
   const db = supabaseAdmin(c.env)

@@ -1,5 +1,5 @@
 import type { LogSessionInput, WorkoutSession } from './workoutApi'
-import { sessionsCountThisWeek } from './derive'
+import { dateKey, sessionsCountThisWeek } from './derive'
 import { notifySessionsUpdated, SESSIONS_UPDATED } from './workoutSessionEvents'
 import { recordExerciseSession } from './exerciseHistoryStore'
 
@@ -113,8 +113,8 @@ export function addLocalSession(input: LogSessionInput): WorkoutSession {
   }
   saveAll([session, ...loadAll()])
 
-  // Store per-exercise history for progression charts
-  const date = session.completed_at.slice(0, 10)
+  // Store per-exercise history for progression charts (local day key)
+  const date = dateKey(new Date(session.completed_at))
   for (const ex of input.exercises) {
     recordExerciseSession(ex.name, date, ex.sets)
   }

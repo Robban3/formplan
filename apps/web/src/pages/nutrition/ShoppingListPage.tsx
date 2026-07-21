@@ -1,14 +1,17 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon, ShoppingCartIcon, CheckIcon } from '../../components/ui/Icons'
 import { useSettings } from '../../hooks/useSettings'
 import type { DietFocus, MealCount } from '../../lib/mealPlanGenerator'
 import {
+  buildShoppingListFromWeekPlan,
   buildWeeklyShoppingList,
   loadChecked,
   saveChecked,
+  shoppingListHash,
   formatAmount,
 } from '../../lib/shoppingList'
+import { loadWeekPlan } from '../../lib/weekMealStore'
 
 const FOCUS_OPTIONS: { key: DietFocus; label: string }[] = [
   { key: 'balanced', label: 'Balanserat' },
@@ -24,13 +27,25 @@ export function ShoppingListPage() {
   const [focus, setFocus] = useState<DietFocus>('balanced')
   const [mealCount, setMealCount] = useState<MealCount>(4)
   const [seed, setSeed] = useState(0)
-  const [checked, setChecked] = useState<Set<string>>(() => loadChecked())
+
+  // A saved week plan is the source of truth — the list must contain the foods
+  // the user actually planned. Generated defaults are only a fallback.
+  const planCategories = useMemo(() => buildShoppingListFromWeekPlan(loadWeekPlan()), [])
+  const fromPlan = planCategories !== null
 
   // Recompute whenever inputs change; seed forces a fresh list on "regenerate".
   const categories = useMemo(
-    () => buildWeeklyShoppingList(settings.calorie_goal, focus, mealCount, 7, seed),
-    [settings.calorie_goal, focus, mealCount, seed]
+    () =>
+      planCategories ?? buildWeeklyShoppingList(settings.calorie_goal, focus, mealCount, 7, seed),
+    [planCategories, settings.calorie_goal, focus, mealCount, seed]
   )
+
+  // Checked state is keyed by the list's content — a new list resets it.
+  const listHash = useMemo(() => shoppingListHash(categories), [categories])
+  const [checked, setChecked] = useState<Set<string>>(() => loadChecked(listHash))
+  useEffect(() => {
+    setChecked(loadChecked(listHash))
+  }, [listHash])
 
   const totalItems = categories.reduce((n, c) => n + c.items.length, 0)
   const checkedCount = categories.reduce(
@@ -43,13 +58,13 @@ export function ShoppingListPage() {
     if (next.has(name)) next.delete(name)
     else next.add(name)
     setChecked(next)
-    saveChecked(next)
+    saveChecked(next, listHash)
   }
 
   function clearChecked() {
     const next = new Set<string>()
     setChecked(next)
-    saveChecked(next)
+    saveChecked(next, listHash)
   }
 
   return (
@@ -64,11 +79,14 @@ export function ShoppingListPage() {
           <ShoppingCartIcon className="w-6 h-6 stroke-forest-600" />
           <h1 className="text-2xl font-bold text-stone-900">Inköpslista</h1>
         </div>
-        <p className="text-sm text-stone-400 mt-0.5">Veckans varor utifrån ditt kostschema</p>
+        <p className="text-sm text-stone-400 mt-0.5">
+          {fromPlan ? 'Veckans varor utifrån din sparade veckoplan' : 'Veckans varor utifrån ditt kostschema'}
+        </p>
       </div>
 
       <div className="px-5 mt-5 space-y-5">
-        {/* Kostfokus */}
+        {/* Kostfokus — bara relevant när listan genereras (ingen sparad veckoplan) */}
+        {!fromPlan && (
         <div className="bg-white rounded-2xl border border-stone-100 p-4 space-y-3">
           <p className="font-semibold text-stone-800 text-sm">Kostfokus</p>
           <div className="grid grid-cols-2 gap-2">
@@ -100,6 +118,7 @@ export function ShoppingListPage() {
             ))}
           </div>
         </div>
+        )}
 
         {/* Progress */}
         <div className="flex items-center justify-between">
@@ -146,13 +165,15 @@ export function ShoppingListPage() {
           </div>
         ))}
 
-        {/* Regenerate */}
-        <button
-          onClick={() => setSeed((s) => s + 1)}
-          className="w-full py-3 border border-stone-200 rounded-2xl text-sm text-stone-500 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
-        >
-          Generera ny lista
-        </button>
+        {/* Regenerate — only for the generated fallback list */}
+        {!fromPlan && (
+          <button
+            onClick={() => setSeed((s) => s + 1)}
+            className="w-full py-3 border border-stone-200 rounded-2xl text-sm text-stone-500 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
+          >
+            Generera ny lista
+          </button>
+        )}
       </div>
     </div>
   )

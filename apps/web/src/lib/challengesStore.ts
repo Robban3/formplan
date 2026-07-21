@@ -1,3 +1,5 @@
+import { dateKey } from './derive'
+
 const KEY = 'formplan_challenges'
 
 export type ChallengeCategory = 'training' | 'nutrition' | 'body'
@@ -112,7 +114,7 @@ export function startChallenge(id: string): Challenge | null {
   if (!preset) return null
   const challenge: Challenge = {
     ...preset,
-    startDate: new Date().toISOString().slice(0, 10),
+    startDate: dateKey(),
     progress: 0,
     currentValue: 0,
     completed: false,
@@ -130,7 +132,7 @@ export function updateChallengeProgress(id: string, currentValue: number) {
   c.progress = Math.min(100, Math.round((currentValue / c.targetValue) * 100))
   if (c.progress >= 100 && !c.completed) {
     c.completed = true
-    c.completedDate = new Date().toISOString().slice(0, 10)
+    c.completedDate = dateKey()
   }
   save(all)
 }

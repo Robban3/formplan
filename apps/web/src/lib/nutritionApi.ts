@@ -52,6 +52,13 @@ export interface FoodLogEntry {
 
 export type MealSlot = 'frukost' | 'lunch' | 'middag' | 'mellanmar'
 
+export const MEAL_SLOTS: MealSlot[] = ['frukost', 'lunch', 'middag', 'mellanmar']
+
+/** Coerce an untrusted value (e.g. a `?slot=` query param) to a valid MealSlot. */
+export function toMealSlot(value: string | null | undefined): MealSlot {
+  return (MEAL_SLOTS as string[]).includes(value ?? '') ? (value as MealSlot) : 'frukost'
+}
+
 export interface DailyGoals {
   kcal: number
   protein_g: number
@@ -77,6 +84,14 @@ export const nutritionApi = {
     request<{ entry: FoodLogEntry }>('/nutrition/log', {
       method: 'POST',
       body: JSON.stringify(entry),
+    }),
+
+  /** Log several entries in ONE atomic request — a per-item loop would duplicate
+   *  already-logged items when a later item fails and the user retries. */
+  addLogEntries: (entries: Omit<FoodLogEntry, 'id'>[]) =>
+    request<{ entries: FoodLogEntry[] }>('/nutrition/log', {
+      method: 'POST',
+      body: JSON.stringify(entries),
     }),
 
   deleteLogEntry: (id: string) =>

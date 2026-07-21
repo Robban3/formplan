@@ -47,7 +47,11 @@ export function loadWeekPlan(): WeekMealPlan {
     for (let d = 1; d <= 7; d++) {
       if (raw.days[d]) days[d] = { generated: raw.days[d]!.generated ?? null, custom: raw.days[d]!.custom ?? [] }
     }
-    return { kcal: raw.kcal, mealCount: raw.mealCount ?? 4, focus: raw.focus ?? 'balanced', days }
+    // mealCount måste vara en giltig MEAL_CONFIGS-nyckel (3|4|5) — korrupt
+    // lagring får inte krascha genereringen.
+    const mealCount: MealCount =
+      raw.mealCount === 3 || raw.mealCount === 4 || raw.mealCount === 5 ? raw.mealCount : 4
+    return { kcal: raw.kcal, mealCount, focus: raw.focus ?? 'balanced', days }
   } catch {
     return defaultPlan()
   }
@@ -64,7 +68,11 @@ export function weekdayOf(date: Date): number {
 }
 
 export function dayTotalKcal(day: DayPlan): number {
-  return (day.generated?.totalKcal ?? 0) + day.custom.reduce((s, m) => s + m.kcal, 0)
+  // Number(x) || 0 — lagrade måltider kan ha korrupta kcal-värden (NaN/strängar).
+  return (
+    (Number(day.generated?.totalKcal) || 0) +
+    day.custom.reduce((s, m) => s + (Number(m.kcal) || 0), 0)
+  )
 }
 
 // Lägg till en egen/loggad måltid på en viss veckodag. Används av kostdagboken

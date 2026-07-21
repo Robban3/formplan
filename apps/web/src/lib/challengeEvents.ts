@@ -36,14 +36,26 @@ export function notifyWaterLogged() {
     const challenges = getActiveChallenges().filter((c) => c.category === 'nutrition')
     if (challenges.length === 0) return
     const logged = getWaterLoggedDays()
-    let streak = 0
-    const d = new Date()
-    while (logged.has(dateKey(d))) {
-      streak++
-      d.setDate(d.getDate() - 1)
-    }
     for (const c of challenges) {
-      if (c.startDate) updateChallengeProgress(c.id, streak)
+      if (!c.startDate) continue
+      const start = new Date(`${c.startDate}T12:00:00`)
+      // Walk backwards from today (or, if the challenge window has passed,
+      // from the window's last day) counting consecutive logged days. Days
+      // before the challenge started never count — a pre-existing streak must
+      // not instantly complete a fresh challenge.
+      const cursor = new Date()
+      cursor.setHours(12, 0, 0, 0)
+      if (c.durationDays > 0) {
+        const windowEnd = new Date(start)
+        windowEnd.setDate(windowEnd.getDate() + c.durationDays - 1)
+        if (cursor > windowEnd) cursor.setTime(windowEnd.getTime())
+      }
+      let streak = 0
+      while (cursor >= start && logged.has(dateKey(cursor))) {
+        streak++
+        cursor.setDate(cursor.getDate() - 1)
+      }
+      updateChallengeProgress(c.id, streak)
     }
   } catch {
     /* never break water logging */

@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronLeftIcon, CameraIcon, FireIcon } from '../../components/ui/Icons'
 import { api, ApiError, type FoodPhotoAnalysis } from '../../lib/api'
 import { compressImage } from '../../lib/image'
-import { nutritionApi, type MealSlot } from '../../lib/nutritionApi'
+import { nutritionApi, toMealSlot, type MealSlot } from '../../lib/nutritionApi'
 import { dateKey } from '../../lib/derive'
 import { toast } from '../../lib/toast'
 
@@ -17,7 +17,7 @@ const SLOT_LABELS: Record<MealSlot, string> = {
 export function FoodPhotoPage() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
-  const slot = (params.get('slot') ?? 'frukost') as MealSlot
+  const slot = toMealSlot(params.get('slot'))
   const date = params.get('date') ?? dateKey()
 
   const fileRef = useRef<HTMLInputElement>(null)
@@ -56,8 +56,9 @@ export function FoodPhotoPage() {
     if (!analysis || analysis.items.length === 0 || saving) return
     setSaving(true)
     try {
-      for (const item of analysis.items) {
-        await nutritionApi.addLogEntry({
+      // One atomic request — a per-item loop duplicates entries on retry.
+      await nutritionApi.addLogEntries(
+        analysis.items.map((item) => ({
           date,
           meal_slot: slot,
           food_id: null,
@@ -67,8 +68,8 @@ export function FoodPhotoPage() {
           protein_g: item.protein_g,
           fat_g: item.fat_g,
           carbs_g: item.carbs_g,
-        })
-      }
+        }))
+      )
       toast.success('Tillagt i kostdagboken')
       navigate(-1)
     } catch (e) {
@@ -99,7 +100,12 @@ export function FoodPhotoPage() {
         accept="image/*"
         capture="environment"
         className="hidden"
-        onChange={(e) => onPick(e.target.files?.[0] ?? undefined)}
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          // Reset so picking the same photo again re-fires onChange.
+          e.target.value = ''
+          onPick(file)
+        }}
       />
 
       <div className="px-5 mt-5 space-y-4">

@@ -6,6 +6,8 @@ export function useNotificationScheduler() {
   const { notifications_enabled, water_reminder, reminders } = useSettings()
 
   useEffect(() => {
+    // Notification saknas i vissa miljöer (iOS-webview m.fl.) — krascha inte.
+    if (typeof Notification === 'undefined') return
     if (!notifications_enabled || Notification.permission !== 'granted') return
 
     const cleanups: (() => void)[] = []

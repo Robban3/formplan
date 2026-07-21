@@ -21,6 +21,13 @@ const KCAL_DEFAULT: Record<MealSlot, number> = {
   mellanmar: 250,
 }
 
+// AI-genererade recept kan ha korrupta/saknade numeriska fält — koda aldrig in
+// NaN/undefined i loggen eller veckoplanen.
+function num(v: unknown): number {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : 0
+}
+
 interface Props {
   slot: MealSlot
   date: string // YYYY-MM-DD
@@ -72,7 +79,10 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
     try {
       // Logga en portion av receptet som en post. amount_g måste vara > 0; vi
       // uppskattar portionsvikten från makromassan (kcal/makros lagras absolut).
-      const grams = Math.max(1, Math.round(recipe.protein_g + recipe.fat_g + recipe.carbs_g))
+      const protein = num(recipe.protein_g)
+      const fat = num(recipe.fat_g)
+      const carbs = num(recipe.carbs_g)
+      const grams = Math.max(1, Math.round(protein + fat + carbs))
       await nutritionApi.addLogEntry({
         date,
         meal_slot: slot,
@@ -80,10 +90,10 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
         food_name: recipe.name,
         serving_label: '1 portion',
         amount_g: grams,
-        kcal: recipe.kcal,
-        protein_g: recipe.protein_g,
-        fat_g: recipe.fat_g,
-        carbs_g: recipe.carbs_g,
+        kcal: num(recipe.kcal),
+        protein_g: protein,
+        fat_g: fat,
+        carbs_g: carbs,
       })
       setLogged(true)
       toast.success('Måltid loggad!')
@@ -101,10 +111,10 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
     addCustomWeekMeal(weekdayOf(new Date(`${date}T00:00:00`)), {
       slot,
       name: recipe.name,
-      kcal: recipe.kcal,
-      protein_g: recipe.protein_g,
-      fat_g: recipe.fat_g,
-      carbs_g: recipe.carbs_g,
+      kcal: num(recipe.kcal),
+      protein_g: num(recipe.protein_g),
+      fat_g: num(recipe.fat_g),
+      carbs_g: num(recipe.carbs_g),
     })
     setSavedWeek(true)
     toast.success('Sparat till veckoschemat!')

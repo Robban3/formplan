@@ -177,12 +177,12 @@ const RECIPES: Recipe[] = [
     tags: ['Mellanmål'],
     illustration: 'balls' as IllustrationKey,
     bg: 'bg-amber-50',
-    ingredients: ['1 dl havregryn', '1.5 dl mjölk', '1 msk chiafrön', '1 msk honung', 'Bär eller frukt till topping'],
+    ingredients: ['2 dl havregryn', '2 msk jordnötssmör', '1 skopa proteinpulver', '1 msk honung', '1 msk kakao'],
     instructions: [
-      'Blanda havregryn, mjölk, chiafrön och honung i en burk.',
-      'Rör om väl.',
-      'Ställ i kylskåpet overnight (minst 6 timmar).',
-      'Toppa med bär eller frukt innan servering.',
+      'Mixa havregryn, jordnötssmör, proteinpulver, honung och kakao till en jämn smet.',
+      'Tillsätt någon tesked vatten om smeten är för torr.',
+      'Rulla smeten till ca 12 jämnstora bollar.',
+      'Låt stå i kylen minst 30 min innan servering.',
     ],
   },
   {

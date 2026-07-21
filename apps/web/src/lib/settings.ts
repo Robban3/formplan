@@ -48,7 +48,10 @@ function load(): AppSettings {
   try {
     const raw = localStorage.getItem(KEY)
     if (!raw) return { ...DEFAULTS }
-    return { ...DEFAULTS, ...(JSON.parse(raw) as Partial<AppSettings>) }
+    const merged = { ...DEFAULTS, ...(JSON.parse(raw) as Partial<AppSettings>) }
+    // Korrupt lagring får inte krascha .map-konsumenter av reminders.
+    if (!Array.isArray(merged.reminders)) merged.reminders = [...DEFAULTS.reminders]
+    return merged
   } catch {
     return { ...DEFAULTS }
   }

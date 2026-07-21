@@ -23,8 +23,8 @@ export function parseGoal(text: string): GoalMeta {
 
   // Weekly training: "träna 3 gånger i veckan", "4 pass i veckan", "träna 4 ggr/vecka"
   const weeklyMatch =
-    t.match(/träna\s+(\d+)\s*(gånger|ggr|pass)\s*(i|per)?\s*vecka/i) ||
-    t.match(/(\d+)\s*(pass|gånger|ggr)\s*(i|per)\s*vecka/i) ||
+    t.match(/träna\s+(\d+)\s*(gånger|ggr|pass)\s*\/?\s*(i|per)?\s*vecka(n)?/i) ||
+    t.match(/(\d+)\s*(pass|gånger|ggr)\s*\/?\s*(i|per)?\s*vecka(n)?/i) ||
     t.match(/(\d+)\s*gånger\s*i\s*veckan/i)
   if (weeklyMatch) {
     const n = parseInt(weeklyMatch[1] ?? weeklyMatch[0])

@@ -37,6 +37,9 @@ async function startNative(
     if (stopped || video.readyState < 2) return
     try {
       const codes = await detector.detect(video)
+      // detect() is async — a late result after stop() must not fire into a
+      // new scan session.
+      if (stopped) return
       const code = codes[0]?.rawValue
       if (code) onDetected(code)
     } catch {
@@ -60,16 +63,40 @@ async function startZXing(
   video: HTMLVideoElement,
   onDetected: (code: string) => void
 ): Promise<ScannerHandle> {
-  const { BrowserMultiFormatReader } = await import('@zxing/browser')
-  const reader = new BrowserMultiFormatReader()
+  // @zxing/browser re-exports BarcodeFormat but not DecodeHintType — that one
+  // comes from @zxing/library (a direct dependency of @zxing/browser).
+  const [{ BrowserMultiFormatReader, BarcodeFormat }, { DecodeHintType }] = await Promise.all([
+    import('@zxing/browser'),
+    import('@zxing/library'),
+  ])
+  // Restrict decoding to the same formats as the native path — fewer false
+  // positives and faster frames than the full multi-format sweep.
+  const hints = new Map()
+  hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+    BarcodeFormat.EAN_13,
+    BarcodeFormat.EAN_8,
+    BarcodeFormat.UPC_A,
+    BarcodeFormat.UPC_E,
+    BarcodeFormat.CODE_128,
+    BarcodeFormat.CODE_39,
+  ])
+  const reader = new BrowserMultiFormatReader(hints)
+  let stopped = false
   const controls = await reader.decodeFromConstraints(
     { video: { facingMode: 'environment' } },
     video,
     (result) => {
+      // Late decode callbacks after stop() must not fire into a new session.
+      if (stopped) return
       if (result) onDetected(result.getText())
     }
   )
-  return { stop: () => controls.stop() }
+  return {
+    stop: () => {
+      stopped = true
+      controls.stop()
+    },
+  }
 }
 
 /**

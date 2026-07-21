@@ -57,13 +57,17 @@ export async function verifyJwt(token: string, env: Env): Promise<JwtPayload | n
   }
 }
 
+// Stripe-statusar som ger premium. incomplete/past_due/unpaid/canceled ger
+// INTE åtkomst även om premium_until råkar ligga i framtiden.
+const PREMIUM_STATUSES = new Set(['active', 'trialing'])
+
 export async function isUserPremium(userId: string, env: Env): Promise<boolean> {
   const db = supabaseAdmin(env)
-  const { data } = await db.query<{ premium_until: string }[]>(
-    `/subscriptions?user_id=eq.${userId}&select=premium_until&limit=1`
+  const { data } = await db.query<{ premium_until: string; status: string | null }[]>(
+    `/subscriptions?user_id=eq.${userId}&select=premium_until,status&limit=1`
   )
-  if (!data || data.length === 0) return false
-  const row = data[0]
+  const row = data?.[0]
   if (!row) return false
+  if (!row.status || !PREMIUM_STATUSES.has(row.status)) return false
   return new Date(row.premium_until) > new Date()
 }

@@ -11,6 +11,8 @@ function msUntilNext(time: string, from = new Date()): number {
 }
 
 export function scheduleReminderNotification(r: Reminder): () => void {
+  // Notification saknas i vissa miljöer (iOS-webview m.fl.) — krascha inte.
+  if (typeof Notification === 'undefined') return () => {}
   if (!r.enabled || Notification.permission !== 'granted') return () => {}
 
   // setTimeout delays are capped at a 32-bit int (~24.8 days); chunk longer waits.
@@ -38,7 +40,7 @@ export function scheduleReminderNotification(r: Reminder): () => void {
       return
     }
     id = setTimeout(() => {
-      if (Notification.permission === 'granted') {
+      if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
         new Notification(`FormPlan – ${r.label}`, {
           body: 'Dags att träna! Öppna appen för att komma igång.',
           icon: '/logo.svg',
@@ -54,14 +56,16 @@ export function scheduleReminderNotification(r: Reminder): () => void {
 
 // Schedules recurring daily water reminders at fixed daytime slots.
 export function scheduleWaterReminders(): () => void {
-  if (Notification.permission !== 'granted') return () => {}
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+    return () => {}
+  }
 
   const timeouts = new Set<ReturnType<typeof setTimeout>>()
 
   function scheduleSlot(time: string) {
     const id = setTimeout(() => {
       timeouts.delete(id)
-      if (Notification.permission !== 'granted') return
+      if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return
       new Notification('FormPlan', {
         body: 'Dags att dricka vatten!',
         icon: '/logo.svg',

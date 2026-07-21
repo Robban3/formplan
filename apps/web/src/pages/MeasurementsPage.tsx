@@ -8,6 +8,7 @@ import {
   type BodyMeasurement,
 } from '../lib/measurementStore'
 import { initMeasurementsSync } from '../lib/measurementsSync'
+import { dateKey } from '../lib/derive'
 
 const FIELDS: { key: keyof BodyMeasurement; label: string; unit: string; placeholder: string }[] = [
   { key: 'weight_kg', label: 'Vikt',    unit: 'kg', placeholder: '75,0' },
@@ -63,7 +64,7 @@ export function MeasurementsPage() {
 
   function handleSave() {
     const m: Omit<BodyMeasurement, 'id'> = {
-      date: new Date().toISOString().slice(0, 10),
+      date: dateKey(),
     }
     for (const f of FIELDS) {
       const v = parseFloat((form[f.key] ?? '').replace(',', '.'))

@@ -5,6 +5,7 @@ import { requireAuth } from '../middleware/auth'
 import { requireAccess } from '../middleware/access'
 import { coachReply, generateRecipe, analyzeFoodPhoto, estimateMeal, friendlyAiError } from '../lib/ai'
 import { rateLimit } from '../lib/rateLimit'
+import { validationHook } from '../lib/validation'
 import type { AppContext } from '../lib/types'
 
 export const aiRouter = new Hono<AppContext>()
@@ -27,7 +28,8 @@ aiRouter.post(
     z.object({
       messages: z.array(messageSchema).min(1).max(30),
       context: z.string().max(2000).optional(),
-    })
+    }),
+    validationHook
   ),
   async (c) => {
     const user = c.get('user')
@@ -56,7 +58,8 @@ aiRouter.post(
       allergies: z.array(z.string().max(60)).max(30).optional(),
       meal_type: z.string().max(40).nullable().optional(),
       category: z.enum(['kott', 'fisk', 'pasta', 'vegetariskt', 'veganskt']).nullable().optional(),
-    })
+    }),
+    validationHook
   ),
   async (c) => {
     const b = c.req.valid('json')
@@ -80,7 +83,8 @@ aiRouter.post(
     z.object({
       image: z.string().min(1).max(8_000_000),
       media_type: z.enum(['image/jpeg', 'image/png', 'image/webp']),
-    })
+    }),
+    validationHook
   ),
   async (c) => {
     const b = c.req.valid('json')
@@ -99,7 +103,7 @@ aiRouter.post(
 aiRouter.post(
   '/estimate-meal',
   rateLimit('ai-estimate-meal', 30),
-  zValidator('json', z.object({ description: z.string().min(1).max(200) })),
+  zValidator('json', z.object({ description: z.string().min(1).max(200) }), validationHook),
   async (c) => {
     const b = c.req.valid('json')
     try {

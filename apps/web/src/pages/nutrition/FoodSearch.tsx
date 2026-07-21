@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { nutritionApi, type FoodItem, type MealSlot } from '../../lib/nutritionApi'
+import { nutritionApi, toMealSlot, type FoodItem, type MealSlot } from '../../lib/nutritionApi'
 import { dateKey } from '../../lib/derive'
 import { loadCustomMeals, mealTotals, type CustomMeal } from '../../lib/customMeals'
 import { toast } from '../../lib/toast'
@@ -21,7 +21,7 @@ function FoodInitial({ name }: { name: string }) {
 export function FoodSearch() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
-  const slot = (params.get('slot') ?? 'frukost') as MealSlot
+  const slot = toMealSlot(params.get('slot'))
   const date = params.get('date') ?? dateKey()
   const prefillId = params.get('prefill')
 
@@ -89,8 +89,9 @@ export function FoodSearch() {
   async function handleAddMeal(meal: CustomMeal) {
     setAdding(true)
     try {
-      for (const ing of meal.ingredients) {
-        await nutritionApi.addLogEntry({
+      // One atomic request — a per-item loop duplicates entries on retry.
+      await nutritionApi.addLogEntries(
+        meal.ingredients.map((ing) => ({
           date,
           meal_slot: slot,
           food_id: ing.food_id ?? null,
@@ -100,8 +101,8 @@ export function FoodSearch() {
           protein_g: ing.protein_g,
           fat_g: ing.fat_g,
           carbs_g: ing.carbs_g,
-        })
-      }
+        }))
+      )
       toast.success(`${meal.name} tillagd`)
       navigate(-1)
     } catch (e) {

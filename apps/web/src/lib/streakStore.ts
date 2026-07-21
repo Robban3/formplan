@@ -1,13 +1,10 @@
 import { getLocalSessions } from './workoutSessionStore'
+import { dateKey } from './derive'
 
-function isoDate(d: Date) {
-  return d.toISOString().slice(0, 10)
-}
-
-function startOfDay(iso: string): Date {
-  // Parse as UTC so day-stepping stays consistent with isoDate() (also UTC)
-  // and never skips a day across timezones/DST.
-  return new Date(iso + 'T00:00:00Z')
+// Local-noon Date for a YYYY-MM-DD key — stepping whole days from noon is
+// immune to DST shifts, and dateKey() maps it back to the same key.
+function localNoon(key: string): Date {
+  return new Date(`${key}T12:00:00`)
 }
 
 /** Returns current streak (consecutive days with at least one workout, ending today or yesterday). */
@@ -15,23 +12,24 @@ export function getTrainingStreak(): number {
   const sessions = getLocalSessions()
   if (sessions.length === 0) return 0
 
-  const days = new Set(sessions.map((s) => s.completed_at.slice(0, 10)))
-  const sorted = [...days].sort().reverse() // newest first
+  // Bucket sessions by the user's LOCAL day — UTC slicing would put sessions
+  // logged 00:00–02:00 Swedish time on the previous day.
+  const days = new Set(sessions.map((s) => dateKey(new Date(s.completed_at))))
 
-  const today = isoDate(new Date())
-  const yesterday = isoDate(new Date(Date.now() - 86400000))
+  const today = dateKey()
+  const yesterdayNoon = localNoon(today)
+  yesterdayNoon.setDate(yesterdayNoon.getDate() - 1)
+  const yesterday = dateKey(yesterdayNoon)
 
   // Streak must include today or yesterday to be "active"
   if (!days.has(today) && !days.has(yesterday)) return 0
 
   let streak = 0
-  let cursor = new Date(days.has(today) ? today : yesterday)
+  const cursor = localNoon(days.has(today) ? today : yesterday)
 
-  for (;;) {
-    const dateStr = isoDate(cursor)
-    if (!days.has(dateStr)) break
+  while (days.has(dateKey(cursor))) {
     streak++
-    cursor = new Date(startOfDay(dateStr).getTime() - 86400000)
+    cursor.setDate(cursor.getDate() - 1)
   }
 
   return streak
@@ -42,13 +40,13 @@ export function getLongestStreak(): number {
   const sessions = getLocalSessions()
   if (sessions.length === 0) return 0
 
-  const days = [...new Set(sessions.map((s) => s.completed_at.slice(0, 10)))].sort()
+  const days = [...new Set(sessions.map((s) => dateKey(new Date(s.completed_at))))].sort()
   if (days.length === 0) return 0
 
   let longest = 1, current = 1
   for (let i = 1; i < days.length; i++) {
-    const prev = new Date(days[i - 1]! + 'T12:00:00')
-    const curr = new Date(days[i]! + 'T12:00:00')
+    const prev = localNoon(days[i - 1]!)
+    const curr = localNoon(days[i]!)
     const diff = Math.round((curr.getTime() - prev.getTime()) / 86400000)
     if (diff === 1) { current++; longest = Math.max(longest, current) }
     else current = 1
