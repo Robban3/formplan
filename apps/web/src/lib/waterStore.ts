@@ -34,6 +34,11 @@ export function deleteLocalWater(id: string) {
   saveAll(loadAll().filter((e) => e.id !== id))
 }
 
+/** Set of dates (YYYY-MM-DD) that have at least one water entry. */
+export function getWaterLoggedDays(): Set<string> {
+  return new Set(loadAll().map((e) => e.date))
+}
+
 export function getLocalWaterSummary(
   from: string,
   to: string

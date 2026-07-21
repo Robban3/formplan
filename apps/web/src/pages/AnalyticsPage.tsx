@@ -7,6 +7,8 @@ import { sessionsCountThisWeek, weeklyCounts, dateKey } from '../lib/derive'
 import { getLocalSessions, subscribeSessions, syncSessionsFromApi } from '../lib/workoutSessionStore'
 import { getLocalWater, getLocalWaterSummary } from '../lib/waterStore'
 import { getWeightEntries, addWeightEntry, deleteWeightEntry, type WeightEntry } from '../lib/weightStore'
+import { notifyWeightLogged } from '../lib/challengeEvents'
+import { initMeasurementsSync } from '../lib/measurementsSync'
 import { getRpeEntries } from '../lib/rpeStore'
 import { useSettings } from '../hooks/useSettings'
 
@@ -329,6 +331,12 @@ export function AnalyticsPage() {
   ).days
   const last7 = last7Dates()
 
+  // Sync weight/measurement history with the server, then refresh the chart.
+  useEffect(() => {
+    initMeasurementsSync().then(() => setWeightEntries(getWeightEntries()))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   useEffect(() => {
     function refreshLocal() { setSessions(deduplicate(getLocalSessions())) }
     async function loadSessions() {
@@ -364,7 +372,7 @@ export function AnalyticsPage() {
   function logWeight() {
     const kg = parseFloat(weightInput.replace(',', '.'))
     if (!kg || kg < 20 || kg > 300) return
-    addWeightEntry(kg); setWeightEntries(getWeightEntries()); setWeightInput(''); setShowWeightInput(false)
+    addWeightEntry(kg); notifyWeightLogged(); setWeightEntries(getWeightEntries()); setWeightInput(''); setShowWeightInput(false)
   }
 
   if (loading) return (

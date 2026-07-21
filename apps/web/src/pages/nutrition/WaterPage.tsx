@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { nutritionApi, type WaterEntry } from '../../lib/nutritionApi'
 import { getLocalWater, addLocalWater } from '../../lib/waterStore'
+import { notifyWaterLogged } from '../../lib/challengeEvents'
 import { dateKey } from '../../lib/derive'
 import { toast } from '../../lib/toast'
 import { toastIfNotNetwork } from '../../lib/errors'
@@ -96,6 +97,7 @@ export function WaterPage() {
       setEntries((prev) => [...prev, entry])
       setTotal(nextTotal)
       setWeekRefresh((n) => n + 1)
+      notifyWaterLogged()
 
       if (crossedGoal && localStorage.getItem(hitKey) !== '1') {
         localStorage.setItem(hitKey, '1')

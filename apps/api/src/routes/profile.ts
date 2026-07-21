@@ -10,9 +10,9 @@ export const profileRouter = new Hono<AppContext>()
 const profileSchema = z.object({
   goal: z.enum(['lose_weight', 'build_muscle', 'maintain', 'improve_endurance']),
   level: z.enum(['beginner', 'intermediate', 'advanced']),
-  equipment: z.array(z.string()).min(1),
+  equipment: z.array(z.string().min(1).max(60)).min(1).max(30),
   days_per_week: z.number().int().min(1).max(7),
-  allergies: z.array(z.string()),
+  allergies: z.array(z.string().max(60)).max(30),
   calorie_goal: z.number().int().positive().nullable(),
   age: z.number().int().min(13).max(120).nullable(),
   weight_kg: z.number().positive().nullable(),

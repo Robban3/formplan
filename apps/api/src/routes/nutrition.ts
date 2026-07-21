@@ -4,6 +4,7 @@ import { zValidator } from '@hono/zod-validator'
 import { requireAuth } from '../middleware/auth'
 import { supabaseAdmin } from '../lib/supabase'
 import { isoWeekday, defaultGoals, goalsFromNutritionDay } from '../lib/derive'
+import { sanitizeSearchTerm, isUuid, isDateString, DATE_RE } from '../lib/sanitize'
 import type {
   AppContext,
   DailyGoals,
@@ -120,7 +121,10 @@ async function searchOpenFoodFacts(q: string): Promise<FoodItemRow[]> {
 
 // GET /nutrition/foods/search?q=  — lokala curated-livsmedel + Open Food Facts.
 nutritionRouter.get('/foods/search', async (c) => {
-  const q = (c.req.query('q') ?? '').trim()
+  // Strip PostgREST metacharacters (* , ( ) & =) from the term — several of
+  // them pass through encodeURIComponent untouched and could otherwise alter
+  // the ilike pattern or the filter tree.
+  const q = sanitizeSearchTerm((c.req.query('q') ?? '').slice(0, 100))
   if (q.length < 2) return c.json({ items: [] })
   const db = supabaseAdmin(c.env)
   // Encode only the user term — keep the * wildcards literal for PostgREST ilike.
@@ -139,7 +143,9 @@ nutritionRouter.get('/foods/search', async (c) => {
 // GET /nutrition/log?date=YYYY-MM-DD
 nutritionRouter.get('/log', async (c) => {
   const date = c.req.query('date')
-  if (!date) return c.json({ error: 'Missing date' }, 400)
+  if (!date || !isDateString(date)) {
+    return c.json({ error: 'Ogiltigt eller saknat datum — använd formatet YYYY-MM-DD.' }, 400)
+  }
   const user = c.get('user')
   const db = supabaseAdmin(c.env)
 
@@ -162,10 +168,10 @@ nutritionRouter.post(
   zValidator(
     'json',
     z.object({
-      date: z.string(),
+      date: z.string().regex(DATE_RE),
       meal_slot: mealSlot,
-      food_id: z.string().nullable().optional(),
-      food_name: z.string().min(1),
+      food_id: z.string().uuid().nullable().optional(),
+      food_name: z.string().min(1).max(200),
       serving_label: z.string().max(40).nullable().optional(),
       amount_g: z.number().positive(),
       kcal: z.number().nonnegative(),
@@ -206,7 +212,8 @@ nutritionRouter.post(
 // DELETE /nutrition/log/:id
 nutritionRouter.delete('/log/:id', async (c) => {
   const user = c.get('user')
-  const id = encodeURIComponent(c.req.param('id'))
+  const id = c.req.param('id')
+  if (!isUuid(id)) return c.json({ error: 'Posten hittades inte.' }, 404)
   const db = supabaseAdmin(c.env)
   const { error } = await db.query(
     `/food_log?id=eq.${id}&user_id=eq.${user.sub}`,
@@ -223,7 +230,9 @@ nutritionRouter.delete('/log/:id', async (c) => {
 nutritionRouter.get('/water/summary', async (c) => {
   const from = c.req.query('from')
   const to = c.req.query('to')
-  if (!from || !to) return c.json({ error: 'Missing from/to' }, 400)
+  if (!from || !to || !isDateString(from) || !isDateString(to)) {
+    return c.json({ error: 'Ogiltigt eller saknat datumintervall — använd formatet YYYY-MM-DD.' }, 400)
+  }
   const user = c.get('user')
   const db = supabaseAdmin(c.env)
 
@@ -246,7 +255,9 @@ nutritionRouter.get('/water/summary', async (c) => {
 // GET /nutrition/water?date=YYYY-MM-DD
 nutritionRouter.get('/water', async (c) => {
   const date = c.req.query('date')
-  if (!date) return c.json({ error: 'Missing date' }, 400)
+  if (!date || !isDateString(date)) {
+    return c.json({ error: 'Ogiltigt eller saknat datum — använd formatet YYYY-MM-DD.' }, 400)
+  }
   const user = c.get('user')
   const db = supabaseAdmin(c.env)
   const { data } = await db.query<WaterLogRow[]>(
@@ -260,7 +271,7 @@ nutritionRouter.get('/water', async (c) => {
 // POST /nutrition/water
 nutritionRouter.post(
   '/water',
-  zValidator('json', z.object({ date: z.string(), amount_ml: z.number().int().positive() })),
+  zValidator('json', z.object({ date: z.string().regex(DATE_RE), amount_ml: z.number().int().positive().max(10_000) })),
   async (c) => {
     const user = c.get('user')
     const b = c.req.valid('json')
@@ -280,7 +291,8 @@ nutritionRouter.post(
 // DELETE /nutrition/water/:id
 nutritionRouter.delete('/water/:id', async (c) => {
   const user = c.get('user')
-  const id = encodeURIComponent(c.req.param('id'))
+  const id = c.req.param('id')
+  if (!isUuid(id)) return c.json({ error: 'Posten hittades inte.' }, 404)
   const db = supabaseAdmin(c.env)
   const { error } = await db.query(
     `/water_log?id=eq.${id}&user_id=eq.${user.sub}`,
@@ -298,7 +310,9 @@ nutritionRouter.delete('/water/:id', async (c) => {
 nutritionRouter.get('/summary', async (c) => {
   const from = c.req.query('from')
   const to = c.req.query('to')
-  if (!from || !to) return c.json({ error: 'Missing from/to' }, 400)
+  if (!from || !to || !isDateString(from) || !isDateString(to)) {
+    return c.json({ error: 'Ogiltigt eller saknat datumintervall — använd formatet YYYY-MM-DD.' }, 400)
+  }
   const user = c.get('user')
   const db = supabaseAdmin(c.env)
 

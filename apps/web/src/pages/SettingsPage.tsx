@@ -193,9 +193,8 @@ export function SettingsPage() {
 
       <div className="px-5 mt-5 space-y-5">
 
-        <Section title="Utseende">
-          <Toggle label="Mörkt läge" sub="Byt till mörkt tema" settingKey="dark_mode" />
-        </Section>
+        {/* "Mörkt läge" är dolt tills komponenterna har dark:-varianter —
+            idag gör toggeln ingenting synbart och känns bara trasig. */}
 
         <Section title="Träning">
           <Toggle

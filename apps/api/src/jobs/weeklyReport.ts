@@ -42,8 +42,19 @@ export async function sendWeeklyReports(env: Env): Promise<void> {
 
       const workouts = sessions.length
 
-      // Viktutveckling lagras klientsidan (ingen server-tabell ännu).
-      const weightDelta = null
+      // Viktutveckling från body_measurement (första → sista vägning senaste
+      // veckan). Feltolerant: saknas tabellen/data blir delta null.
+      const { data: weights } = await db.query<{ measured_on: string; weight_kg: number | null }[]>(
+        `/body_measurement?user_id=eq.${user.id}&measured_on=gte.${since.slice(0, 10)}&weight_kg=not.is.null&select=measured_on,weight_kg&order=measured_on.asc`
+      )
+      let weightDelta: number | null = null
+      if (weights && weights.length >= 2) {
+        const first = Number(weights[0]?.weight_kg)
+        const last = Number(weights[weights.length - 1]?.weight_kg)
+        if (Number.isFinite(first) && Number.isFinite(last)) {
+          weightDelta = Math.round((last - first) * 10) / 10
+        }
+      }
 
       // Streak
       const { data: logs } = await db.query<{ completed_at: string }[]>(

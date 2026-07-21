@@ -5,6 +5,8 @@ import { requireAuth } from '../middleware/auth'
 import { supabaseAdmin, isUserPremium } from '../lib/supabase'
 import { generatePlan } from '../lib/ai'
 import { buildMockPlanDays } from '../lib/mockPlan'
+import { rateLimit } from '../lib/rateLimit'
+import { isUuid } from '../lib/sanitize'
 import type { AppContext, FitnessProfile, Plan } from '../lib/types'
 
 export const planRouter = new Hono<AppContext>()
@@ -13,6 +15,8 @@ planRouter.use('*', requireAuth)
 
 planRouter.post(
   '/generate',
+  // Plangenerering är den dyraste AI-operationen — hård gräns per användare.
+  rateLimit('plan-generate', 3),
   zValidator('json', z.object({ profile_snapshot: z.record(z.unknown()).optional() })),
   async (c) => {
     const user = c.get('user')
@@ -71,7 +75,9 @@ const mockGoalSchema = z.object({
 })
 
 // Dev-friendly: insert a ready plan with realistic Swedish mock data (no AI).
+// Inte tillgänglig i produktion — svarar 404 som om routen inte fanns.
 planRouter.post('/mock', zValidator('json', mockGoalSchema), async (c) => {
+  if (c.env.ENVIRONMENT === 'production') return c.json({ error: 'Hittades inte.' }, 404)
   const user = c.get('user')
   const db = supabaseAdmin(c.env)
   const { goal } = c.req.valid('json')
@@ -113,7 +119,8 @@ planRouter.get('/list', async (c) => {
 
 planRouter.get('/:id', async (c) => {
   const user = c.get('user')
-  const planId = encodeURIComponent(c.req.param('id'))
+  const planId = c.req.param('id')
+  if (!isUuid(planId)) return c.json({ error: 'Schemat hittades inte.' }, 404)
   const db = supabaseAdmin(c.env)
 
   const { data: plans } = await db.query<{ id: string; user_id: string; status: string; created_at: string }[]>(

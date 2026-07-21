@@ -4,6 +4,7 @@ import { zValidator } from '@hono/zod-validator'
 import { requireAuth } from '../middleware/auth'
 import { requireAccess } from '../middleware/access'
 import { coachReply, generateRecipe, analyzeFoodPhoto, estimateMeal, friendlyAiError } from '../lib/ai'
+import { rateLimit } from '../lib/rateLimit'
 import type { AppContext } from '../lib/types'
 
 export const aiRouter = new Hono<AppContext>()
@@ -20,6 +21,7 @@ const messageSchema = z.object({
 // POST /ai/coach — conversational coach grounded in the user's own data.
 aiRouter.post(
   '/coach',
+  rateLimit('ai-coach', 20),
   zValidator(
     'json',
     z.object({
@@ -44,6 +46,7 @@ aiRouter.post(
 // POST /ai/recipe — generate a recipe from goals, macros and allergies.
 aiRouter.post(
   '/recipe',
+  rateLimit('ai-recipe', 30),
   zValidator(
     'json',
     z.object({
@@ -71,6 +74,7 @@ aiRouter.post(
 // POST /ai/food-photo — estimate a meal's nutrition from a photo (base64).
 aiRouter.post(
   '/food-photo',
+  rateLimit('ai-food-photo', 30),
   zValidator(
     'json',
     z.object({
@@ -94,6 +98,7 @@ aiRouter.post(
 // POST /ai/estimate-meal — uppskatta kcal/makros för en fritextmåltid.
 aiRouter.post(
   '/estimate-meal',
+  rateLimit('ai-estimate-meal', 30),
   zValidator('json', z.object({ description: z.string().min(1).max(200) })),
   async (c) => {
     const b = c.req.valid('json')

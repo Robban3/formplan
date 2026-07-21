@@ -13,6 +13,7 @@ import { getTrainingStreak } from '../../lib/streakStore'
 import { getLocalSessions } from '../../lib/workoutSessionStore'
 import { loadGoals, effectiveProgress } from '../GoalsPage'
 import { addLocalWater, getLocalWater } from '../../lib/waterStore'
+import { notifyWaterLogged } from '../../lib/challengeEvents'
 import { toast } from '../../lib/toast'
 import {
   DumbbellIcon,
@@ -302,6 +303,7 @@ export function HomePage() {
   function handleQuickWater() {
     addLocalWater(today, 250)
     setWaterTotal((prev) => prev + 250)
+    notifyWaterLogged()
     toast.success('+250 ml vatten loggat')
   }
 

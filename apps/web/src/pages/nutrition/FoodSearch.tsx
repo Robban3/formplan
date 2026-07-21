@@ -140,7 +140,7 @@ export function FoodSearch() {
       })
       navigate(-1)
     } catch (e) {
-      alert((e as Error).message)
+      toast.error((e as Error).message)
     } finally {
       setAdding(false)
     }
@@ -197,7 +197,6 @@ export function FoodSearch() {
       <div className="px-4 flex gap-4 border-b border-stone-100">
         {([
           { key: 'alla' as const, label: 'Alla' },
-          { key: 'mina' as const, label: 'Mina livsmedel' },
           { key: 'maltider' as const, label: 'Måltider' },
         ]).map(({ key, label }) => (
           <button
@@ -216,12 +215,6 @@ export function FoodSearch() {
         {searching && (
           <div className="flex justify-center pt-8">
             <div className="w-6 h-6 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
-
-        {tab === 'mina' && (
-          <div className="text-center pt-12 px-4 text-stone-400 text-sm">
-            Mina livsmedel kommer snart.
           </div>
         )}
 

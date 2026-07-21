@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon, PlusIcon, XIcon, RulerIcon } from '../components/ui/Icons'
 import {
@@ -7,6 +7,7 @@ import {
   deleteMeasurement,
   type BodyMeasurement,
 } from '../lib/measurementStore'
+import { initMeasurementsSync } from '../lib/measurementsSync'
 
 const FIELDS: { key: keyof BodyMeasurement; label: string; unit: string; placeholder: string }[] = [
   { key: 'weight_kg', label: 'Vikt',    unit: 'kg', placeholder: '75,0' },
@@ -53,6 +54,12 @@ export function MeasurementsPage() {
   const [form, setForm] = useState<Record<string, string>>({})
 
   function reload() { setEntries(getMeasurements()) }
+
+  // Pull measurements from the server (other devices) and refresh the list.
+  useEffect(() => {
+    initMeasurementsSync().then(reload)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function handleSave() {
     const m: Omit<BodyMeasurement, 'id'> = {

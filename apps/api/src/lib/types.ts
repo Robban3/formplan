@@ -12,6 +12,9 @@ export interface Env {
   RESEND_API_KEY: string
   WEBHOOK_SECRET: string
   ENVIRONMENT: string
+  // Kommaseparerad lista med admin-mejladresser (t.ex. nyhetsbrevsutskick).
+  // Osatt ⇒ inga admins ⇒ admin-endpoints svarar alltid 403.
+  ADMIN_EMAILS?: string
 }
 
 export interface JwtPayload {
@@ -174,6 +177,19 @@ export interface DailyGoals {
   protein_g: number
   fat_g: number
   carbs_g: number
+}
+
+export interface BodyMeasurementRow {
+  id: string
+  user_id: string
+  measured_on: string
+  weight_kg: number | null
+  waist_cm: number | null
+  chest_cm: number | null
+  hips_cm: number | null
+  arm_cm: number | null
+  thigh_cm: number | null
+  created_at: string
 }
 
 export interface WorkoutSessionRow {

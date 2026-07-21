@@ -108,6 +108,8 @@ export function addLocalSession(input: LogSessionInput): WorkoutSession {
     completed_at: new Date().toISOString(),
     duration_seconds: input.duration_seconds,
     ...stats,
+    // Keep the raw exercises so an offline session can be POSTed to the API later.
+    exercises: input.exercises,
   }
   saveAll([session, ...loadAll()])
 
@@ -123,9 +125,32 @@ export function addLocalSession(input: LogSessionInput): WorkoutSession {
 
 export function getLocalSessions(from?: string, to?: string): WorkoutSession[] {
   let sessions = loadAll()
-  if (from) sessions = sessions.filter((s) => s.completed_at >= from)
-  if (to) sessions = sessions.filter((s) => s.completed_at <= to)
+  // A date-only bound (YYYY-MM-DD) must be compared against the session's
+  // date part — comparing it lexically against a full ISO timestamp would
+  // e.g. exclude sessions completed later the same day for `to` bounds.
+  if (from) {
+    sessions = sessions.filter((s) =>
+      from.length === 10 ? s.completed_at.slice(0, 10) >= from : s.completed_at >= from
+    )
+  }
+  if (to) {
+    sessions = sessions.filter((s) =>
+      to.length === 10 ? s.completed_at.slice(0, 10) <= to : s.completed_at <= to
+    )
+  }
   return sessions.sort((a, b) => b.completed_at.localeCompare(a.completed_at))
+}
+
+/**
+ * Replace an optimistic `local-<uuid>` row with the server-created row after a
+ * successful POST, so the same workout never exists under two ids.
+ */
+export function replaceLocalSession(localId: string, serverSession: WorkoutSession) {
+  const rest = loadAll().filter((s) => s.id !== localId && s.id !== serverSession.id)
+  saveAll(
+    [serverSession, ...rest].sort((a, b) => b.completed_at.localeCompare(a.completed_at))
+  )
+  notify()
 }
 
 export function getWeeklySessionCount(): number {
@@ -151,11 +176,36 @@ export function subscribeSessions(listener: () => void): () => void {
   }
 }
 
+/** Sessions with identical started_at + workout_name are the same session. */
+function contentKey(s: WorkoutSession): string {
+  // Normalize via epoch time — the server may return the same instant in a
+  // different ISO format (e.g. `+00:00` instead of `Z`).
+  const t = new Date(s.started_at).getTime()
+  return `${Number.isNaN(t) ? s.started_at : t}|${s.workout_name}`
+}
+
+/** Collapse duplicates that share started_at + workout_name, preferring server ids. */
+function dedupeByContent(sessions: WorkoutSession[]): WorkoutSession[] {
+  const byContent = new Map<string, WorkoutSession>()
+  for (const s of sessions) {
+    const key = contentKey(s)
+    const existing = byContent.get(key)
+    if (!existing || (existing.id.startsWith('local-') && !s.id.startsWith('local-'))) {
+      byContent.set(key, s)
+    }
+  }
+  return [...byContent.values()]
+}
+
 export function mergeSessions(api: WorkoutSession[], local: WorkoutSession[]): WorkoutSession[] {
   const byId = new Map<string, WorkoutSession>()
   for (const s of local) byId.set(s.id, s)
   for (const s of api) byId.set(s.id, s)
-  return [...byId.values()].sort((a, b) => b.completed_at.localeCompare(a.completed_at))
+  // Safety net: a local- row that was also persisted server-side (e.g. the
+  // response was lost) must not show up twice — prefer the server copy.
+  return dedupeByContent([...byId.values()]).sort((a, b) =>
+    b.completed_at.localeCompare(a.completed_at)
+  )
 }
 
 /** Merge API sessions into the local store and notify all subscribers. */
@@ -164,3 +214,26 @@ export function syncSessionsFromApi(apiSessions: WorkoutSession[]) {
   saveAll(merged)
   notify()
 }
+
+// ── One-time dedup ────────────────────────────────────────────────────────────
+// A double-insert bug (local write in both ActiveWorkout and logSession)
+// shipped and left duplicate rows in existing users' stores. Collapse them
+// once; the flag prevents re-running.
+const DEDUP_FLAG = 'formplan_sessions_dedup_v1'
+
+function dedupExistingSessionsOnce() {
+  try {
+    if (localStorage.getItem(DEDUP_FLAG) === '1') return
+    const all = loadAll()
+    const deduped = dedupeByContent(all)
+    if (deduped.length !== all.length) {
+      saveAll(deduped.sort((a, b) => b.completed_at.localeCompare(a.completed_at)))
+      notify()
+    }
+    localStorage.setItem(DEDUP_FLAG, '1')
+  } catch {
+    /* storage unavailable (e.g. non-browser env) — skip */
+  }
+}
+
+dedupExistingSessionsOnce()

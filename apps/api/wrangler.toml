@@ -25,6 +25,10 @@ AI_PROVIDER = "gemini"
 # STRIPE_WEBHOOK_SECRET
 # RESEND_API_KEY
 # WEBHOOK_SECRET
+# ADMIN_EMAILS          # valfri: kommaseparerad lista med admin-mejladresser
+#                       # (t.ex. "anna@formplan.app,bo@formplan.app") som får
+#                       # använda admin-endpoints som /email/newsletter.
+#                       # Osatt ⇒ inga admins ⇒ 403.
 
 [triggers]
 crons = ["0 7 * * 1"]  # Varje måndag kl 07:00 UTC

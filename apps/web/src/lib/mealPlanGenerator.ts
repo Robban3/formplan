@@ -223,6 +223,22 @@ function pickFoodsForMeal(
     remaining -= item.kcal
   }
 
+  // Rescale so the meal lands near its calorie share — the serving clamp in
+  // calcFood can otherwise leave small-serving slots far under target.
+  const total = foods.reduce((s, f) => s + f.kcal, 0)
+  if (total > 0) {
+    const factor = Math.max(0.5, Math.min(2.5, targetKcal / total))
+    if (Math.abs(1 - factor) > 0.05) {
+      for (const f of foods) {
+        f.amount_g = Math.round(f.amount_g * factor)
+        f.kcal = Math.round(f.kcal * factor)
+        f.protein_g = Math.round(f.protein_g * factor * 10) / 10
+        f.fat_g = Math.round(f.fat_g * factor * 10) / 10
+        f.carbs_g = Math.round(f.carbs_g * factor * 10) / 10
+      }
+    }
+  }
+
   return foods
 }
 

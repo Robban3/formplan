@@ -18,8 +18,8 @@ const setSchema = z.object({
 })
 
 const exerciseSchema = z.object({
-  name: z.string(),
-  sets: z.array(setSchema),
+  name: z.string().min(1).max(120),
+  sets: z.array(setSchema).max(50),
 })
 
 // POST /workout/session — persist a completed (or partial) workout session.
@@ -28,11 +28,11 @@ workoutRouter.post(
   zValidator(
     'json',
     z.object({
-      plan_day_id: z.string().nullable().optional(),
-      workout_name: z.string().min(1),
-      started_at: z.string(),
+      plan_day_id: z.string().uuid().nullable().optional(),
+      workout_name: z.string().min(1).max(120),
+      started_at: z.string().max(64),
       duration_seconds: z.number().int().nonnegative(),
-      exercises: z.array(exerciseSchema),
+      exercises: z.array(exerciseSchema).max(50),
     })
   ),
   async (c) => {

@@ -1,7 +1,7 @@
 import { getLocalSessions } from './workoutSessionStore'
 import { getLocalWater } from './waterStore'
 import { getWeightEntries } from './weightStore'
-import { sessionsCountThisWeek } from './derive'
+import { dateKey, sessionsCountThisWeek } from './derive'
 
 export type GoalType =
   | 'training_weekly'   // Träna X gånger i veckan
@@ -33,7 +33,8 @@ export function parseGoal(text: string): GoalMeta {
 
   // Water: "dricka 2 liter", "2,5 L vatten per dag", "2 liter om dagen"
   const waterMatch =
-    t.match(/(\d+[,.]\d*|\d+)\s*(liter|l)\s*(vatten)?/i) ||
+    // (?![a-zåäö]) so "5 löppass" / "3 lätta pass" never parse as liters.
+    t.match(/(\d+[,.]\d*|\d+)\s*(liter|l)(?![a-zåäö])\s*(vatten)?/i) ||
     t.match(/dricka\s+(\d+[,.]\d*|\d+)/i)
   if (waterMatch) {
     const raw = (waterMatch[1] ?? '').replace(',', '.')
@@ -78,7 +79,9 @@ export function parseGoal(text: string): GoalMeta {
 export function computeAutoProgress(meta: GoalMeta): number | null {
   if (meta.type === 'manual' || meta.targetValue <= 0) return null
 
-  const today = new Date().toISOString().slice(0, 10)
+  // Local date — the water log stores entries under the user's local day,
+  // so a UTC date here would read the wrong bucket between 00:00 and 02:00.
+  const today = dateKey()
 
   switch (meta.type) {
     case 'training_weekly': {
@@ -123,7 +126,9 @@ export function computeAutoProgress(meta: GoalMeta): number | null {
 /** Human-readable live status string, e.g. "2 av 4 pass denna vecka" */
 export function goalStatusText(meta: GoalMeta): string | null {
   if (meta.type === 'manual' || meta.targetValue <= 0) return null
-  const today = new Date().toISOString().slice(0, 10)
+  // Local date — the water log stores entries under the user's local day,
+  // so a UTC date here would read the wrong bucket between 00:00 and 02:00.
+  const today = dateKey()
 
   switch (meta.type) {
     case 'training_weekly': {

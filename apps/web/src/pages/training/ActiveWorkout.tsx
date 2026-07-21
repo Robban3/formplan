@@ -5,7 +5,6 @@ import { useSettings } from '../../hooks/useSettings'
 import { useUnits } from '../../hooks/useUnits'
 import { workoutStore } from '../../store/workoutStore'
 import { workoutApi } from '../../lib/workoutApi'
-import { addLocalSession } from '../../lib/workoutSessionStore'
 import { saveRpe } from '../../lib/rpeStore'
 import { checkAndUpdatePR } from '../../lib/prStore'
 import { toast } from '../../lib/toast'
@@ -395,8 +394,10 @@ export function ActiveWorkout() {
       0
     )
 
-    // Always save locally first — this updates Hem and Analys immediately
-    addLocalSession(input)
+    // logSession writes the local row synchronously (updates Hem and Analys
+    // immediately) and syncs to the API in the background — one single write,
+    // so the session is never counted twice.
+    workoutApi.logSession(input).catch(() => {})
 
     toast.success(completed > 0 ? 'Pass sparat!' : 'Pass avslutat!')
     const name = snapshot.workoutName
@@ -411,8 +412,6 @@ export function ActiveWorkout() {
       navigate('/hem', { replace: true })
     }
 
-    // Sync to API in background (best-effort)
-    workoutApi.logSession(input).catch(() => {})
   }
 
   const nextIncompleteIndex = currentExerciseComplete

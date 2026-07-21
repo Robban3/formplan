@@ -3,14 +3,16 @@ import { workoutApi } from '../lib/workoutApi'
 import { syncSessionsFromApi } from '../lib/workoutSessionStore'
 
 /**
- * Fetches sessions from the API once on mount and syncs them into the local
- * store so that Home and Analytics always reflect the true session count,
- * even if other components haven't fetched yet.
+ * On mount: first pushes any offline-logged sessions (`local-…` ids) to the
+ * API, then fetches the server list and syncs it into the local store so that
+ * Home and Analytics always reflect the true session count.
  */
 export function useSessionsSync() {
   useEffect(() => {
     workoutApi
-      .getSessions()
+      .flushLocalSessions()
+      .catch(() => {})
+      .then(() => workoutApi.getSessions())
       .then(({ sessions }) => {
         if (sessions && sessions.length > 0) {
           syncSessionsFromApi(sessions)

@@ -10,6 +10,7 @@ import { emailRouter } from './routes/email'
 import { aiRouter } from './routes/ai'
 import { billingRouter } from './routes/billing'
 import { accountRouter } from './routes/account'
+import { measurementsRouter } from './routes/measurements'
 import type { Env } from './lib/types'
 import { sendWeeklyReports } from './jobs/weeklyReport'
 
@@ -19,12 +20,12 @@ app.use('*', logger())
 app.use(
   '*',
   cors({
-    origin: (origin) =>
-      ['https://app.formplan.app', 'https://formplan.app', 'http://localhost:5173'].includes(
-        origin
-      )
-        ? origin
-        : null,
+    // localhost tillåts bara utanför produktion (lokal utveckling/test).
+    origin: (origin, c) => {
+      const allowed = ['https://app.formplan.app', 'https://formplan.app']
+      if (c.env.ENVIRONMENT !== 'production') allowed.push('http://localhost:5173')
+      return allowed.includes(origin) ? origin : null
+    },
     allowHeaders: ['Content-Type', 'Authorization'],
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
@@ -42,6 +43,7 @@ app.route('/email', emailRouter)
 app.route('/ai', aiRouter)
 app.route('/billing', billingRouter)
 app.route('/account', accountRouter)
+app.route('/measurements', measurementsRouter)
 
 const worker = {
   fetch: app.fetch.bind(app),
