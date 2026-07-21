@@ -15,6 +15,7 @@ import { AppleHealthPage } from '../pages/AppleHealthPage'
 import { HelpPage } from '../pages/HelpPage'
 import { GoalsPage } from '../pages/GoalsPage'
 import { RecipesPage } from '../pages/RecipesPage'
+import { RecipeDetailPage } from '../pages/RecipeDetailPage'
 import { MealPlanPage } from '../pages/nutrition/MealPlanPage'
 import { MeasurementsPage } from '../pages/MeasurementsPage'
 import { ChallengesPage } from '../pages/ChallengesPage'
@@ -66,6 +67,7 @@ export function TabLayout() {
           <Route path="/mer/om"             element={<AboutPage />} />
           <Route path="/mer/mina-mal"       element={<GoalsPage />} />
           <Route path="/mer/recept"         element={<RecipesPage />} />
+          <Route path="/mer/recept/:id"     element={<RecipeDetailPage />} />
           <Route path="/mer/matningar"      element={<MeasurementsPage />} />
           <Route path="/mer/utmaningar"     element={<ChallengesPage />} />
           <Route path="/mer/ai-coach"       element={<AiCoachPage />} />

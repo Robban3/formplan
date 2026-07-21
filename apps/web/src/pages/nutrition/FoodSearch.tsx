@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { nutritionApi, toMealSlot, type FoodItem, type MealSlot } from '../../lib/nutritionApi'
 import { dateKey } from '../../lib/derive'
-import { loadCustomMeals, mealTotals, type CustomMeal } from '../../lib/customMeals'
+import { loadCustomMeals, deleteCustomMeal, mealTotals, type CustomMeal } from '../../lib/customMeals'
 import { toast } from '../../lib/toast'
 import { ChevronLeftIcon, XIcon, PlusIcon, UtensilsIcon, CameraIcon, ScanBarcodeIcon } from '../../components/ui/Icons'
 import { recordFoodUsed, getTopFavorites } from '../../lib/foodFavoritesStore'
@@ -85,6 +85,15 @@ export function FoodSearch() {
     }, 350)
     return () => { cancelled = true; clearTimeout(timer) }
   }, [query])
+
+  function handleDeleteMeal(meal: CustomMeal) {
+    // Bara den sparade mallen tas bort — redan loggade dagboksposter är
+    // ögonblicksbilder på servern och påverkas inte.
+    if (!window.confirm(`Ta bort måltiden "${meal.name}"?`)) return
+    deleteCustomMeal(meal.id)
+    setCustomMeals(loadCustomMeals())
+    toast.success('Måltid borttagen')
+  }
 
   async function handleAddMeal(meal: CustomMeal) {
     setAdding(true)
@@ -234,25 +243,47 @@ export function FoodSearch() {
               customMeals.map((meal) => {
                 const t = mealTotals(meal.ingredients)
                 return (
-                  <button
+                  <div
                     key={meal.id}
-                    onClick={() => handleAddMeal(meal)}
-                    disabled={adding}
-                    className="w-full flex items-center gap-3 p-3 bg-white rounded-2xl border border-stone-100 hover:bg-stone-50 active:bg-stone-100 transition-colors text-left disabled:opacity-60"
+                    className="flex items-center gap-2 p-3 bg-white rounded-2xl border border-stone-100"
                   >
-                    <div className="w-11 h-11 rounded-xl bg-forest-50 flex items-center justify-center flex-shrink-0">
-                      <UtensilsIcon className="w-5 h-5 stroke-forest-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-stone-800 truncate">{meal.name}</p>
-                      <p className="text-xs text-stone-400">
-                        {meal.ingredients.length} livsmedel · {t.kcal} kcal
-                      </p>
-                    </div>
-                    <div className="w-8 h-8 rounded-full bg-forest-700 flex items-center justify-center flex-shrink-0">
+                    <button
+                      onClick={() => handleAddMeal(meal)}
+                      disabled={adding}
+                      className="flex items-center gap-3 flex-1 min-w-0 text-left disabled:opacity-60"
+                    >
+                      <div className="w-11 h-11 rounded-xl bg-forest-50 flex items-center justify-center flex-shrink-0">
+                        <UtensilsIcon className="w-5 h-5 stroke-forest-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-stone-800 truncate">{meal.name}</p>
+                        <p className="text-xs text-stone-400">
+                          {meal.ingredients.length} livsmedel · {t.kcal} kcal
+                        </p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => navigate(`/kost/skapa-maltid?id=${meal.id}`)}
+                      className="text-xs font-medium text-forest-600 px-2 py-1.5 rounded-lg hover:bg-forest-50 flex-shrink-0"
+                    >
+                      Ändra
+                    </button>
+                    <button
+                      onClick={() => handleDeleteMeal(meal)}
+                      aria-label={`Ta bort ${meal.name}`}
+                      className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 hover:bg-red-100"
+                    >
+                      <XIcon className="w-4 h-4 stroke-red-500" />
+                    </button>
+                    <button
+                      onClick={() => handleAddMeal(meal)}
+                      disabled={adding}
+                      aria-label={`Lägg till ${meal.name}`}
+                      className="w-8 h-8 rounded-full bg-forest-700 flex items-center justify-center flex-shrink-0 disabled:opacity-60"
+                    >
                       <PlusIcon className="w-4 h-4 stroke-white" />
-                    </div>
-                  </button>
+                    </button>
+                  </div>
                 )
               })
             )}

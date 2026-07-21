@@ -32,11 +32,18 @@ function loadAll(): WorkoutSession[] {
     { storage: sessionStorage, key: BACKUP_KEY },
   ]
 
+  // Compare candidates by their *deduplicated* content, not raw length. A
+  // mirror that only looks longer because it still holds duplicate rows must
+  // not win over an already-cleaned copy (that would resurrect duplicates the
+  // one-time dedup removed). dedupeByContent is idempotent, so clean data is
+  // unchanged; ties keep the earlier source (primary storage is listed first).
   let best: WorkoutSession[] = []
   for (const { storage, key } of sources) {
     try {
       const parsed = parseSessions(storage.getItem(key))
-      if (parsed && parsed.length > best.length) best = parsed
+      if (!parsed) continue
+      const cleaned = dedupeByContent(parsed)
+      if (cleaned.length > best.length) best = cleaned
     } catch {
       /* storage blocked */
     }

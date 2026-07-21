@@ -46,15 +46,39 @@ export function recordExerciseSession(
   const h = load()
   const entries = h[exercise] ?? []
   const idx = entries.findIndex((e) => e.date === date)
-  const entry: ExerciseEntry = {
-    date,
-    maxWeight_kg: maxWeight,
-    repsAtMax,
-    totalVolume_kg: Math.round(totalVolume * 10) / 10,
-    totalReps,
+  if (idx >= 0) {
+    // Merge with the earlier entry for the same day: a second workout must add
+    // to the day's volume/reps, never overwrite it. maxWeight is the heaviest
+    // across both sessions, and repsAtMax follows whichever session set it.
+    const prev = entries[idx]!
+    let mergedMax: number
+    let mergedRepsAtMax: number
+    if (maxWeight > prev.maxWeight_kg) {
+      mergedMax = maxWeight
+      mergedRepsAtMax = repsAtMax
+    } else if (maxWeight < prev.maxWeight_kg) {
+      mergedMax = prev.maxWeight_kg
+      mergedRepsAtMax = prev.repsAtMax
+    } else {
+      mergedMax = prev.maxWeight_kg
+      mergedRepsAtMax = Math.max(prev.repsAtMax, repsAtMax)
+    }
+    entries[idx] = {
+      date,
+      maxWeight_kg: mergedMax,
+      repsAtMax: mergedRepsAtMax,
+      totalVolume_kg: Math.round((prev.totalVolume_kg + totalVolume) * 10) / 10,
+      totalReps: prev.totalReps + totalReps,
+    }
+  } else {
+    entries.push({
+      date,
+      maxWeight_kg: maxWeight,
+      repsAtMax,
+      totalVolume_kg: Math.round(totalVolume * 10) / 10,
+      totalReps,
+    })
   }
-  if (idx >= 0) entries[idx] = entry
-  else entries.push(entry)
   h[exercise] = entries
   save(h)
 }

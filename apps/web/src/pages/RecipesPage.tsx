@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ChevronLeftIcon,
+  ChevronRightIcon,
   ClockIcon,
   FireIcon,
   ZapIcon,
@@ -25,10 +26,13 @@ const RECIPE_CATEGORIES: { key: RecipeCategory; label: string; Icon: IconCompone
 
 type IllustrationKey = 'bowl' | 'wok' | 'salmon' | 'balls' | 'oats'
 
-interface Recipe {
+export interface Recipe {
   id: string
   name: string
   calories: number
+  protein_g: number
+  fat_g: number
+  carbs_g: number
   prepMinutes: number
   servings: number
   tags: string[]
@@ -38,7 +42,7 @@ interface Recipe {
   instructions: string[]
 }
 
-function RecipeIllustration({ kind, bg }: { kind: IllustrationKey; bg: string }) {
+export function RecipeIllustration({ kind, bg }: { kind: IllustrationKey; bg: string }) {
   return (
     <div className={`w-16 h-16 ${bg} rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden`}>
       <svg viewBox="0 0 64 64" width="56" height="56" aria-hidden="true">
@@ -116,11 +120,14 @@ function RecipeIllustration({ kind, bg }: { kind: IllustrationKey; bg: string })
   )
 }
 
-const RECIPES: Recipe[] = [
+export const RECIPES: Recipe[] = [
   {
     id: '1',
     name: 'Proteinfruktskål',
     calories: 420,
+    protein_g: 28,
+    fat_g: 14,
+    carbs_g: 42,
     prepMinutes: 20,
     servings: 2,
     tags: ['Frukost'],
@@ -138,6 +145,9 @@ const RECIPES: Recipe[] = [
     id: '2',
     name: 'Kycklingwok med nudlar',
     calories: 550,
+    protein_g: 45,
+    fat_g: 16,
+    carbs_g: 52,
     prepMinutes: 30,
     servings: 1,
     tags: ['Lunch', 'Middag'],
@@ -155,6 +165,9 @@ const RECIPES: Recipe[] = [
     id: '3',
     name: 'Lax med ugnsrostade grönsaker',
     calories: 600,
+    protein_g: 40,
+    fat_g: 30,
+    carbs_g: 40,
     prepMinutes: 35,
     servings: 2,
     tags: ['Middag'],
@@ -172,6 +185,9 @@ const RECIPES: Recipe[] = [
     id: '4',
     name: 'Proteinbollar',
     calories: 180,
+    protein_g: 12,
+    fat_g: 8,
+    carbs_g: 16,
     prepMinutes: 15,
     servings: 6,
     tags: ['Mellanmål'],
@@ -189,6 +205,9 @@ const RECIPES: Recipe[] = [
     id: '5',
     name: 'Overnight oats',
     calories: 380,
+    protein_g: 14,
+    fat_g: 9,
+    carbs_g: 58,
     prepMinutes: 5,
     servings: 1,
     tags: ['Frukost'],
@@ -443,7 +462,6 @@ export function RecipesPage() {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState<MealTab>('Alla')
-  const [expanded, setExpanded] = useState<string | null>(null)
 
   const filtered = RECIPES.filter((r) => {
     const matchSearch = r.name.toLowerCase().includes(search.toLowerCase())
@@ -498,66 +516,36 @@ export function RecipesPage() {
         )}
 
         {filtered.map((recipe) => (
-          <div key={recipe.id} className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
-            <button
-              onClick={() => setExpanded(expanded === recipe.id ? null : recipe.id)}
-              className="w-full flex items-center gap-4 px-4 py-4 text-left"
-            >
-              <RecipeIllustration kind={recipe.illustration} bg={recipe.bg} />
+          <button
+            key={recipe.id}
+            onClick={() => navigate(`/mer/recept/${recipe.id}`)}
+            className="w-full flex items-center gap-4 px-4 py-4 text-left bg-white rounded-2xl border border-stone-100 hover:bg-stone-50 active:bg-stone-100 transition-colors"
+          >
+            <RecipeIllustration kind={recipe.illustration} bg={recipe.bg} />
 
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-stone-900 text-sm leading-tight">{recipe.name}</p>
-                <div className="flex items-center gap-3 mt-1.5">
-                  <span className="flex items-center gap-1 text-xs text-stone-400">
-                    <ClockIcon className="w-3 h-3 stroke-stone-400" />
-                    {recipe.prepMinutes} min
-                  </span>
-                  <span className="flex items-center gap-1 text-xs text-stone-400">
-                    <FireIcon className="w-3 h-3 stroke-stone-400" />
-                    {recipe.calories} kcal
-                  </span>
-                </div>
-                <div className="flex gap-1 mt-1.5 flex-wrap">
-                  {recipe.tags.map((tag) => (
-                    <span key={tag} className="text-[10px] bg-forest-50 text-forest-700 px-2 py-0.5 rounded-full font-medium">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-stone-900 text-sm leading-tight">{recipe.name}</p>
+              <div className="flex items-center gap-3 mt-1.5">
+                <span className="flex items-center gap-1 text-xs text-stone-400">
+                  <ClockIcon className="w-3 h-3 stroke-stone-400" />
+                  {recipe.prepMinutes} min
+                </span>
+                <span className="flex items-center gap-1 text-xs text-stone-400">
+                  <FireIcon className="w-3 h-3 stroke-stone-400" />
+                  {recipe.calories} kcal
+                </span>
               </div>
-
-              <ChevronLeftIcon
-                className={`w-4 h-4 stroke-stone-300 flex-shrink-0 transition-transform ${
-                  expanded === recipe.id ? '-rotate-90' : 'rotate-180'
-                }`}
-              />
-            </button>
-
-            {expanded === recipe.id && (
-              <div className="px-4 pb-5 border-t border-stone-50">
-                <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mt-4 mb-2">Ingredienser</p>
-                <ul className="space-y-1.5">
-                  {recipe.ingredients.map((ing, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-stone-700">
-                      <span className="w-1.5 h-1.5 rounded-full bg-forest-400 flex-shrink-0" />
-                      {ing}
-                    </li>
-                  ))}
-                </ul>
-                <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mt-4 mb-2">Tillagning</p>
-                <ol className="space-y-2">
-                  {recipe.instructions.map((step, i) => (
-                    <li key={i} className="flex gap-3 text-sm text-stone-700">
-                      <span className="w-5 h-5 rounded-full bg-forest-700 text-white text-xs flex items-center justify-center flex-shrink-0 font-semibold">
-                        {i + 1}
-                      </span>
-                      {step}
-                    </li>
-                  ))}
-                </ol>
+              <div className="flex gap-1 mt-1.5 flex-wrap">
+                {recipe.tags.map((tag) => (
+                  <span key={tag} className="text-[10px] bg-forest-50 text-forest-700 px-2 py-0.5 rounded-full font-medium">
+                    {tag}
+                  </span>
+                ))}
               </div>
-            )}
-          </div>
+            </div>
+
+            <ChevronRightIcon className="w-4 h-4 stroke-stone-300 flex-shrink-0" />
+          </button>
         ))}
       </div>
     </div>

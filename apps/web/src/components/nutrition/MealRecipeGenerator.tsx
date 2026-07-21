@@ -77,19 +77,20 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
     if (!recipe || logging || logged) return
     setLogging(true)
     try {
-      // Logga en portion av receptet som en post. amount_g måste vara > 0; vi
-      // uppskattar portionsvikten från makromassan (kcal/makros lagras absolut).
+      // Logga en portion av receptet som en post. Receptets kcal/makros lagras
+      // absolut ("1 portion"); vikten är okänd (AI-receptet saknar portionsvikt).
+      // amount_g måste vara > 0 men får INTE vara makromassan — då skulle
+      // framtida per-gram-beräkningar bli fel. 1 g = nominell platshållare.
       const protein = num(recipe.protein_g)
       const fat = num(recipe.fat_g)
       const carbs = num(recipe.carbs_g)
-      const grams = Math.max(1, Math.round(protein + fat + carbs))
       await nutritionApi.addLogEntry({
         date,
         meal_slot: slot,
         food_id: null,
         food_name: recipe.name,
         serving_label: '1 portion',
-        amount_g: grams,
+        amount_g: 1,
         kcal: num(recipe.kcal),
         protein_g: protein,
         fat_g: fat,

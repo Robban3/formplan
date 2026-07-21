@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useLoadTimeout } from '../hooks/useLoadTimeout'
 import { BarChartIcon, LeafIcon, PlusIcon, XIcon, DropletIcon, DumbbellIcon } from '../components/ui/Icons'
-import { workoutApi, type WorkoutSession } from '../lib/workoutApi'
+import { type WorkoutSession } from '../lib/workoutApi'
 import { nutritionApi } from '../lib/nutritionApi'
 import { sessionsCountThisWeek, weeklyCounts, dateKey } from '../lib/derive'
-import { getLocalSessions, subscribeSessions, syncSessionsFromApi } from '../lib/workoutSessionStore'
+import { getLocalSessions, subscribeSessions } from '../lib/workoutSessionStore'
 import { getLocalWater, getLocalWaterSummary } from '../lib/waterStore'
 import { getWeightEntries, addWeightEntry, deleteWeightEntry, type WeightEntry } from '../lib/weightStore'
 import { notifyWeightLogged } from '../lib/challengeEvents'
@@ -338,22 +338,15 @@ export function AnalyticsPage() {
   }, [])
 
   useEffect(() => {
-    function refreshLocal() { setSessions(deduplicate(getLocalSessions())) }
-    async function loadSessions() {
-      refreshLocal()
-      try {
-        const { sessions } = await workoutApi.getSessions()
-        if (sessions?.length) syncSessionsFromApi(sessions)
-        setSessions(deduplicate(sessions ?? getLocalSessions()))
-      } catch { refreshLocal() }
-      finally { setLoading(false) }
-    }
-    loadSessions()
+    // The local store is the source of truth for this screen. App-level
+    // useSessionsSync owns server pulls and notifies subscribers, so we only
+    // read local here — subscribeSessions fires the listener immediately, so
+    // the initial render is populated synchronously and a later server sync
+    // re-renders via the same listener. (Previously this also fetched from the
+    // API on mount and inside the listener, triple-fetching sessions.)
     return subscribeSessions(() => {
-      refreshLocal()
-      workoutApi.getSessions()
-        .then(({ sessions }) => setSessions(deduplicate(sessions ?? getLocalSessions())))
-        .catch(refreshLocal)
+      setSessions(deduplicate(getLocalSessions()))
+      setLoading(false)
     })
   }, [])
 

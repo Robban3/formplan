@@ -301,6 +301,9 @@ export function HomePage() {
   const waterPct = Math.min((waterTotal / settings.water_goal_ml) * 100, 100)
 
   function handleQuickWater() {
+    // Resolve the day at click time — a dashboard left open across midnight
+    // must log water against the new day, not the render-time `today`.
+    const today = dateKey()
     addLocalWater(today, 250)
     setWaterTotal((prev) => prev + 250)
     notifyWaterLogged()

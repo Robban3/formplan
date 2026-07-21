@@ -203,8 +203,13 @@ function pickFoodsForMeal(
   rng: () => number
 ): MealPlanFood[] {
   const pool = FOODS[focus][slotKey as keyof typeof FOODS[typeof focus]] ?? FOODS[focus]['snack']
-  // Shuffle pool
-  const shuffled = [...(pool ?? [])].sort(() => rng() - 0.5)
+  // Shuffle pool — Fisher-Yates with the seeded rng. `sort(() => rng() - 0.5)`
+  // is non-uniform and engine-dependent, so avoid it.
+  const shuffled = [...(pool ?? [])]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!]
+  }
 
   const foods: MealPlanFood[] = []
   let remaining = targetKcal
