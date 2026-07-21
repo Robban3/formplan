@@ -30,12 +30,12 @@ AI_PROVIDER = "gemini"
 #                       # använda admin-endpoints som /email/newsletter.
 #                       # Osatt ⇒ inga admins ⇒ 403.
 
-# Distribuerad rate limiting (valfritt): skapa namespace och klistra in id.
-#   npx wrangler kv namespace create RATE_LIMIT_KV
-# [[kv_namespaces]]
-# binding = "RATE_LIMIT_KV"
-# id = "<klistra-in-id-här>"
-# Utan denna bindning använder rate-limitern in-memory-läge per isolate.
+# Distribuerad rate limiting: rate-limitern använder detta KV-namespace och
+# håller därmed gränserna över isolates/colos. Saknas bindningen faller den
+# tyst tillbaka på in-memory-läge per isolate.
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "e4b8eb90b44a486288be90ce85212ad2"
 
 [triggers]
 crons = [
