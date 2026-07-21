@@ -13,6 +13,7 @@ import { accountRouter } from './routes/account'
 import { measurementsRouter } from './routes/measurements'
 import type { Env } from './lib/types'
 import { sendWeeklyReports } from './jobs/weeklyReport'
+import { sendTrialReminders } from './jobs/trialReminder'
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -47,8 +48,13 @@ app.route('/measurements', measurementsRouter)
 
 const worker = {
   fetch: app.fetch.bind(app),
-  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
-    ctx.waitUntil(sendWeeklyReports(env))
+  async scheduled(event: ScheduledController, env: Env, ctx: ExecutionContext) {
+    // Måndag 07:00 UTC → veckorapport; dagligen 08:00 UTC → trial-påminnelser.
+    if (event.cron === '0 7 * * 1') {
+      ctx.waitUntil(sendWeeklyReports(env))
+    } else if (event.cron === '0 8 * * *') {
+      ctx.waitUntil(sendTrialReminders(env))
+    }
   },
 }
 

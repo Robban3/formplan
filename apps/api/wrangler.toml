@@ -31,5 +31,8 @@ AI_PROVIDER = "gemini"
 #                       # Osatt ⇒ inga admins ⇒ 403.
 
 [triggers]
-crons = ["0 7 * * 1"]  # Varje måndag kl 07:00 UTC
+crons = [
+  "0 7 * * 1",  # Måndag 07:00 UTC — veckorapport
+  "0 8 * * *",  # Dagligen 08:00 UTC — trial-påminnelser
+]
 

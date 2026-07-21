@@ -3,6 +3,7 @@ import MagicLinkEmail from '../emails/magic-link'
 import WelcomeEmail from '../emails/welcome'
 import ProgressReport from '../emails/progress-report'
 import Newsletter from '../emails/newsletter'
+import TrialEndingEmail from '../emails/trial-ending'
 
 const RESEND_API = 'https://api.resend.com/emails'
 const FROM = 'FormPlan <noreply@formplan.app>'
@@ -46,6 +47,13 @@ export async function verifyEmail(verifyUrl: string): Promise<string> {
 
 export async function welcomeEmail(firstName: string): Promise<string> {
   return render(WelcomeEmail({ firstName }))
+}
+
+export async function trialEndingEmail(opts: {
+  firstName: string
+  daysLeft: number
+}): Promise<string> {
+  return render(TrialEndingEmail(opts))
 }
 
 export async function progressEmail(opts: {
