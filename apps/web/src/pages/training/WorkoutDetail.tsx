@@ -3,8 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api'
 import { PlayIcon } from '../../components/ui/Icons'
 import { WorkoutHero } from '../../components/training/WorkoutHero'
-import { ExerciseVideo } from '../../components/training/ExerciseVideo'
-import { ExerciseAnimation } from '../../components/training/ExerciseAnimation'
 import { workoutStore } from '../../store/workoutStore'
 import type { ExerciseLog } from '../../store/workoutStore'
 
@@ -117,22 +115,11 @@ export function WorkoutDetail() {
             key={i}
             className="bg-white rounded-2xl p-4 shadow-sm border border-stone-100"
           >
-            <div className="flex items-start gap-4">
-              <div className="w-20 h-20 rounded-xl overflow-hidden bg-stone-100 flex-shrink-0">
-                <ExerciseAnimation
-                  exerciseName={ex.name}
-                  className="w-full h-full object-cover object-top"
-                />
-              </div>
-              <div className="flex-1 min-w-0 pt-0.5">
-                <p className="font-semibold text-stone-900 text-sm">{ex.name}</p>
-                <p className="text-stone-400 text-xs mt-0.5">
-                  {ex.sets} set × {ex.reps} reps
-                </p>
-                {ex.notes && <p className="text-stone-300 text-xs mt-0.5">{ex.notes}</p>}
-              </div>
-            </div>
-            <ExerciseVideo exerciseName={ex.name} variant="card" />
+            <p className="font-semibold text-stone-900 text-sm">{ex.name}</p>
+            <p className="text-stone-400 text-xs mt-0.5">
+              {ex.sets} set × {ex.reps} reps
+            </p>
+            {ex.notes && <p className="text-stone-300 text-xs mt-0.5">{ex.notes}</p>}
           </div>
         ))}
       </div>

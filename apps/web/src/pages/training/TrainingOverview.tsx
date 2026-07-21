@@ -12,7 +12,6 @@ import { useLoadTimeout } from '../../hooks/useLoadTimeout'
 import { getTrainingStreak, getLongestStreak } from '../../lib/streakStore'
 import { loadActivePlan, type WorkoutPlanDay } from '../../lib/planLoader'
 import { parseMockPlanId } from '../../lib/mockPlan'
-import { ExerciseVideo } from '../../components/training/ExerciseVideo'
 import { workoutStore, type ExerciseLog } from '../../store/workoutStore'
 import { EXERCISE_LIBRARY, EXERCISE_CATEGORIES } from '../../lib/exerciseLibrary'
 import { PROGRAM_TEMPLATES, type ProgramTemplate, type TemplateDay } from '../../lib/programTemplates'
@@ -338,41 +337,16 @@ function ProgramExerciseList({
 }: {
   exercises: { name: string; sets: number; reps: string }[]
 }) {
-  const [openIndex, setOpenIndex] = useState<number | null>(null)
-
   return (
     <div className="divide-y divide-stone-50">
-      {exercises.map((ex, i) => {
-        const isOpen = openIndex === i
-
-        return (
-          <div key={i} className="py-2.5 first:pt-0">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setOpenIndex(isOpen ? null : i)}
-                className="flex-1 min-w-0 flex items-center justify-between gap-2 text-left"
-              >
-                <span className="text-sm text-stone-700">{ex.name}</span>
-                <span className="text-xs text-stone-400 shrink-0">{ex.sets} × {ex.reps}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setOpenIndex(isOpen ? null : i)}
-                aria-label={`Teknikguide: ${ex.name}`}
-                className="shrink-0"
-              >
-                <ExerciseVideo exerciseName={ex.name} variant="row" />
-              </button>
-            </div>
-            {isOpen && (
-              <div className="mt-2">
-                <ExerciseVideo exerciseName={ex.name} variant="card" />
-              </div>
-            )}
+      {exercises.map((ex, i) => (
+        <div key={i} className="py-2.5 first:pt-0">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm text-stone-700">{ex.name}</span>
+            <span className="text-xs text-stone-400 shrink-0">{ex.sets} × {ex.reps}</span>
           </div>
-        )
-      })}
+        </div>
+      ))}
     </div>
   )
 }
@@ -445,7 +419,6 @@ function WorkoutCard({
 // Standalone, always-available exercise library grouped by muscle group.
 function ExerciseLibrary() {
   const [query, setQuery] = useState('')
-  const [expanded, setExpanded] = useState<string | null>(null)
 
   const q = query.trim().toLowerCase()
   const groups = EXERCISE_CATEGORIES.map((category) => ({
@@ -475,23 +448,11 @@ function ExerciseLibrary() {
           </p>
           <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
             {g.items.map((ex, i) => (
-              <div key={ex.name} className={i > 0 ? 'border-t border-stone-50' : ''}>
-                <button
-                  type="button"
-                  onClick={() => setExpanded(expanded === ex.name ? null : ex.name)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-stone-50 transition-colors"
-                >
-                  <p className="text-sm font-medium text-stone-800 min-w-0 flex-1">{ex.name}</p>
-                  <span className="flex items-center gap-1 text-xs font-medium text-forest-600 ml-2 flex-shrink-0">
-                    <PlayIcon className="w-3.5 h-3.5" />
-                    {expanded === ex.name ? 'Stäng' : 'Video'}
-                  </span>
-                </button>
-                {expanded === ex.name && (
-                  <div className="px-4 pb-3">
-                    <ExerciseVideo exerciseName={ex.name} variant="card" />
-                  </div>
-                )}
+              <div
+                key={ex.name}
+                className={`px-4 py-3 ${i > 0 ? 'border-t border-stone-50' : ''}`}
+              >
+                <p className="text-sm font-medium text-stone-800">{ex.name}</p>
               </div>
             ))}
           </div>

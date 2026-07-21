@@ -9,7 +9,6 @@ import { saveRpe } from '../../lib/rpeStore'
 import { checkAndUpdatePR } from '../../lib/prStore'
 import { toast } from '../../lib/toast'
 import { PauseIcon, PlayIcon, CheckIcon, XIcon, ChevronLeftIcon, ChevronRightIcon, ShareIcon, DumbbellIcon, ZapIcon } from '../../components/ui/Icons'
-import { ExerciseVideo } from '../../components/training/ExerciseVideo'
 import { exerciseUsesWeight, isCardioExercise } from '../../lib/exerciseLog'
 import { getExerciseHistory } from '../../lib/exerciseHistoryStore'
 import { recommendNextWeight, type ProgressionAdvice } from '../../lib/progression'
@@ -512,8 +511,6 @@ export function ActiveWorkout() {
             <ChevronRightIcon className="w-5 h-5 stroke-stone-400" />
           </button>
         </div>
-
-        <ExerciseVideo exerciseName={ex.name} variant="inline" />
 
         {/* Automatic progression suggestion */}
         {showWeight && recommendations[ex.name] && (() => {

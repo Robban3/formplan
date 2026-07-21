@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
-import { ExerciseVideo } from '../components/training/ExerciseVideo'
 
 interface Exercise {
   name: string
@@ -183,19 +182,14 @@ export function PlanPage() {
             </div>
             <div className="space-y-4">
               {(selectedWorkout.content as WorkoutContent).exercises.map((ex, i) => (
-                <div key={i}>
-                  <div className="flex items-start gap-3">
-                    <span className="w-6 h-6 rounded-lg bg-slate-700 flex items-center justify-center text-xs text-slate-400 flex-shrink-0 mt-0.5">
-                      {i + 1}
-                    </span>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{ex.name}</p>
-                      <p className="text-slate-400 text-xs">{ex.sets} set × {ex.reps} · {ex.rest_seconds}s vila</p>
-                      {ex.notes && <p className="text-slate-500 text-xs mt-0.5">{ex.notes}</p>}
-                    </div>
-                  </div>
-                  <div className="mt-2 ml-9">
-                    <ExerciseVideo exerciseName={ex.name} variant="card" />
+                <div key={i} className="flex items-start gap-3">
+                  <span className="w-6 h-6 rounded-lg bg-slate-700 flex items-center justify-center text-xs text-slate-400 flex-shrink-0 mt-0.5">
+                    {i + 1}
+                  </span>
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">{ex.name}</p>
+                    <p className="text-slate-400 text-xs">{ex.sets} set × {ex.reps} · {ex.rest_seconds}s vila</p>
+                    {ex.notes && <p className="text-slate-500 text-xs mt-0.5">{ex.notes}</p>}
                   </div>
                 </div>
               ))}
