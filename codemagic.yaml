@@ -1,0 +1,68 @@
+# Codemagic CI/CD — bygger FormPlans iOS-app i molnet (ingen Mac krävs).
+#
+# Förkrav som konfigureras i Codemagic-UI:t (inte här i filen):
+#   1. Apple Developer Program + appen skapad i App Store Connect (bundle-id
+#      app.formplan.app).
+#   2. Integrations → App Store Connect: koppla en App Store Connect API-nyckel.
+#      Använd samma "integration name" nedan (här: "FormPlan ASC").
+#   3. Environment variables → grupp "formplan_ios" med webb-byggets värden:
+#        VITE_API_URL           = https://api.formplan.app
+#        VITE_SUPABASE_URL      = https://rgnbcmgvzohqkmnuixps.supabase.co
+#        VITE_SUPABASE_ANON_KEY = <anon-nyckeln>
+#      (markera dem som "secure"/secret.)
+#
+# iOS-projektet (apps/web/ios) genereras i CI med `cap add ios` — det behöver
+# alltså inte committas och kräver ingen Mac lokalt.
+
+workflows:
+  ios-formplan:
+    name: FormPlan iOS
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: FormPlan ASC
+    environment:
+      groups:
+        - formplan_ios
+      vars:
+        BUNDLE_ID: "app.formplan.app"
+        XCODE_WORKSPACE: "App.xcworkspace"
+        XCODE_SCHEME: "App"
+        APP_STORE_APPLE_ID: "0000000000" # byt till appens Apple ID från App Store Connect
+      node: 20
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Installera beroenden (workspace-root)
+        script: npm ci
+      - name: Bygg webben (prod) + synka Capacitor
+        script: |
+          cd apps/web
+          npm run build
+          npx cap add ios || true   # första bygget skapar ios/, sedan no-op
+          npx cap sync ios
+      - name: Hämta signeringsfiler
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+      - name: Lägg till certifikat i keychain
+        script: |
+          keychain initialize
+          keychain add-certificates
+      - name: Applicera provisioning profiles på Xcode-projektet
+        script: xcode-project use-profiles
+      - name: Bygg IPA
+        script: |
+          cd apps/web/ios/App
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - apps/web/ios/App/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        # submit_to_app_store: false  # slå på när du är redo för skarp granskning

@@ -41,20 +41,21 @@ npm run cap:build:android
 
 ## iOS — byggs i molnet (Codemagic, ingen Mac krävs)
 
-iOS-projektet genereras inte här (kräver CocoaPods/macOS). Det körs i Codemagics
-macOS-runner:
+Byggkonfigen finns i **`codemagic.yaml`** i repo-roten — den bygger webben,
+genererar iOS-projektet (`cap add ios`), signerar och laddar upp till TestFlight.
+iOS-projektet committas alltså inte; det skapas i CI.
 
-1. Koppla repot i Codemagic.
-2. Build-steg (macOS-runner):
-   ```bash
-   cd apps/web
-   npm ci
-   VITE_API_URL=https://api.formplan.app npm run build
-   npx cap add ios          # första gången
-   npx cap sync ios
-   ```
-3. Codemagic bygger, signerar (Apple Developer-konto) och laddar upp till
-   App Store Connect / TestFlight.
+Förkrav (konfigureras i Codemagic-UI:t, se kommentarerna överst i codemagic.yaml):
+1. **Apple Developer Program** + appen skapad i **App Store Connect** (bundle-id
+   `app.formplan.app`).
+2. Codemagic **Integrations → App Store Connect**: en API-nyckel med integration-
+   namnet `FormPlan ASC` (matchar `codemagic.yaml`).
+3. Codemagic **Environment variables**, grupp `formplan_ios`: `VITE_API_URL`,
+   `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (markera som secure).
+4. Sätt `APP_STORE_APPLE_ID` i `codemagic.yaml` till appens Apple ID.
+
+Koppla GitHub-repot i Codemagic → kör workflowen `ios-formplan` → bygget landar i
+TestFlight.
 
 ## Kvar innan native-köp fungerar (RevenueCat)
 
