@@ -35,16 +35,25 @@ stripeRouter.post('/webhook', async (c) => {
   // försenad "updated" (active) återuppliva premium EFTER en "deleted".
   // event.created (unix-sekunder) jämförs mot senast tillämpade händelse.
   const eventCreatedMs = event.created * 1000
-  const { data: existingRows, error: readErr } = await db.query<{ last_event_at: string | null }[]>(
-    `/subscriptions?user_id=eq.${userId}&select=last_event_at&limit=1`
-  )
+  const { data: existingRows, error: readErr } = await db.query<
+    { last_event_at: string | null; last_event_id: string | null }[]
+  >(`/subscriptions?user_id=eq.${userId}&select=last_event_at,last_event_id&limit=1`)
   if (readErr) {
     console.error('stripe webhook: could not read subscription row:', readErr)
     // 500 → Stripe försöker igen senare.
     return c.json({ error: 'Databasfel' }, 500)
   }
-  const lastEventAt = existingRows?.[0]?.last_event_at
-  if (lastEventAt && Date.parse(lastEventAt) >= eventCreatedMs) {
+  const existing = existingRows?.[0]
+  // Idempotens: en omleverans av exakt samma händelse (samma event.id) ska inte
+  // tillämpas två gånger.
+  if (existing?.last_event_id && existing.last_event_id === event.id) {
+    return c.json({ ok: true, ignored: 'duplicate_event' })
+  }
+  // Ordningsvakt: ignorera ENDAST strikt äldre händelser (>). Med >= tappades en
+  // andra händelse med samma event.created-sekund — event.id-kollen ovan skiljer
+  // ändå genuina dubbletter från två olika händelser samma sekund.
+  const lastEventAt = existing?.last_event_at
+  if (lastEventAt && Date.parse(lastEventAt) > eventCreatedMs) {
     return c.json({ ok: true, ignored: 'stale_event' })
   }
   const lastEventIso = new Date(eventCreatedMs).toISOString()
@@ -59,6 +68,7 @@ stripeRouter.post('/webhook', async (c) => {
         status: 'canceled',
         premium_until: new Date().toISOString(),
         last_event_at: lastEventIso,
+        last_event_id: event.id,
       }),
       headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
     })
@@ -95,6 +105,7 @@ stripeRouter.post('/webhook', async (c) => {
       status: sub.status,
       premium_until: premiumUntil,
       last_event_at: lastEventIso,
+      last_event_id: event.id,
     }),
     headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
   })

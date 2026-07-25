@@ -1,7 +1,9 @@
+import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon } from '../components/ui/Icons'
 import { useSettings } from '../hooks/useSettings'
 import { settingsStore, type AppSettings } from '../lib/settings'
+import { api } from '../lib/api'
 import { toast } from '../lib/toast'
 
 type BoolKey = {
@@ -32,8 +34,9 @@ function Toggle({ label, sub, settingKey }: { label: string; sub: string; settin
   )
 }
 
-function NumberInput({ label, sub, settingKey, unit, min, max, step = 1 }: {
+function NumberInput({ label, sub, settingKey, unit, min, max, step = 1, onCommit }: {
   label: string; sub: string; settingKey: NumberKey; unit: string; min: number; max: number; step?: number
+  onCommit?: (n: number) => void
 }) {
   const settings = useSettings()
   const value = settings[settingKey] as number
@@ -53,7 +56,10 @@ function NumberInput({ label, sub, settingKey, unit, min, max, step = 1 }: {
           step={step}
           onChange={(e) => {
             const n = Number(e.target.value)
-            if (!isNaN(n) && n >= min && n <= max) settingsStore.set(settingKey, n)
+            if (!isNaN(n) && n >= min && n <= max) {
+              settingsStore.set(settingKey, n)
+              onCommit?.(n)
+            }
           }}
           className="w-20 text-right bg-stone-100 rounded-xl px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400"
         />
@@ -180,6 +186,32 @@ const REST_OPTIONS = [
 
 export function SettingsPage() {
   const navigate = useNavigate()
+  // Cache of the server profile so goal edits merge into it rather than wiping
+  // the rest of the profile. Kept in a ref — it's not rendered directly.
+  const profileRef = useRef<Record<string, unknown>>({})
+
+  // Hydrate the effective calorie/protein goals from the server profile so the
+  // Settings screen shows the value the app (Home/Diary) actually applies.
+  useEffect(() => {
+    let cancelled = false
+    api.getProfile().then(({ profile }) => {
+      if (cancelled) return
+      if (profile && typeof profile === 'object') {
+        profileRef.current = { ...(profile as Record<string, unknown>) }
+        const p = profile as { calorie_goal?: number | null; protein_goal?: number | null }
+        if (typeof p.calorie_goal === 'number') settingsStore.set('calorie_goal', p.calorie_goal)
+        if (typeof p.protein_goal === 'number') settingsStore.set('protein_goal_g', p.protein_goal)
+      }
+    }).catch(() => { /* best-effort — local settings stand */ })
+    return () => { cancelled = true }
+  }, [])
+
+  // Persist a goal override to the server profile (best-effort). Explicit
+  // non-null calorie_goal/protein_goal are treated as overrides by the API.
+  function saveGoalToProfile(patch: { calorie_goal?: number; protein_goal?: number }) {
+    profileRef.current = { ...profileRef.current, ...patch }
+    api.saveProfile(profileRef.current).catch(() => { /* best-effort */ })
+  }
 
   return (
     <div className="pb-10">
@@ -224,6 +256,7 @@ export function SettingsPage() {
             min={500}
             max={6000}
             step={50}
+            onCommit={(n) => saveGoalToProfile({ calorie_goal: n })}
           />
           <NumberInput
             label="Proteinmål"
@@ -233,6 +266,7 @@ export function SettingsPage() {
             min={20}
             max={500}
             step={5}
+            onCommit={(n) => saveGoalToProfile({ protein_goal: n })}
           />
           <NumberInput
             label="Vattenmål"

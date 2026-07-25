@@ -12,11 +12,15 @@ create table if not exists fitness_profile (
   days_per_week int not null check (days_per_week between 1 and 7),
   allergies   text[] not null default '{}',
   calorie_goal int,
+  protein_goal int,
   age         int,
   weight_kg   numeric(5,1),
   height_cm   numeric(5,1),
   updated_at  timestamptz not null default now()
 );
+
+-- Idempotent: användarsatt proteinmål (överstyr planhärlett mål när det är satt).
+alter table fitness_profile add column if not exists protein_goal int;
 
 alter table fitness_profile enable row level security;
 create policy "owner" on fitness_profile using (auth.uid() = user_id);
@@ -58,12 +62,16 @@ create table if not exists subscriptions (
   -- ignorerar äldre händelser så en försenad "updated" inte kan återuppliva
   -- premium efter "deleted".
   last_event_at          timestamptz,
+  -- Stripe event.id för den senast tillämpade händelsen — idempotensnyckel så en
+  -- omleverans av exakt samma händelse (även inom samma sekund) inte tillämpas två gånger.
+  last_event_id          text,
   updated_at             timestamptz not null default now()
 );
 
 -- Idempotent: lägg till kolumnerna i befintliga databaser.
 alter table subscriptions add column if not exists status text;
 alter table subscriptions add column if not exists last_event_at timestamptz;
+alter table subscriptions add column if not exists last_event_id text;
 
 alter table subscriptions enable row level security;
 create policy "owner_read" on subscriptions for select using (auth.uid() = user_id);

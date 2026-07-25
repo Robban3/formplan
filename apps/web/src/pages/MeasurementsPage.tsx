@@ -7,8 +7,30 @@ import {
   deleteMeasurement,
   type BodyMeasurement,
 } from '../lib/measurementStore'
+import { getWeightEntries, addWeightEntry, deleteWeightEntry } from '../lib/weightStore'
+import { notifyWeightLogged } from '../lib/challengeEvents'
 import { initMeasurementsSync } from '../lib/measurementsSync'
 import { dateKey } from '../lib/derive'
+
+/**
+ * Combined view: girth fields come from measurementStore, but the weight scalar
+ * is sourced exclusively from weightStore (the single source of truth shared
+ * with Analytics/goals/challenges). Any weight_kg on a girth row is ignored so
+ * the two screens can never disagree.
+ */
+function buildEntries(): BodyMeasurement[] {
+  const byDate = new Map<string, BodyMeasurement>()
+  for (const g of getMeasurements()) {
+    const { weight_kg: _ignored, ...girth } = g
+    byDate.set(g.date, { ...girth })
+  }
+  for (const w of getWeightEntries()) {
+    const existing = byDate.get(w.date)
+    if (existing) existing.weight_kg = w.weight_kg
+    else byDate.set(w.date, { id: `weight-${w.date}`, date: w.date, weight_kg: w.weight_kg })
+  }
+  return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date))
+}
 
 const FIELDS: { key: keyof BodyMeasurement; label: string; unit: string; placeholder: string }[] = [
   { key: 'weight_kg', label: 'Vikt',    unit: 'kg', placeholder: '75,0' },
@@ -50,11 +72,11 @@ function MiniLineChart({ values, color }: { values: number[]; color: string }) {
 
 export function MeasurementsPage() {
   const navigate = useNavigate()
-  const [entries, setEntries] = useState<BodyMeasurement[]>(getMeasurements)
+  const [entries, setEntries] = useState<BodyMeasurement[]>(buildEntries)
   const [adding, setAdding] = useState(false)
   const [form, setForm] = useState<Record<string, string>>({})
 
-  function reload() { setEntries(getMeasurements()) }
+  function reload() { setEntries(buildEntries()) }
 
   // Pull measurements from the server (other devices) and refresh the list.
   useEffect(() => {
@@ -63,18 +85,33 @@ export function MeasurementsPage() {
   }, [])
 
   function handleSave() {
-    const m: Omit<BodyMeasurement, 'id'> = {
-      date: dateKey(),
-    }
+    const girth: Omit<BodyMeasurement, 'id'> = { date: dateKey() }
+    let weightVal: number | null = null
     for (const f of FIELDS) {
       const v = parseFloat((form[f.key] ?? '').replace(',', '.'))
-      if (!isNaN(v) && v > 0) (m as Record<string, unknown>)[f.key] = v
+      if (isNaN(v) || v <= 0) continue
+      if (f.key === 'weight_kg') weightVal = v
+      else (girth as Record<string, unknown>)[f.key] = v
     }
-    if (Object.keys(m).length <= 1) return // only date, no values
-    addMeasurement(m)
+    const hasGirth = Object.keys(girth).length > 1 // more than just `date`
+    if (!hasGirth && weightVal === null) return
+    // Weight goes to the single source of truth (weightStore) and advances the
+    // weight challenge; only girth fields stay in measurementStore.
+    if (weightVal !== null) { addWeightEntry(weightVal); notifyWeightLogged() }
+    if (hasGirth) addMeasurement(girth)
     reload()
     setAdding(false)
     setForm({})
+  }
+
+  // Delete every store's row for that date: girth (measurementStore) and weight
+  // (weightStore). Both create tombstones so a server merge won't resurrect it.
+  function handleDelete(date: string) {
+    const girth = getMeasurements().find((m) => m.date === date)
+    if (girth) deleteMeasurement(girth.id)
+    const weight = getWeightEntries().find((w) => w.date === date)
+    if (weight) deleteWeightEntry(weight.id)
+    reload()
   }
 
   // Build per-field series for trend charts
@@ -177,7 +214,7 @@ export function MeasurementsPage() {
               <div key={e.id} className="px-4 py-3 border-b border-stone-50 last:border-0">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm font-semibold text-stone-800">{fmtDate(e.date)}</p>
-                  <button onClick={() => { deleteMeasurement(e.id); reload() }}>
+                  <button onClick={() => handleDelete(e.date)}>
                     <XIcon className="w-4 h-4 stroke-stone-300" />
                   </button>
                 </div>

@@ -105,10 +105,13 @@ emailRouter.post('/progress', requireAuth, async (c) => {
   let streak = 0
   if (logs?.length) {
     const days = new Set(logs.map((l) => l.completed_at.slice(0, 10)))
-    let d = new Date()
+    // En streak lever tills dagen är slut. Rapporten kan begäras innan dagens
+    // pass loggats, så saknas dagens datum börjar vi räkna från gårdagen.
+    const d = new Date()
+    if (!days.has(d.toISOString().slice(0, 10))) d.setUTCDate(d.getUTCDate() - 1)
     while (days.has(d.toISOString().slice(0, 10))) {
       streak++
-      d.setDate(d.getDate() - 1)
+      d.setUTCDate(d.getUTCDate() - 1)
     }
   }
 

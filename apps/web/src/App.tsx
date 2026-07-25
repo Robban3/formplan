@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import { AuthPage } from './pages/AuthPage'
@@ -10,12 +11,15 @@ import { Toaster } from './components/ui/Toaster'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { useNotificationScheduler } from './hooks/useNotificationScheduler'
 import { useSessionsSync } from './hooks/useSessionsSync'
+import { flushLocalWater } from './lib/waterStore'
 import { WeeklySessionsProvider } from './contexts/WeeklySessionsContext'
 
 export default function App() {
   const { user, loading } = useAuth()
   useNotificationScheduler()
   useSessionsSync()
+  // Push any water logged offline to the server on app start (flush-on-reconnect).
+  useEffect(() => { flushLocalWater().catch(() => {}) }, [])
 
   if (loading) {
     return (

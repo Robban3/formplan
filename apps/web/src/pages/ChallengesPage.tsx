@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   getActiveChallenges,
@@ -9,6 +9,7 @@ import {
   type Challenge,
   type ChallengeIconKey,
 } from '../lib/challengesStore'
+import { notifyWorkoutLogged, notifyWaterLogged, notifyWeightLogged } from '../lib/challengeEvents'
 import {
   ChevronLeftIcon,
   TrophyIcon,
@@ -63,7 +64,9 @@ function ChallengeIcon({ iconKey }: { iconKey: ChallengeIconKey | undefined }) {
 function ChallengeCard({ challenge, onAbandon }: { challenge: Challenge; onAbandon: () => void }) {
   const daysLeft = challenge.startDate
     ? Math.max(0, challenge.durationDays - Math.floor(
-        (Date.now() - new Date(challenge.startDate).getTime()) / 86400000
+        // Parse the YYYY-MM-DD start at local noon — a bare new Date('YYYY-MM-DD')
+        // is UTC midnight, which skews "dagar kvar" by a day in most timezones.
+        (Date.now() - new Date(`${challenge.startDate}T12:00:00`).getTime()) / 86400000
       ))
     : challenge.durationDays
 
@@ -106,6 +109,25 @@ export function ChallengesPage() {
   const [active, setActive] = useState(getActiveChallenges)
   const [available, setAvailable] = useState(getAvailablePresets)
   const [completed, setCompleted] = useState(getCompletedChallenges)
+
+  // Recompute active-challenge progress from live data on mount and whenever the
+  // page becomes visible again — data changed on other screens (workouts, water,
+  // weight) is reflected here without a remount. Reuses the same logic that runs
+  // on each log event, so numbers stay consistent everywhere.
+  useEffect(() => {
+    function recompute() {
+      notifyWorkoutLogged()
+      notifyWaterLogged()
+      notifyWeightLogged()
+      setActive(getActiveChallenges())
+      setAvailable(getAvailablePresets())
+      setCompleted(getCompletedChallenges())
+    }
+    recompute()
+    const onVisible = () => { if (document.visibilityState === 'visible') recompute() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [])
 
   function handleStart(id: string) {
     startChallenge(id)

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useWorkoutStore } from '../../hooks/useWorkoutStore'
 import { useSettings } from '../../hooks/useSettings'
 import { useUnits } from '../../hooks/useUnits'
-import { workoutStore } from '../../store/workoutStore'
+import { workoutStore, computeElapsedSeconds } from '../../store/workoutStore'
 import { workoutApi } from '../../lib/workoutApi'
 import { saveRpe } from '../../lib/rpeStore'
 import { checkAndUpdatePR } from '../../lib/prStore'
@@ -26,8 +26,11 @@ export function ActiveWorkout() {
   const state = useWorkoutStore()
   const { auto_rest, rest_seconds_default, keep_screen_on } = useSettings()
   const { weightLabel, toDisplay, toStore, formatWeight } = useUnits()
-  const [elapsed, setElapsed] = useState(0)
-  const [paused, setPaused] = useState(false)
+  const [elapsed, setElapsed] = useState(() => {
+    const s = workoutStore.get()
+    return s ? computeElapsedSeconds(s) : 0
+  })
+  const paused = state?.pausedAt != null
   const [restTimer, setRestTimer] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
   const [showRpe, setShowRpe] = useState(false)
@@ -35,7 +38,6 @@ export function ActiveWorkout() {
   // Snapshot of the finished workout for the RPE screen — the store is cleared
   // by finishWorkout, so live reads would show 0/0 and a still-ticking timer.
   const [pendingStats, setPendingStats] = useState({ done: 0, total: 0, elapsed: 0 })
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const restRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const advanceToRef = useRef<number | null>(null)
   const finishingRef = useRef(false)
@@ -77,14 +79,37 @@ export function ActiveWorkout() {
     if (!state && !finishingRef.current) navigate('/traning', { replace: true })
   }, [state, navigate])
 
-  // Main elapsed timer
+  // Main elapsed timer — derived from wall-clock time so it never drifts or
+  // resets across reloads/remounts and stays correct after a background tab
+  // throttled the interval (recomputed on tick and on visibilitychange).
   useEffect(() => {
-    if (paused) { clearInterval(intervalRef.current ?? undefined); return }
-    intervalRef.current = setInterval(() => {
-      setElapsed((e) => e + 1)
-    }, 1000)
-    return () => clearInterval(intervalRef.current ?? undefined)
-  }, [paused])
+    function tick() {
+      const s = workoutStore.get()
+      if (s) setElapsed(computeElapsedSeconds(s))
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    const onVisible = () => { if (document.visibilityState === 'visible') tick() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [])
+
+  function togglePause() {
+    workoutStore.update((s) => {
+      if (s.pausedAt != null) {
+        // Resume: fold the just-ended pause span into the accumulator.
+        return {
+          ...s,
+          pausedAccumMs: (s.pausedAccumMs ?? 0) + (Date.now() - s.pausedAt),
+          pausedAt: null,
+        }
+      }
+      return { ...s, pausedAt: Date.now() }
+    })
+  }
 
   // Rest countdown
   useEffect(() => {
@@ -374,11 +399,15 @@ export function ActiveWorkout() {
     setSaving(true)
     finishingRef.current = true
 
+    // Derive the final duration from wall-clock time (minus paused spans) so an
+    // offline-logged / reloaded session keeps an accurate duration.
+    const finalElapsed = computeElapsedSeconds(snapshot)
+
     const input = {
       plan_day_id: snapshot.planDayId,
       workout_name: snapshot.workoutName,
       started_at: new Date(snapshot.startedAt).toISOString(),
-      duration_seconds: elapsed,
+      duration_seconds: finalElapsed,
       exercises: snapshot.exercises.map((e) => ({
         name: e.name,
         sets: e.sets.map((x) => ({
@@ -413,7 +442,7 @@ export function ActiveWorkout() {
     // Show RPE rating before navigating
     if (completed > 0) {
       setPendingWorkoutName(name)
-      setPendingStats({ done: completed, total: totalSetCount, elapsed })
+      setPendingStats({ done: completed, total: totalSetCount, elapsed: finalElapsed })
       setShowRpe(true)
     } else {
       navigate('/hem', { replace: true })
@@ -438,7 +467,7 @@ export function ActiveWorkout() {
           <p className="text-xs text-stone-400">{workout.workoutName}</p>
         </div>
         <button
-          onClick={() => setPaused((p) => !p)}
+          onClick={togglePause}
           className="text-forest-600"
         >
           {paused
@@ -462,7 +491,16 @@ export function ActiveWorkout() {
           <p className="text-forest-700 font-semibold">Vila</p>
           <p className="text-3xl font-bold font-mono text-forest-600">{formatTime(restTimer)}</p>
           <button
-            onClick={() => setRestTimer(null)}
+            onClick={() => {
+              // Perform any pending exercise advance immediately instead of
+              // leaving a stale jump queued (or silently dropping it).
+              if (advanceToRef.current !== null) {
+                const idx = advanceToRef.current
+                advanceToRef.current = null
+                workoutStore.update((s) => ({ ...s, currentExerciseIndex: idx }))
+              }
+              setRestTimer(null)
+            }}
             className="text-xs text-forest-500 mt-1 underline"
           >
             Hoppa över vila

@@ -105,8 +105,10 @@ export function computeAutoProgress(meta: GoalMeta): number | null {
       const target = meta.targetValue
       if (start === target) return current === target ? 100 : 0
       const totalNeeded = Math.abs(start - target)
-      const done = Math.abs(start - current)
-      // Clamp: don't go negative if user went the wrong direction
+      // Signed progress along the target direction: movement toward the target
+      // counts, movement away (e.g. gaining weight when the goal is to lose)
+      // reads as 0 — never as full progress.
+      const done = target > start ? current - start : start - current
       return Math.max(0, Math.min(100, Math.round((done / totalNeeded) * 100)))
     }
     case 'weight_loss': {

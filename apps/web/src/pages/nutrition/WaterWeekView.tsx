@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { nutritionApi } from '../../lib/nutritionApi'
-import { getLocalWaterSummary } from '../../lib/waterStore'
+import { getLocalWaterSummary, hydrateLocalWaterFromSummary } from '../../lib/waterStore'
 import { dateKey, dateKeysInRange, weekRange } from '../../lib/derive'
 import { ChevronLeftIcon, ChevronRightIcon, GlassWaterIcon } from '../../components/ui/Icons'
 
@@ -55,6 +55,9 @@ export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
     const keys = dateKeysInRange(from, to)
     try {
       const { days: apiDays } = await nutritionApi.getWaterSummary(fromKey, toKey)
+      // Seed the local mirror so day-scoped readers (water challenge) reflect
+      // history from other devices; only fills gaps, never double-counts.
+      hydrateLocalWaterFromSummary(apiDays)
       const byDate = new Map(apiDays.map((d) => [d.date, d.total_ml]))
       setDays(keys.map((date) => ({ date, total_ml: byDate.get(date) ?? 0 })))
     } catch {

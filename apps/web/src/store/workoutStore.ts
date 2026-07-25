@@ -25,6 +25,21 @@ export interface ActiveWorkoutState {
   startedAt: number // Date.now()
   exercises: ExerciseLog[]
   currentExerciseIndex: number
+  /** ms timestamp the workout was paused at; null/absent while running. */
+  pausedAt?: number | null
+  /** Total ms spent paused across previous pause spans. */
+  pausedAccumMs?: number
+}
+
+/**
+ * Elapsed seconds derived from wall-clock time, so it survives reloads/remounts
+ * (state is restored from sessionStorage) and stays correct even when a
+ * background tab throttles timers. Time spent paused is excluded.
+ */
+export function computeElapsedSeconds(s: ActiveWorkoutState, now: number = Date.now()): number {
+  const accum = s.pausedAccumMs ?? 0
+  const openPause = s.pausedAt != null ? now - s.pausedAt : 0
+  return Math.max(0, Math.floor((now - s.startedAt - accum - openPause) / 1000))
 }
 
 const ACTIVE_KEY = 'formplan_active_workout'

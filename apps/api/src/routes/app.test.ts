@@ -88,6 +88,137 @@ describe('server-side paywall (requireAccess)', () => {
   })
 })
 
+describe('isUserPremium fail-open on transient DB error', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  // Autentiserad användare med utgången provperiod, men subscriptions-läsningen
+  // ger ett DB-fel (500). Fail-open ska ge åtkomst i stället för att låsa ute en
+  // potentiellt betalande användare med 402.
+  it('grants access (not 402) when the subscription read keeps failing', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url.includes('/auth/v1/user')) {
+        return new Response(
+          JSON.stringify({
+            id: 'user-1',
+            email: 'payer@example.com',
+            created_at: '2020-01-01T00:00:00Z',
+            email_confirmed_at: '2020-01-01T00:00:00Z',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      // Subscriptions-läsningen (och retry) misslyckas → isUserPremium fail-open.
+      if (url.includes('/subscriptions')) {
+        return new Response('db down', { status: 500 })
+      }
+      return new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } })
+    })
+
+    const res = await app.request('/plan/list', { headers: { Authorization: 'Bearer token' } }, mockEnv)
+    expect(res.status).not.toBe(402)
+    expect(res.status).toBe(200)
+  })
+})
+
+describe('profile protein_goal', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('accepts and persists protein_goal', async () => {
+    let insertedBody: Record<string, unknown> | null = null
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input)
+      if (url.includes('/auth/v1/user')) {
+        return new Response(
+          JSON.stringify({
+            id: 'user-3',
+            email: 'test@example.com',
+            created_at: '2020-01-01T00:00:00Z',
+            email_confirmed_at: '2020-01-01T00:00:00Z',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      if (url.includes('/fitness_profile') && init?.method === 'POST') {
+        insertedBody = JSON.parse(String(init.body)) as Record<string, unknown>
+        return new Response(JSON.stringify([insertedBody]), {
+          status: 201,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      }
+      return new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } })
+    })
+
+    const res = await app.request(
+      '/profile',
+      {
+        method: 'POST',
+        headers: { Authorization: 'Bearer token', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goal: 'build_muscle',
+          level: 'intermediate',
+          equipment: ['gym'],
+          days_per_week: 4,
+          allergies: [],
+          calorie_goal: 2500,
+          protein_goal: 180,
+          age: 30,
+          weight_kg: 80,
+          height_cm: 180,
+        }),
+      },
+      mockEnv
+    )
+    expect(res.status).toBe(200)
+    expect(insertedBody).not.toBeNull()
+    expect((insertedBody as Record<string, unknown> | null)?.protein_goal).toBe(180)
+  })
+
+  it('rejects a non-positive protein_goal with 400', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url.includes('/auth/v1/user')) {
+        return new Response(
+          JSON.stringify({
+            id: 'user-3',
+            email: 'test@example.com',
+            created_at: '2020-01-01T00:00:00Z',
+            email_confirmed_at: '2020-01-01T00:00:00Z',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      return new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } })
+    })
+
+    const res = await app.request(
+      '/profile',
+      {
+        method: 'POST',
+        headers: { Authorization: 'Bearer token', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goal: 'build_muscle',
+          level: 'intermediate',
+          equipment: ['gym'],
+          days_per_week: 4,
+          allergies: [],
+          calorie_goal: 2500,
+          protein_goal: -5,
+          age: 30,
+          weight_kg: 80,
+          height_cm: 180,
+        }),
+      },
+      mockEnv
+    )
+    expect(res.status).toBe(400)
+  })
+})
+
 describe('verified-email gate (requireVerifiedEmail)', () => {
   afterEach(() => {
     vi.restoreAllMocks()

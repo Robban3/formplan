@@ -10,7 +10,7 @@ import { dateKey, deriveDifficulty, isoWeekday } from '../../lib/derive'
 import { loadActivePlan } from '../../lib/planLoader'
 import { useWeeklySessions } from '../../contexts/WeeklySessionsContext'
 import { getTrainingStreak } from '../../lib/streakStore'
-import { getLocalSessions } from '../../lib/workoutSessionStore'
+import { getLocalSessions, subscribeSessions } from '../../lib/workoutSessionStore'
 import { loadGoals, effectiveProgress } from '../GoalsPage'
 import { addLocalWater, getLocalWater } from '../../lib/waterStore'
 import { notifyWaterLogged } from '../../lib/challengeEvents'
@@ -225,7 +225,12 @@ export function HomePage() {
   const [waterTotal, setWaterTotal] = useState(() => getLocalWater(dateKey()).total_ml)
   const [activeGoals, setActiveGoals] = useState(loadActiveGoalsCount)
   const [topGoals] = useState(() => loadGoals().filter((g) => !g.done).slice(0, 3))
-  const [streak] = useState(() => getTrainingStreak())
+  const [streak, setStreak] = useState(() => getTrainingStreak())
+
+  // Refresh the streak when sessions change (e.g. a workout logged elsewhere or
+  // synced from the server) without needing a remount. subscribeSessions fires
+  // the listener immediately, so the initial value stays correct too.
+  useEffect(() => subscribeSessions(() => setStreak(getTrainingStreak())), [])
 
   const firstName = user?.user_metadata?.['full_name']?.split(' ')[0]
   const greeting = firstName ? `Hej, ${firstName}!` : 'Hej!'
@@ -309,13 +314,15 @@ export function HomePage() {
     toast.success('+250 ml vatten loggat')
     // Write-through: servern är auktoritativ källa (Hem/Kost/Analys läser den),
     // localStorage speglas för synkrona läsare som vattenmålet (goalTracker).
-    // Ingen läsare summerar båda, så ingen dubbelräkning. Tidigare skrevs bara
-    // localStorage här, vilket divergerade mot Kost/Vatten-sidan.
-    addLocalWater(day, 250)
+    // Ingen läsare summerar båda, så ingen dubbelräkning.
     try {
       await nutritionApi.addWater(day, 250)
+      // Server-raden finns — spegla lokalt utan pending-flagga.
+      addLocalWater(day, 250)
     } catch {
-      // Offline: den lokala spegeln räcker tills nästa online-läsning.
+      // Offline: markera som pending så flushLocalWater() skickar den vid
+      // återanslutning (och hydreringen på Vatten-sidan inte skriver över den).
+      addLocalWater(day, 250, true)
     }
   }
 

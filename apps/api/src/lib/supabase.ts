@@ -68,9 +68,24 @@ const PREMIUM_STATUSES = new Set(['active', 'trialing'])
 
 export async function isUserPremium(userId: string, env: Env): Promise<boolean> {
   const db = supabaseAdmin(env)
-  const { data } = await db.query<{ premium_until: string; status: string | null }[]>(
-    `/subscriptions?user_id=eq.${userId}&select=premium_until,status&limit=1`
-  )
+  const path = `/subscriptions?user_id=eq.${userId}&select=premium_until,status&limit=1`
+  const read = () =>
+    db.query<{ premium_until: string; status: string | null }[]>(path)
+
+  // Ett läsfel får INTE nekas — en betalande användare skulle då få 402 vid en
+  // tillfällig Supabase-glitch. Försök igen en gång och fail OPEN vid fortsatt
+  // fel (returnera true) så en övergående störning inte låser ute betalare.
+  // Ett normalt svar (ingen rad / utgången) ger fortfarande false.
+  let { data, error } = await read()
+  if (error) {
+    console.error('isUserPremium: subscription-läsning misslyckades, försöker igen:', error)
+    ;({ data, error } = await read())
+    if (error) {
+      console.error('isUserPremium: läsning misslyckades igen — fail-open (ger åtkomst):', error)
+      return true
+    }
+  }
+
   const row = data?.[0]
   if (!row) return false
   if (!row.status || !PREMIUM_STATUSES.has(row.status)) return false

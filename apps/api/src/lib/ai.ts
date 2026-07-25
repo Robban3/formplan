@@ -279,7 +279,7 @@ export async function generatePlan(
 ): Promise<void> {
   const db = supabaseAdmin(env)
 
-  const { text: rawText } = await callAi(
+  const { text: rawText, stopReason } = await callAi(
     {
       system:
         'You are a certified personal trainer and nutritionist. Always respond with valid JSON only — no markdown, no explanation.',
@@ -290,13 +290,27 @@ export async function generatePlan(
     env
   )
 
-  const parsed = JSON.parse(extractJson(rawText)) as {
+  // Avhugget svar (max_tokens) ⇒ trunkerad JSON. Ge ett begripligt svenskt
+  // meddelande i stället för ett rått parse-fel.
+  const truncated = (stopReason ?? '').toLowerCase() === 'max_tokens'
+
+  let parsed: {
     days: Array<{
       weekday: number
       type: 'workout' | 'rest'
       content: WorkoutDay | RestDay
       nutrition: NutritionDay
     }>
+  }
+  try {
+    parsed = JSON.parse(extractJson(rawText))
+  } catch (err) {
+    if (truncated) throw new AiResponseError('Planen blev för lång — försök igen.')
+    console.error(
+      `Plan: could not parse model JSON (stop_reason=${stopReason}). Raw response:`,
+      rawText.slice(0, 1000)
+    )
+    throw new Error(`Plan generation returned unparseable output: ${(err as Error).message}`)
   }
 
   const dayRows = parsed.days.flatMap((d) => [
@@ -762,7 +776,7 @@ Om bilden inte föreställer mat: returnera tomma "items", nollställd "total" o
 // "kvarg med bär" → { name, kcal, protein_g, fat_g, carbs_g } för en normal
 // portion. Används av veckoplaneringen för egna måltider.
 export async function estimateMeal(description: string, env: Env): Promise<MealEstimate> {
-  const { text } = await callAi(
+  const { text, stopReason } = await callAi(
     {
       system: 'Svara alltid med enbart giltig JSON — ingen markdown, ingen förklaring.',
       messages: [
@@ -778,7 +792,20 @@ export async function estimateMeal(description: string, env: Env): Promise<MealE
     env
   )
 
-  const p = JSON.parse(extractJson(text)) as Partial<MealEstimate>
+  // Avhugget svar (max_tokens) ⇒ trunkerad JSON. Ge ett begripligt svenskt fel.
+  const truncated = (stopReason ?? '').toLowerCase() === 'max_tokens'
+
+  let p: Partial<MealEstimate>
+  try {
+    p = JSON.parse(extractJson(text)) as Partial<MealEstimate>
+  } catch (err) {
+    if (truncated) throw new AiResponseError('Uppskattningen blev för lång — försök med en kortare beskrivning.')
+    console.error(
+      `Meal estimate: could not parse model JSON (stop_reason=${stopReason}). Raw response:`,
+      text.slice(0, 1000)
+    )
+    throw new Error(`Meal estimate returned unparseable output: ${(err as Error).message}`)
+  }
   const num = (v: unknown) => (typeof v === 'number' && isFinite(v) && v > 0 ? v : 0)
   const r1 = (v: unknown) => Math.round(num(v) * 10) / 10
   return {

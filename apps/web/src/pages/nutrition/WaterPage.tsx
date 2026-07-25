@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { nutritionApi, type WaterEntry } from '../../lib/nutritionApi'
-import { getLocalWater, addLocalWater } from '../../lib/waterStore'
+import { getLocalWater, addLocalWater, flushLocalWater, hydrateLocalWater } from '../../lib/waterStore'
 import { notifyWaterLogged } from '../../lib/challengeEvents'
 import { dateKey } from '../../lib/derive'
 import { toast } from '../../lib/toast'
@@ -64,8 +64,13 @@ export function WaterPage() {
 
   const load = useCallback(async () => {
     setLoading(true)
+    // Push anything logged offline before reading, so the server list is complete.
+    await flushLocalWater().catch(() => {})
     try {
       const { entries, total_ml } = await nutritionApi.getWater(today)
+      // Keep the local mirror in sync with the server for synchronous readers
+      // (goalTracker/challenges) — server stays authoritative, no double count.
+      hydrateLocalWater(today, entries)
       setEntries(entries.map((e) => normalizeEntry(e, e.amount_ml)))
       setTotal(total_ml)
       setUseLocal(false)
@@ -87,9 +92,13 @@ export function WaterPage() {
     if (adding) return
     setAdding(true)
 
+    // Resolve the day at click time (like HomePage) so water logged across
+    // midnight lands on the correct day rather than the day the page loaded.
+    const day = dateKey()
+
     const apply = (raw: WaterEntry) => {
       const entry = normalizeEntry(raw, selectedMl)
-      const hitKey = GOAL_HIT_KEY(today)
+      const hitKey = GOAL_HIT_KEY(day)
       const prevTotal = total
       const nextTotal = prevTotal + entry.amount_ml
       const crossedGoal = prevTotal < GOAL_ML && nextTotal >= GOAL_ML
@@ -109,18 +118,20 @@ export function WaterPage() {
 
     try {
       if (useLocal) {
-        apply(addLocalWater(today, selectedMl))
+        // Offline: mark pending so flushLocalWater() sends it on reconnect.
+        apply(addLocalWater(day, selectedMl, true))
         return
       }
-      const { entry } = await nutritionApi.addWater(today, selectedMl)
+      const { entry } = await nutritionApi.addWater(day, selectedMl)
       // Spegla lokalt (för synkrona läsare som vattenmålet i goalTracker) —
       // WaterPage/Hem/Analys läser servern, så ingen läsare summerar båda.
-      addLocalWater(today, selectedMl)
+      addLocalWater(day, selectedMl)
       apply(entry)
     } catch (e) {
       try {
         setUseLocal(true)
-        apply(addLocalWater(today, selectedMl))
+        // Server write failed — keep it as a pending offline entry to flush later.
+        apply(addLocalWater(day, selectedMl, true))
       } catch {
         toastIfNotNetwork(e, toast.error)
       }

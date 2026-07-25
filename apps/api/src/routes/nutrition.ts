@@ -33,9 +33,11 @@ function rangeDays(from: string, to: string): number {
   return Math.round((Date.parse(to) - Date.parse(from)) / 86_400_000)
 }
 
-// Resolve the user's daily macro goals for a given date. Prefers the nutrition
-// day from their latest ready plan that matches the weekday, then falls back to
-// the profile calorie goal, then a sensible default.
+// Resolve the user's daily macro goals for a given date. Explicit user-set goals
+// on the fitness profile (calorie_goal / protein_goal) are AUTHORITATIVE and
+// override the plan-derived value per field — explicit user intent wins. When a
+// field is unset it falls back to the latest ready plan's nutrition day for the
+// weekday, then to a sensible default.
 async function resolveDailyGoals(
   c: { env: AppContext['Bindings'] },
   userId: string,
@@ -43,6 +45,15 @@ async function resolveDailyGoals(
 ): Promise<DailyGoals> {
   const db = supabaseAdmin(c.env)
 
+  const { data: profiles } = await db.query<{ calorie_goal: number | null; protein_goal: number | null }[]>(
+    `/fitness_profile?user_id=eq.${userId}&select=calorie_goal,protein_goal&limit=1`
+  )
+  const explicitKcal = profiles?.[0]?.calorie_goal ?? null
+  const explicitProtein = profiles?.[0]?.protein_goal ?? null
+
+  // Base goals: plan nutrition-day matching the weekday, else a default derived
+  // from the user's calorie goal (or the generic default when that is unset too).
+  let goals: DailyGoals | null = null
   const { data: plans } = await db.query<Plan[]>(
     `/plan?user_id=eq.${userId}&status=eq.ready&select=id&order=created_at.desc&limit=1`
   )
@@ -53,13 +64,45 @@ async function resolveDailyGoals(
       `/plan_day?plan_id=eq.${planId}&type=eq.nutrition&weekday=eq.${weekday}&select=content&limit=1`
     )
     const content = days?.[0]?.content
-    if (content) return goalsFromNutritionDay(content)
+    if (content) goals = goalsFromNutritionDay(content)
   }
+  if (!goals) goals = defaultGoals(explicitKcal)
 
-  const { data: profiles } = await db.query<{ calorie_goal: number | null }[]>(
-    `/fitness_profile?user_id=eq.${userId}&select=calorie_goal&limit=1`
-  )
-  return defaultGoals(profiles?.[0]?.calorie_goal ?? null)
+  // Explicit user-set goals override the plan-derived values, per field.
+  if (explicitKcal != null) goals.kcal = explicitKcal
+  if (explicitProtein != null) goals.protein_g = explicitProtein
+
+  return goals
+}
+
+// Hämtar alla rader för en summeringsfråga i sidor. En enkel obegränsad
+// PostgREST-fråga trunkeras tyst om projektet har db-max-rows satt → för låga
+// totaler utan fel. Paginera med offset/limit och gå vidare så länge en sida
+// gav rader (offset flyttas fram med det faktiska antalet, så det fungerar även
+// om db-max-rows är lägre än vår begärda sidstorlek).
+const SUMMARY_PAGE_SIZE = 1000
+async function fetchAllRows<T>(
+  db: ReturnType<typeof supabaseAdmin>,
+  basePath: string
+): Promise<{ data: T[] | null; error: string | null }> {
+  const all: T[] = []
+  let offset = 0
+  // Absolut tak som skyddsräcke mot en oändlig loop (t.ex. en server som ignorerar
+  // offset). Vida över vad ett realistiskt intervall (max 400 dagar) kan ge.
+  const MAX_OFFSET = 500_000
+  for (;;) {
+    const { data, error } = await db.query<T[]>(
+      `${basePath}&offset=${offset}&limit=${SUMMARY_PAGE_SIZE}`
+    )
+    if (error) return { data: null, error }
+    const rows = data ?? []
+    all.push(...rows)
+    // Stoppa först vid en tom sida — inte vid "färre än sidstorleken", eftersom en
+    // lägre db-max-rows kan kapa varje sida och då skulle vi trunkera för tidigt.
+    if (rows.length === 0 || offset >= MAX_OFFSET) break
+    offset += rows.length
+  }
+  return { data: all, error: null }
 }
 
 // ── Open Food Facts (server-side proxy) ─────────────────────────────────────
@@ -232,6 +275,15 @@ nutritionRouter.post(
       body: JSON.stringify(rows),
     })
     if (error || !data || data.length !== rows.length) {
+      // Ett food_id som inte finns i food_item ger ett FK-fel (Postgres 23503).
+      // Tidigare sprängde det hela batchen som 500 — svara 400 så klienten kan
+      // rätta (t.ex. logga med food_id = null) i stället.
+      if (error && /23503|foreign key|food_id/i.test(error)) {
+        return c.json(
+          { error: 'Ett av livsmedlen kunde inte hittas. Ladda om sidan och försök igen.' },
+          400
+        )
+      }
       console.error('add food log failed:', error)
       return c.json({ error: 'Kunde inte spara måltiden just nu. Försök igen.' }, 500)
     }
@@ -266,13 +318,17 @@ nutritionRouter.get('/water/summary', async (c) => {
   if (!from || !to || !isDateString(from) || !isDateString(to)) {
     return c.json({ error: 'Ogiltigt eller saknat datumintervall — använd formatet YYYY-MM-DD.' }, 400)
   }
+  if (rangeDays(from, to) < 0) {
+    return c.json({ error: 'Ogiltigt datumintervall — "från" måste vara före "till".' }, 400)
+  }
   if (rangeDays(from, to) > MAX_SUMMARY_DAYS) {
     return c.json({ error: 'Datumintervallet är för stort — max 400 dagar.' }, 400)
   }
   const user = c.get('user')
   const db = supabaseAdmin(c.env)
 
-  const { data, error } = await db.query<Pick<WaterLogRow, 'log_date' | 'amount_ml'>[]>(
+  const { data, error } = await fetchAllRows<Pick<WaterLogRow, 'log_date' | 'amount_ml'>>(
+    db,
     `/water_log?user_id=eq.${user.sub}&log_date=gte.${encodeURIComponent(from)}&log_date=lte.${encodeURIComponent(to)}&select=log_date,amount_ml`
   )
   if (error) {
@@ -357,13 +413,17 @@ nutritionRouter.get('/summary', async (c) => {
   if (!from || !to || !isDateString(from) || !isDateString(to)) {
     return c.json({ error: 'Ogiltigt eller saknat datumintervall — använd formatet YYYY-MM-DD.' }, 400)
   }
+  if (rangeDays(from, to) < 0) {
+    return c.json({ error: 'Ogiltigt datumintervall — "från" måste vara före "till".' }, 400)
+  }
   if (rangeDays(from, to) > MAX_SUMMARY_DAYS) {
     return c.json({ error: 'Datumintervallet är för stort — max 400 dagar.' }, 400)
   }
   const user = c.get('user')
   const db = supabaseAdmin(c.env)
 
-  const { data, error } = await db.query<Pick<FoodLogRow, 'log_date' | 'kcal' | 'protein_g' | 'fat_g' | 'carbs_g'>[]>(
+  const { data, error } = await fetchAllRows<Pick<FoodLogRow, 'log_date' | 'kcal' | 'protein_g' | 'fat_g' | 'carbs_g'>>(
+    db,
     `/food_log?user_id=eq.${user.sub}&log_date=gte.${encodeURIComponent(from)}&log_date=lte.${encodeURIComponent(to)}&select=log_date,kcal,protein_g,fat_g,carbs_g`
   )
   if (error) {

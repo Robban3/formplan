@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { api } from '../lib/api'
 import { billingApi, type BillingStatus } from '../lib/billingApi'
 import { toast } from '../lib/toast'
+import { clearLocalUserData } from '../lib/localData'
 import {
   UserIcon,
   SettingsIcon,
@@ -74,6 +75,7 @@ export function MorePage() {
     if (!confirm('Är du helt säker? Detta går inte att ångra.')) return
     try {
       await api.deleteAccount()
+      clearLocalUserData()
       await supabase.auth.signOut()
       toast.success('Ditt konto har raderats.')
       window.location.href = '/auth'
@@ -147,7 +149,7 @@ export function MorePage() {
       </div>
 
       <button
-        onClick={async () => { await supabase.auth.signOut(); window.location.href = '/auth' }}
+        onClick={async () => { clearLocalUserData(); await supabase.auth.signOut(); window.location.href = '/auth' }}
         className="w-full flex items-center justify-center gap-2 text-red-500 font-medium py-4 mt-4"
       >
         <LogOutIcon className="w-4 h-4 stroke-red-500" />

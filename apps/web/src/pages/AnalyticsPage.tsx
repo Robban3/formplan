@@ -39,9 +39,13 @@ function getISOWeek(date: Date) {
   return 1 + Math.round(((d.getTime() - w1.getTime()) / 86400000 - 3 + ((w1.getDay() + 6) % 7)) / 7)
 }
 function deduplicate(sessions: WorkoutSession[]) {
+  // Key by started_at + workout_name — the SAME identity the store dedups on
+  // (getWeeklySessionCount). Keying by day collapsed distinct same-day sessions,
+  // so Analytics' weekly count disagreed with Home/Training.
   const seen = new Set<string>()
   return sessions.filter((s) => {
-    const key = `${s.plan_day_id ?? s.workout_name}-${s.completed_at.slice(0, 10)}`
+    const t = new Date(s.started_at).getTime()
+    const key = `${Number.isNaN(t) ? s.started_at : t}|${s.workout_name}`
     if (seen.has(key)) return false; seen.add(key); return true
   })
 }
@@ -315,6 +319,9 @@ export function AnalyticsPage() {
   const [tab, setTab] = useState<Tab>('oversikt')
   const [sessions, setSessions] = useState<WorkoutSession[]>([])
   const [daySummaries, setDaySummaries] = useState<DaySummary[]>([])
+  // Calorie goal from the server daily log (the effective goal used by
+  // Home/Diary), falling back to the local setting until it loads.
+  const [calorieGoal, setCalorieGoal] = useState(settings.calorie_goal)
   const [loading, setLoading] = useState(true)
   const [nutritionLoading, setNutritionLoading] = useState(false)
   const [nutritionLoaded, setNutritionLoaded] = useState(false)
@@ -332,6 +339,7 @@ export function AnalyticsPage() {
   const last7 = last7Dates()
 
   useEffect(() => {
+    nutritionApi.getDailyLog(today).then((log) => setCalorieGoal(log.goals.kcal)).catch(() => {})
     nutritionApi.getWater(today).then((w) => setWaterToday(w.total_ml)).catch(() => {})
     nutritionApi
       .getWaterSummary(waterFrom, today)
@@ -716,18 +724,18 @@ export function AnalyticsPage() {
               </div>
 
               {/* Kaloribalans */}
-              {settings.calorie_goal > 0 && (
+              {calorieGoal > 0 && (
                 <div className="bg-white rounded-2xl border border-stone-100 p-4">
                   <p className="font-semibold text-stone-800 mb-1">Kaloribalans</p>
-                  <p className="text-xs text-stone-400 mb-4">Mål: {settings.calorie_goal} kcal/dag · + överskott · – underskott</p>
+                  <p className="text-xs text-stone-400 mb-4">Mål: {calorieGoal} kcal/dag · + överskott · – underskott</p>
                   <div className="flex items-center gap-1.5 h-28">
                     {last7.map((date, i) => {
                       const d = daySummaries.find((x) => x.date === date)
-                      const balance = d ? d.kcal - settings.calorie_goal : null
+                      const balance = d ? d.kcal - calorieGoal : null
                       const isToday = i === 6
                       const maxAbs = Math.max(300, ...last7.map((dt) => {
                         const dd = daySummaries.find((x) => x.date === dt)
-                        return dd ? Math.abs(dd.kcal - settings.calorie_goal) : 0
+                        return dd ? Math.abs(dd.kcal - calorieGoal) : 0
                       }))
                       const pct = balance !== null ? Math.min(Math.abs(balance) / maxAbs * 100, 100) : 0
                       const isPos = (balance ?? 0) >= 0

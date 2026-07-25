@@ -15,6 +15,7 @@ const profileSchema = z.object({
   days_per_week: z.number().int().min(1).max(7),
   allergies: z.array(z.string().max(60)).max(30),
   calorie_goal: z.number().int().positive().nullable(),
+  protein_goal: z.number().int().positive().nullable(),
   age: z.number().int().min(13).max(120).nullable(),
   weight_kg: z.number().positive().nullable(),
   height_cm: z.number().positive().nullable(),
