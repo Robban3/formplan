@@ -113,6 +113,9 @@ export function WaterPage() {
         return
       }
       const { entry } = await nutritionApi.addWater(today, selectedMl)
+      // Spegla lokalt (för synkrona läsare som vattenmålet i goalTracker) —
+      // WaterPage/Hem/Analys läser servern, så ingen läsare summerar båda.
+      addLocalWater(today, selectedMl)
       apply(entry)
     } catch (e) {
       try {

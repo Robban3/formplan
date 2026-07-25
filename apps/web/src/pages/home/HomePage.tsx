@@ -300,14 +300,23 @@ export function HomePage() {
   const loggedMeals = MEAL_SLOTS.filter((slot) => entries.some((e) => e.meal_slot === slot))
   const waterPct = Math.min((waterTotal / settings.water_goal_ml) * 100, 100)
 
-  function handleQuickWater() {
+  async function handleQuickWater() {
     // Resolve the day at click time — a dashboard left open across midnight
     // must log water against the new day, not the render-time `today`.
-    const today = dateKey()
-    addLocalWater(today, 250)
+    const day = dateKey()
     setWaterTotal((prev) => prev + 250)
     notifyWaterLogged()
     toast.success('+250 ml vatten loggat')
+    // Write-through: servern är auktoritativ källa (Hem/Kost/Analys läser den),
+    // localStorage speglas för synkrona läsare som vattenmålet (goalTracker).
+    // Ingen läsare summerar båda, så ingen dubbelräkning. Tidigare skrevs bara
+    // localStorage här, vilket divergerade mot Kost/Vatten-sidan.
+    addLocalWater(day, 250)
+    try {
+      await nutritionApi.addWater(day, 250)
+    } catch {
+      // Offline: den lokala spegeln räcker tills nästa online-läsning.
+    }
   }
 
   return (

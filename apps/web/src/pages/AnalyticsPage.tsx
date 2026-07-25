@@ -324,12 +324,21 @@ export function AnalyticsPage() {
   const [showWeightInput, setShowWeightInput] = useState(false)
 
   const today = dateKey()
-  const waterToday = getLocalWater(today).total_ml
-  const waterDays = getLocalWaterSummary(
-    (() => { const d = new Date(); d.setDate(d.getDate() - 6); return dateKey(d) })(),
-    today
-  ).days
+  const waterFrom = (() => { const d = new Date(); d.setDate(d.getDate() - 6); return dateKey(d) })()
+  // Vatten läses från servern (samma källa som Hem/Kost) med lokal fallback,
+  // annars visar Analys en egen localStorage-siffra som divergerar.
+  const [waterToday, setWaterToday] = useState(() => getLocalWater(today).total_ml)
+  const [waterDays, setWaterDays] = useState(() => getLocalWaterSummary(waterFrom, today).days)
   const last7 = last7Dates()
+
+  useEffect(() => {
+    nutritionApi.getWater(today).then((w) => setWaterToday(w.total_ml)).catch(() => {})
+    nutritionApi
+      .getWaterSummary(waterFrom, today)
+      .then((r) => setWaterDays(r.days))
+      .catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [today])
 
   // Sync weight/measurement history with the server, then refresh the chart.
   useEffect(() => {
