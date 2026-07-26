@@ -186,8 +186,8 @@ function WeeklyReport({ weeklyDone, weeklyTotal }: { weeklyDone: number; weeklyT
           {weeklyTotal > 0 && <p className="text-[9px] text-forest-600 font-medium">{pct}%</p>}
         </div>
         <div>
-          <p className="text-xl font-bold text-stone-900">{totalVolume > 0 ? Math.round(totalVolume / 1000 * 10) / 10 : 0}</p>
-          <p className="text-[10px] text-stone-400">ton lyft</p>
+          <p className="text-xl font-bold text-stone-900">{Math.round(totalVolume).toLocaleString('sv-SE')}</p>
+          <p className="text-[10px] text-stone-400">kg lyft</p>
         </div>
         <div>
           <p className="text-xl font-bold text-stone-900">{avgTime}</p>
