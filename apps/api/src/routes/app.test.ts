@@ -88,15 +88,16 @@ describe('server-side paywall (requireAccess)', () => {
   })
 })
 
-describe('isUserPremium fail-open on transient DB error', () => {
+describe('isUserPremium fail-closed on persistent DB error (no cache)', () => {
   afterEach(() => {
     vi.restoreAllMocks()
   })
 
-  // Autentiserad användare med utgången provperiod, men subscriptions-läsningen
-  // ger ett DB-fel (500). Fail-open ska ge åtkomst i stället för att låsa ute en
-  // potentiellt betalande användare med 402.
-  it('grants access (not 402) when the subscription read keeps failing', async () => {
+  // Autentiserad användare med utgången provperiod där subscriptions-läsningen
+  // (och retry) ger ett DB-fel (500) och ingen KV-cache finns. Ett läsfel får
+  // ALDRIG blankt ge premium (betalväggsbypass) — utan senast känt värde ska
+  // åtkomst NEKAS (402), inte beviljas.
+  it('denies access (402) when the subscription read keeps failing and no cache exists', async () => {
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
       const url = String(input)
       if (url.includes('/auth/v1/user')) {
@@ -110,7 +111,7 @@ describe('isUserPremium fail-open on transient DB error', () => {
           { status: 200, headers: { 'Content-Type': 'application/json' } }
         )
       }
-      // Subscriptions-läsningen (och retry) misslyckas → isUserPremium fail-open.
+      // Subscriptions-läsningen (och retry) misslyckas → fail-closed (ingen KV).
       if (url.includes('/subscriptions')) {
         return new Response('db down', { status: 500 })
       }
@@ -118,8 +119,9 @@ describe('isUserPremium fail-open on transient DB error', () => {
     })
 
     const res = await app.request('/plan/list', { headers: { Authorization: 'Bearer token' } }, mockEnv)
-    expect(res.status).not.toBe(402)
-    expect(res.status).toBe(200)
+    expect(res.status).toBe(402)
+    const body = (await res.json()) as { code?: string }
+    expect(body.code).toBe('premium_required')
   })
 })
 
@@ -176,6 +178,55 @@ describe('profile protein_goal', () => {
     expect(res.status).toBe(200)
     expect(insertedBody).not.toBeNull()
     expect((insertedBody as Record<string, unknown> | null)?.protein_goal).toBe(180)
+  })
+
+  it('accepts an onboarding POST that omits protein_goal and calorie_goal', async () => {
+    let insertedBody: Record<string, unknown> | null = null
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input)
+      if (url.includes('/auth/v1/user')) {
+        return new Response(
+          JSON.stringify({
+            id: 'user-4',
+            email: 'newuser@example.com',
+            created_at: '2020-01-01T00:00:00Z',
+            email_confirmed_at: '2020-01-01T00:00:00Z',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      if (url.includes('/fitness_profile') && init?.method === 'POST') {
+        insertedBody = JSON.parse(String(init.body)) as Record<string, unknown>
+        return new Response(JSON.stringify([insertedBody]), {
+          status: 201,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      }
+      return new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } })
+    })
+
+    const res = await app.request(
+      '/profile',
+      {
+        method: 'POST',
+        headers: { Authorization: 'Bearer token', 'Content-Type': 'application/json' },
+        // Onboarding-payloaden utelämnar protein_goal (och calorie_goal) helt.
+        body: JSON.stringify({
+          goal: 'lose_weight',
+          level: 'beginner',
+          equipment: ['bodyweight'],
+          days_per_week: 3,
+          allergies: [],
+          age: 25,
+          weight_kg: 70,
+          height_cm: 175,
+        }),
+      },
+      mockEnv
+    )
+    expect(res.status).toBe(200)
+    expect(insertedBody).not.toBeNull()
+    expect((insertedBody as Record<string, unknown> | null)).not.toHaveProperty('protein_goal')
   })
 
   it('rejects a non-positive protein_goal with 400', async () => {

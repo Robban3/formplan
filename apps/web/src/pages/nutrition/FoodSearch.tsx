@@ -123,7 +123,8 @@ export function FoodSearch() {
 
   async function handleAdd() {
     if (!selected || !amount) return
-    const g = parseFloat(amount)
+    // Normalize a Swedish decimal comma before parsing (like CreateMealPage).
+    const g = parseFloat(amount.replace(',', '.'))
     if (isNaN(g) || g <= 0) return
     setAdding(true)
     try {

@@ -1,8 +1,10 @@
 import { measurementsApi, type ServerMeasurement } from './measurementsApi'
+import { getMeasurements } from './measurementStore'
 import { dateKey } from './derive'
 
 const KEY = 'formplan_weight_log'
 const TOMBSTONE_KEY = 'formplan_weight_tombstones'
+const WEIGHT_FROM_MEASUREMENTS_FLAG = 'formplan_weight_from_measurements_v1'
 
 export interface WeightEntry {
   id: string
@@ -48,6 +50,35 @@ function isWeightRow(m: ServerMeasurement): boolean {
 
 export function getWeightEntries(): WeightEntry[] {
   return load().sort((a, b) => a.date.localeCompare(b.date))
+}
+
+/**
+ * One-time local migration (no network) for legacy users whose weight was only
+ * ever stored on girth rows in `measurementStore` (before weight moved to its
+ * own store). Copies each such `weight_kg` into weightStore so it shows in the
+ * Measurements trend/history immediately, without waiting for a server
+ * round-trip. Existing weight entries and locally deleted dates (tombstones)
+ * are respected, so it never overwrites or resurrects anything. Idempotent via
+ * a persisted flag.
+ */
+export function migrateWeightFromMeasurements(): void {
+  try {
+    if (localStorage.getItem(WEIGHT_FROM_MEASUREMENTS_FLAG)) return
+    const entries = load()
+    const tombstones = loadTombstones()
+    const have = new Set(entries.map((e) => e.date))
+    const added: WeightEntry[] = []
+    for (const m of getMeasurements()) {
+      if (typeof m.weight_kg !== 'number') continue
+      if (have.has(m.date) || tombstones.has(m.date)) continue
+      have.add(m.date)
+      added.push({ id: crypto.randomUUID(), date: m.date, weight_kg: m.weight_kg })
+    }
+    if (added.length > 0) save([...entries, ...added])
+    localStorage.setItem(WEIGHT_FROM_MEASUREMENTS_FLAG, '1')
+  } catch {
+    /* storage blocked — retry on next launch */
+  }
 }
 
 export function addWeightEntry(weight_kg: number): WeightEntry {

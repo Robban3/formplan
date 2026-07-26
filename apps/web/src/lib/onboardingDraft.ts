@@ -7,6 +7,7 @@ export interface OnboardingForm {
   days_per_week: number
   allergies: string[]
   calorie_goal: number | null
+  protein_goal: number | null
   age: number | null
   weight_kg: number | null
   height_cm: number | null
@@ -26,6 +27,7 @@ export const EMPTY_ONBOARDING_FORM: OnboardingForm = {
   days_per_week: 3,
   allergies: [],
   calorie_goal: null,
+  protein_goal: null,
   age: null,
   weight_kg: null,
   height_cm: null,
@@ -62,6 +64,7 @@ export function profileToForm(profile: Record<string, unknown>): OnboardingForm 
     days_per_week: Number(profile.days_per_week) || 3,
     allergies: Array.isArray(profile.allergies) ? (profile.allergies as string[]) : [],
     calorie_goal: profile.calorie_goal != null ? Number(profile.calorie_goal) : null,
+    protein_goal: profile.protein_goal != null ? Number(profile.protein_goal) : null,
     age: profile.age != null ? Number(profile.age) : null,
     weight_kg: profile.weight_kg != null ? Number(profile.weight_kg) : null,
     height_cm: profile.height_cm != null ? Number(profile.height_cm) : null,

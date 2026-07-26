@@ -9,6 +9,7 @@ import {
 } from '../lib/email'
 import { supabaseAdmin } from '../lib/supabase'
 import { timingSafeEqual } from '../lib/timingSafe'
+import { rateLimit } from '../lib/rateLimit'
 
 export const emailRouter = new Hono<AppContext>()
 
@@ -52,7 +53,7 @@ emailRouter.post('/webhook/new-user', async (c) => {
  * POST /email/welcome
  * Skickas automatiskt när en ny användare skapas (kallas från Supabase webhook eller manuellt).
  */
-emailRouter.post('/welcome', requireAuth, async (c) => {
+emailRouter.post('/welcome', requireAuth, rateLimit('email-welcome', 3), async (c) => {
   const user = c.get('user')
   const name = (user.user_metadata?.full_name as string) ?? user.email?.split('@')[0] ?? ''
 
@@ -70,7 +71,7 @@ emailRouter.post('/welcome', requireAuth, async (c) => {
  * Veckorapport — kan triggas av en cron-job i Cloudflare Workers.
  * Body: { user_id?: string }  (admin kan ange specifik användare)
  */
-emailRouter.post('/progress', requireAuth, async (c) => {
+emailRouter.post('/progress', requireAuth, rateLimit('email-progress', 3), async (c) => {
   const user = c.get('user')
   const db = supabaseAdmin(c.env)
 

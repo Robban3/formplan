@@ -29,6 +29,10 @@ planRouter.post(
     const user = c.get('user')
     const db = supabaseAdmin(c.env)
 
+    // /generate är den dyraste AI-operationen: ett okänt/felat premium-tillstånd
+    // ska behandlas som INTE premium (fail closed). isUserPremium returnerar
+    // aldrig blankt true vid läsfel (senast känt värde eller false), så en
+    // falsk träff kan inte låsa upp obegränsad plangenerering under en störning.
     const premium = await isUserPremium(user.sub, c.env)
 
     // Free tier: allow only 1 plan ever

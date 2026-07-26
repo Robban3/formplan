@@ -86,6 +86,16 @@ export const workoutStore = {
     persist(null)
     _listeners.forEach((l) => l())
   },
+  /**
+   * Hard-clear the in-memory state (and its sessionStorage mirror). Used by the
+   * account-switch purge — clearing storage alone would leave this module's
+   * `_state` (read at module-eval) pointing at the previous user's workout.
+   */
+  reset() {
+    _state = null
+    persist(null)
+    _listeners.forEach((l) => l())
+  },
   subscribe(listener: () => void) {
     _listeners.add(listener)
     return () => _listeners.delete(listener)

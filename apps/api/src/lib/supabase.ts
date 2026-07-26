@@ -66,28 +66,53 @@ export async function verifyJwt(token: string, env: Env): Promise<JwtPayload | n
 // INTE åtkomst även om premium_until råkar ligga i framtiden.
 const PREMIUM_STATUSES = new Set(['active', 'trialing'])
 
+// Senast kända premium-status cachas ~30 min i KV. Räcker för att hålla nyligen
+// aktiva betalare upplåsta genom en kortvarig Supabase-störning, utan att ge
+// gratisåtkomst till konton som aldrig varit premium.
+const PREMIUM_CACHE_TTL_S = 30 * 60
+
 export async function isUserPremium(userId: string, env: Env): Promise<boolean> {
   const db = supabaseAdmin(env)
   const path = `/subscriptions?user_id=eq.${userId}&select=premium_until,status&limit=1`
   const read = () =>
     db.query<{ premium_until: string; status: string | null }[]>(path)
+  const kv = env.RATE_LIMIT_KV
+  const cacheKey = `premium_cache:${userId}`
 
-  // Ett läsfel får INTE nekas — en betalande användare skulle då få 402 vid en
-  // tillfällig Supabase-glitch. Försök igen en gång och fail OPEN vid fortsatt
-  // fel (returnera true) så en övergående störning inte låser ute betalare.
-  // Ett normalt svar (ingen rad / utgången) ger fortfarande false.
+  // Ett läsfel får ALDRIG blankt ge premium (det vore en betalväggsbypass som
+  // dessutom självförstärker lasten under en störning). Försök igen en gång
+  // efter en kort jitter-fördröjning; håller felet i sig används senast kända
+  // värde från KV om det finns, annars fail CLOSED (false).
   let { data, error } = await read()
   if (error) {
     console.error('isUserPremium: subscription-läsning misslyckades, försöker igen:', error)
+    await new Promise((r) => setTimeout(r, 50 + Math.floor(Math.random() * 100)))
     ;({ data, error } = await read())
     if (error) {
-      console.error('isUserPremium: läsning misslyckades igen — fail-open (ger åtkomst):', error)
-      return true
+      console.error('isUserPremium: läsning misslyckades igen — cache/fail-closed:', error)
+      if (kv) {
+        const cached = await kv.get(cacheKey)
+        if (cached != null) return cached === '1'
+      }
+      return false
     }
   }
 
   const row = data?.[0]
-  if (!row) return false
-  if (!row.status || !PREMIUM_STATUSES.has(row.status)) return false
-  return new Date(row.premium_until) > new Date()
+  const premium =
+    !!row &&
+    !!row.status &&
+    PREMIUM_STATUSES.has(row.status) &&
+    new Date(row.premium_until) > new Date()
+
+  // Lyckad läsning → uppdatera senast-känt-värde i KV (om KV finns).
+  if (kv) {
+    try {
+      await kv.put(cacheKey, premium ? '1' : '0', { expirationTtl: PREMIUM_CACHE_TTL_S })
+    } catch (e) {
+      console.error('isUserPremium: kunde inte skriva premium-cache:', e)
+    }
+  }
+
+  return premium
 }

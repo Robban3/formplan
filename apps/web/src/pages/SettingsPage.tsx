@@ -189,6 +189,10 @@ export function SettingsPage() {
   // Cache of the server profile so goal edits merge into it rather than wiping
   // the rest of the profile. Kept in a ref — it's not rendered directly.
   const profileRef = useRef<Record<string, unknown>>({})
+  // Whether the server profile has been loaded into profileRef. Until then a
+  // save would POST an incomplete `{}` profile and 400 (silently dropping the
+  // override), so saveGoalToProfile fetches the full profile before writing.
+  const hydratedRef = useRef(false)
 
   // Hydrate the effective calorie/protein goals from the server profile so the
   // Settings screen shows the value the app (Home/Diary) actually applies.
@@ -198,6 +202,7 @@ export function SettingsPage() {
       if (cancelled) return
       if (profile && typeof profile === 'object') {
         profileRef.current = { ...(profile as Record<string, unknown>) }
+        hydratedRef.current = true
         const p = profile as { calorie_goal?: number | null; protein_goal?: number | null }
         if (typeof p.calorie_goal === 'number') settingsStore.set('calorie_goal', p.calorie_goal)
         if (typeof p.protein_goal === 'number') settingsStore.set('protein_goal_g', p.protein_goal)
@@ -206,11 +211,24 @@ export function SettingsPage() {
     return () => { cancelled = true }
   }, [])
 
-  // Persist a goal override to the server profile (best-effort). Explicit
-  // non-null calorie_goal/protein_goal are treated as overrides by the API.
-  function saveGoalToProfile(patch: { calorie_goal?: number; protein_goal?: number }) {
-    profileRef.current = { ...profileRef.current, ...patch }
-    api.saveProfile(profileRef.current).catch(() => { /* best-effort */ })
+  // Persist a goal override to the server profile. Explicit non-null
+  // calorie_goal/protein_goal are treated as overrides by the API. Guards
+  // against writing before the profile has hydrated (which would 400 and drop
+  // the override) by fetch-merging the full profile first.
+  async function saveGoalToProfile(patch: { calorie_goal?: number; protein_goal?: number }) {
+    try {
+      if (!hydratedRef.current) {
+        const { profile } = await api.getProfile()
+        if (profile && typeof profile === 'object') {
+          profileRef.current = { ...(profile as Record<string, unknown>) }
+        }
+        hydratedRef.current = true
+      }
+      profileRef.current = { ...profileRef.current, ...patch }
+      await api.saveProfile(profileRef.current)
+    } catch {
+      toast.error('Kunde inte spara målet. Försök igen.')
+    }
   }
 
   return (

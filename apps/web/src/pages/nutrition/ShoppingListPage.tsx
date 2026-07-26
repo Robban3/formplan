@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronLeftIcon, ShoppingCartIcon, CheckIcon } from '../../components/ui/Icons'
 import { useSettings } from '../../hooks/useSettings'
 import type { DietFocus, MealCount } from '../../lib/mealPlanGenerator'
@@ -20,13 +20,29 @@ const FOCUS_OPTIONS: { key: DietFocus; label: string }[] = [
   { key: 'low_carb', label: 'Låg kolhydrat' },
 ]
 
+const VALID_FOCUS: DietFocus[] = ['balanced', 'high_protein', 'vegetarian', 'low_carb']
+
 export function ShoppingListPage() {
   const navigate = useNavigate()
   const settings = useSettings()
+  const [params] = useSearchParams()
 
-  const [focus, setFocus] = useState<DietFocus>('balanced')
-  const [mealCount, setMealCount] = useState<MealCount>(4)
+  // Initial focus/mealCount come from the MealPlanPage selection (query params)
+  // when present, so the list matches the day the user just generated.
+  const focusParam = params.get('focus') as DietFocus | null
+  const mealsParam = Number(params.get('meals'))
+  const kcalParam = Number(params.get('kcal'))
+
+  const [focus, setFocus] = useState<DietFocus>(
+    focusParam && VALID_FOCUS.includes(focusParam) ? focusParam : 'balanced'
+  )
+  const [mealCount, setMealCount] = useState<MealCount>(
+    [3, 4, 5].includes(mealsParam) ? (mealsParam as MealCount) : 4
+  )
   const [seed, setSeed] = useState(0)
+
+  // Use the passed calorie target when valid, otherwise the app's goal.
+  const kcal = kcalParam > 0 ? kcalParam : settings.calorie_goal
 
   // A saved week plan is the source of truth — the list must contain the foods
   // the user actually planned. Generated defaults are only a fallback.
@@ -36,8 +52,8 @@ export function ShoppingListPage() {
   // Recompute whenever inputs change; seed forces a fresh list on "regenerate".
   const categories = useMemo(
     () =>
-      planCategories ?? buildWeeklyShoppingList(settings.calorie_goal, focus, mealCount, 7, seed),
-    [planCategories, settings.calorie_goal, focus, mealCount, seed]
+      planCategories ?? buildWeeklyShoppingList(kcal, focus, mealCount, 7, seed),
+    [planCategories, kcal, focus, mealCount, seed]
   )
 
   // Checked state is keyed by the list's content — a new list resets it.

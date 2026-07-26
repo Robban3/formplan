@@ -400,8 +400,11 @@ export function ActiveWorkout() {
     finishingRef.current = true
 
     // Derive the final duration from wall-clock time (minus paused spans) so an
-    // offline-logged / reloaded session keeps an accurate duration.
-    const finalElapsed = computeElapsedSeconds(snapshot)
+    // offline-logged / reloaded session keeps an accurate duration. Clamp to a
+    // sane max (4 h) so a workout left open for hours without pausing can't save
+    // an inflated wall-clock duration that skews weekly stats/email.
+    const MAX_WORKOUT_SECONDS = 4 * 60 * 60
+    const finalElapsed = Math.min(computeElapsedSeconds(snapshot), MAX_WORKOUT_SECONDS)
 
     const input = {
       plan_day_id: snapshot.planDayId,

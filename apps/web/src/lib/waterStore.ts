@@ -72,7 +72,9 @@ async function doFlushLocalWater(): Promise<void> {
   const pending = loadAll().filter((e) => e.id.startsWith('local-'))
   for (const e of pending) {
     try {
-      const { entry } = await nutritionApi.addWater(e.date, e.amount_ml)
+      // Pass the local id as an idempotency key so a re-flush after a lost
+      // response can't create a duplicate water row on the server.
+      const { entry } = await nutritionApi.addWater(e.date, e.amount_ml, e.id)
       // Replace the local- row with the server row (guards against double-send:
       // the entry no longer starts with `local-`, so a later flush skips it).
       saveAll([...loadAll().filter((x) => x.id !== e.id), entry])

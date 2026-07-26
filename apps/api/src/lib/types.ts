@@ -180,6 +180,8 @@ export interface WaterLogRow {
   log_date: string
   amount_ml: number
   logged_at: string
+  // Klientens lokala post-id för idempotent offline-flush (valfritt).
+  client_id?: string | null
 }
 
 export interface DailyGoals {

@@ -6,9 +6,34 @@ import { requireAuth } from '../middleware/auth'
 import { supabaseAdmin } from '../lib/supabase'
 import { validationHook } from '../lib/validation'
 import { PRICE_SEK_ORE, resolveAccess } from '../lib/access'
-import type { AppContext } from '../lib/types'
+import type { AppContext, Env } from '../lib/types'
 
 export const billingRouter = new Hono<AppContext>()
+
+// Stripe success/cancel/return-URL:er byggs från klientens origin. En godtycklig
+// .url() räcker inte — en angripare kan då skicka en egen origin och få en giltig
+// Stripe-länk som pekar tillbaka mot sin egen sida (open redirect / phishing).
+// Tillåt bara kända origins; annars falla tillbaka på standarddomänen.
+const DEFAULT_ORIGIN = 'https://app.formplan.app'
+const ALLOWED_ORIGINS = new Set(['https://app.formplan.app', 'https://formplan.app'])
+
+function safeOrigin(origin: string | undefined, env: Env): string {
+  if (!origin) return DEFAULT_ORIGIN
+  try {
+    const u = new URL(origin)
+    if (ALLOWED_ORIGINS.has(u.origin)) return u.origin
+    // Localhost tillåts bara utanför produktion (lokal utveckling).
+    if (
+      env.ENVIRONMENT !== 'production' &&
+      (u.hostname === 'localhost' || u.hostname === '127.0.0.1')
+    ) {
+      return u.origin
+    }
+  } catch {
+    // Ogiltig URL → standarddomän.
+  }
+  return DEFAULT_ORIGIN
+}
 
 billingRouter.use('*', requireAuth)
 
@@ -26,7 +51,7 @@ billingRouter.post(
   async (c) => {
     const user = c.get('user')
     const { origin } = c.req.valid('json')
-    const base = origin ?? 'https://app.formplan.app'
+    const base = safeOrigin(origin, c.env)
 
     if (!c.env.STRIPE_SECRET_KEY) {
       return c.json({ error: 'Betalning är inte tillgänglig just nu. Försök igen senare.' }, 503)
@@ -81,7 +106,7 @@ billingRouter.post(
   async (c) => {
     const user = c.get('user')
     const { origin } = c.req.valid('json')
-    const base = origin ?? 'https://app.formplan.app'
+    const base = safeOrigin(origin, c.env)
 
     if (!c.env.STRIPE_SECRET_KEY) {
       return c.json({ error: 'Betalning är inte tillgänglig just nu. Försök igen senare.' }, 503)

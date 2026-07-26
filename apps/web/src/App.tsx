@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useAuth } from './hooks/useAuth'
+import { useAuth, whenAuthReconciled } from './hooks/useAuth'
 import { AuthPage } from './pages/AuthPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { TabLayout } from './components/TabLayout'
@@ -19,7 +19,11 @@ export default function App() {
   useNotificationScheduler()
   useSessionsSync()
   // Push any water logged offline to the server on app start (flush-on-reconnect).
-  useEffect(() => { flushLocalWater().catch(() => {}) }, [])
+  // Wait for the session to be reconciled first, so a pending offline row from a
+  // previous account can't be POSTed before the uid-guard purge clears it.
+  useEffect(() => {
+    whenAuthReconciled.then(() => flushLocalWater()).catch(() => {})
+  }, [])
 
   if (loading) {
     return (

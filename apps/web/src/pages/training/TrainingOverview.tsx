@@ -4,7 +4,7 @@ import { api } from '../../lib/api'
 import { deriveDifficulty } from '../../lib/derive'
 import { useWeeklySessions } from '../../contexts/WeeklySessionsContext'
 import { toast } from '../../lib/toast'
-import { toastIfNotNetwork } from '../../lib/errors'
+import { toastIfNotNetwork, isNetworkError } from '../../lib/errors'
 import { PlusIcon, DumbbellIcon, PlayIcon } from '../../components/ui/Icons'
 import { WorkoutHero } from '../../components/training/WorkoutHero'
 import { useWorkoutStore } from '../../hooks/useWorkoutStore'
@@ -94,19 +94,40 @@ export function TrainingOverview() {
     try {
       const { plan_id } = await api.generatePlan()
       sessionStorage.setItem('formplan_plan_id', plan_id)
-      // poll until ready
+      // Poll until ready with a gentle backoff (2s → 6s). AI generation can take
+      // well over 40s, so we allow up to ~40 checks (~3 min) before giving up.
       let attempts = 0
-      while (attempts < 20) {
-        await new Promise((r) => setTimeout(r, 2000))
-        const { plan, days } = await api.getPlan(plan_id)
-        const p = plan as Plan
-        if (p.status === 'ready') {
-          setPlan(p)
-          setDays((days as WorkoutDay[]).filter((d) => d.type === 'workout'))
-          break
+      let ready = false
+      let errored = false
+      while (attempts < 40) {
+        const delay = Math.min(2000 + attempts * 500, 6000)
+        await new Promise((r) => setTimeout(r, delay))
+        try {
+          const { plan, days } = await api.getPlan(plan_id)
+          const p = plan as Plan
+          if (p.status === 'ready') {
+            setPlan(p)
+            setDays((days as WorkoutDay[]).filter((d) => d.type === 'workout'))
+            ready = true
+            break
+          }
+          if (p.status === 'error') {
+            errored = true
+            break
+          }
+        } catch (e) {
+          // Transient network blip while polling — keep trying. Re-throw a real
+          // API error so the outer catch reports it.
+          if (!isNetworkError(e)) throw e
         }
-        if (p.status === 'error') break
         attempts++
+      }
+      if (errored) {
+        toast.error('Något gick fel när schemat skulle skapas. Försök igen.')
+      } else if (!ready) {
+        // Timed out, but the plan is still being generated server-side. Keep the
+        // stored plan_id so the next mount picks it up when it's ready.
+        toast.info('Schemat tar längre tid än vanligt. Det visas här så snart det är klart.')
       }
     } catch (e) {
       toastIfNotNetwork(e, toast.error)

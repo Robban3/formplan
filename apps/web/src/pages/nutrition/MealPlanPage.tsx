@@ -255,9 +255,14 @@ export function MealPlanPage() {
               Generera nytt förslag
             </button>
 
-            {/* Shopping list */}
+            {/* Shopping list — carry the chosen kcal/focus/mealCount so the list
+                matches the day the user just generated. */}
             <button
-              onClick={() => navigate('/kost/inkopslista')}
+              onClick={() =>
+                navigate(
+                  `/kost/inkopslista?kcal=${clampedKcal()}&focus=${focus}&meals=${mealCount}`
+                )
+              }
               className="w-full py-3 bg-stone-100 rounded-2xl text-sm text-stone-700 font-semibold flex items-center justify-center gap-2 hover:bg-stone-200 transition-colors"
             >
               <ShoppingCartIcon className="w-4 h-4 stroke-stone-600" />

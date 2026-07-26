@@ -132,12 +132,22 @@ create table if not exists water_log (
   user_id    uuid not null references auth.users(id) on delete cascade,
   log_date   date not null,
   amount_ml  int not null check (amount_ml > 0),
-  logged_at  timestamptz not null default now()
+  logged_at  timestamptz not null default now(),
+  -- Klientens lokala post-id för idempotent offline-flush (valfritt).
+  client_id  text
 );
+
+-- Idempotent: lägg till kolumnen i befintliga databaser.
+alter table water_log add column if not exists client_id text;
 
 alter table water_log enable row level security;
 create policy "owner" on water_log using (auth.uid() = user_id);
 create index if not exists water_log_user_date_idx on water_log(user_id, log_date);
+-- Idempotent offline-flush: en re-POST med samma client_id blir en no-op (merge)
+-- i stället för en dubblettrad. Partiellt så inserts utan client_id är obegränsade.
+create unique index if not exists water_log_client_idx
+  on water_log(user_id, client_id)
+  where client_id is not null;
 
 -- Workout sessions (completed/partial training logs)
 create table if not exists workout_session (

@@ -79,7 +79,9 @@ async function resolveDailyGoals(
 // PostgREST-fråga trunkeras tyst om projektet har db-max-rows satt → för låga
 // totaler utan fel. Paginera med offset/limit och gå vidare så länge en sida
 // gav rader (offset flyttas fram med det faktiska antalet, så det fungerar även
-// om db-max-rows är lägre än vår begärda sidstorlek).
+// om db-max-rows är lägre än vår begärda sidstorlek). OBS: basePath MÅSTE ha en
+// stabil &order (t.ex. log_date.asc,id.asc) — utan deterministisk sortering kan
+// offset-paginering duplicera eller tappa rader vid sidgränserna.
 const SUMMARY_PAGE_SIZE = 1000
 async function fetchAllRows<T>(
   db: ReturnType<typeof supabaseAdmin>,
@@ -329,7 +331,7 @@ nutritionRouter.get('/water/summary', async (c) => {
 
   const { data, error } = await fetchAllRows<Pick<WaterLogRow, 'log_date' | 'amount_ml'>>(
     db,
-    `/water_log?user_id=eq.${user.sub}&log_date=gte.${encodeURIComponent(from)}&log_date=lte.${encodeURIComponent(to)}&select=log_date,amount_ml`
+    `/water_log?user_id=eq.${user.sub}&log_date=gte.${encodeURIComponent(from)}&log_date=lte.${encodeURIComponent(to)}&select=log_date,amount_ml&order=log_date.asc,id.asc`
   )
   if (error) {
     console.error('water summary failed:', error)
@@ -369,17 +371,46 @@ nutritionRouter.get('/water', async (c) => {
 })
 
 // POST /nutrition/water
+// client_id (valfritt): klientens lokala post-id. Offline-flush är at-least-once
+// — ett tappat svar får klienten att re-POST:a. Med client_id blir en re-POST en
+// no-op (returnerar befintlig rad) via unikt index (user_id, client_id) +
+// on_conflict, så inga dubbletter uppstår. Utan client_id fungerar inserts som förr.
 nutritionRouter.post(
   '/water',
-  zValidator('json', z.object({ date: z.string().regex(DATE_RE), amount_ml: z.number().int().positive().max(10_000) }), validationHook),
+  zValidator(
+    'json',
+    z.object({
+      date: z.string().regex(DATE_RE),
+      amount_ml: z.number().int().positive().max(10_000),
+      client_id: z.string().min(1).max(64).optional(),
+    }),
+    validationHook
+  ),
   async (c) => {
     const user = c.get('user')
     const b = c.req.valid('json')
     const db = supabaseAdmin(c.env)
-    const { data, error } = await db.query<WaterLogRow[]>('/water_log', {
-      method: 'POST',
-      body: JSON.stringify({ user_id: user.sub, log_date: b.date, amount_ml: b.amount_ml }),
-    })
+
+    const row: Record<string, unknown> = {
+      user_id: user.sub,
+      log_date: b.date,
+      amount_ml: b.amount_ml,
+    }
+    let path = '/water_log'
+    let options: RequestInit = { method: 'POST', body: '' }
+    if (b.client_id) {
+      row.client_id = b.client_id
+      path = '/water_log?on_conflict=user_id,client_id'
+      options = {
+        method: 'POST',
+        body: JSON.stringify(row),
+        headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+      }
+    } else {
+      options.body = JSON.stringify(row)
+    }
+
+    const { data, error } = await db.query<WaterLogRow[]>(path, options)
     if (error || !data?.[0]) {
       console.error('add water log failed:', error)
       return c.json({ error: 'Kunde inte spara vattnet just nu. Försök igen.' }, 500)
@@ -424,7 +455,7 @@ nutritionRouter.get('/summary', async (c) => {
 
   const { data, error } = await fetchAllRows<Pick<FoodLogRow, 'log_date' | 'kcal' | 'protein_g' | 'fat_g' | 'carbs_g'>>(
     db,
-    `/food_log?user_id=eq.${user.sub}&log_date=gte.${encodeURIComponent(from)}&log_date=lte.${encodeURIComponent(to)}&select=log_date,kcal,protein_g,fat_g,carbs_g`
+    `/food_log?user_id=eq.${user.sub}&log_date=gte.${encodeURIComponent(from)}&log_date=lte.${encodeURIComponent(to)}&select=log_date,kcal,protein_g,fat_g,carbs_g&order=log_date.asc,id.asc`
   )
   if (error) {
     console.error('nutrition summary failed:', error)

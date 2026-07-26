@@ -5,6 +5,7 @@ import { getLocalSessions } from '../lib/workoutSessionStore'
 import { getWeightEntries } from '../lib/weightStore'
 import { getTrainingStreak } from '../lib/streakStore'
 import { request, ApiError } from '../lib/api'
+import { toast } from '../lib/toast'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -37,34 +38,14 @@ function buildContext(): string {
 }
 
 async function askCoach(messages: Message[]): Promise<string> {
-  try {
-    const { reply } = await request<{ reply: string }>('/ai/coach', {
-      method: 'POST',
-      body: JSON.stringify({ messages, context: buildContext() }),
-    })
-    return reply
-  } catch (e) {
-    // Premium-gate: don't fake an answer — the central toast already fired, so
-    // tell the user to upgrade.
-    if (e instanceof ApiError && e.status === 402) {
-      return 'AI-coachen är en Premium-funktion. Uppgradera under Mer → Premium för att fortsätta chatta.'
-    }
-    // Fallback: simple rule-based responses if backend endpoint doesn't exist
-    const lastMsg = messages[messages.length - 1]?.content.toLowerCase() ?? ''
-    if (lastMsg.includes('vila') || lastMsg.includes('rest')) {
-      return 'Generellt rekommenderas 48 timmar vila för samma muskelgrupp. Lyssna på din kropp — känner du dig fortfarande trött och öm, ta en extra vilodag. Aktiv återhämtning som promenader eller stretching kan hjälpa.'
-    }
-    if (lastMsg.includes('äta') || lastMsg.includes('mat') || lastMsg.includes('kost')) {
-      return 'Ät ett kolhydratrikt mellanmål 1–2 timmar innan träning, t.ex. havregryn eller banan. Protein är viktigt efter passet för muskelåterhämtning — sikta på 20–40g protein inom 2 timmar efter träning.'
-    }
-    if (lastMsg.includes('platå') || lastMsg.includes('fastnat') || lastMsg.includes('starkare')) {
-      return 'Platåer är normala! Prova periodisering: variera rep-intervall (t.ex. 3×5 en vecka, 4×8 nästa). Kontrollera att du sover tillräckligt (7–9 h), äter tillräckligt protein, och progressivt ökar belastningen. Ibland hjälper det med en deload-vecka med lägre vikt.'
-    }
-    if (lastMsg.includes('för hårt') || lastMsg.includes('överträning')) {
-      return 'Tecken på överträning: kronisk trötthet, minskad prestanda, humörsvängningar, sömnproblem och ökad skaderisk. Lösning: 1–2 veckors deload, prioritera sömn och kost. En bra tumregel: om du inte kan träna med samma entusiasm som vanligt, ta en extra vilodag.'
-    }
-    return 'Jag förstår din fråga! Tyvärr kan jag inte ge ett specifikt svar just nu, men generellt gäller: träna progressivt, återhämta dig ordentligt, ät varierat och lyssna på din kropp. Har du en mer specifik fråga om träning eller kost?'
-  }
+  // Trim to the last 20 turns before POSTing — the server caps history at 30 and
+  // rejects anything longer with a 400, which used to break the chat after ~15
+  // exchanges. Mirror the server's `history.slice(-20)`.
+  const { reply } = await request<{ reply: string }>('/ai/coach', {
+    method: 'POST',
+    body: JSON.stringify({ messages: messages.slice(-20), context: buildContext() }),
+  })
+  return reply
 }
 
 export function AiCoachPage() {
@@ -96,8 +77,22 @@ export function AiCoachPage() {
     try {
       const reply = await askCoach(newMessages)
       setMessages([...newMessages, { role: 'assistant', content: reply }])
-    } catch {
-      setMessages([...newMessages, { role: 'assistant', content: 'Något gick fel. Försök igen.' }])
+    } catch (e) {
+      // Premium-gate (402): keep the upgrade prompt as an assistant message.
+      if (e instanceof ApiError && e.status === 402) {
+        setMessages([
+          ...newMessages,
+          {
+            role: 'assistant',
+            content:
+              'AI-coachen är en Premium-funktion. Uppgradera under Mer → Premium för att fortsätta chatta.',
+          },
+        ])
+      } else {
+        // Any other failure: surface a real error instead of passing off a
+        // canned rule-based answer as an AI reply.
+        toast.error('AI-coachen är tillfälligt otillgänglig, försök igen om en stund')
+      }
     } finally {
       setLoading(false)
     }

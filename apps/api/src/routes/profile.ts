@@ -14,8 +14,12 @@ const profileSchema = z.object({
   equipment: z.array(z.string().min(1).max(60)).min(1).max(30),
   days_per_week: z.number().int().min(1).max(7),
   allergies: z.array(z.string().max(60)).max(30),
-  calorie_goal: z.number().int().positive().nullable(),
-  protein_goal: z.number().int().positive().nullable(),
+  // .optional().nullable(): onboarding utelämnar dessa nyare fält helt. Utan
+  // .optional() skulle en saknad nyckel ge 400 och blockera profil-/planskapande
+  // för nya användare. resolveDailyGoals behandlar frånvarande/null som "inget
+  // överstyrt mål".
+  calorie_goal: z.number().int().positive().optional().nullable(),
+  protein_goal: z.number().int().positive().optional().nullable(),
   age: z.number().int().min(13).max(120).nullable(),
   weight_kg: z.number().positive().nullable(),
   height_cm: z.number().positive().nullable(),

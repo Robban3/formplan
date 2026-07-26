@@ -29,10 +29,13 @@ export async function sendTrialReminders(env: Env): Promise<void> {
 
   const now = Date.now()
 
-  // GoTrue Admin paginerar (page 1-indexerad, per_page). Loopa tills en kort
-  // sida returneras så användare > 1000 inte tappas.
+  // GoTrue Admin paginerar (page 1-indexerad) men CAPAR per_page (ofta 50) och
+  // kan returnera FÄRRE än begärt per sida. Att bryta på "kortare sida än
+  // begärt" stoppar redan efter sida 1 och tappar resten — loopa i stället tills
+  // en TOM sida returneras, med ett hårt sidtak som skydd mot oändlig loop.
   const PER_PAGE = 1000
-  for (let page = 1; ; page++) {
+  const MAX_PAGES = 100
+  for (let page = 1; page <= MAX_PAGES; page++) {
     const usersRes = await fetch(
       `${env.SUPABASE_URL}/auth/v1/admin/users?page=${page}&per_page=${PER_PAGE}`,
       {
@@ -91,10 +94,8 @@ export async function sendTrialReminders(env: Env): Promise<void> {
         // Liten paus mellan varje mail för att inte överbelasta Resend.
         await new Promise((r) => setTimeout(r, 100))
       } catch (err) {
-        console.error(`Trial-påminnelse misslyckades för ${user.email}:`, err)
+        console.error(`Trial-påminnelse misslyckades för ${user.id}:`, err)
       }
     }
-
-    if (users.length < PER_PAGE) break
   }
 }

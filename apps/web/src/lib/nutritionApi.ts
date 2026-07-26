@@ -100,10 +100,15 @@ export const nutritionApi = {
   getWater: (date: string) =>
     request<{ entries: WaterEntry[]; total_ml: number }>(`/nutrition/water?date=${date}`),
 
-  addWater: (date: string, amount_ml: number) =>
+  /**
+   * `client_id` is an idempotency key (the local entry's id). When a re-flush
+   * happens after a lost response, the server dedupes on it so the water row is
+   * never created twice.
+   */
+  addWater: (date: string, amount_ml: number, client_id?: string) =>
     request<{ entry: WaterEntry }>('/nutrition/water', {
       method: 'POST',
-      body: JSON.stringify({ date, amount_ml }),
+      body: JSON.stringify({ date, amount_ml, ...(client_id ? { client_id } : {}) }),
     }),
 
   deleteWater: (id: string) =>

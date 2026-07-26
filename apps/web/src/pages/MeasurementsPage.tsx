@@ -7,7 +7,12 @@ import {
   deleteMeasurement,
   type BodyMeasurement,
 } from '../lib/measurementStore'
-import { getWeightEntries, addWeightEntry, deleteWeightEntry } from '../lib/weightStore'
+import {
+  getWeightEntries,
+  addWeightEntry,
+  deleteWeightEntry,
+  migrateWeightFromMeasurements,
+} from '../lib/weightStore'
 import { notifyWeightLogged } from '../lib/challengeEvents'
 import { initMeasurementsSync } from '../lib/measurementsSync'
 import { dateKey } from '../lib/derive'
@@ -72,7 +77,12 @@ function MiniLineChart({ values, color }: { values: number[]; color: string }) {
 
 export function MeasurementsPage() {
   const navigate = useNavigate()
-  const [entries, setEntries] = useState<BodyMeasurement[]>(buildEntries)
+  const [entries, setEntries] = useState<BodyMeasurement[]>(() => {
+    // Legacy weight (stored only on measurementStore rows) into weightStore
+    // before the first read, so it shows without a server round-trip.
+    migrateWeightFromMeasurements()
+    return buildEntries()
+  })
   const [adding, setAdding] = useState(false)
   const [form, setForm] = useState<Record<string, string>>({})
 
