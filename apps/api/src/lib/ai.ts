@@ -21,6 +21,11 @@ const FALLBACK_MODEL = 'claude-3-5-sonnet-latest'
 // Gemini har en gratis nivå och stödjer både vision och JSON-läge.
 const GEMINI_DEFAULT_MODEL = 'gemini-2.5-flash'
 
+// Hård timeout för plangenereringens AI-anrop. Körs i bakgrunden via waitUntil,
+// som kan vräkas utan att .catch hinner köra om providern hänger sig — timeouten
+// gör att ett stall garanterat avvisas så statusen sätts till "error".
+const PLAN_AI_TIMEOUT_MS = 60_000
+
 // ── Provider-neutral AI-abstraktion ─────────────────────────────────────────
 // Stödjer Anthropic (standard) och Google Gemini. Välj med env.AI_PROVIDER.
 // Båda normaliseras till { text, stopReason } så resten av koden är
@@ -43,6 +48,25 @@ interface AiRequest {
   json?: boolean
   /** 0–1; högre = mer variation/kreativitet. */
   temperature?: number
+  /**
+   * Hård timeout (ms) per HTTP-anrop mot providern. Utan detta kan en provider
+   * som hänger sig få bakgrundstasken (waitUntil) att vräkas UTAN att .catch
+   * körs → planens status fastnar på "generating" för alltid. Sätts för
+   * plangenerering; ett stall avbryts då och avvisas (rejectar).
+   */
+  timeoutMs?: number
+}
+
+// Skapar en AbortSignal som avbryter efter timeoutMs. done() rensar timern
+// (kör alltid i finally så vi inte läcker en pending timer per anrop).
+function withTimeout(timeoutMs: number | undefined): {
+  signal: AbortSignal | undefined
+  done: () => void
+} {
+  if (!timeoutMs) return { signal: undefined, done: () => {} }
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs)
+  return { signal: ctrl.signal, done: () => clearTimeout(timer) }
 }
 
 interface AiResult {
@@ -130,15 +154,23 @@ async function callAnthropic(req: AiRequest, env: Env): Promise<AiResult> {
   }
 
   let message: Anthropic.Message
+  const t1 = withTimeout(req.timeoutMs)
   try {
-    message = await client.messages.create(params)
+    message = await client.messages.create(params, { signal: t1.signal })
   } catch (err) {
     if (params.model === FALLBACK_MODEL) throw err
     const status = (err as { status?: number }).status
     console.warn(
       `Claude model "${params.model}" failed (status ${status ?? 'unknown'}); retrying on ${FALLBACK_MODEL}`
     )
-    message = await client.messages.create({ ...params, model: FALLBACK_MODEL })
+    const t2 = withTimeout(req.timeoutMs)
+    try {
+      message = await client.messages.create({ ...params, model: FALLBACK_MODEL }, { signal: t2.signal })
+    } finally {
+      t2.done()
+    }
+  } finally {
+    t1.done()
   }
 
   const text = message.content
@@ -188,14 +220,21 @@ async function callGemini(req: AiRequest, env: Env): Promise<AiResult> {
     },
   }
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-      body: JSON.stringify(body),
-    }
-  )
+  const { signal, done } = withTimeout(req.timeoutMs)
+  let res: Response
+  try {
+    res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+        body: JSON.stringify(body),
+        ...(signal ? { signal } : {}),
+      }
+    )
+  } finally {
+    done()
+  }
 
   const data = (await res.json()) as GeminiResponse
   if (!res.ok) {
@@ -286,6 +325,7 @@ export async function generatePlan(
       messages: [{ role: 'user', content: buildPrompt(profile) }],
       maxTokens: 8192,
       json: true,
+      timeoutMs: PLAN_AI_TIMEOUT_MS,
     },
     env
   )
@@ -328,11 +368,17 @@ export async function generatePlan(
     },
   ])
 
-  await db.query('/plan_day', {
+  // db.query kastar aldrig — den returnerar { error }. Utan denna koll skulle en
+  // misslyckad insert ändå markera planen "ready" med NOLL dagar (tyst tomt
+  // schema). Kasta i stället så det yttre .catch (routes/plan.ts) sätter "error".
+  const { error: insertErr } = await db.query('/plan_day', {
     method: 'POST',
     body: JSON.stringify(dayRows),
     headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
   })
+  if (insertErr) {
+    throw new Error(`Plan generation failed to save plan days: ${insertErr}`)
+  }
 
   await db.query(`/plan?id=eq.${planId}`, {
     method: 'PATCH',

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { billingApi, type BillingStatus } from '../lib/billingApi'
+import { flushLocalWater } from '../lib/waterStore'
+import { workoutApi } from '../lib/workoutApi'
 import { CheckIcon } from '../components/ui/Icons'
 
 const FEATURES = [
@@ -30,6 +32,10 @@ export function PaywallPage({ status }: { status: BillingStatus }) {
   }
 
   async function logout() {
+    // Flush pending offline data before signing out (same as MorePage) so a
+    // logout never discards unsynced water/session rows or local settings.
+    await flushLocalWater().catch(() => {})
+    await workoutApi.flushLocalSessions().catch(() => {})
     await supabase.auth.signOut()
     window.location.href = '/auth'
   }

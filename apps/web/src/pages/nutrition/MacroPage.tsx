@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { nutritionApi, type DailyGoals, type FoodLogEntry } from '../../lib/nutritionApi'
-import { dateKey } from '../../lib/derive'
+import { dateKey, defaultMacroGoals } from '../../lib/derive'
 import { MacroRing } from '../../components/nutrition/MacroRing'
 import { MacroBar } from '../../components/nutrition/MacroBar'
 import { ChevronLeftIcon } from '../../components/ui/Icons'
+import { useSettings } from '../../hooks/useSettings'
 
 type Tab = 'oversikt' | 'detaljer'
-
-const DEFAULT_GOALS: DailyGoals = { kcal: 2000, protein_g: 150, fat_g: 67, carbs_g: 250 }
 
 const SLOT_LABELS: Record<string, string> = {
   frukost: 'Frukost',
@@ -19,10 +18,15 @@ const SLOT_LABELS: Record<string, string> = {
 
 export function MacroPage() {
   const navigate = useNavigate()
+  const settings = useSettings()
   const today = dateKey()
   const [tab, setTab] = useState<Tab>('oversikt')
   const [entries, setEntries] = useState<FoodLogEntry[]>([])
-  const [goals, setGoals] = useState<DailyGoals>(DEFAULT_GOALS)
+  // Client fallback goals mirror the server split, preferring the user's own
+  // calorie/protein settings; replaced once the server daily-log loads.
+  const [goals, setGoals] = useState<DailyGoals>(() =>
+    defaultMacroGoals(settings.calorie_goal, settings.protein_goal_g)
+  )
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

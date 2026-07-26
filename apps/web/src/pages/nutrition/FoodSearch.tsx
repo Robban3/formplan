@@ -115,7 +115,7 @@ export function FoodSearch() {
       toast.success(`${meal.name} tillagd`)
       navigate(-1)
     } catch (e) {
-      toast.error((e as Error).message)
+      toast.error((e as Error).message ?? 'Något gick fel')
     } finally {
       setAdding(false)
     }
@@ -151,7 +151,7 @@ export function FoodSearch() {
       })
       navigate(-1)
     } catch (e) {
-      toast.error((e as Error).message)
+      toast.error((e as Error).message ?? 'Något gick fel')
     } finally {
       setAdding(false)
     }

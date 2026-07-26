@@ -16,6 +16,7 @@ import {
 import { notifyWeightLogged } from '../lib/challengeEvents'
 import { initMeasurementsSync } from '../lib/measurementsSync'
 import { dateKey } from '../lib/derive'
+import { formatKg } from '../lib/format'
 
 /**
  * Combined view: girth fields come from measurementStore, but the weight scalar
@@ -69,7 +70,7 @@ function MiniLineChart({ values, color }: { values: number[]; color: string }) {
         {values.map((v, i) => <circle key={i} cx={fx(i)} cy={fy(v)} r="2" fill={color} />)}
       </svg>
       <span className="text-[10px] font-semibold" style={{ color }}>
-        {sign}{change.toFixed(1)}
+        {sign}{formatKg(change)}
       </span>
     </div>
   )
@@ -88,9 +89,15 @@ export function MeasurementsPage() {
 
   function reload() { setEntries(buildEntries()) }
 
-  // Pull measurements from the server (other devices) and refresh the list.
+  // Pull measurements from the server (other devices), then re-run the legacy
+  // weight migration so combined weight+girth rows that only arrived via the
+  // server sync still reach weightStore (on a fresh device measurementStore was
+  // empty at mount, so the first migration attempt was a no-op).
   useEffect(() => {
-    initMeasurementsSync().then(reload)
+    initMeasurementsSync().then(() => {
+      migrateWeightFromMeasurements()
+      reload()
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -148,6 +155,7 @@ export function MeasurementsPage() {
           </div>
           <button
             onClick={() => setAdding(true)}
+            aria-label="Lägg till mätning"
             className="w-10 h-10 bg-forest-700 rounded-xl flex items-center justify-center"
           >
             <PlusIcon className="w-5 h-5 stroke-white" />
@@ -204,7 +212,7 @@ export function MeasurementsPage() {
                   <p className="text-xs text-stone-400 font-medium">{f.label}</p>
                   {latestVal && (
                     <p className="text-lg font-bold text-stone-900 mt-0.5">
-                      {latestVal.toFixed(1).replace('.', ',')} {f.unit}
+                      {formatKg(latestVal)} {f.unit}
                     </p>
                   )}
                   <div className="mt-2">
@@ -235,7 +243,7 @@ export function MeasurementsPage() {
                     return (
                       <span key={f.key} className="text-xs text-stone-500">
                         <span className="font-medium text-stone-700">{f.label}:</span>{' '}
-                        {val.toFixed(1).replace('.', ',')} {f.unit}
+                        {formatKg(val)} {f.unit}
                       </span>
                     )
                   })}

@@ -7,6 +7,7 @@ import { useLoadTimeout } from '../../hooks/useLoadTimeout'
 import { api } from '../../lib/api'
 import { nutritionApi, type FoodLogEntry, type MealSlot } from '../../lib/nutritionApi'
 import { dateKey, deriveDifficulty, isoWeekday } from '../../lib/derive'
+import { formatLiters } from '../../lib/format'
 import { loadActivePlan } from '../../lib/planLoader'
 import { useWeeklySessions } from '../../contexts/WeeklySessionsContext'
 import { getTrainingStreak } from '../../lib/streakStore'
@@ -367,7 +368,7 @@ export function HomePage() {
             />
             <StatCard
               label="Kvar idag"
-              value={Math.max(0, kcalGoal - Math.round(eatenKcal))}
+              value={Math.max(0, Math.round(kcalGoal - eatenKcal))}
               goal={kcalGoal}
               unit="kcal"
               onClick={() => navigate('/kost')}
@@ -491,9 +492,9 @@ export function HomePage() {
                 </button>
               </div>
               <p className="text-lg font-bold text-stone-900">
-                {(waterTotal / 1000).toLocaleString('sv-SE', { maximumFractionDigits: 1 })} L
+                {formatLiters(waterTotal)} L
               </p>
-              <p className="text-xs text-stone-400">av {settings.water_goal_ml / 1000} L</p>
+              <p className="text-xs text-stone-400">av {formatLiters(settings.water_goal_ml)} L</p>
               <div className="w-full bg-stone-100 rounded-full h-1.5 mt-2">
                 <div
                   className="bg-sky-500 h-1.5 rounded-full transition-all"

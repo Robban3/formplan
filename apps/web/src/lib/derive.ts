@@ -1,6 +1,34 @@
 // Pure helpers shared across pages. Kept dependency-free so they're easy to test.
 
+// Fallback weekly training goal when no active plan defines a workout-day count.
+// Shared so Home and Analytics show the same "pass denna vecka" denominator.
+export const DEFAULT_WEEKLY_GOAL = 5
+
 export type Difficulty = 'Lätt' | 'Medel' | 'Hög'
+
+export interface MacroGoals {
+  kcal: number
+  protein_g: number
+  fat_g: number
+  carbs_g: number
+}
+
+// Client-side fallback goals used before the server daily-log loads. Mirrors the
+// API's defaultGoals split (30% protein / 25% fat / 45% carbs) so an offline /
+// pre-load screen shows the same numbers the server will return. Prefers the
+// user's own calorie/protein settings where available.
+export function defaultMacroGoals(
+  calorieGoal?: number | null,
+  proteinGoal?: number | null
+): MacroGoals {
+  const kcal = calorieGoal && calorieGoal > 0 ? calorieGoal : 2000
+  return {
+    kcal,
+    protein_g: proteinGoal && proteinGoal > 0 ? proteinGoal : Math.round((kcal * 0.3) / 4),
+    fat_g: Math.round((kcal * 0.25) / 9),
+    carbs_g: Math.round((kcal * 0.45) / 4),
+  }
+}
 
 export interface WorkoutLike {
   duration_minutes: number

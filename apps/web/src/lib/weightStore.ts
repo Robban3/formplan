@@ -64,11 +64,18 @@ export function getWeightEntries(): WeightEntry[] {
 export function migrateWeightFromMeasurements(): void {
   try {
     if (localStorage.getItem(WEIGHT_FROM_MEASUREMENTS_FLAG)) return
+    const measurements = getMeasurements()
+    // Don't set the flag while measurementStore is still empty (e.g. a fresh
+    // device before the server sync populates it) — otherwise the flag would be
+    // set with nothing migrated, and legacy combined weight+girth rows that
+    // arrive later via the sync would never reach weightStore. We re-run this
+    // after initMeasurementsSync() resolves.
+    if (measurements.length === 0) return
     const entries = load()
     const tombstones = loadTombstones()
     const have = new Set(entries.map((e) => e.date))
     const added: WeightEntry[] = []
-    for (const m of getMeasurements()) {
+    for (const m of measurements) {
       if (typeof m.weight_kg !== 'number') continue
       if (have.has(m.date) || tombstones.has(m.date)) continue
       have.add(m.date)

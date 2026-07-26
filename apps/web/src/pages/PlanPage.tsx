@@ -55,6 +55,7 @@ export function PlanPage() {
   const [selected, setSelected] = useState(1)
   const [loading, setLoading] = useState(true)
   const [polling, setPolling] = useState(false)
+  const [timedOut, setTimedOut] = useState(false)
 
   const load = useCallback(async () => {
     if (!id) return
@@ -81,17 +82,29 @@ export function PlanPage() {
     load()
   }, [load])
 
-  // Poll while generating, with a gentle backoff (2s → 8s) instead of a tight loop.
+  // Poll while generating, with a gentle backoff (2s → 8s) instead of a tight
+  // loop, and a hard cap (~3 min) so a plan that never flips status doesn't spin
+  // forever. On timeout we show an escape screen (below) rather than stay stuck.
   useEffect(() => {
     if (!polling) return
     let cancelled = false
     let attempt = 0
+    let elapsed = 0
     let timer: ReturnType<typeof setTimeout>
+    const MAX_MS = 3 * 60 * 1000
     const tick = async () => {
       await load()
       if (cancelled) return
       attempt++
-      timer = setTimeout(tick, Math.min(2000 + attempt * 1000, 8000))
+      const delay = Math.min(2000 + attempt * 1000, 8000)
+      elapsed += delay
+      if (elapsed >= MAX_MS) {
+        setPolling(false)
+        setLoading(false)
+        setTimedOut(true)
+        return
+      }
+      timer = setTimeout(tick, delay)
     }
     timer = setTimeout(tick, 2000)
     return () => {
@@ -100,22 +113,49 @@ export function PlanPage() {
     }
   }, [polling, load])
 
-  if (loading || plan?.status === 'generating') {
+  // Timed out or the server reported an error: the plan may still be generating
+  // server-side, so the plan_id stays persisted and Träning picks it up when
+  // ready. Give the user a clear way out instead of an endless spinner.
+  if (timedOut || plan?.status === 'error') {
+    const isError = plan?.status === 'error'
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100">
-        <div className="w-10 h-10 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-slate-400">AI genererar ditt personliga schema...</p>
-        <p className="text-slate-600 text-sm">Det tar ungefär 15–30 sekunder</p>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100 px-6 text-center">
+        <p className={isError ? 'text-red-400' : 'text-slate-200'}>
+          {isError ? 'Något gick fel vid generering.' : 'Det tar längre tid än vanligt…'}
+        </p>
+        <p className="text-slate-500 text-sm max-w-xs">
+          {isError
+            ? 'Försök skapa schemat igen från Träning.'
+            : 'Ditt schema skapas fortfarande i bakgrunden och visas här så snart det är klart.'}
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={() => navigate('/traning')}
+            className="text-sm font-medium bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-xl transition-colors"
+          >
+            Öppna appen
+          </button>
+          <button onClick={() => navigate('/hem')} className="text-brand-400 hover:underline px-4 py-2">
+            Till startsidan
+          </button>
+        </div>
       </div>
     )
   }
 
-  if (plan?.status === 'error') {
+  if (loading || plan?.status === 'generating') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100">
-        <p className="text-red-400">Något gick fel vid generering.</p>
-        <button onClick={() => navigate('/')} className="text-brand-400 hover:underline">
-          Tillbaka
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100 px-6 text-center">
+        <div className="w-10 h-10 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-slate-400">AI genererar ditt personliga schema...</p>
+        <p className="text-slate-600 text-sm">Det tar ungefär 15–30 sekunder</p>
+        {/* Escape hatch so the user is never trapped on the spinner — the plan_id
+            is persisted, so Träning shows the schema when it's ready. */}
+        <button
+          onClick={() => navigate('/hem')}
+          className="mt-2 text-brand-400 hover:underline text-sm"
+        >
+          Öppna appen
         </button>
       </div>
     )

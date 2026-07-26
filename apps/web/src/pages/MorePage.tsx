@@ -5,6 +5,8 @@ import { api } from '../lib/api'
 import { billingApi, type BillingStatus } from '../lib/billingApi'
 import { toast } from '../lib/toast'
 import { clearLocalUserData } from '../lib/localData'
+import { flushLocalWater } from '../lib/waterStore'
+import { workoutApi } from '../lib/workoutApi'
 import {
   UserIcon,
   SettingsIcon,
@@ -68,6 +70,17 @@ export function MorePage() {
       toast.error('Kunde inte öppna prenumerationen')
       setBusy(false)
     }
+  }
+
+  async function logout() {
+    // Flush pending offline data first so a logout never discards unsynced
+    // water/session rows. Do NOT clearLocalUserData() on a plain logout — that
+    // would wipe local-only settings (auto_rest, water_goal_ml, imperial, …).
+    // The uid-guard in useAuth purges only when a DIFFERENT user signs in.
+    await flushLocalWater().catch(() => {})
+    await workoutApi.flushLocalSessions().catch(() => {})
+    await supabase.auth.signOut()
+    window.location.href = '/auth'
   }
 
   async function deleteAccount() {
@@ -149,7 +162,7 @@ export function MorePage() {
       </div>
 
       <button
-        onClick={async () => { clearLocalUserData(); await supabase.auth.signOut(); window.location.href = '/auth' }}
+        onClick={logout}
         className="w-full flex items-center justify-center gap-2 text-red-500 font-medium py-4 mt-4"
       >
         <LogOutIcon className="w-4 h-4 stroke-red-500" />

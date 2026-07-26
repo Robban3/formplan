@@ -184,6 +184,7 @@ export function AiCoachPage() {
           <button
             onClick={() => send()}
             disabled={!input.trim() || loading}
+            aria-label="Skicka"
             className="w-11 h-11 bg-forest-700 rounded-2xl flex items-center justify-center disabled:opacity-40 transition-opacity"
           >
             <SendIcon className="w-4 h-4 stroke-white" />

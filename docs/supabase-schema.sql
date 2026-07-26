@@ -144,10 +144,12 @@ alter table water_log enable row level security;
 create policy "owner" on water_log using (auth.uid() = user_id);
 create index if not exists water_log_user_date_idx on water_log(user_id, log_date);
 -- Idempotent offline-flush: en re-POST med samma client_id blir en no-op (merge)
--- i stället för en dubblettrad. Partiellt så inserts utan client_id är obegränsade.
+-- i stället för en dubblettrad. NON-partiellt (round 5): PostgREST kan inte skicka
+-- ett partiellt index predikat till ON CONFLICT, vilket gav 42P10 på varje
+-- client_id-insert. NULL är distinkt i ett unikt index, så inserts utan client_id
+-- förblir obegränsade. (Se docs/migrations/2026-07-24-round5.sql.)
 create unique index if not exists water_log_client_idx
-  on water_log(user_id, client_id)
-  where client_id is not null;
+  on water_log(user_id, client_id);
 
 -- Workout sessions (completed/partial training logs)
 create table if not exists workout_session (

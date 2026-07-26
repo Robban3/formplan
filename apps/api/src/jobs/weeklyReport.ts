@@ -2,12 +2,35 @@ import type { Env } from '../lib/types'
 import { supabaseAdmin } from '../lib/supabase'
 import { sendEmail, progressEmail } from '../lib/email'
 
+// ISO-8601 vecko-nyckel (t.ex. "2026-W30"). Används som dedup-markör per
+// användare och vecka så en re-körning inte dubblar veckoutskicket.
+function isoWeekKey(d: Date): string {
+  const date = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()))
+  // Torsdagen i innevarande vecka avgör vilket ISO-år veckan tillhör.
+  date.setUTCDate(date.getUTCDate() + 3 - ((date.getUTCDay() + 6) % 7))
+  const week1 = new Date(Date.UTC(date.getUTCFullYear(), 0, 4))
+  const weekNo =
+    1 +
+    Math.round(
+      ((date.getTime() - week1.getTime()) / 86_400_000 - 3 + ((week1.getUTCDay() + 6) % 7)) / 7
+    )
+  return `${date.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`
+}
+
 /**
  * Körs varje måndag kl 07:00 UTC via Cloudflare cron.
  * Hämtar alla användare och skickar veckorapport.
+ *
+ * Idempotens: finns env.RATE_LIMIT_KV sätts en markör per användare+vecka
+ * (weekly_report:<userId>:<isoVecka>, ~8 dygns TTL) efter ett lyckat utskick.
+ * Redan markerade användare hoppas över, så om GoTrue någonsin returnerade en
+ * upprepad sida (bara begränsat av MAX_PAGES) får ingen dubbla mejl. Saknas KV
+ * behålls nuvarande beteende.
  */
 export async function sendWeeklyReports(env: Env): Promise<void> {
   const db = supabaseAdmin(env)
+  const kv = env.RATE_LIMIT_KV
+  const weekKey = isoWeekKey(new Date())
 
   const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
@@ -42,7 +65,12 @@ export async function sendWeeklyReports(env: Env): Promise<void> {
     // Skicka rapport till varje användare (med liten fördröjning för att undvika rate limiting)
     for (const user of users) {
       if (!user.email) continue
+      const markerKey = `weekly_report:${user.id}:${weekKey}`
       try {
+        // Redan skickad denna vecka (persisterad markör) → hoppa så en re-körning
+        // (eller en upprepad GoTrue-sida) inte dubblar veckoutskicket.
+        if (kv && (await kv.get(markerKey))) continue
+
         // Hämta träningspass senaste 7 dagarna
         const { data: sessions } = await db.query<{ total_volume_kg: number; completed_at: string }[]>(
           `/workout_session?user_id=eq.${user.id}&completed_at=gte.${since}&select=total_volume_kg,completed_at`
@@ -107,6 +135,9 @@ export async function sendWeeklyReports(env: Env): Promise<void> {
             motivationalMessage: 'Din kontinuitet placerar dig bland de mest aktiva användarna. Grymt jobbat!',
           }),
         })
+
+        // Markera som skickad (~8 dygns TTL täcker veckan och lite drift).
+        if (kv) await kv.put(markerKey, '1', { expirationTtl: 8 * 86_400 })
 
         // Liten paus mellan varje mail för att inte överbelasta Resend
         await new Promise((r) => setTimeout(r, 100))

@@ -25,6 +25,8 @@ const profileSchema = z.object({
   height_cm: z.number().positive().nullable(),
 })
 
+// Medvetet endast requireAuth (INTE requireAccess): en paywallad användare måste
+// fortfarande kunna se/redigera sin grundprofil även utan aktiv provperiod/prenumeration.
 profileRouter.use('*', requireAuth)
 
 profileRouter.get('/', async (c) => {

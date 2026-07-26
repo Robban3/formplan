@@ -4,6 +4,7 @@ import { nutritionApi, type WaterEntry } from '../../lib/nutritionApi'
 import { getLocalWater, addLocalWater, flushLocalWater, hydrateLocalWater } from '../../lib/waterStore'
 import { notifyWaterLogged } from '../../lib/challengeEvents'
 import { dateKey } from '../../lib/derive'
+import { formatLiters } from '../../lib/format'
 import { toast } from '../../lib/toast'
 import { toastIfNotNetwork } from '../../lib/errors'
 import { CheckIcon, ChevronLeftIcon, DropletIcon, GlassWaterIcon } from '../../components/ui/Icons'
@@ -37,13 +38,9 @@ type WaterTab = 'idag' | 'vecka'
 
 const GOAL_HIT_KEY = (date: string) => `formplan_water_goal_hit_${date}`
 
-function formatLiters(ml: number) {
-  return `${(ml / 1000).toFixed(1).replace('.', ',')} L`
-}
-
 function celebrateWaterGoal(totalMl: number, goalMl: number) {
   toast.success(
-    `Mål uppnått! Du har druckit ${formatLiters(totalMl)} av ${formatLiters(goalMl)} idag.`,
+    `Mål uppnått! Du har druckit ${formatLiters(totalMl)} L av ${formatLiters(goalMl)} L idag.`,
     6000
   )
   navigator.vibrate?.([100, 50, 100])
@@ -197,9 +194,9 @@ export function WaterPage() {
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <DropletIcon className={`w-6 h-6 mb-1 ${goalReached ? 'stroke-forest-600' : 'stroke-sky-500'}`} />
                 <span className="text-2xl font-bold text-stone-900">
-                  {formatLiters(total)}
+                  {formatLiters(total)} L
                 </span>
-                <span className="text-sm text-stone-400">av {GOAL_ML / 1000} L</span>
+                <span className="text-sm text-stone-400">av {formatLiters(GOAL_ML)} L</span>
                 <span className={`text-sm font-semibold mt-0.5 ${goalReached ? 'text-forest-600' : 'text-sky-500'}`}>
                   ({Math.round(pct * 100)}%)
                 </span>
@@ -215,7 +212,7 @@ export function WaterPage() {
               <div>
                 <p className="font-semibold text-forest-800">Dagsmål uppnått!</p>
                 <p className="text-sm text-forest-600">
-                  Du har druckit {formatLiters(total)} idag — bra jobbat.
+                  Du har druckit {formatLiters(total)} L idag — bra jobbat.
                 </p>
               </div>
             </div>

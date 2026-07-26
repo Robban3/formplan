@@ -210,9 +210,10 @@ export function OnboardingPage() {
         settingsStore.set('calorie_goal', form.calorie_goal)
       }
 
-      clearOnboardingDraft()
-
+      // Clear the draft only AFTER generation succeeds — if generatePlan()
+      // throws, the user keeps their draft instead of being stranded.
       const { plan_id } = await api.generatePlan()
+      clearOnboardingDraft()
       sessionStorage.setItem('formplan_plan_id', plan_id)
       navigate(`/plan/${plan_id}`)
     } catch (e) {

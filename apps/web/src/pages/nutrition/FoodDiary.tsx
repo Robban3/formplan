@@ -1,15 +1,15 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { nutritionApi, type FoodLogEntry, type DailyGoals, type MealSlot } from '../../lib/nutritionApi'
-import { dateKey } from '../../lib/derive'
+import { dateKey, defaultMacroGoals } from '../../lib/derive'
 import { MacroSummary } from '../../components/nutrition/MacroSummary'
 import { MealSection } from '../../components/nutrition/MealSection'
 import { ChevronLeftIcon, ChevronRightIcon, DropletIcon, StarIcon, ShoppingCartIcon, SearchIcon } from '../../components/ui/Icons'
 import { getTopFavorites, type FoodFavorite } from '../../lib/foodFavoritesStore'
 import { toast } from '../../lib/toast'
+import { useSettings } from '../../hooks/useSettings'
 
 const MEALS: MealSlot[] = ['frukost', 'lunch', 'middag', 'mellanmar']
-const DEFAULT_GOALS: DailyGoals = { kcal: 2000, protein_g: 150, fat_g: 67, carbs_g: 250 }
 
 const MEAL_LABELS: Record<MealSlot, string> = {
   frukost: 'Frukost', lunch: 'Lunch', middag: 'Middag', mellanmar: 'Mellanmål',
@@ -33,10 +33,15 @@ function mealMacros(entries: FoodLogEntry[]) {
 
 export function FoodDiary() {
   const navigate = useNavigate()
+  const settings = useSettings()
+  // Client fallback goals: same macro split as the server, preferring the user's
+  // own calorie/protein settings. Used only until the server daily-log loads.
+  const fallbackGoals = defaultMacroGoals(settings.calorie_goal, settings.protein_goal_g)
   const [date, setDate] = useState(new Date())
   const [entries, setEntries] = useState<FoodLogEntry[]>([])
-  const [goals, setGoals] = useState<DailyGoals>(DEFAULT_GOALS)
+  const [goals, setGoals] = useState<DailyGoals>(fallbackGoals)
   const [loading, setLoading] = useState(true)
+  const [loadFailed, setLoadFailed] = useState(false)
   const [showMealMacros, setShowMealMacros] = useState(false)
   const favorites = getTopFavorites()
 
@@ -46,8 +51,14 @@ export function FoodDiary() {
       const { entries, goals } = await nutritionApi.getDailyLog(dateKey(d))
       setEntries(entries)
       setGoals(goals)
+      setLoadFailed(false)
     } catch {
+      // Distinguish a failed load from a genuinely empty diary: surface a toast
+      // and a banner, and leave the goals as the sensible fallback (never zero
+      // them, which would look like the user's targets vanished).
       setEntries([])
+      setLoadFailed(true)
+      toast.error('Kunde inte ladda kostdagboken. Kontrollera din anslutning.')
     } finally {
       setLoading(false)
     }
@@ -160,6 +171,11 @@ export function FoodDiary() {
         </div>
       ) : (
         <div className="px-5 mt-5 space-y-4">
+          {loadFailed && (
+            <div className="bg-red-50 border border-red-100 rounded-2xl p-3 text-sm text-red-600">
+              Kunde inte ladda dagens data. Visade värden kan vara ofullständiga — försök igen senare.
+            </div>
+          )}
           <button
             onClick={() => navigate('/kost/makro')}
             className="w-full bg-white rounded-2xl border border-stone-100 p-4 text-left active:scale-[0.98] transition-transform"

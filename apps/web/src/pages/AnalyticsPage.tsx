@@ -3,8 +3,11 @@ import { useLoadTimeout } from '../hooks/useLoadTimeout'
 import { BarChartIcon, LeafIcon, PlusIcon, XIcon, DropletIcon, DumbbellIcon } from '../components/ui/Icons'
 import { type WorkoutSession } from '../lib/workoutApi'
 import { nutritionApi } from '../lib/nutritionApi'
-import { sessionsCountThisWeek, weeklyCounts, dateKey } from '../lib/derive'
+import { sessionsCountThisWeek, weeklyCounts, dateKey, DEFAULT_WEEKLY_GOAL } from '../lib/derive'
 import { getLocalSessions, subscribeSessions } from '../lib/workoutSessionStore'
+import { loadActivePlan } from '../lib/planLoader'
+import { api } from '../lib/api'
+import { formatLiters, formatKg } from '../lib/format'
 import { getLocalWater, getLocalWaterSummary } from '../lib/waterStore'
 import { getWeightEntries, addWeightEntry, deleteWeightEntry, type WeightEntry } from '../lib/weightStore'
 import { notifyWeightLogged } from '../lib/challengeEvents'
@@ -103,7 +106,7 @@ function StatRing({
       <div className="text-center">
         <p className="text-xs font-bold text-stone-900">
           {unit === 'L'
-            ? `${(value / 1000).toFixed(1).replace('.', ',')} ${unit}`
+            ? `${formatLiters(value)} ${unit}`
             : `${value.toLocaleString('sv-SE')} ${unit}`}
         </p>
         <p className="text-[10px] text-stone-400">{label}</p>
@@ -289,7 +292,7 @@ function WeightChart({ entries }: { entries: WeightEntry[] }) {
     <div>
       <div className="flex items-baseline gap-2 mb-1">
         <span className="text-3xl font-bold" style={{ color }}>
-          {sign}{change.toFixed(1).replace('.', ',')} kg
+          {sign}{formatKg(change)} kg
         </span>
         <span className="text-sm text-stone-400">förändring sedan start</span>
       </div>
@@ -306,7 +309,7 @@ function WeightChart({ entries }: { entries: WeightEntry[] }) {
       />
       <div className="flex justify-between mt-1 text-[9px] text-stone-400">
         <span>{fmtDate(entries[0]!.date)}</span>
-        <span>{entries[entries.length - 1]!.weight_kg.toFixed(1)} kg · {fmtDate(entries[entries.length - 1]!.date)}</span>
+        <span>{formatKg(entries[entries.length - 1]!.weight_kg)} kg · {fmtDate(entries[entries.length - 1]!.date)}</span>
       </div>
     </div>
   )
@@ -329,6 +332,10 @@ export function AnalyticsPage() {
   const rpeEntries = getRpeEntries()
   const [weightInput, setWeightInput] = useState('')
   const [showWeightInput, setShowWeightInput] = useState(false)
+  // Weekly pass goal — same source Home uses: the active plan's workout-day
+  // count when a plan exists, else a shared fallback constant. Keeps the
+  // "pass denna vecka" ring denominator identical across both screens.
+  const [weeklyGoal, setWeeklyGoal] = useState(DEFAULT_WEEKLY_GOAL)
 
   const today = dateKey()
   const waterFrom = (() => { const d = new Date(); d.setDate(d.getDate() - 6); return dateKey(d) })()
@@ -352,6 +359,22 @@ export function AnalyticsPage() {
   useEffect(() => {
     initMeasurementsSync().then(() => setWeightEntries(getWeightEntries()))
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Resolve the weekly pass goal from the active plan (same as Home).
+  useEffect(() => {
+    let cancelled = false
+    api
+      .getProfile()
+      .catch(() => ({ profile: null }))
+      .then((res) => loadActivePlan((res as { profile: unknown }).profile))
+      .then((loaded) => {
+        if (!cancelled && loaded && loaded.workoutDays.length > 0) {
+          setWeeklyGoal(loaded.workoutDays.length)
+        }
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
   }, [])
 
   useEffect(() => {
@@ -401,7 +424,6 @@ export function AnalyticsPage() {
     return d >= monday
   })
   const thisWeekTime = thisWeekSessions.reduce((s, w) => s + w.duration_seconds, 0)
-  const weeklyGoal = 5
 
   const avgKcal = daySummaries.length > 0 ? Math.round(daySummaries.reduce((s, d) => s + d.kcal, 0) / daySummaries.length) : 0
   const avgProtein = daySummaries.length > 0 ? Math.round(daySummaries.reduce((s, d) => s + d.protein_g, 0) / daySummaries.length) : 0
@@ -448,7 +470,7 @@ export function AnalyticsPage() {
               />
               <StatRing
                 Icon={DropletIcon} label="Vatten idag" unit="L"
-                value={waterToday} goal={settings.water_goal_ml} goalLabel={`${(settings.water_goal_ml / 1000).toFixed(1)} L`}
+                value={waterToday} goal={settings.water_goal_ml} goalLabel={`${formatLiters(settings.water_goal_ml)} L`}
                 color="#38bdf8" iconStroke="stroke-sky-500"
               />
               <StatRing
@@ -471,7 +493,7 @@ export function AnalyticsPage() {
               <p className="font-semibold text-stone-800">Vatten senaste 7 dagar</p>
               {avgWater > 0 && (
                 <span className="text-xs text-stone-400">
-                  snitt {(avgWater / 1000).toFixed(1).replace('.', ',')} L/dag
+                  snitt {formatLiters(avgWater)} L/dag
                 </span>
               )}
             </div>
@@ -557,7 +579,7 @@ export function AnalyticsPage() {
               <WeightChart entries={weightEntries} />
             ) : weightEntries.length === 1 ? (
               <div className="text-center py-4">
-                <p className="text-2xl font-bold text-stone-900">{weightEntries[0]!.weight_kg.toFixed(1).replace('.', ',')} kg</p>
+                <p className="text-2xl font-bold text-stone-900">{formatKg(weightEntries[0]!.weight_kg)} kg</p>
                 <p className="text-xs text-stone-400 mt-1">Logga igen imorgon för att se trenden</p>
               </div>
             ) : (
@@ -572,7 +594,7 @@ export function AnalyticsPage() {
               {[...weightEntries].reverse().map((e) => (
                 <div key={e.id} className="flex items-center justify-between px-4 py-3 border-b border-stone-50 last:border-0">
                   <div>
-                    <p className="text-sm font-medium text-stone-800">{e.weight_kg.toFixed(1).replace('.', ',')} kg</p>
+                    <p className="text-sm font-medium text-stone-800">{formatKg(e.weight_kg)} kg</p>
                     <p className="text-xs text-stone-400">{fmtDate(e.date)}</p>
                   </div>
                   <button onClick={() => { deleteWeightEntry(e.id); setWeightEntries(getWeightEntries()) }} className="p-1">
@@ -603,7 +625,7 @@ export function AnalyticsPage() {
             <div className="flex items-baseline justify-between mb-3">
               <p className="font-semibold text-stone-800">Vatten senaste 7 dagar</p>
               {avgWater > 0 && (
-                <span className="text-xs text-stone-400">snitt {(avgWater / 1000).toFixed(1).replace('.', ',')} L</span>
+                <span className="text-xs text-stone-400">snitt {formatLiters(avgWater)} L</span>
               )}
             </div>
             {waterPoints.some((v) => v > 0) ? (
@@ -630,7 +652,7 @@ export function AnalyticsPage() {
                 </div>
                 <div className="flex justify-between mt-2 text-[9px] text-stone-300">
                   <span>0 L</span>
-                  <span>mål: {(settings.water_goal_ml / 1000).toFixed(1)} L</span>
+                  <span>mål: {formatLiters(settings.water_goal_ml)} L</span>
                 </div>
 
                 {/* Vattenring idag */}
@@ -638,10 +660,10 @@ export function AnalyticsPage() {
                   <Ring value={waterToday} goal={settings.water_goal_ml} color="#38bdf8" size={56} strokeWidth={6} />
                   <div>
                     <p className="text-sm font-bold text-stone-900">
-                      {(waterToday / 1000).toFixed(1).replace('.', ',')} L idag
+                      {formatLiters(waterToday)} L idag
                     </p>
                     <p className="text-xs text-stone-400">
-                      av {(settings.water_goal_ml / 1000).toFixed(1)} L · {Math.round((waterToday / settings.water_goal_ml) * 100)}%
+                      av {formatLiters(settings.water_goal_ml)} L · {settings.water_goal_ml > 0 ? Math.round((waterToday / settings.water_goal_ml) * 100) : 0}%
                     </p>
                   </div>
                 </div>

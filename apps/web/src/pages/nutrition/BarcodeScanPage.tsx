@@ -103,7 +103,7 @@ export function BarcodeScanPage() {
       toast.success('Tillagt i kostdagboken')
       navigate(-1)
     } catch (e) {
-      toast.error((e as Error).message)
+      toast.error((e as Error).message ?? 'Något gick fel')
     } finally {
       setAdding(false)
     }

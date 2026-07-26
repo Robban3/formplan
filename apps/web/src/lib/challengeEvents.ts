@@ -31,7 +31,10 @@ export function notifyWorkoutLogged() {
       if (!c.startDate) continue
       const end = windowEndKey(c)
       const since = sessions.filter((s) => {
-        const day = s.completed_at.slice(0, 10)
+        // Bucket by the LOCAL calendar day (matching streakStore/Analytics), so a
+        // session logged just after local midnight advances the challenge on the
+        // same day it advances the streak — slice(0,10) would use the UTC day.
+        const day = dateKey(new Date(s.completed_at))
         // Only sessions within [startDate, startDate + durationDays) count — a
         // pass logged after the window has closed must not push a stale,
         // time-boxed challenge to completion.

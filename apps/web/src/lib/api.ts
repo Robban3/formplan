@@ -35,7 +35,16 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const message = err.error ?? res.statusText
     // Premium-gate (402): visa en toast centralt så alla AI-funktioner ger
     // samma tydliga "uppgradera"-meddelande oavsett lokal felhantering.
-    if (res.status === 402) toast.error(message)
+    // Callers ska INTE toasta 402 igen (se toastIfNotNetwork) → ingen dubbel-toast.
+    if (res.status === 402) {
+      toast.error(message)
+      // Entitlement kan ha ändrats mitt i sessionen (provperiod slut / avslutad
+      // prenumeration). Signalera BillingGate att hämta /billing/status på nytt
+      // så paywallen faktiskt visas istället för att appen ser "upplåst" ut.
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('formplan:entitlement-changed'))
+      }
+    }
     throw new ApiError(message, res.status, err.code, err.detail)
   }
   return res.json() as Promise<T>

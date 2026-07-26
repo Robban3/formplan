@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api'
 import { deriveDifficulty } from '../../lib/derive'
@@ -49,6 +49,13 @@ export function TrainingOverview() {
   const workoutDays = days.filter((d) => d.type === 'workout')
   const totalWeek = workoutDays.length
 
+  // Guards for the long-running generate poll: mountedRef bails out of late
+  // setState/toasts after the component unmounts; generatingRef synchronously
+  // blocks a double-tap from starting a second poll.
+  const mountedRef = useRef(true)
+  const generatingRef = useRef(false)
+  useEffect(() => () => { mountedRef.current = false }, [])
+
   useEffect(() => {
     loadPlan()
   }, [])
@@ -90,6 +97,8 @@ export function TrainingOverview() {
   }
 
   async function handleGenerate() {
+    if (generatingRef.current) return
+    generatingRef.current = true
     setGenerating(true)
     try {
       const { plan_id } = await api.generatePlan()
@@ -106,8 +115,10 @@ export function TrainingOverview() {
           const { plan, days } = await api.getPlan(plan_id)
           const p = plan as Plan
           if (p.status === 'ready') {
-            setPlan(p)
-            setDays((days as WorkoutDay[]).filter((d) => d.type === 'workout'))
+            if (mountedRef.current) {
+              setPlan(p)
+              setDays((days as WorkoutDay[]).filter((d) => d.type === 'workout'))
+            }
             ready = true
             break
           }
@@ -122,17 +133,20 @@ export function TrainingOverview() {
         }
         attempts++
       }
-      if (errored) {
-        toast.error('Något gick fel när schemat skulle skapas. Försök igen.')
-      } else if (!ready) {
-        // Timed out, but the plan is still being generated server-side. Keep the
-        // stored plan_id so the next mount picks it up when it's ready.
-        toast.info('Schemat tar längre tid än vanligt. Det visas här så snart det är klart.')
+      if (mountedRef.current) {
+        if (errored) {
+          toast.error('Något gick fel när schemat skulle skapas. Försök igen.')
+        } else if (!ready) {
+          // Timed out, but the plan is still being generated server-side. Keep the
+          // stored plan_id so the next mount picks it up when it's ready.
+          toast.info('Schemat tar längre tid än vanligt. Det visas här så snart det är klart.')
+        }
       }
     } catch (e) {
-      toastIfNotNetwork(e, toast.error)
+      if (mountedRef.current) toastIfNotNetwork(e, toast.error)
     } finally {
-      setGenerating(false)
+      generatingRef.current = false
+      if (mountedRef.current) setGenerating(false)
     }
   }
 

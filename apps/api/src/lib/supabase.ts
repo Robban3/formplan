@@ -71,6 +71,28 @@ const PREMIUM_STATUSES = new Set(['active', 'trialing'])
 // gratisåtkomst till konton som aldrig varit premium.
 const PREMIUM_CACHE_TTL_S = 30 * 60
 
+// Skriv om cachen (och förnya TTL) när mindre än så här återstår, även om värdet
+// är oförändrat — annars kunde en het nyckel som aldrig ändrar värde till slut
+// löpa ut mitt under en störning.
+const PREMIUM_CACHE_REFRESH_BEFORE_MS = 5 * 60 * 1000
+
+// Cachen lagras som JSON { v, exp } så vi kan hoppa över kv.put när värdet är
+// oförändrat och inte nära utgång (en put per lyckad läsning 429:ar KV:s
+// ~1/s-skrivtak per nyckel). Bakåtkompatibel med gammalt format ('1'/'0').
+function parseCachedPremium(raw: string): { v: '1' | '0'; exp: number | null } | null {
+  if (raw === '1') return { v: '1', exp: null }
+  if (raw === '0') return { v: '0', exp: null }
+  try {
+    const p = JSON.parse(raw) as { v?: unknown; exp?: unknown }
+    if (p.v === '1' || p.v === '0') {
+      return { v: p.v, exp: typeof p.exp === 'number' ? p.exp : null }
+    }
+  } catch {
+    // Trasigt/okänt format → behandla som cache-miss (skriv om).
+  }
+  return null
+}
+
 export async function isUserPremium(userId: string, env: Env): Promise<boolean> {
   const db = supabaseAdmin(env)
   const path = `/subscriptions?user_id=eq.${userId}&select=premium_until,status&limit=1`
@@ -92,7 +114,8 @@ export async function isUserPremium(userId: string, env: Env): Promise<boolean> 
       console.error('isUserPremium: läsning misslyckades igen — cache/fail-closed:', error)
       if (kv) {
         const cached = await kv.get(cacheKey)
-        if (cached != null) return cached === '1'
+        const parsed = cached != null ? parseCachedPremium(cached) : null
+        if (parsed) return parsed.v === '1'
       }
       return false
     }
@@ -105,12 +128,28 @@ export async function isUserPremium(userId: string, env: Env): Promise<boolean> 
     PREMIUM_STATUSES.has(row.status) &&
     new Date(row.premium_until) > new Date()
 
-  // Lyckad läsning → uppdatera senast-känt-värde i KV (om KV finns).
+  // Lyckad läsning → uppdatera senast-känt-värde i KV (om KV finns), men skriv
+  // BARA när det behövs. En put per läsning hamrar KV:s skrivtak (~1/s per
+  // nyckel) → 429 + kvot/loggspam. Läs cachen först (en billig get) och hoppa
+  // över putten när värdet är oförändrat och inte nära utgång.
   if (kv) {
     try {
-      await kv.put(cacheKey, premium ? '1' : '0', { expirationTtl: PREMIUM_CACHE_TTL_S })
+      const wanted: '1' | '0' = premium ? '1' : '0'
+      const cached = await kv.get(cacheKey)
+      const parsed = cached != null ? parseCachedPremium(cached) : null
+      const fresh =
+        parsed != null &&
+        parsed.v === wanted &&
+        parsed.exp != null &&
+        parsed.exp - Date.now() > PREMIUM_CACHE_REFRESH_BEFORE_MS
+      if (!fresh) {
+        const exp = Date.now() + PREMIUM_CACHE_TTL_S * 1000
+        await kv.put(cacheKey, JSON.stringify({ v: wanted, exp }), {
+          expirationTtl: PREMIUM_CACHE_TTL_S,
+        })
+      }
     } catch (e) {
-      console.error('isUserPremium: kunde inte skriva premium-cache:', e)
+      console.error('isUserPremium: kunde inte läsa/skriva premium-cache:', e)
     }
   }
 
