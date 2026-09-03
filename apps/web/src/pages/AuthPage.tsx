@@ -1,11 +1,28 @@
 import { useState } from 'react'
 import { supabase, supabaseConfigured } from '../lib/supabase'
 
+/** Översätt de vanligaste GoTrue-felen till svenska. */
+function translateAuthError(msg: string): string {
+  const m = msg.toLowerCase()
+  if (m.includes('invalid login')) return 'Fel e-post eller lösenord.'
+  if (m.includes('already registered') || m.includes('already been registered'))
+    return 'Ett konto finns redan för den här e-posten. Logga in i stället.'
+  if (m.includes('email not confirmed')) return 'Bekräfta din e-post först — kolla inkorgen.'
+  if (m.includes('password should be') || m.includes('at least 6'))
+    return 'Lösenordet måste vara minst 6 tecken.'
+  if (m.includes('rate limit') || m.includes('too many')) return 'För många försök — vänta en stund och försök igen.'
+  return msg
+}
+
 export function AuthPage() {
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [mode, setMode] = useState<'password' | 'magic'>('password')
+  const [isSignup, setIsSignup] = useState(false)
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
 
   if (!supabaseConfigured) {
     return (
@@ -27,6 +44,39 @@ export function AuthPage() {
     setLoading(false)
     if (error) setError(error.message)
     else setSent(true)
+  }
+
+  async function handlePassword(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setNotice(null)
+    if (password.length < 6) {
+      setError('Lösenordet måste vara minst 6 tecken.')
+      return
+    }
+    setLoading(true)
+    if (isSignup) {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${window.location.origin}/auth` },
+      })
+      setLoading(false)
+      if (error) {
+        setError(translateAuthError(error.message))
+        return
+      }
+      // Ingen session ⇒ Supabase kräver e-postbekräftelse. Med session är
+      // användaren redan inloggad och onAuthStateChange sköter redirect.
+      if (!data.session) {
+        setNotice('Konto skapat! Kolla din e-post och bekräfta för att logga in.')
+      }
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      setLoading(false)
+      if (error) setError(translateAuthError(error.message))
+      // Vid lyckad inloggning triggar onAuthStateChange navigeringen.
+    }
   }
 
   async function handleGoogle() {
@@ -93,8 +143,12 @@ export function AuthPage() {
                 </div>
               ) : (
                 <>
-                  <h2 className="text-white text-2xl font-bold text-center mb-1">Välkommen tillbaka</h2>
-                  <p className="text-slate-400 text-sm text-center mb-7">Logga in för att fortsätta din resa</p>
+                  <h2 className="text-white text-2xl font-bold text-center mb-1">
+                    {isSignup ? 'Skapa konto' : 'Välkommen tillbaka'}
+                  </h2>
+                  <p className="text-slate-400 text-sm text-center mb-7">
+                    {isSignup ? 'Kom igång på under en minut' : 'Logga in för att fortsätta din resa'}
+                  </p>
 
                   <button onClick={handleGoogle}
                     className="w-full flex items-center justify-center gap-3 bg-white text-slate-900 font-semibold py-4 rounded-xl mb-5 hover:bg-slate-100 transition-colors text-sm">
@@ -116,31 +170,91 @@ export function AuthPage() {
                     </div>
                   </div>
 
-                  <form onSubmit={handleMagicLink} className="space-y-3">
-                    <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                        </svg>
+                  {/* Metodväljare: lösenord eller magisk länk */}
+                  <div className="flex gap-1 p-1 mb-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                    {(['password', 'magic'] as const).map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => { setMode(m); setError(null); setNotice(null) }}
+                        className="flex-1 py-2 rounded-lg text-xs font-semibold transition-colors"
+                        style={mode === m ? { background: 'var(--brand)', color: '#0f172a' } : { color: '#cbd5e1' }}
+                      >
+                        {m === 'password' ? 'Lösenord' : 'Magisk länk'}
+                      </button>
+                    ))}
+                  </div>
+
+                  {mode === 'password' ? (
+                    <form onSubmit={handlePassword} className="space-y-3">
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                          </svg>
+                        </div>
+                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                          placeholder="din@epost.se" required autoComplete="email"
+                          className="w-full pl-11 pr-4 py-4 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:outline-[var(--brand)] transition-all"
+                          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
+                        />
                       </div>
-                      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                        placeholder="din@epost.se" required
-                        className="w-full pl-11 pr-4 py-4 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:outline-[var(--brand)] transition-all"
-                        style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
-                      />
-                    </div>
-                    {error && <p className="text-red-400 text-xs">{error}</p>}
-                    <button type="submit" disabled={loading}
-                      className="w-full flex items-center justify-between px-5 py-4 rounded-xl text-sm font-semibold text-slate-900 transition-all disabled:opacity-60"
-                      style={{ background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%)' }}>
-                      <span>{loading ? 'Skickar...' : 'Skicka inloggningslänk'}</span>
-                      {!loading && (
-                        <svg className="w-4 h-4 stroke-slate-900" fill="none" viewBox="0 0 24 24" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                        </svg>
-                      )}
-                    </button>
-                  </form>
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                          </svg>
+                        </div>
+                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Lösenord (minst 6 tecken)" required minLength={6}
+                          autoComplete={isSignup ? 'new-password' : 'current-password'}
+                          className="w-full pl-11 pr-4 py-4 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:outline-[var(--brand)] transition-all"
+                          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
+                        />
+                      </div>
+                      {error && <p className="text-red-400 text-xs">{error}</p>}
+                      {notice && <p className="text-emerald-400 text-xs">{notice}</p>}
+                      <button type="submit" disabled={loading}
+                        className="w-full flex items-center justify-center px-5 py-4 rounded-xl text-sm font-semibold text-slate-900 transition-all disabled:opacity-60"
+                        style={{ background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%)' }}>
+                        {loading ? (isSignup ? 'Skapar konto...' : 'Loggar in...') : (isSignup ? 'Skapa konto' : 'Logga in')}
+                      </button>
+                      <p className="text-center text-xs text-slate-400 pt-1">
+                        {isSignup ? 'Har du redan ett konto? ' : 'Har du inget konto? '}
+                        <button type="button"
+                          onClick={() => { setIsSignup(!isSignup); setError(null); setNotice(null) }}
+                          className="font-semibold" style={{ color: 'var(--brand)' }}>
+                          {isSignup ? 'Logga in' : 'Skapa konto'}
+                        </button>
+                      </p>
+                    </form>
+                  ) : (
+                    <form onSubmit={handleMagicLink} className="space-y-3">
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                          </svg>
+                        </div>
+                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                          placeholder="din@epost.se" required autoComplete="email"
+                          className="w-full pl-11 pr-4 py-4 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:outline-[var(--brand)] transition-all"
+                          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
+                        />
+                      </div>
+                      {error && <p className="text-red-400 text-xs">{error}</p>}
+                      <button type="submit" disabled={loading}
+                        className="w-full flex items-center justify-between px-5 py-4 rounded-xl text-sm font-semibold text-slate-900 transition-all disabled:opacity-60"
+                        style={{ background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%)' }}>
+                        <span>{loading ? 'Skickar...' : 'Skicka inloggningslänk'}</span>
+                        {!loading && (
+                          <svg className="w-4 h-4 stroke-slate-900" fill="none" viewBox="0 0 24 24" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                          </svg>
+                        )}
+                      </button>
+                    </form>
+                  )}
 
                   <div className="flex items-center justify-center gap-2 mt-5 text-slate-500 text-xs">
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
