@@ -30,6 +30,9 @@ const MUSCLE_IDLE = '#c9cdd0' // muskel som inte tränas
 const BODY_BASE = '#d7dadd' // silhuett (huvud, händer, fötter, leder)
 const SEPARATOR = '#ffffff' // avgränsningslinjer mellan muskler
 const CAPTION = '#a8a29e' // "Framsida" / "Baksida"
+/** Explicit stack så bildtexterna ser rätt ut även när SVG:n renderas utan app-CSS. */
+const CAPTION_FONT =
+  'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
 
 type Tone = 'primary' | 'secondary' | 'idle'
 
@@ -63,32 +66,26 @@ interface ToneProps {
 function SilhouetteHalf() {
   return (
     <g fill="#fff">
-      {/* Huvud + öra */}
-      <path d="M50 2.6C43.4 2.6 39.4 7 39.4 13.6L39.4 18C39.4 23 42.8 26.8 50 26.8Z" />
-      <path d="M39.6 14.6C38.6 14.4 38.1 15.1 38.2 16.2C38.3 17.3 38.9 17.8 39.6 17.7Z" />
-      {/* Hals */}
-      <path d="M42.6 20.4L50 20.4L50 35.2C47.4 35.2 44.8 34.6 42.2 33.4C41 29 41.2 24.7 42.6 20.4Z" />
+      {/* Huvud och hals i en enda kontur: rund hjässa, avsmalnande käke och en
+          hals som vidgar sig mjukt ned i kappmuskeln/nyckelbenet. */}
+      <path
+        d="M51 1.4C43.6 1.4 40.4 4.2 41 10.5C41.1 11.6 40.2 13.4 39.6 14.6C39.6 16.8 40.6 19 42.2 20.6C43 21.6 43.4 22.9 43.4 24.4C43.3 26.8 42.8 28.8 41.6 30.4C41 31 40.2 31.9 39 32.6C37.4 33.5 35.4 34.4 33.2 35.2L51 35.2Z"
+      />
       {/* Bål — kappmuskelns lutning, bröstkorg, midja och höft */}
-      <path d="M50 27.8C45.4 27.9 41.6 28.8 38.6 30.4C36 32.4 33.4 35.4 30.8 39.4C29.6 42.8 29.2 46.4 29.4 50.4C30.2 58 31.8 65.6 33.6 73.2C34.4 77.4 34.8 81 34.6 84C31.2 88.4 28.4 93.6 26.8 100C26.4 102 26.8 104 28 106C32.6 108 38 109.2 44.4 109.6C47.6 108.6 49.3 105.8 50 101Z" />
+      <path d="M51 27.8C45.4 27.9 41.6 28.8 38.6 30.4C36 32.4 33.4 35.4 30.8 39.4C29.6 42.8 29.2 46.4 29.4 50.4C30.2 58 31.8 65.6 33.6 73.2C34.4 77.4 34.8 81 34.6 84C31.2 88.4 28.4 93.6 26.8 100C26.4 102 26.8 104 28 106C32.6 108 38 109.2 44.4 109.6C47.6 108.6 49.3 105.8 51 101Z" />
       {/* Överarm med rundad axelkupa */}
-      <path d="M36 31.6C29.4 32.6 24.4 35.6 21.6 40.6C19.8 45.2 18.8 51 18.6 58C18.5 62.8 18.4 68 18.2 73.4L28.2 74.8C28.8 68 29.6 61.2 30.6 54.2C31.6 46.4 33.6 38.8 36 31.6Z" />
+      <path d="M38.8 30.6C30 31.8 24.4 35.6 21.6 40.6C19.8 45.2 18.8 51 18.6 58C18.5 62.8 18.4 68 18.2 73.4L28.2 74.8C28.8 68 29.6 61.2 30.6 54.2C31.6 46.4 34.6 38.4 38.8 30.6Z" />
       {/* Underarm */}
       <path d="M18.2 71.6L28.4 73C28 79.8 26.6 86.4 24.6 92.4C23.7 95.2 22.9 97.2 22.2 98.6L13.6 96.4C14.6 92.8 15.4 88.4 16.2 83C16.8 78.6 17.6 74.4 18.2 71.6Z" />
-      {/* Hand: handflata, tumme och fyra fingrar */}
-      <path d="M13.4 93.6C16.4 92.6 19.6 92.9 23 94.4C23.6 98.4 22.8 101.8 20.6 104.6C17.6 106.4 14.2 106.7 10.4 105.4C9.8 101.2 10.8 97.3 13.4 93.6Z" />
-      <path d="M13 95.8C10.4 96.9 8.4 98.4 7 100.4C6.1 101.7 6.3 102.7 7.5 103.4C8.7 104.1 9.8 103.7 10.8 102.2C11.6 100.8 12.3 98.6 13 95.8Z" />
-      <g stroke="#fff" strokeWidth="2.6" strokeLinecap="round">
-        <path d="M11.8 104.6 6.8 113.8" />
-        <path d="M15.2 105.8 11.8 116" />
-        <path d="M18.4 105.8 16.8 116" />
-        <path d="M21.2 104.4 21 113.8" />
-      </g>
+      {/* Hand: en samlad handflata som vidgar sig mjukt ur handleden. Fingrar och
+          tumme antyds med tunna vita linjer i DetailsHalf istället för egna former. */}
+      <path d="M15.8 92.8C13.8 95.4 12.5 98.6 12.1 102.4C11.8 106.2 12.6 109 14.4 110.8C16.3 112.2 18.3 112 20.1 110.4C21.5 108.2 22.2 105 22.5 100.8C22.9 97.6 23.4 95.2 23.8 93.2C22 92 17.6 92.2 15.8 92.8Z" />
       {/* Lår */}
       <path d="M48 97.8C41.2 95.8 34 96.8 26.8 101.2C24.8 107.2 24 114 24.4 122C24.6 126.2 25.2 129.8 26.2 132.8L40.8 132.6C42.6 125 44.2 117.2 45.4 109.2C46.1 104.4 47 100.4 48 97.8Z" />
       {/* Underben */}
       <path d="M26.6 130.8L41 130.6C41.8 135.6 40.8 141 38.2 147.2C35.8 153 34.2 158.4 33.4 162.8C33.1 164.4 32.9 165.8 32.8 166.8L26 166.6C25.6 162 25 157.2 24.2 152.4C23.4 147 23.2 142.6 23.8 139C24.3 135.6 25.2 132.9 26.6 130.8Z" />
-      {/* Fot */}
-      <path d="M25.8 164.6L32.8 164.8C33.2 168.2 33.4 171 33.2 173.4C33 177.6 32 180 30.2 180.6L22.6 180.6C20.9 180.6 20.2 179.6 20.6 177.7C21.2 175.4 22.3 173.1 24 170.8C25.1 169.2 25.7 167.1 25.8 164.6Z" />
+      {/* Fot — smal kil som pekar snett utåt, tårna antyds med vita linjer */}
+      <path d="M26 162.8L32.8 163C33.5 167.4 33.6 171.2 33.1 174.8C32.8 178.3 31.8 180.5 30 180.9L21.6 180.9C19.9 180.9 19.3 179.7 20.1 177.5C20.9 175.2 22.3 173.1 24.1 171.3C25.4 169.9 26 167.1 26 162.8Z" />
     </g>
   )
 }
@@ -102,9 +99,10 @@ function MusclesHalf({ view, toneOf }: ToneProps & { view: View }) {
   if (view === 'front') {
     return (
       <>
-        {/* Nacke */}
+        {/* Hals (sternocleidomastoideus) — övre kanten blir käklinjen,
+            nedre kanten nyckelbenet. */}
         <path
-          d="M43.4 21.6L50 21.6L50 34.2C47 34.2 44 33.4 41.4 31.8C40.8 28.2 41.4 24.8 43.4 21.6Z"
+          d="M50 27.2C47.2 26.2 45 24.8 43.4 22.8C43.5 24.8 43.5 26.6 43.2 28.2C42.8 29.4 42.4 30.2 41.6 30.9C40.2 32.4 38.6 34.2 37 36.2C40.8 34.8 45.2 34 50 33.8Z"
           fill={fill('neck')}
         />
 
@@ -116,7 +114,7 @@ function MusclesHalf({ view, toneOf }: ToneProps & { view: View }) {
 
         {/* Axel (deltoid) — rundad kupa över axelleden */}
         <path
-          d="M37.4 30.4C30.2 31.2 24.2 34.6 20.6 40.6C19 45.2 18 50.4 17.8 56.2C17.8 58.8 17.8 60.8 18 62.2C22.2 57.8 27.4 53.8 33.6 50.2C34.2 43 35.4 36.4 37.4 30.4Z"
+          d="M38.8 30.6C30.4 31.8 24.2 34.6 20.6 40.6C19 45.2 18 50.4 17.8 56.2C17.8 58.8 17.8 60.8 18 62.2C22.2 57.8 27.4 53.8 33.6 50.2C34.2 43 35.6 36.4 38.8 30.6Z"
           fill={fill('shoulders')}
         />
 
@@ -171,7 +169,7 @@ function MusclesHalf({ view, toneOf }: ToneProps & { view: View }) {
     <>
       {/* Kappmuskel (trapezius) */}
       <path
-        d="M50 22.8C46.2 22.8 43.6 23.9 42.6 26.2C42.2 29 42.2 31.8 42.6 34.4C37.4 35 32.2 37.2 27 41C25.6 42.2 25.4 43.4 26.4 44.6C32.8 51.4 40.6 58.8 50 66.8Z"
+        d="M50 21.4C47.2 21.6 45.2 22.6 43.6 24.4C43.6 26.6 43 28.6 41.6 31C35.4 32.2 29.8 35.4 26.6 40.6C25.8 42 25.7 43.3 26.4 44.6C32.8 51.4 40.6 58.8 50 66.8Z"
         fill={fill('traps')}
       />
 
@@ -195,7 +193,7 @@ function MusclesHalf({ view, toneOf }: ToneProps & { view: View }) {
 
       {/* Axel (bakre deltoid) */}
       <path
-        d="M37.4 30.4C30.2 31.2 24.2 34.6 20.6 40.6C19 45.2 18 50.4 17.8 56.2C17.8 58.8 17.8 60.8 18 62.2C22.2 57.8 27.4 53.8 33.6 50.2C34.2 43 35.4 36.4 37.4 30.4Z"
+        d="M38.8 30.6C30.4 31.8 24.2 34.6 20.6 40.6C19 45.2 18 50.4 17.8 56.2C17.8 58.8 17.8 60.8 18 62.2C22.2 57.8 27.4 53.8 33.6 50.2C34.2 43 35.6 36.4 38.8 30.6Z"
         fill={fill('shoulders')}
       />
 
@@ -236,16 +234,28 @@ function MusclesHalf({ view, toneOf }: ToneProps & { view: View }) {
 function DetailsHalf({ view }: { view: View }) {
   return (
     <g fill="none" stroke={SEPARATOR} strokeWidth="0.7" strokeLinecap="round">
-      {/* Handled */}
-      <path d="M13.6 93.8C16.6 93 19.8 93.3 23.2 94.6" />
+      {/* Öra — bara en diskret båge, aldrig en egen utstickande form */}
+      <path d="M41.4 12.9C40.2 14.4 40 16.6 40.8 19.1" />
+      {/* Handled — dubbelt streck som i klassiska anatomiplanscher */}
+      <path d="M13.8 96C16.5 95.2 19.2 95.6 21.8 97.1" />
+      {/* Handens knogar, fingerdelningar och tumme */}
+      <path d="M12.6 101.4C15.6 102.6 19 102.7 22.6 101.6" />
+      <path d="M13.9 102.6C14.1 105.8 14.7 108.6 15.6 111" />
+      <path d="M16.8 102.9C17 106 17.3 108.8 17.8 111.3" />
+      <path d="M19.6 102.7C19.5 105.8 19.4 108.6 19.3 111" />
+      <path d="M22.7 98C21.8 99 21.3 100.3 21.3 101.6" />
       {/* Underarmens muskelbukar */}
-      <path d="M25.8 76C24.4 83 22.4 89.8 19.8 96.4" />
+      <path d="M25.8 76C24.6 81.8 23.1 87.2 21.2 92" />
       {/* Knä */}
       <path d="M28.4 133.2C31.8 134.2 35.4 134.3 38.8 133.6" />
-      {/* Vrist och tår */}
-      <path d="M26.2 167.4C28.4 168.2 30.6 168.4 32.8 168" />
-      <path d="M24.4 170.6 22.6 179.6" />
-      <path d="M28 168.2 27.6 181" />
+      {/* Vrist — dubbelt streck — och tårnas strimmor */}
+      <path d="M25.9 166.2C28.1 167 30.4 167.2 32.8 166.8" />
+      <path d="M25.4 169.4C28 170.3 30.5 170.5 33 170.1" />
+      <path d="M22.8 173.2C22.3 175.3 22 177 21.9 178.5" />
+      <path d="M25.2 172.2C25 174.6 24.9 176.8 24.9 178.5" />
+      <path d="M27.7 171.9C27.6 174.4 27.6 176.7 27.7 178.5" />
+      <path d="M30.2 172.1C30.2 174.6 30.3 176.8 30.4 178.5" />
+      <path d="M20.6 178.6C24.2 179.3 27.8 179.4 31.4 178.9" />
       {view === 'front' ? (
         <>
           {/* Deltoidens delning */}
@@ -303,7 +313,16 @@ function Figure({
           <DetailsHalf view={view} />
         </g>
       </g>
-      <text x="50" y="194" textAnchor="middle" fontSize="9" fontWeight="600" fill={CAPTION}>
+      <text
+        x="50"
+        y="193.5"
+        textAnchor="middle"
+        fontFamily={CAPTION_FONT}
+        fontSize="6.2"
+        fontWeight="600"
+        letterSpacing="0.25"
+        fill={CAPTION}
+      >
         {label}
       </text>
     </g>
