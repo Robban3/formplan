@@ -83,6 +83,10 @@ export interface WorkoutDay {
 }
 
 export interface Exercise {
+  // Id ur den kurerade övningskatalogen (lib/exerciseCatalog.ts). Sätts alltid
+  // för nygenererade scheman — valfritt eftersom scheman som sparades innan
+  // katalogen infördes saknar fältet i sin jsonb-content.
+  exercise_id?: string
   name: string
   sets: number
   reps: string

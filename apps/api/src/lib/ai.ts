@@ -1,8 +1,10 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { z } from 'zod'
 import { supabaseAdmin } from './supabase'
+import { catalogForPrompt, getExerciseById, matchExercise } from './exerciseCatalog'
 import type {
   Env,
+  Exercise,
   FitnessProfile,
   WorkoutDay,
   NutritionDay,
@@ -276,6 +278,14 @@ ${profile.age ? `- Age: ${profile.age}` : ''}
 ${profile.weight_kg ? `- Weight: ${profile.weight_kg} kg` : ''}
 ${profile.height_cm ? `- Height: ${profile.height_cm} cm` : ''}
 
+EXERCISE CATALOG — every exercise you use MUST come from this list (format: id (Namn)):
+${catalogForPrompt()}
+
+EXERCISE RULES (strict):
+- Choose exercises ONLY from the catalog above. Put the catalog id in "exercise_id" and the exact Swedish name from the list in "name".
+- Inventing exercises, variations or names that are not in the catalog is NOT allowed. If the exercise you had in mind is missing, pick the closest one that IS in the catalog.
+- Prefer exercises whose equipment matches the user's available equipment (${profile.equipment.join(', ')}); only pick another exercise when the catalog offers nothing suitable for that equipment.
+
 INSTRUCTIONS:
 - Distribute ${profile.days_per_week} workout days across the week. Remaining days are rest days.
 - Every day gets a nutrition plan (macros + meals).
@@ -292,7 +302,7 @@ INSTRUCTIONS:
         "focus": "string",
         "duration_minutes": number,
         "exercises": [
-          { "name": "string", "sets": number, "reps": "string", "rest_seconds": number, "notes": "string (optional)" }
+          { "exercise_id": "string (must be an id from the list)", "name": "string (the Swedish name from the list)", "sets": number, "reps": "string", "rest_seconds": number, "notes": "string (optional)" }
         ]
       },
       "nutrition": {
@@ -309,6 +319,100 @@ INSTRUCTIONS:
 }
 
 weekday: 1=Monday through 7=Sunday. Include all 7 days.`
+}
+
+// En dag som modellen returnerat, innan den skrivs till plan_day.
+export interface GeneratedPlanDay {
+  weekday: number
+  type: 'workout' | 'rest'
+  content: WorkoutDay | RestDay
+  nutrition: NutritionDay
+}
+
+// Rå (ovaliderad) övning från modellen — varje fält kan saknas eller ha fel typ.
+interface RawExercise {
+  exercise_id?: unknown
+  name?: unknown
+  sets?: unknown
+  reps?: unknown
+  rest_seconds?: unknown
+  notes?: unknown
+}
+
+function toNumber(value: unknown, fallback: number): number {
+  const n = typeof value === 'string' ? Number(value) : value
+  return typeof n === 'number' && isFinite(n) && n >= 0 ? n : fallback
+}
+
+/**
+ * Låser modellens övningar till den kurerade katalogen. Modellen får ALDRIG
+ * litas på: den kan hitta på id:n, stava namn på eget sätt eller hoppa över
+ * exercise_id helt. Utan detta går det inte att koppla rätt bild/teknik till en
+ * övning och träningshistoriken splittras på namnvarianter ("Bänkpress" vs
+ * "Bänkpress med skivstång").
+ *
+ * Per övning i en träningsdag:
+ *  1. giltigt exercise_id → behåll, men skriv över name med katalogens namn,
+ *  2. annars fritextmatcha mot katalogen (först exercise_id, sedan name),
+ *  3. annars släpp övningen (loggas) hellre än att spara något ospårbart.
+ *
+ * Blir en träningsdag helt tom kastar vi — routes/plan.ts sätter då planens
+ * status till "error", vilket är ärligare än ett tomt pass.
+ */
+export function normalizePlanExercises<T extends GeneratedPlanDay>(days: T[]): T[] {
+  if (!Array.isArray(days) || days.length === 0) {
+    throw new Error('Plan generation returned no days')
+  }
+
+  for (const day of days) {
+    if (day?.type !== 'workout') continue
+
+    const content = day.content as Partial<WorkoutDay> | undefined
+    const rawExercises = Array.isArray(content?.exercises) ? (content.exercises as RawExercise[]) : []
+
+    const exercises: Exercise[] = []
+    for (const raw of rawExercises) {
+      const o = (raw ?? {}) as RawExercise
+      const id = typeof o.exercise_id === 'string' ? o.exercise_id.trim() : ''
+      const name = typeof o.name === 'string' ? o.name.trim() : ''
+
+      // Tom sträng får aldrig gå till matchExercise — den skulle delsträngs-
+      // matcha mot vad som helst och tyst byta ut övningen.
+      const hit =
+        (id ? getExerciseById(id) : undefined) ??
+        (id ? matchExercise(id) : undefined) ??
+        (name ? matchExercise(name) : undefined)
+
+      if (!hit) {
+        console.warn(
+          `Plan: dropping unknown exercise (weekday ${day.weekday}):`,
+          JSON.stringify({ exercise_id: o.exercise_id, name: o.name }).slice(0, 200)
+        )
+        continue
+      }
+
+      const notes = typeof o.notes === 'string' ? o.notes.trim().slice(0, 300) : ''
+      exercises.push({
+        exercise_id: hit.id,
+        // Alltid katalogens kanoniska svenska namn → konsekvent historik.
+        name: hit.name,
+        sets: Math.round(toNumber(o.sets, 3)),
+        reps: typeof o.reps === 'string' ? o.reps : String(o.reps ?? '10'),
+        rest_seconds: Math.round(toNumber(o.rest_seconds, 60)),
+        ...(notes ? { notes } : {}),
+      })
+    }
+
+    if (exercises.length === 0) {
+      throw new Error(
+        `Plan generation produced a workout day (weekday ${day.weekday}) with no exercises from the catalog`
+      )
+    }
+
+    day.content = { ...(content as WorkoutDay), exercises }
+  }
+
+  return days
 }
 
 export async function generatePlan(
@@ -334,14 +438,7 @@ export async function generatePlan(
   // meddelande i stället för ett rått parse-fel.
   const truncated = (stopReason ?? '').toLowerCase() === 'max_tokens'
 
-  let parsed: {
-    days: Array<{
-      weekday: number
-      type: 'workout' | 'rest'
-      content: WorkoutDay | RestDay
-      nutrition: NutritionDay
-    }>
-  }
+  let parsed: { days: GeneratedPlanDay[] }
   try {
     parsed = JSON.parse(extractJson(rawText))
   } catch (err) {
@@ -353,7 +450,11 @@ export async function generatePlan(
     throw new Error(`Plan generation returned unparseable output: ${(err as Error).message}`)
   }
 
-  const dayRows = parsed.days.flatMap((d) => [
+  // Lås övningarna till katalogen innan något sparas. Kastar hellre än sparar
+  // en träningsdag utan giltiga övningar.
+  const days = normalizePlanExercises(parsed.days)
+
+  const dayRows = days.flatMap((d) => [
     {
       plan_id: planId,
       weekday: d.weekday,
