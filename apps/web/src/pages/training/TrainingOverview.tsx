@@ -5,7 +5,7 @@ import { deriveDifficulty } from '../../lib/derive'
 import { useWeeklySessions } from '../../contexts/WeeklySessionsContext'
 import { toast } from '../../lib/toast'
 import { toastIfNotNetwork, isNetworkError } from '../../lib/errors'
-import { PlusIcon, DumbbellIcon, PlayIcon } from '../../components/ui/Icons'
+import { PlusIcon, DumbbellIcon, PlayIcon, ChevronDownIcon } from '../../components/ui/Icons'
 import { WorkoutHero } from '../../components/training/WorkoutHero'
 import { useWorkoutStore } from '../../hooks/useWorkoutStore'
 import { useLoadTimeout } from '../../hooks/useLoadTimeout'
@@ -13,7 +13,16 @@ import { getTrainingStreak, getLongestStreak } from '../../lib/streakStore'
 import { loadActivePlan, type WorkoutPlanDay } from '../../lib/planLoader'
 import { parseMockPlanId } from '../../lib/mockPlan'
 import { workoutStore, type ExerciseLog } from '../../store/workoutStore'
-import { EXERCISE_LIBRARY, EXERCISE_CATEGORIES } from '../../lib/exerciseLibrary'
+import {
+  EXERCISE_CATALOG,
+  EXERCISE_CATEGORIES,
+  MUSCLE_LABELS,
+  type CatalogExercise,
+  type ExerciseCategory,
+} from '../../lib/exerciseCatalog'
+import { resolveExercise } from '../../lib/exerciseResolve'
+import { ExerciseMedia } from '../../components/training/ExerciseMedia'
+import { ExerciseDetail } from '../../components/training/ExerciseDetail'
 import { PROGRAM_TEMPLATES, type ProgramTemplate, type TemplateDay } from '../../lib/programTemplates'
 
 type WorkoutDay = WorkoutPlanDay
@@ -370,18 +379,23 @@ export function TrainingOverview() {
 function ProgramExerciseList({
   exercises,
 }: {
-  exercises: { name: string; sets: number; reps: string }[]
+  exercises: { name: string; sets: number; reps: string; exercise_id?: string }[]
 }) {
   return (
     <div className="divide-y divide-stone-50">
-      {exercises.map((ex, i) => (
-        <div key={i} className="py-2.5 first:pt-0">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-sm text-stone-700">{ex.name}</span>
-            <span className="text-xs text-stone-400 shrink-0">{ex.sets} × {ex.reps}</span>
+      {exercises.map((ex, i) => {
+        // Media visas bara för en säkert upplöst katalogövning — annars ingen bild.
+        const catalog = resolveExercise(ex)
+        return (
+          <div key={i} className="py-2.5 first:pt-0">
+            <div className="flex items-center gap-2.5">
+              {catalog && <ExerciseMedia exercise={catalog} variant="thumb" />}
+              <span className="text-sm text-stone-700 flex-1 min-w-0 truncate">{ex.name}</span>
+              <span className="text-xs text-stone-400 shrink-0">{ex.sets} × {ex.reps}</span>
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -451,16 +465,27 @@ function WorkoutCard({
   )
 }
 
-// Standalone, always-available exercise library grouped by muscle group.
+// Standalone, always-available exercise library driven by the curated catalog:
+// search + category filter, each row with its own images and muscle chips.
 function ExerciseLibrary() {
   const [query, setQuery] = useState('')
+  const [category, setCategory] = useState<ExerciseCategory | 'Alla'>('Alla')
+  const [openId, setOpenId] = useState<string | null>(null)
 
   const q = query.trim().toLowerCase()
-  const groups = EXERCISE_CATEGORIES.map((category) => ({
-    category,
-    items: EXERCISE_LIBRARY.filter(
-      (ex) => ex.category === category && (!q || ex.name.toLowerCase().includes(q))
-    ),
+  const matches = (ex: CatalogExercise) =>
+    !q ||
+    ex.name.toLowerCase().includes(q) ||
+    ex.category.toLowerCase().includes(q) ||
+    ex.aliases.some((a) => a.toLowerCase().includes(q)) ||
+    ex.primaryMuscles.some((m) => MUSCLE_LABELS[m].toLowerCase().includes(q))
+
+  const visible = EXERCISE_CATALOG.filter(
+    (ex) => (category === 'Alla' || ex.category === category) && matches(ex)
+  )
+  const groups = EXERCISE_CATEGORIES.map((c) => ({
+    category: c,
+    items: visible.filter((ex) => ex.category === c),
   })).filter((g) => g.items.length > 0)
 
   return (
@@ -472,6 +497,22 @@ function ExerciseLibrary() {
         className="w-full bg-stone-100 rounded-xl px-4 py-3 text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 text-sm"
       />
 
+      <div className="flex gap-1.5 overflow-x-auto -mx-1 px-1 pb-1">
+        {(['Alla', ...EXERCISE_CATEGORIES] as const).map((c) => (
+          <button
+            key={c}
+            onClick={() => setCategory(c)}
+            className={`flex-shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+              category === c
+                ? 'bg-forest-700 border-forest-700 text-white'
+                : 'bg-white border-stone-200 text-stone-500'
+            }`}
+          >
+            {c}
+          </button>
+        ))}
+      </div>
+
       {groups.length === 0 && (
         <p className="text-stone-400 text-sm text-center py-6">Inga träffar.</p>
       )}
@@ -482,14 +523,43 @@ function ExerciseLibrary() {
             {g.category}
           </p>
           <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
-            {g.items.map((ex, i) => (
-              <div
-                key={ex.name}
-                className={`px-4 py-3 ${i > 0 ? 'border-t border-stone-50' : ''}`}
-              >
-                <p className="text-sm font-medium text-stone-800">{ex.name}</p>
-              </div>
-            ))}
+            {g.items.map((ex, i) => {
+              const open = openId === ex.id
+              return (
+                <div key={ex.id} className={i > 0 ? 'border-t border-stone-50' : ''}>
+                  <button
+                    onClick={() => setOpenId(open ? null : ex.id)}
+                    aria-expanded={open}
+                    className="w-full text-left px-4 py-3 flex items-center gap-3"
+                  >
+                    <ExerciseMedia exercise={ex} variant="thumb" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-stone-800 truncate">{ex.name}</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {ex.primaryMuscles.map((m) => (
+                          <span
+                            key={m}
+                            className="text-[10px] font-medium text-forest-700 bg-forest-50 rounded-full px-1.5 py-0.5"
+                          >
+                            {MUSCLE_LABELS[m]}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <ChevronDownIcon
+                      className={`w-4 h-4 stroke-stone-300 flex-shrink-0 transition-transform ${
+                        open ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+                  {open && (
+                    <div className="px-4 pb-4">
+                      <ExerciseDetail exercise={ex} />
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
       ))}

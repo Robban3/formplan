@@ -12,6 +12,8 @@ export interface SetLog {
 
 export interface ExerciseLog {
   name: string
+  /** Stabilt katalog-id när schemat bär ett — används för att visa rätt bild. */
+  exerciseId?: string
   targetSets: number
   targetReps: string
   restSeconds: number

@@ -1,3 +1,5 @@
+import { exerciseKey, mergeExerciseEntries, migrateExerciseKeysOnce } from './exerciseKey'
+
 const KEY = 'formplan_exercise_history'
 
 export interface ExerciseEntry {
@@ -11,6 +13,8 @@ export interface ExerciseEntry {
 type ExerciseHistory = Record<string, ExerciseEntry[]>
 
 function load(): ExerciseHistory {
+  // Re-keys any pre-v2 (name-keyed) data before the first read.
+  migrateExerciseKeysOnce()
   try { return JSON.parse(localStorage.getItem(KEY) ?? '{}') as ExerciseHistory }
   catch { return {} }
 }
@@ -19,11 +23,17 @@ function save(h: ExerciseHistory) {
   localStorage.setItem(KEY, JSON.stringify(h))
 }
 
+/**
+ * History for an exercise. `exercise` is the free-text name as shown in the UI;
+ * it is resolved to the catalog id internally, so "Bänkpress" and "Bänkpress
+ * med skivstång" share one series instead of splitting into two.
+ */
 export function getExerciseHistory(exercise: string): ExerciseEntry[] {
   const h = load()
-  return (h[exercise] ?? []).sort((a, b) => a.date.localeCompare(b.date))
+  return (h[exerciseKey(exercise)] ?? []).sort((a, b) => a.date.localeCompare(b.date))
 }
 
+/** Storage keys (catalog ids where resolvable), not display names. */
 export function getAllTrackedExercises(): string[] {
   return Object.keys(load())
 }
@@ -43,42 +53,26 @@ export function recordExerciseSession(
   const totalVolume = doneSets.reduce((sum, s) => sum + s.reps * (s.weight_kg ?? 0), 0)
   const totalReps = doneSets.reduce((sum, s) => sum + s.reps, 0)
 
+  const entry: ExerciseEntry = {
+    date,
+    maxWeight_kg: maxWeight,
+    repsAtMax,
+    totalVolume_kg: Math.round(totalVolume * 10) / 10,
+    totalReps,
+  }
+
+  const key = exerciseKey(exercise)
   const h = load()
-  const entries = h[exercise] ?? []
+  const entries = h[key] ?? []
   const idx = entries.findIndex((e) => e.date === date)
   if (idx >= 0) {
     // Merge with the earlier entry for the same day: a second workout must add
     // to the day's volume/reps, never overwrite it. maxWeight is the heaviest
     // across both sessions, and repsAtMax follows whichever session set it.
-    const prev = entries[idx]!
-    let mergedMax: number
-    let mergedRepsAtMax: number
-    if (maxWeight > prev.maxWeight_kg) {
-      mergedMax = maxWeight
-      mergedRepsAtMax = repsAtMax
-    } else if (maxWeight < prev.maxWeight_kg) {
-      mergedMax = prev.maxWeight_kg
-      mergedRepsAtMax = prev.repsAtMax
-    } else {
-      mergedMax = prev.maxWeight_kg
-      mergedRepsAtMax = Math.max(prev.repsAtMax, repsAtMax)
-    }
-    entries[idx] = {
-      date,
-      maxWeight_kg: mergedMax,
-      repsAtMax: mergedRepsAtMax,
-      totalVolume_kg: Math.round((prev.totalVolume_kg + totalVolume) * 10) / 10,
-      totalReps: prev.totalReps + totalReps,
-    }
+    entries[idx] = mergeExerciseEntries(entries[idx]!, entry)
   } else {
-    entries.push({
-      date,
-      maxWeight_kg: maxWeight,
-      repsAtMax,
-      totalVolume_kg: Math.round(totalVolume * 10) / 10,
-      totalReps,
-    })
+    entries.push(entry)
   }
-  h[exercise] = entries
+  h[key] = entries
   save(h)
 }

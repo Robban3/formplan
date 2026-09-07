@@ -9,7 +9,15 @@ export interface WorkoutPlanDay {
     name: string
     focus: string
     duration_minutes: number
-    exercises: { name: string; sets: number; reps: string; rest_seconds?: number; notes?: string }[]
+    exercises: {
+      name: string
+      sets: number
+      reps: string
+      rest_seconds?: number
+      notes?: string
+      /** Stabilt katalog-id — API:t kan börja skicka det; UI:t tål att det saknas. */
+      exercise_id?: string
+    }[]
   }
 }
 

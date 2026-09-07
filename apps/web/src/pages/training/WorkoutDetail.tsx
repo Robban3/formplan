@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api'
-import { PlayIcon } from '../../components/ui/Icons'
+import { PlayIcon, ChevronDownIcon } from '../../components/ui/Icons'
 import { WorkoutHero } from '../../components/training/WorkoutHero'
 import { workoutStore } from '../../store/workoutStore'
 import type { ExerciseLog } from '../../store/workoutStore'
+import { resolveExercise } from '../../lib/exerciseResolve'
+import { ExerciseMedia } from '../../components/training/ExerciseMedia'
+import { ExerciseDetail } from '../../components/training/ExerciseDetail'
 
 interface Exercise {
   name: string
@@ -12,6 +15,8 @@ interface Exercise {
   reps: string
   rest_seconds: number
   notes?: string
+  /** Kan komma från API:t — UI:t fungerar även utan det. */
+  exercise_id?: string
 }
 
 interface WorkoutContent {
@@ -26,6 +31,51 @@ interface PlanDay {
   weekday: number
   type: string
   content: WorkoutContent
+}
+
+/**
+ * En rad i passets övningslista. Bild och muskelkarta visas bara när övningen
+ * går att slå upp i katalogen (id först, annars namnet) — aldrig en gissad bild.
+ */
+function ExerciseRow({ exercise }: { exercise: Exercise }) {
+  const [open, setOpen] = useState(false)
+  const catalog = resolveExercise(exercise)
+
+  return (
+    <div className="bg-white rounded-2xl p-4 shadow-sm border border-stone-100">
+      <div className="flex items-center gap-3">
+        {catalog && <ExerciseMedia exercise={catalog} variant="thumb" />}
+        <div className="flex-1 min-w-0">
+          {catalog ? (
+            <button
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              className="text-left w-full flex items-center gap-1.5"
+            >
+              <span className="font-semibold text-stone-900 text-sm truncate">{exercise.name}</span>
+              <ChevronDownIcon
+                className={`w-3.5 h-3.5 stroke-stone-300 flex-shrink-0 transition-transform ${
+                  open ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+          ) : (
+            <p className="font-semibold text-stone-900 text-sm">{exercise.name}</p>
+          )}
+          <p className="text-stone-400 text-xs mt-0.5">
+            {exercise.sets} set × {exercise.reps} reps
+          </p>
+          {exercise.notes && <p className="text-stone-300 text-xs mt-0.5">{exercise.notes}</p>}
+        </div>
+      </div>
+
+      {open && catalog && (
+        <div className="mt-3 pt-3 border-t border-stone-50">
+          <ExerciseDetail exercise={catalog} />
+        </div>
+      )}
+    </div>
+  )
 }
 
 export function WorkoutDetail() {
@@ -57,6 +107,7 @@ export function WorkoutDetail() {
     if (!day) return
     const exercises: ExerciseLog[] = day.content.exercises.map((ex) => ({
       name: ex.name,
+      exerciseId: ex.exercise_id,
       targetSets: ex.sets,
       targetReps: ex.reps,
       restSeconds: ex.rest_seconds,
@@ -111,16 +162,7 @@ export function WorkoutDetail() {
       {/* Exercise list */}
       <div className="px-5 space-y-3">
         {content.exercises.map((ex, i) => (
-          <div
-            key={i}
-            className="bg-white rounded-2xl p-4 shadow-sm border border-stone-100"
-          >
-            <p className="font-semibold text-stone-900 text-sm">{ex.name}</p>
-            <p className="text-stone-400 text-xs mt-0.5">
-              {ex.sets} set × {ex.reps} reps
-            </p>
-            {ex.notes && <p className="text-stone-300 text-xs mt-0.5">{ex.notes}</p>}
-          </div>
+          <ExerciseRow key={i} exercise={ex} />
         ))}
       </div>
 

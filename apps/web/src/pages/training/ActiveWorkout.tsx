@@ -8,8 +8,11 @@ import { workoutApi } from '../../lib/workoutApi'
 import { saveRpe } from '../../lib/rpeStore'
 import { checkAndUpdatePR } from '../../lib/prStore'
 import { toast } from '../../lib/toast'
-import { PauseIcon, PlayIcon, CheckIcon, XIcon, ChevronLeftIcon, ChevronRightIcon, ShareIcon, DumbbellIcon, ZapIcon } from '../../components/ui/Icons'
+import { PauseIcon, PlayIcon, CheckIcon, XIcon, ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon, ShareIcon, DumbbellIcon, ZapIcon } from '../../components/ui/Icons'
 import { exerciseUsesWeight, isCardioExercise } from '../../lib/exerciseLog'
+import { resolveExercise } from '../../lib/exerciseResolve'
+import { ExerciseMedia } from '../../components/training/ExerciseMedia'
+import { ExerciseDetail } from '../../components/training/ExerciseDetail'
 import { getExerciseHistory } from '../../lib/exerciseHistoryStore'
 import { recommendNextWeight, type ProgressionAdvice } from '../../lib/progression'
 
@@ -45,6 +48,14 @@ export function ActiveWorkout() {
   const [previousSets, setPreviousSets] = useState<Record<string, PrevSet[]>>({})
   // recommendations[exerciseName] = automatic progression suggestion (or null)
   const [recommendations, setRecommendations] = useState<Record<string, ProgressionAdvice | null>>({})
+  // Övningsbeskrivningen (bild + muskelkarta) är hopfälld som standard så att
+  // set-loggningen aldrig trängs undan.
+  const [showDetail, setShowDetail] = useState(false)
+
+  // Fäll ihop beskrivningen när man byter övning.
+  useEffect(() => {
+    setShowDetail(false)
+  }, [state?.currentExerciseIndex])
 
   // Fetch exercise history for all exercises in this workout once on mount.
   useEffect(() => {
@@ -254,6 +265,9 @@ export function ActiveWorkout() {
     const n = parseInt(exercise.targetReps.replace(/\D/g, ''), 10)
     return Number.isFinite(n) && n > 0 ? n : 0
   }
+  // Katalogövning för bild/muskelkarta — id först, annars namnet. Går den inte
+  // att lösa upp visas ingen bild alls (aldrig en annan övnings bild).
+  const catalogEx = resolveExercise(ex)
   const isCardio = isCardioExercise(ex.name)
   const showWeight = exerciseUsesWeight(ex.name, ex.targetReps)
   const setGrid = showWeight || isCardio
@@ -526,7 +540,23 @@ export function ActiveWorkout() {
               Övning {workout.currentExerciseIndex + 1} av {workout.exercises.length}
             </p>
             <div className="flex items-center gap-2 justify-center">
-              <h2 className="text-xl font-bold text-stone-900 mt-0.5">{ex.name}</h2>
+              {catalogEx ? (
+                <button
+                  onClick={() => setShowDetail((v) => !v)}
+                  aria-expanded={showDetail}
+                  className="flex items-center gap-2 mt-0.5"
+                >
+                  <ExerciseMedia exercise={catalogEx} variant="thumb" />
+                  <h2 className="text-xl font-bold text-stone-900">{ex.name}</h2>
+                  <ChevronDownIcon
+                    className={`w-4 h-4 stroke-stone-300 transition-transform ${
+                      showDetail ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+              ) : (
+                <h2 className="text-xl font-bold text-stone-900 mt-0.5">{ex.name}</h2>
+              )}
               {ex.supersetGroup !== undefined && (
                 <span className="text-[10px] font-bold bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">SS</span>
               )}
@@ -552,6 +582,13 @@ export function ActiveWorkout() {
             <ChevronRightIcon className="w-5 h-5 stroke-stone-400" />
           </button>
         </div>
+
+        {/* Övningsbeskrivning — bara på begäran, så set-loggningen syns direkt */}
+        {showDetail && catalogEx && (
+          <div className="bg-white rounded-2xl border border-stone-100 p-4 mb-4">
+            <ExerciseDetail exercise={catalogEx} />
+          </div>
+        )}
 
         {/* Automatic progression suggestion */}
         {showWeight && recommendations[ex.name] && (() => {
@@ -706,6 +743,12 @@ export function ActiveWorkout() {
         {/* Next exercise */}
         {nextIncompleteEx && !workoutComplete && (
           <div className="flex items-center gap-3 bg-white rounded-xl border border-stone-100 p-3 mb-4">
+            {(() => {
+              const nextCatalog = resolveExercise(nextIncompleteEx)
+              return nextCatalog ? (
+                <ExerciseMedia exercise={nextCatalog} variant="thumb" />
+              ) : null
+            })()}
             <div className="text-stone-400 text-xs">Nästa övning</div>
             <div className="font-semibold text-sm text-stone-700">{nextIncompleteEx.name}</div>
           </div>
