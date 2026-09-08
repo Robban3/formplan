@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth, whenAuthReconciled } from './hooks/useAuth'
 import { AuthPage } from './pages/AuthPage'
@@ -15,6 +15,7 @@ import { flushLocalWater } from './lib/waterStore'
 import { WeeklySessionsProvider } from './contexts/WeeklySessionsContext'
 import { api } from './lib/api'
 import { parseMockPlanId } from './lib/mockPlan'
+import { isPasswordRecovery, subscribePasswordRecovery } from './lib/authRecovery'
 
 /**
  * Redirect a freshly-authenticated user with no profile to onboarding. Without
@@ -59,6 +60,13 @@ function RequireProfile({ children }: { children: ReactNode }) {
 
 export default function App() {
   const { user, loading } = useAuth()
+  // Återställningslänken loggar in användaren direkt. Håll kvar /auth så länge
+  // återställningen pågår — annars hinner aldrig "sätt nytt lösenord" visas.
+  const recovering = useSyncExternalStore(
+    subscribePasswordRecovery,
+    isPasswordRecovery,
+    () => false
+  )
   useNotificationScheduler()
   useSessionsSync()
   // Push any water logged offline to the server on app start (flush-on-reconnect).
@@ -82,7 +90,7 @@ export default function App() {
       <WeeklySessionsProvider>
       <BillingGate user={user}>
       <Routes>
-        <Route path="/auth" element={user ? <Navigate to="/hem" replace /> : <AuthPage />} />
+        <Route path="/auth" element={user && !recovering ? <Navigate to="/hem" replace /> : <AuthPage />} />
         <Route path="/onboarding" element={user ? <OnboardingPage /> : <Navigate to="/auth" replace />} />
         {/* Plan generation/preview is full-screen, outside the tab layout */}
         <Route

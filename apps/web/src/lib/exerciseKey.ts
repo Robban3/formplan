@@ -1,4 +1,5 @@
-import { matchExercise } from './exerciseCatalog'
+import { getExerciseById } from './exerciseCatalog'
+import { resolveExercise, type ExerciseRef } from './exerciseResolve'
 import type { ExerciseEntry } from './exerciseHistoryStore'
 import type { PersonalRecord } from './prStore'
 
@@ -6,10 +7,16 @@ import type { PersonalRecord } from './prStore'
  * Historik och personbästa lagrades tidigare på övningens *fritextnamn*, vilket
  * gjorde att "Bänkpress" och "Bänkpress med skivstång" hamnade i två separata
  * serier — progressionen såg då aldrig att det var samma lyft. Nyckeln är nu
- * katalogens stabila id när namnet går att matcha, annars ett normaliserat namn.
+ * katalogens stabila id när övningen går att slå upp, annars ett normaliserat
+ * namn.
  *
- * OBS: typimporterna ovan är avsiktligt `import type` — de raderas vid kompilering
- * så att migrationen här kan äga båda lagringsformaten utan importcykel.
+ * Uppslagningen delas med bild-/detaljvisningen (`resolveExercise`): id först,
+ * därefter namnet. Utan den delade regeln kunde en övning visa bilden för ett
+ * id men lagra historik under ett namn som pekade på en annan övning.
+ *
+ * OBS: typimporterna av lagringsformaten är avsiktligt `import type` — de
+ * raderas vid kompilering så att migrationen här kan äga båda formaten utan
+ * importcykel.
  */
 
 /** Sätts när engångsmigrationen till id-nycklar är körd. */
@@ -31,9 +38,17 @@ export function normalizeExerciseName(name: string): string {
     .trim()
 }
 
-/** Lagringsnyckel för en övning: katalog-id när det går att matcha, annars namnet. */
-export function exerciseKey(name: string): string {
-  return matchExercise(name)?.id ?? normalizeExerciseName(name)
+/**
+ * Lagringsnyckel för en övning: katalog-id när övningen går att slå upp
+ * (`exercise_id`/`exerciseId` först, därefter namnet), annars det normaliserade
+ * namnet. Tar samma referensform som `resolveExercise`, så ett schema med id
+ * lagrar historik under exakt samma nyckel som bilden visas för.
+ */
+export function exerciseKey(ref: ExerciseRef | string | null | undefined): string {
+  const resolved = resolveExercise(ref)
+  if (resolved) return resolved.id
+  const name = typeof ref === 'string' ? ref : ref?.name ?? ''
+  return normalizeExerciseName(name)
 }
 
 /**
@@ -62,16 +77,36 @@ export function mergeExerciseEntries(prev: ExerciseEntry, next: ExerciseEntry): 
   }
 }
 
+/** JSON.parse som aldrig kastar — trasig data behandlas som "inget att migrera". */
+function parseJson<T>(raw: string | null): T | null {
+  if (!raw) return null
+  try {
+    return JSON.parse(raw) as T
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Nyckeln för en redan migrerad post lämnas orörd. `exerciseKey` skulle ge
+ * samma svar (id:t är registrerat som egen nyckel i katalogen), men den här
+ * genvägen gör en omkörning bevisligen idempotent även om namnmatchningen
+ * ändras i framtiden.
+ */
+function migratedKey(oldKey: string): string {
+  return getExerciseById(oldKey) ? oldKey : exerciseKey(oldKey)
+}
+
 function migrateHistory() {
-  const raw = localStorage.getItem(HISTORY_STORAGE_KEY)
-  if (!raw) return
-  const parsed = JSON.parse(raw) as Record<string, ExerciseEntry[]>
-  if (!parsed || typeof parsed !== 'object') return
+  const parsed = parseJson<Record<string, ExerciseEntry[]>>(
+    localStorage.getItem(HISTORY_STORAGE_KEY)
+  )
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return
 
   const out: Record<string, ExerciseEntry[]> = {}
   for (const [oldKey, entries] of Object.entries(parsed)) {
     if (!Array.isArray(entries)) continue
-    const key = exerciseKey(oldKey)
+    const key = migratedKey(oldKey)
     const byDate = new Map<string, ExerciseEntry>()
     for (const e of out[key] ?? []) byDate.set(e.date, e)
     for (const entry of entries) {
@@ -85,15 +120,13 @@ function migrateHistory() {
 }
 
 function migratePersonalRecords() {
-  const raw = localStorage.getItem(PR_STORAGE_KEY)
-  if (!raw) return
-  const parsed = JSON.parse(raw) as PersonalRecord[]
+  const parsed = parseJson<PersonalRecord[]>(localStorage.getItem(PR_STORAGE_KEY))
   if (!Array.isArray(parsed)) return
 
   const byKey = new Map<string, PersonalRecord>()
   for (const record of parsed) {
     if (!record || typeof record.exercise !== 'string') continue
-    const key = exerciseKey(record.exercise)
+    const key = migratedKey(record.exercise)
     const migrated: PersonalRecord = {
       ...record,
       exercise: key,
@@ -118,14 +151,24 @@ export function migrateExerciseKeysOnce() {
   migrationDone = true
   try {
     if (localStorage.getItem(MIGRATION_FLAG)) return
-    try {
-      migrateHistory()
-      migratePersonalRecords()
-    } finally {
-      // Sätts även om något gick fel — en trasig post ska inte ge en
-      // migration som försöker om och om igen vid varje läsning.
-      localStorage.setItem(MIGRATION_FLAG, '1')
+
+    // Varje steg körs för sig: kastar historikmigreringen får personbästa
+    // ändå sin körning. Tidigare delade de ett try, så ett fel i det första
+    // steget lämnade PR:n namnnycklade — då hittade checkAndUpdatePR aldrig
+    // det gamla rekordet och varje set utropades som nytt personbästa.
+    let allOk = true
+    for (const step of [migrateHistory, migratePersonalRecords]) {
+      try {
+        step()
+      } catch {
+        allOk = false
+      }
     }
+
+    // Flaggan sätts bara när BÅDA stegen gick igenom. Misslyckas något körs
+    // migreringen om vid nästa start (den är idempotent) i stället för att
+    // permanent lämna halvmigrerad data bakom sig.
+    if (allOk) localStorage.setItem(MIGRATION_FLAG, '1')
   } catch {
     /* localStorage blockerat — appen fungerar ändå, bara utan migrering. */
   }

@@ -389,7 +389,7 @@ function ProgramExerciseList({
         return (
           <div key={i} className="py-2.5 first:pt-0">
             <div className="flex items-center gap-2.5">
-              {catalog && <ExerciseMedia exercise={catalog} variant="thumb" />}
+              {catalog && <ExerciseMedia key={catalog.id} exercise={catalog} variant="thumb" />}
               <span className="text-sm text-stone-700 flex-1 min-w-0 truncate">{ex.name}</span>
               <span className="text-xs text-stone-400 shrink-0">{ex.sets} × {ex.reps}</span>
             </div>

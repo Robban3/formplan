@@ -14,6 +14,7 @@ import { resolveExercise } from '../../lib/exerciseResolve'
 import { ExerciseMedia } from '../../components/training/ExerciseMedia'
 import { ExerciseDetail } from '../../components/training/ExerciseDetail'
 import { getExerciseHistory } from '../../lib/exerciseHistoryStore'
+import { exerciseKey } from '../../lib/exerciseKey'
 import { recommendNextWeight, type ProgressionAdvice } from '../../lib/progression'
 
 function formatTime(seconds: number) {
@@ -44,9 +45,11 @@ export function ActiveWorkout() {
   const restRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const advanceToRef = useRef<number | null>(null)
   const finishingRef = useRef(false)
-  // previousSets[exerciseName] = last logged sets for that exercise
+  // previousSets[exerciseKey] = last logged sets for that exercise. Keyed on the
+  // catalog id (when the exercise resolves) — the same key history and PRs use,
+  // so two spellings of one lift can't split into two entries.
   const [previousSets, setPreviousSets] = useState<Record<string, PrevSet[]>>({})
-  // recommendations[exerciseName] = automatic progression suggestion (or null)
+  // recommendations[exerciseKey] = automatic progression suggestion (or null)
   const [recommendations, setRecommendations] = useState<Record<string, ProgressionAdvice | null>>({})
   // Övningsbeskrivningen (bild + muskelkarta) är hopfälld som standard så att
   // set-loggningen aldrig trängs undan.
@@ -60,26 +63,30 @@ export function ActiveWorkout() {
   // Fetch exercise history for all exercises in this workout once on mount.
   useEffect(() => {
     if (!state) return
-    const names = [...new Set(state.exercises.map((e) => e.name))]
+    // One entry per storage key — two spellings of the same lift share history.
+    const unique = new Map<string, (typeof state.exercises)[number]>()
+    for (const e of state.exercises) {
+      const key = exerciseKey(e)
+      if (!unique.has(key)) unique.set(key, e)
+    }
 
     // Automatic progression from locally tracked history (offline-friendly).
     const recs: Record<string, ProgressionAdvice | null> = {}
-    for (const name of names) {
-      const targetReps = state.exercises.find((e) => e.name === name)?.targetReps ?? ''
-      recs[name] = recommendNextWeight(getExerciseHistory(name), targetReps)
+    for (const [key, e] of unique) {
+      recs[key] = recommendNextWeight(getExerciseHistory(e), e.targetReps)
     }
     setRecommendations(recs)
 
     Promise.all(
-      names.map((name) =>
+      [...unique].map(([key, e]) =>
         workoutApi
-          .getExerciseHistory(name)
-          .then(({ history }) => ({ name, sets: history[0]?.sets ?? [] }))
-          .catch(() => ({ name, sets: [] }))
+          .getExerciseHistory(e)
+          .then(({ history }) => ({ key, sets: history[0]?.sets ?? [] }))
+          .catch(() => ({ key, sets: [] }))
       )
     ).then((results) => {
       const map: Record<string, PrevSet[]> = {}
-      for (const r of results) map[r.name] = r.sets
+      for (const r of results) map[r.key] = r.sets
       setPreviousSets(map)
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -268,6 +275,9 @@ export function ActiveWorkout() {
   // Katalogövning för bild/muskelkarta — id först, annars namnet. Går den inte
   // att lösa upp visas ingen bild alls (aldrig en annan övnings bild).
   const catalogEx = resolveExercise(ex)
+  // Samma nyckel som historik/PR lagras på — id först, annars namnet.
+  const exKey = exerciseKey(ex)
+  const prevSetsForEx = previousSets[exKey]
   const isCardio = isCardioExercise(ex.name)
   const showWeight = exerciseUsesWeight(ex.name, ex.targetReps)
   const setGrid = showWeight || isCardio
@@ -289,7 +299,7 @@ export function ActiveWorkout() {
     // converting again would corrupt PRs for imperial users.
     if (set && showWeight && set.weight_kg && set.weight_kg > 0) {
       const reps = set.reps || fallbackReps
-      const isNewPR = checkAndUpdatePR(ex.name, set.weight_kg, reps)
+      const isNewPR = checkAndUpdatePR(ex, set.weight_kg, reps)
       if (isNewPR) {
         setTimeout(() => toast.success(`🏆 Nytt personbästa på ${ex.name}!`), 100)
       }
@@ -427,6 +437,9 @@ export function ActiveWorkout() {
       duration_seconds: finalElapsed,
       exercises: snapshot.exercises.map((e) => ({
         name: e.name,
+        // Följer med till den lokala historiken (och API:t) så nyckeln blir
+        // katalogens id i stället för fritextnamnet.
+        ...(e.exerciseId ? { exercise_id: e.exerciseId } : {}),
         sets: e.sets.map((x) => ({
           reps: x.reps,
           weight_kg: x.weight_kg,
@@ -546,7 +559,7 @@ export function ActiveWorkout() {
                   aria-expanded={showDetail}
                   className="flex items-center gap-2 mt-0.5"
                 >
-                  <ExerciseMedia exercise={catalogEx} variant="thumb" />
+                  <ExerciseMedia key={catalogEx.id} exercise={catalogEx} variant="thumb" />
                   <h2 className="text-xl font-bold text-stone-900">{ex.name}</h2>
                   <ChevronDownIcon
                     className={`w-4 h-4 stroke-stone-300 transition-transform ${
@@ -563,7 +576,7 @@ export function ActiveWorkout() {
             </div>
             {(() => {
               if (isCardio) return null
-              const prev = previousSets[ex.name]
+              const prev = prevSetsForEx
               if (!prev || prev.length === 0) return null
               const kg = prev[0]?.weight_kg
               const reps = prev[0]?.reps
@@ -591,8 +604,8 @@ export function ActiveWorkout() {
         )}
 
         {/* Automatic progression suggestion */}
-        {showWeight && recommendations[ex.name] && (() => {
-          const rec = recommendations[ex.name]!
+        {showWeight && recommendations[exKey] && (() => {
+          const rec = recommendations[exKey]!
           const applied = ex.sets.some((s) => !s.done && s.weight_kg != null && Math.abs(s.weight_kg - rec.recommendedWeight_kg) < 0.05)
           return (
             <div className="flex items-center gap-3 bg-forest-50 border border-forest-200 rounded-2xl px-4 py-3 mb-4">
@@ -690,8 +703,8 @@ export function ActiveWorkout() {
                     <input
                       type="number"
                       inputMode="decimal"
-                      placeholder={previousSets[ex.name]?.[si]?.weight_kg != null
-                        ? String(toDisplay(previousSets[ex.name]![si]!.weight_kg!))
+                      placeholder={prevSetsForEx?.[si]?.weight_kg != null
+                        ? String(toDisplay(prevSetsForEx[si]!.weight_kg!))
                         : 'Valfritt'}
                       value={set.weight_kg != null ? toDisplay(set.weight_kg) : ''}
                       onChange={(e) => updateSet(si, 'weight_kg', e.target.value)}
@@ -746,7 +759,7 @@ export function ActiveWorkout() {
             {(() => {
               const nextCatalog = resolveExercise(nextIncompleteEx)
               return nextCatalog ? (
-                <ExerciseMedia exercise={nextCatalog} variant="thumb" />
+                <ExerciseMedia key={nextCatalog.id} exercise={nextCatalog} variant="thumb" />
               ) : null
             })()}
             <div className="text-stone-400 text-xs">Nästa övning</div>

@@ -44,7 +44,7 @@ function ExerciseRow({ exercise }: { exercise: Exercise }) {
   return (
     <div className="bg-white rounded-2xl p-4 shadow-sm border border-stone-100">
       <div className="flex items-center gap-3">
-        {catalog && <ExerciseMedia exercise={catalog} variant="thumb" />}
+        {catalog && <ExerciseMedia key={catalog.id} exercise={catalog} variant="thumb" />}
         <div className="flex-1 min-w-0">
           {catalog ? (
             <button

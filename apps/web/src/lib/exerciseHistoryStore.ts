@@ -1,4 +1,5 @@
 import { exerciseKey, mergeExerciseEntries, migrateExerciseKeysOnce } from './exerciseKey'
+import type { ExerciseRef } from './exerciseResolve'
 
 const KEY = 'formplan_exercise_history'
 
@@ -24,11 +25,12 @@ function save(h: ExerciseHistory) {
 }
 
 /**
- * History for an exercise. `exercise` is the free-text name as shown in the UI;
- * it is resolved to the catalog id internally, so "Bänkpress" and "Bänkpress
- * med skivstång" share one series instead of splitting into two.
+ * History for an exercise. `exercise` is either the free-text name shown in the
+ * UI or a reference carrying `exercise_id`/`exerciseId`; it is resolved to the
+ * catalog id internally, so "Bänkpress" and "Bänkpress med skivstång" share one
+ * series instead of splitting into two.
  */
-export function getExerciseHistory(exercise: string): ExerciseEntry[] {
+export function getExerciseHistory(exercise: ExerciseRef | string): ExerciseEntry[] {
   const h = load()
   return (h[exerciseKey(exercise)] ?? []).sort((a, b) => a.date.localeCompare(b.date))
 }
@@ -39,7 +41,7 @@ export function getAllTrackedExercises(): string[] {
 }
 
 export function recordExerciseSession(
-  exercise: string,
+  exercise: ExerciseRef | string,
   date: string,
   sets: { reps: number; weight_kg: number | null; done: boolean }[]
 ) {

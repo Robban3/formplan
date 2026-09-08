@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import type { CatalogExercise } from '../../lib/exerciseCatalog'
 import { DumbbellIcon } from '../ui/Icons'
 
@@ -21,19 +21,86 @@ export interface ExerciseMediaProps {
   className?: string
 }
 
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== 'undefined' &&
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  )
+// ── Delad bildväxlare ─────────────────────────────────────────────────────────
+// Övningslistorna kan visa 80 kort samtidigt. Med ett eget setInterval per kort
+// blev det ~67 state-uppdateringar/sekund på en telefon; nu driver EN timer alla
+// instanser. Timern startar först när någon lyssnar och stoppas när sista
+// instansen försvinner (eller när användaren slår på "reducera rörelse").
+
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
+
+function motionQuery(): MediaQueryList | null {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return null
+  return window.matchMedia(REDUCED_MOTION_QUERY)
 }
 
-/** Stabil fasförskjutning (0–FRAME_MS) härledd ur övningens id. */
-function phaseOffset(id: string): number {
+function prefersReducedMotion(): boolean {
+  return motionQuery()?.matches ?? false
+}
+
+let tickCount = 0
+let intervalId: ReturnType<typeof setInterval> | null = null
+let motionListenerAttached = false
+const tickListeners = new Set<() => void>()
+
+function emitTick() {
+  for (const listener of tickListeners) listener()
+}
+
+function startTicker() {
+  if (intervalId !== null || prefersReducedMotion() || tickListeners.size === 0) return
+  intervalId = setInterval(() => {
+    tickCount++
+    emitTick()
+  }, FRAME_MS)
+}
+
+function stopTicker() {
+  if (intervalId !== null) clearInterval(intervalId)
+  intervalId = null
+}
+
+/**
+ * Följ ändringar i prefers-reduced-motion i stället för att bara läsa av den en
+ * gång: slår användaren på inställningen mitt i sessionen ska bilderna stanna
+ * direkt (och börja röra sig igen om den slås av).
+ */
+function attachMotionListener() {
+  if (motionListenerAttached) return
+  const mql = motionQuery()
+  if (!mql) return
+  motionListenerAttached = true
+  mql.addEventListener('change', () => {
+    if (prefersReducedMotion()) {
+      stopTicker()
+      // Frys på startläget så alla kort visar samma (första) bildruta.
+      tickCount = 0
+      emitTick()
+    } else {
+      startTicker()
+    }
+  })
+}
+
+function subscribeTick(listener: () => void): () => void {
+  tickListeners.add(listener)
+  attachMotionListener()
+  startTicker()
+  return () => {
+    tickListeners.delete(listener)
+    if (tickListeners.size === 0) stopTicker()
+  }
+}
+
+function getTick(): number {
+  return tickCount
+}
+
+/** Stabil fasgrupp (0 eller 1) härledd ur övningens id. */
+function phase(id: string): number {
   let h = 0
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 100000
-  return h % FRAME_MS
+  return h % 2
 }
 
 /** Neutral platshållare — används när ingen bild kan visas. */
@@ -54,32 +121,19 @@ export function ExerciseMedia({
   showName = true,
   className = '',
 }: ExerciseMediaProps) {
-  const [frame, setFrame] = useState(0)
-  const [failed, setFailed] = useState<[boolean, boolean]>([false, false])
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const startRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const tick = useSyncExternalStore(subscribeTick, getTick, () => 0)
+  // Fasgrupp per övning, så en hel lista inte växlar helt i takt.
+  const frame = (tick + phase(exercise.id)) % 2
 
-  // Nollställ när övningen byts (samma komponent återanvänds i listor).
-  useEffect(() => {
-    setFrame(0)
-    setFailed([false, false])
-  }, [exercise.id])
-
-  useEffect(() => {
-    if (prefersReducedMotion()) return
-    const tick = () => setFrame((f) => (f === 0 ? 1 : 0))
-    // Fasförskjutning per övning, så en hel lista inte blinkar i takt.
-    startRef.current = setTimeout(() => {
-      tick()
-      timerRef.current = setInterval(tick, FRAME_MS)
-    }, phaseOffset(exercise.id))
-    return () => {
-      if (startRef.current) clearTimeout(startRef.current)
-      if (timerRef.current) clearInterval(timerRef.current)
-      startRef.current = null
-      timerRef.current = null
-    }
-  }, [exercise.id])
+  // Fel-flaggorna hör ihop med en *specifik* övning. Utan id:t i state skulle
+  // en tidigare övnings misslyckade bilder visa platshållaren en frame innan en
+  // nollställande effekt hann köra.
+  const [failedFor, setFailedFor] = useState<{ id: string; flags: [boolean, boolean] }>({
+    id: exercise.id,
+    flags: [false, false],
+  })
+  const failed: [boolean, boolean] =
+    failedFor.id === exercise.id ? failedFor.flags : [false, false]
 
   const bothFailed = failed[0] && failed[1]
   // Om den aktuella rutan saknas visar vi övningens andra ruta i stället.
@@ -107,10 +161,11 @@ export function ExerciseMedia({
           loading="lazy"
           decoding="async"
           onError={() =>
-            setFailed((prev) => {
-              const next: [boolean, boolean] = [prev[0], prev[1]]
-              next[i] = true
-              return next
+            setFailedFor((prev) => {
+              const flags: [boolean, boolean] =
+                prev.id === exercise.id ? [prev.flags[0], prev.flags[1]] : [false, false]
+              flags[i] = true
+              return { id: exercise.id, flags }
             })
           }
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${

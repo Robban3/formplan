@@ -1,5 +1,7 @@
 /** Client-side mock — fullständigt schema utan API. Id-format: mock-{goal} */
 
+import { getExerciseById } from './exerciseCatalog'
+
 export type MockGoal = 'lose_weight' | 'build_muscle' | 'maintain' | 'improve_endurance'
 
 export const MOCK_GOALS: MockGoal[] = ['lose_weight', 'build_muscle', 'maintain', 'improve_endurance']
@@ -17,11 +19,34 @@ export function parseMockPlanId(id: string): MockGoal | null {
 }
 
 interface Exercise {
+  /** Stabilt katalog-id — samma form som en AI-genererad plan. */
+  exercise_id: string
   name: string
   sets: number
   reps: string
   rest_seconds: number
   notes?: string
+}
+
+/**
+ * Bygger en övning ur den kurerade katalogen så mockplanen har exakt samma form
+ * som en riktig plan (giltigt exercise_id + kanoniskt svenskt namn) och därmed
+ * alltid visar rätt bild. Speglar `ex()` i apps/api/src/lib/mockPlan.ts.
+ *
+ * Ett okänt id kastar direkt vid modulinläsning i stället för att tyst ge
+ * mockdata som produktionskoden aldrig skulle acceptera.
+ */
+function ex(id: string, sets: number, reps: string, rest_seconds: number, notes?: string): Exercise {
+  const c = getExerciseById(id)
+  if (!c) throw new Error(`mockPlan: okänt exercise_id "${id}"`)
+  return {
+    exercise_id: c.id,
+    name: c.name,
+    sets,
+    reps,
+    rest_seconds,
+    ...(notes ? { notes } : {}),
+  }
 }
 
 interface WorkoutContent {
@@ -74,11 +99,11 @@ function buildGoalTemplates(): Record<MockGoal, GoalTemplate> {
         focus: 'Circuit, hög puls',
         duration_minutes: 45,
         exercises: [
-          { name: 'Burpees', sets: 4, reps: '12', rest_seconds: 45 },
-          { name: 'Kettlebell swings', sets: 4, reps: '20', rest_seconds: 45 },
-          { name: 'Goblet squat', sets: 3, reps: '15', rest_seconds: 60 },
-          { name: 'Mountain climbers', sets: 3, reps: '40 s', rest_seconds: 30 },
-          { name: 'Plankan', sets: 3, reps: '45 s', rest_seconds: 30 },
+          ex('hopprep', 4, '60 s', 45),
+          ex('kettlebell-swing', 4, '20', 45),
+          ex('goblet-squat', 3, '15', 60),
+          ex('mountain-climbers', 3, '40 s', 30),
+          ex('plankan', 3, '45 s', 30),
         ],
       },
       2: {
@@ -86,10 +111,10 @@ function buildGoalTemplates(): Record<MockGoal, GoalTemplate> {
         focus: 'Löpband, intervaller',
         duration_minutes: 40,
         exercises: [
-          { name: 'Löpintervaller', sets: 6, reps: '1 min hårt / 1 min lätt', rest_seconds: 0, notes: 'På löpband eller utomhus' },
-          { name: 'Russian twist', sets: 3, reps: '20', rest_seconds: 45 },
-          { name: 'Bicycle crunch', sets: 3, reps: '20/sida', rest_seconds: 45 },
-          { name: 'Dead bug', sets: 3, reps: '12/sida', rest_seconds: 45 },
+          ex('lopning', 6, '1 min hårt / 1 min lätt', 0, 'På löpband eller utomhus'),
+          ex('russian-twist', 3, '20', 45),
+          ex('cykelcrunch', 3, '20/sida', 45),
+          ex('dead-bug', 3, '12/sida', 45),
         ],
       },
       3: { notes: 'Vila — promenad 45–60 min i måttlig takt.' },
@@ -98,10 +123,10 @@ function buildGoalTemplates(): Record<MockGoal, GoalTemplate> {
         focus: 'Muskler bibehålls under deficit',
         duration_minutes: 50,
         exercises: [
-          { name: 'Knäböj med hantlar', sets: 4, reps: '12', rest_seconds: 75 },
-          { name: 'Hantelrodd', sets: 3, reps: '12', rest_seconds: 75 },
-          { name: 'Hantelpress', sets: 3, reps: '12', rest_seconds: 75 },
-          { name: 'Utfallsgång', sets: 3, reps: '12/ben', rest_seconds: 60 },
+          ex('goblet-squat', 4, '12', 75),
+          ex('hantelrodd', 3, '12', 75),
+          ex('hantelpress-brost', 3, '12', 75),
+          ex('utfallssteg', 3, '12/ben', 60, 'Med hantlar'),
         ],
       },
       5: {
@@ -109,9 +134,9 @@ function buildGoalTemplates(): Record<MockGoal, GoalTemplate> {
         focus: 'Lätt rörelse, låg intensitet',
         duration_minutes: 35,
         exercises: [
-          { name: 'Promenad eller cykel', sets: 1, reps: '30 min', rest_seconds: 0 },
-          { name: 'Mobilitet höfter & axlar', sets: 1, reps: '10 min', rest_seconds: 0 },
-          { name: 'Stretch', sets: 1, reps: '10 min', rest_seconds: 0 },
+          ex('gang', 1, '30 min', 0, 'Rask promenad'),
+          ex('cykling', 1, '10 min', 0, 'Lätt motstånd'),
+          ex('dead-bug', 2, '10/sida', 30),
         ],
       },
       6: { notes: 'Vila. Fokus på sömn och återhämtning.' },
@@ -127,11 +152,11 @@ function buildGoalTemplates(): Record<MockGoal, GoalTemplate> {
         focus: 'Tryckrörelser, hypertrofi',
         duration_minutes: 60,
         exercises: [
-          { name: 'Bänkpress', sets: 4, reps: '6–8', rest_seconds: 120 },
-          { name: 'Sned bänkpress', sets: 3, reps: '8–10', rest_seconds: 90 },
-          { name: 'Axelpress', sets: 3, reps: '10', rest_seconds: 90 },
-          { name: 'Triceps dips', sets: 3, reps: '10–12', rest_seconds: 75 },
-          { name: 'Triceps pushdown', sets: 3, reps: '12–15', rest_seconds: 60 },
+          ex('bankpress', 4, '6–8', 120),
+          ex('lutande-bankpress', 3, '8–10', 90),
+          ex('axelpress', 3, '10', 90),
+          ex('tricepsdips', 3, '10–12', 75),
+          ex('tricepspress', 3, '12–15', 60),
         ],
       },
       2: {
@@ -139,11 +164,11 @@ function buildGoalTemplates(): Record<MockGoal, GoalTemplate> {
         focus: 'Quads, glutes, hamstrings',
         duration_minutes: 65,
         exercises: [
-          { name: 'Knäböj', sets: 4, reps: '6–8', rest_seconds: 150 },
-          { name: 'Rumänsk marklyft', sets: 4, reps: '8–10', rest_seconds: 120 },
-          { name: 'Benpress', sets: 3, reps: '10–12', rest_seconds: 90 },
-          { name: 'Hip thrust', sets: 3, reps: '12', rest_seconds: 75 },
-          { name: 'Vadpress', sets: 4, reps: '15', rest_seconds: 60 },
+          ex('knaboj', 4, '6–8', 150),
+          ex('rumansk-marklyft', 4, '8–10', 120),
+          ex('benpress', 3, '10–12', 90),
+          ex('hip-thrust', 3, '12', 75),
+          ex('vadpress-staende', 4, '15', 60),
         ],
       },
       3: { notes: 'Vila eller lätt promenad.' },
@@ -152,11 +177,11 @@ function buildGoalTemplates(): Record<MockGoal, GoalTemplate> {
         focus: 'Dragrörelser, tjocklek',
         duration_minutes: 60,
         exercises: [
-          { name: 'Marklyft', sets: 4, reps: '5', rest_seconds: 150, notes: 'Tungt, kontrollerat' },
-          { name: 'Lat pulldown', sets: 4, reps: '8–10', rest_seconds: 90 },
-          { name: 'Enarms hantelrodd', sets: 3, reps: '10/arm', rest_seconds: 75 },
-          { name: 'Hantelcurl', sets: 3, reps: '10–12', rest_seconds: 60 },
-          { name: 'Face pull', sets: 3, reps: '15', rest_seconds: 60 },
+          ex('marklyft', 4, '5', 150, 'Tungt, kontrollerat'),
+          ex('latsdrag', 4, '8–10', 90),
+          ex('hantelrodd', 3, '10/arm', 75),
+          ex('bicepscurl', 3, '10–12', 60),
+          ex('face-pull', 3, '15', 60),
         ],
       },
       5: {
@@ -164,10 +189,10 @@ function buildGoalTemplates(): Record<MockGoal, GoalTemplate> {
         focus: 'Volym, pump',
         duration_minutes: 50,
         exercises: [
-          { name: 'Arnold press', sets: 3, reps: '10', rest_seconds: 75 },
-          { name: 'Lateral raises', sets: 4, reps: '15', rest_seconds: 60 },
-          { name: 'Hammer curl', sets: 3, reps: '12', rest_seconds: 60 },
-          { name: 'Skull crushers', sets: 3, reps: '12', rest_seconds: 60 },
+          ex('arnoldpress', 3, '10', 75),
+          ex('sidolyft', 4, '15', 60),
+          ex('hammarcurl', 3, '12', 60),
+          ex('skullcrushers', 3, '12', 60),
         ],
       },
       6: { notes: 'Aktiv vila — stretching 20 min.' },
@@ -183,10 +208,10 @@ function buildGoalTemplates(): Record<MockGoal, GoalTemplate> {
         focus: 'Styrka & rörlighet',
         duration_minutes: 50,
         exercises: [
-          { name: 'Goblet squat', sets: 3, reps: '12', rest_seconds: 75 },
-          { name: 'Hantelrodd', sets: 3, reps: '12', rest_seconds: 75 },
-          { name: 'Hantelpress', sets: 3, reps: '12', rest_seconds: 75 },
-          { name: 'Plankan', sets: 3, reps: '45 s', rest_seconds: 45 },
+          ex('goblet-squat', 3, '12', 75),
+          ex('hantelrodd', 3, '12', 75),
+          ex('hantelpress-brost', 3, '12', 75),
+          ex('plankan', 3, '45 s', 45),
         ],
       },
       2: { notes: 'Vila eller yoga 30 min.' },
@@ -195,9 +220,9 @@ function buildGoalTemplates(): Record<MockGoal, GoalTemplate> {
         focus: 'Hjärta & uthållighet',
         duration_minutes: 40,
         exercises: [
-          { name: 'Cykling eller rodd', sets: 1, reps: '25 min', rest_seconds: 0, notes: 'Stadig puls, zon 2' },
-          { name: 'Utfallsgång', sets: 3, reps: '12/ben', rest_seconds: 60 },
-          { name: 'Push-ups', sets: 3, reps: 'max', rest_seconds: 60 },
+          ex('cykling', 1, '25 min', 0, 'Stadig puls, zon 2'),
+          ex('utfallssteg', 3, '12/ben', 60),
+          ex('armhavningar', 3, 'max', 60),
         ],
       },
       4: { notes: 'Vila — promenad i naturen.' },
@@ -206,10 +231,10 @@ function buildGoalTemplates(): Record<MockGoal, GoalTemplate> {
         focus: 'Vardagsrörelser',
         duration_minutes: 45,
         exercises: [
-          { name: 'Kettlebell swings', sets: 4, reps: '15', rest_seconds: 60 },
-          { name: 'Farmer walk', sets: 3, reps: '40 m', rest_seconds: 60 },
-          { name: 'Step-ups', sets: 3, reps: '12/ben', rest_seconds: 60 },
-          { name: 'Bird dog', sets: 3, reps: '10/sida', rest_seconds: 45 },
+          ex('kettlebell-swing', 4, '15', 60),
+          ex('shrugs', 3, '12', 60, 'Tungt grepp, kontrollerad topp'),
+          ex('step-up', 3, '12/ben', 60),
+          ex('dead-bug', 3, '10/sida', 45),
         ],
       },
       6: { notes: 'Aktiv vila.' },
@@ -225,9 +250,9 @@ function buildGoalTemplates(): Record<MockGoal, GoalTemplate> {
         focus: 'VO2 max, snabbhet',
         duration_minutes: 45,
         exercises: [
-          { name: 'Uppvärmning', sets: 1, reps: '10 min lätt', rest_seconds: 0 },
-          { name: 'Intervaller', sets: 8, reps: '400 m hårt', rest_seconds: 90, notes: 'Löpning eller roddmaskin' },
-          { name: 'Nedvarvning', sets: 1, reps: '5 min', rest_seconds: 0 },
+          ex('gang', 1, '10 min', 0, 'Uppvärmning i lätt tempo'),
+          ex('lopning', 8, '400 m hårt', 90, 'Intervaller'),
+          ex('gang', 1, '5 min', 0, 'Nedvarvning'),
         ],
       },
       2: {
@@ -235,8 +260,10 @@ function buildGoalTemplates(): Record<MockGoal, GoalTemplate> {
         focus: 'Laktattröskel',
         duration_minutes: 50,
         exercises: [
-          { name: 'Tempo', sets: 1, reps: '25–30 min', rest_seconds: 0, notes: 'Utmanande men hållbar takt' },
-          { name: 'Core-circuit', sets: 3, reps: 'runda', rest_seconds: 60, notes: 'Planka, dead bug, side plank' },
+          ex('lopning', 1, '25–30 min', 0, 'Utmanande men hållbar takt'),
+          ex('plankan', 3, '45 s', 45, 'Core-circuit'),
+          ex('sidoplanka', 3, '30 s/sida', 45, 'Core-circuit'),
+          ex('dead-bug', 3, '10/sida', 45, 'Core-circuit'),
         ],
       },
       3: { notes: 'Vila eller lätt cykling 30 min.' },
@@ -245,7 +272,7 @@ function buildGoalTemplates(): Record<MockGoal, GoalTemplate> {
         focus: 'Aerob bas, uthållighet',
         duration_minutes: 60,
         exercises: [
-          { name: 'Långlöpning/cykling', sets: 1, reps: '45–60 min', rest_seconds: 0, notes: 'Låg intensitet, zon 2' },
+          ex('lopning', 1, '45–60 min', 0, 'Låg intensitet, zon 2'),
         ],
       },
       5: {
@@ -253,10 +280,10 @@ function buildGoalTemplates(): Record<MockGoal, GoalTemplate> {
         focus: 'Benstyrka utan trötthet',
         duration_minutes: 40,
         exercises: [
-          { name: 'Utfallsgång', sets: 3, reps: '12/ben', rest_seconds: 60 },
-          { name: 'Enbens Romanian deadlift', sets: 3, reps: '10/ben', rest_seconds: 60 },
-          { name: 'Calf raises', sets: 3, reps: '15', rest_seconds: 45 },
-          { name: 'Plankan', sets: 3, reps: '45 s', rest_seconds: 45 },
+          ex('utfallssteg', 3, '12/ben', 60),
+          ex('rumansk-marklyft', 3, '10', 60, 'Lätt vikt, fokus på teknik'),
+          ex('vadpress-staende', 3, '15', 45),
+          ex('plankan', 3, '45 s', 45),
         ],
       },
       6: {
@@ -264,7 +291,7 @@ function buildGoalTemplates(): Record<MockGoal, GoalTemplate> {
         focus: 'Lekfull variation i tempo',
         duration_minutes: 40,
         exercises: [
-          { name: 'Fartlek', sets: 1, reps: '30 min', rest_seconds: 0, notes: 'Växla mellan snabbt och lugnt' },
+          ex('lopning', 1, '30 min', 0, 'Fartlek — växla mellan snabbt och lugnt'),
         ],
       },
       7: { notes: 'Vila. Stretch och foam rolling.' },

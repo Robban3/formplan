@@ -233,7 +233,7 @@ export function PlanPage() {
                     <span className="w-6 h-6 rounded-lg bg-slate-700 flex items-center justify-center text-xs text-slate-400 flex-shrink-0 mt-0.5">
                       {i + 1}
                     </span>
-                    {catalog && <ExerciseMedia exercise={catalog} variant="thumb" />}
+                    {catalog && <ExerciseMedia key={catalog.id} exercise={catalog} variant="thumb" />}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm">{ex.name}</p>
                       <p className="text-slate-400 text-xs">{ex.sets} set × {ex.reps} · {ex.rest_seconds}s vila</p>

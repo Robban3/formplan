@@ -62,6 +62,34 @@ describe('exerciseKey', () => {
     expect(exerciseKey('Xyzzy quux')).toBe(normalizeExerciseName('Xyzzy quux'))
     expect(normalizeExerciseName('  Höft-Lyft!! ')).toBe('hoft lyft')
   })
+
+  it('prefers the catalog id on a reference, in both naming styles', () => {
+    expect(exerciseKey({ exercise_id: 'bankpress' })).toBe('bankpress')
+    // Från den lokala pass-loggen (camelCase).
+    expect(exerciseKey({ name: 'Bänkpress', exerciseId: 'bankpress' })).toBe('bankpress')
+    // Id:t vinner över ett namn som pekar på en annan övning.
+    expect(exerciseKey({ name: 'Knäböj', exercise_id: 'bankpress' })).toBe('bankpress')
+  })
+
+  it('falls back to the name when the id is unknown', () => {
+    expect(exerciseKey({ name: 'Bänkpress', exercise_id: 'finns-inte' })).toBe('bankpress')
+    expect(exerciseKey({ name: 'Xyzzy quux', exercise_id: 'finns-inte' })).toBe('xyzzy quux')
+  })
+
+  it('never invents a key for an empty or unresolvable reference', () => {
+    expect(exerciseKey({})).toBe('')
+    expect(exerciseKey(null)).toBe('')
+    expect(exerciseKey('💪')).toBe('')
+  })
+})
+
+describe('ref-keyed reads', () => {
+  it('reads the same series whether the ref carries an id or only a name', () => {
+    const byName = getExerciseHistory('Bänkpress')
+    expect(getExerciseHistory({ exercise_id: 'bankpress' })).toEqual(byName)
+    expect(getExerciseHistory({ name: 'Bänkpress med skivstång' })).toEqual(byName)
+    expect(getPRForExercise({ exerciseId: 'bankpress' })?.exercise).toBe('bankpress')
+  })
 })
 
 describe('one-time migration to id keys', () => {

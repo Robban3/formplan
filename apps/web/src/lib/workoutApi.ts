@@ -7,6 +7,7 @@ import {
   replaceLocalSession,
 } from './workoutSessionStore'
 import { notifyWorkoutLogged } from './challengeEvents'
+import { resolveExercise, type ExerciseRef } from './exerciseResolve'
 
 export interface SessionSetInput {
   reps: number
@@ -18,6 +19,8 @@ export interface SessionSetInput {
 
 export interface SessionExerciseInput {
   name: string
+  /** Stabilt katalog-id när passet bär ett — historik/PR nycklas på det. */
+  exercise_id?: string
   sets: SessionSetInput[]
 }
 
@@ -136,11 +139,24 @@ export const workoutApi = {
     }
   },
 
-  getExerciseHistory: async (name: string) => {
+  /**
+   * Sessions containing this exercise, newest first. The catalog id is sent
+   * alongside the name when the exercise resolves, so the API can match on the
+   * stable id (and thus still find the lift after it canonicalises a name).
+   * The name is always sent as a fallback — an API that ignores `exercise_id`
+   * behaves exactly as before.
+   */
+  getExerciseHistory: async (exercise: ExerciseRef | string) => {
+    const name = (typeof exercise === 'string' ? exercise : exercise.name ?? '').trim()
+    const id = resolveExercise(exercise)?.id
+    if (!name && !id) return { history: [] }
+    const params = new URLSearchParams()
+    if (name) params.set('name', name)
+    if (id) params.set('exercise_id', id)
     try {
       return await request<{
         history: { date: string; sets: { reps: number; weight_kg: number | null }[] }[]
-      }>(`/workout/exercise-history?name=${encodeURIComponent(name)}`)
+      }>(`/workout/exercise-history?${params.toString()}`)
     } catch {
       return { history: [] }
     }

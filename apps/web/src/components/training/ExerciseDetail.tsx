@@ -34,7 +34,7 @@ export interface ExerciseDetailProps {
 export function ExerciseDetail({ exercise, className = '' }: ExerciseDetailProps) {
   return (
     <div className={`space-y-3 ${className}`}>
-      <ExerciseMedia exercise={exercise} variant="card" showName={false} />
+      <ExerciseMedia key={exercise.id} exercise={exercise} variant="card" showName={false} />
 
       <div>
         <h3 className="font-semibold text-stone-900">{exercise.name}</h3>

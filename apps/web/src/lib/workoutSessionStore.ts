@@ -123,7 +123,9 @@ export function addLocalSession(input: LogSessionInput): WorkoutSession {
   // Store per-exercise history for progression charts (local day key)
   const date = dateKey(new Date(session.completed_at))
   for (const ex of input.exercises) {
-    recordExerciseSession(ex.name, date, ex.sets)
+    // Skicka hela referensen: bär passet ett katalog-id nycklas historiken på
+    // det (samma nyckel som bilden slås upp med), annars på namnet.
+    recordExerciseSession({ name: ex.name, exercise_id: ex.exercise_id }, date, ex.sets)
   }
 
   notify()

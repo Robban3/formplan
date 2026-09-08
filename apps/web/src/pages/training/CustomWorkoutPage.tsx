@@ -4,8 +4,19 @@ import { ChevronLeftIcon, PlusIcon, XIcon, PlayIcon, DumbbellIcon } from '../../
 import { workoutStore } from '../../store/workoutStore'
 import type { ExerciseLog } from '../../store/workoutStore'
 import { isCardioExercise, exerciseUsesWeight } from '../../lib/exerciseLog'
+import { EXERCISE_CATALOG, EXERCISE_CATEGORIES } from '../../lib/exerciseCatalog'
+import { resolveExercise } from '../../lib/exerciseResolve'
+import { normalizeExerciseName } from '../../lib/exerciseKey'
 
-interface Exercise { name: string; sets: number; reps: string; rest_seconds: number; weight_kg?: number | null }
+interface Exercise {
+  name: string
+  /** Katalog-id när övningen kommer från katalogen — ger rätt bild och historiknyckel. */
+  exercise_id?: string
+  sets: number
+  reps: string
+  rest_seconds: number
+  weight_kg?: number | null
+}
 interface CustomWorkout { id: string; name: string; exercises: Exercise[]; createdAt: string }
 
 const KEY = 'formplan_custom_workouts'
@@ -16,15 +27,20 @@ function loadWorkouts(): CustomWorkout[] {
 }
 function saveWorkouts(ws: CustomWorkout[]) { localStorage.setItem(KEY, JSON.stringify(ws)) }
 
-const EXERCISE_PRESETS = [
-  'Knäböj','Bänkpress','Marklyft','Axelpress','Hantelrodd','Lat pulldown',
-  'Bicep curl','Triceps dips','Utfallsgång','Hip thrust','Vadpress',
-  'Push-ups','Pull-ups','Plankan','Rygglyft','Sit-ups',
-  'Kettlebell swings','Farmer walk','Goblet squat','Romanian deadlift',
-  // Kondition (loggas med tid/distans)
-  'Löpning','Löpband','Cykling','Spinning','Roddmaskin','Crosstrainer',
-  'Stairmaster','Promenad','Hopprep','Simning',
-]
+/**
+ * Förslagen härleds ur katalogen i stället för en handskriven namnlista. En
+ * handskriven lista kan innehålla namn som inte finns i katalogen (t.ex.
+ * "Triceps dips") — då fick övningen fel eller ingen bild. Id:t sparas på
+ * övningen, så uppslagningen sedan är exakt i stället för luddig.
+ */
+const CATEGORY_ORDER = new Map<string, number>(EXERCISE_CATEGORIES.map((c, i) => [c, i]))
+const EXERCISE_PRESETS: { id: string; name: string }[] = [...EXERCISE_CATALOG]
+  .sort(
+    (a, b) =>
+      (CATEGORY_ORDER.get(a.category) ?? 99) - (CATEGORY_ORDER.get(b.category) ?? 99) ||
+      a.name.localeCompare(b.name, 'sv')
+  )
+  .map((ex) => ({ id: ex.id, name: ex.name }))
 
 export function CustomWorkoutPage() {
   const navigate = useNavigate()
@@ -34,25 +50,46 @@ export function CustomWorkoutPage() {
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [addingEx, setAddingEx] = useState(false)
   const [exName, setExName] = useState('')
+  // Id:t sätts när övningen valts bland förslagen; fritext löses upp vid tillägg.
+  const [exId, setExId] = useState<string | null>(null)
   const [exSets, setExSets] = useState('3')
   const [exReps, setExReps] = useState('10')
   const [exRest, setExRest] = useState('60')
   const [exWeight, setExWeight] = useState('')
+  const [exError, setExError] = useState<string | null>(null)
 
   function reload() { setWorkouts(loadWorkouts()) }
+
+  function resetExerciseForm() {
+    setExName('')
+    setExId(null)
+    setExWeight('')
+    setExError(null)
+  }
 
   function addExercise() {
     const n = exName.trim()
     if (!n) return
+    // Ett namn som varken matchar katalogen ELLER innehåller något
+    // betydelsebärande tecken (t.ex. "💪") skulle normaliseras till tomt och
+    // därmed dela historiknyckel med varje annan sådan övning.
+    const catalog = resolveExercise({ name: n, exercise_id: exId })
+    if (!catalog && normalizeExerciseName(n) === '') {
+      setExError('Ange ett övningsnamn med bokstäver eller siffror.')
+      return
+    }
     const w = parseFloat(exWeight)
+    const name = catalog?.name ?? n
     setExercises((prev) => [...prev, {
-      name: n,
+      name,
+      ...(catalog ? { exercise_id: catalog.id } : {}),
       sets: parseInt(exSets, 10) || 3,
       reps: exReps || '10',
       rest_seconds: parseInt(exRest, 10) || 60,
-      weight_kg: !isCardioExercise(n) && exerciseUsesWeight(n) && w > 0 ? w : null,
+      weight_kg: !isCardioExercise(name) && exerciseUsesWeight(name) && w > 0 ? w : null,
     }])
-    setExName(''); setExWeight(''); setAddingEx(false)
+    resetExerciseForm()
+    setAddingEx(false)
   }
 
   function saveWorkout() {
@@ -72,6 +109,9 @@ export function CustomWorkoutPage() {
   function startWorkout(w: CustomWorkout) {
     const exLogs: ExerciseLog[] = w.exercises.map((ex) => ({
       name: ex.name,
+      // Följer med genom hela passet: bild, historik och personbästa nycklas
+      // på katalog-id:t i stället för att gissas fram ur namnet.
+      exerciseId: ex.exercise_id,
       targetSets: ex.sets,
       targetReps: ex.reps,
       restSeconds: ex.rest_seconds,
@@ -87,7 +127,8 @@ export function CustomWorkoutPage() {
     navigate(`/workout/custom-${w.id}/active`)
   }
 
-  const suggestions = EXERCISE_PRESETS.filter((e) => e.toLowerCase().includes(exName.trim().toLowerCase()))
+  const q = exName.trim().toLowerCase()
+  const suggestions = EXERCISE_PRESETS.filter((e) => e.name.toLowerCase().includes(q)).slice(0, 40)
 
   return (
     <div className="pb-10">
@@ -152,7 +193,7 @@ export function CustomWorkoutPage() {
                   autoFocus
                   placeholder="Sök eller skriv övning…"
                   value={exName}
-                  onChange={(e) => setExName(e.target.value)}
+                  onChange={(e) => { setExName(e.target.value); setExId(null); setExError(null) }}
                   className="w-full bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
                 />
 
@@ -161,20 +202,22 @@ export function CustomWorkoutPage() {
                   <div className="max-h-32 overflow-y-auto flex flex-wrap gap-1.5">
                     {suggestions.map((ex) => (
                       <button
-                        key={ex}
+                        key={ex.id}
                         onClick={() => {
-                          setExName(ex)
+                          setExName(ex.name)
+                          setExId(ex.id)
                           setExWeight('')
-                          if (isCardioExercise(ex)) { setExSets('1'); setExReps('20') }
+                          setExError(null)
+                          if (isCardioExercise(ex.name)) { setExSets('1'); setExReps('20') }
                           else { setExSets('3'); setExReps('10') }
                         }}
                         className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-                          exName === ex
+                          exId === ex.id
                             ? 'bg-forest-700 text-white border-forest-700'
                             : 'bg-white border-stone-200 text-stone-600 hover:border-forest-300'
                         }`}
                       >
-                        {ex}
+                        {ex.name}
                       </button>
                     ))}
                   </div>
@@ -210,8 +253,9 @@ export function CustomWorkoutPage() {
                     )}
                   </>
                 )}
+                {exError && <p className="text-xs text-red-500">{exError}</p>}
                 <div className="flex gap-2">
-                  <button onClick={() => { setAddingEx(false); setExName(''); setExWeight('') }}
+                  <button onClick={() => { setAddingEx(false); resetExerciseForm() }}
                     className="flex-1 py-2 rounded-xl border border-stone-200 text-stone-600 text-sm">
                     Avbryt
                   </button>

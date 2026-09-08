@@ -1,6 +1,7 @@
 import { dateKey } from './derive'
 import { exerciseKey, migrateExerciseKeysOnce } from './exerciseKey'
 import { getExerciseById } from './exerciseCatalog'
+import { resolveExercise, type ExerciseRef } from './exerciseResolve'
 
 const KEY = 'formplan_personal_records'
 
@@ -35,14 +36,28 @@ export function personalRecordLabel(record: PersonalRecord): string {
   return getExerciseById(record.exercise)?.name ?? record.name ?? record.exercise
 }
 
-/** `exercise` is the free-text name; it is resolved to the catalog id internally. */
-export function getPRForExercise(exercise: string): PersonalRecord | null {
+/** Display name for a reference: catalog name when it resolves, else the raw name. */
+function refLabel(exercise: ExerciseRef | string): string {
+  const resolved = resolveExercise(exercise)
+  if (resolved) return resolved.name
+  return (typeof exercise === 'string' ? exercise : exercise.name ?? '') || ''
+}
+
+/**
+ * `exercise` is the free-text name or a reference carrying
+ * `exercise_id`/`exerciseId`; it is resolved to the catalog id internally.
+ */
+export function getPRForExercise(exercise: ExerciseRef | string): PersonalRecord | null {
   const key = exerciseKey(exercise)
   return load().find((r) => r.exercise === key) ?? null
 }
 
 /** Returns true if this is a new personal record (Epley 1RM comparison). */
-export function checkAndUpdatePR(exercise: string, weight_kg: number, reps: number): boolean {
+export function checkAndUpdatePR(
+  exercise: ExerciseRef | string,
+  weight_kg: number,
+  reps: number
+): boolean {
   if (weight_kg <= 0 || reps <= 0) return false
   const est1rm = Math.round(weight_kg * (1 + reps / 30))
   const key = exerciseKey(exercise)
@@ -52,7 +67,7 @@ export function checkAndUpdatePR(exercise: string, weight_kg: number, reps: numb
 
   const newRecord: PersonalRecord = {
     exercise: key,
-    name: exercise,
+    name: refLabel(exercise),
     weight_kg,
     reps,
     estimated_1rm: est1rm,
