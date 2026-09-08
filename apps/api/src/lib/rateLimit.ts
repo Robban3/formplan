@@ -54,7 +54,7 @@ export function resetRateLimits(): void {
 // blir mjuk, inte hård). För dessa lågfrekventa AI-endpoints (tiotal/timme per
 // användare) är det gott nog — poängen är att stoppa massmissbruk, inte att
 // räkna exakt. Nyckeln får expirationTtl = fönstrets längd så gamla fönster
-// städas automatiskt (KV kräver minst 60 s TTL, våra fönster är ≥ 1 timme).
+// städas automatiskt (KV kräver minst 60 s TTL — kortare fönster golvas dit).
 export async function consumeRateLimitKV(
   kv: KVNamespace,
   key: string,
@@ -65,12 +65,20 @@ export async function consumeRateLimitKV(
   const windowStart = Math.floor(now / windowMs) * windowMs
   const kvKey = `rl:${key}:${windowStart}`
   const { value } = await kv.getWithMetadata(kvKey)
-  const count = value ? parseInt(value, 10) : 0
+  // Ett trasigt/oläsbart KV-värde ger NaN, och `NaN >= max` är false — utan
+  // Number.isFinite skulle limitern då släppa igenom ALLT under hela fönstret
+  // (fail-open). Behandla skräp som 0 så räknaren startar om i stället.
+  const parsed = value != null ? Number.parseInt(value, 10) : 0
+  const count = Number.isFinite(parsed) && parsed > 0 ? parsed : 0
   if (count >= max) {
     const resetAt = windowStart + windowMs
     return { allowed: false, retryAfterSeconds: Math.max(1, Math.ceil((resetAt - now) / 1000)) }
   }
-  await kv.put(kvKey, String(count + 1), { expirationTtl: Math.ceil(windowMs / 1000) })
+  // KV avvisar expirationTtl < 60 s med ett fel — ett kort fönster skulle alltså
+  // få kv.put att kasta ut ur middlewaren och 500:a varje anrop. Golva på 60 s.
+  await kv.put(kvKey, String(count + 1), {
+    expirationTtl: Math.max(60, Math.ceil(windowMs / 1000)),
+  })
   return { allowed: true, retryAfterSeconds: 0 }
 }
 

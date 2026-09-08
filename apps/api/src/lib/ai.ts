@@ -353,22 +353,48 @@ function toNumber(value: unknown, fallback: number): number {
  *
  * Per övning i en träningsdag:
  *  1. giltigt exercise_id → behåll, men skriv över name med katalogens namn,
- *  2. annars fritextmatcha mot katalogen (först exercise_id, sedan name),
- *  3. annars släpp övningen (loggas) hellre än att spara något ospårbart.
+ *  2. annars fritextmatcha på modellens NAMN (modellens egen beskrivning väger
+ *     tyngre än ett id den hittat på),
+ *  3. annars fritextmatcha på id:t som sista utväg (fångar id-stavfel som
+ *     "vadpress_sittande" när namnet inte går att känna igen),
+ *  4. annars släpp övningen (loggas) hellre än att spara något ospårbart.
  *
- * Blir en träningsdag helt tom kastar vi — routes/plan.ts sätter då planens
- * status till "error", vilket är ärligare än ett tomt pass.
+ * Ordningen i 2/3 är kritisk: ett ogiltigt id kört genom fritextmatchningen kan
+ * träffa FEL övning ({ exercise_id: 'dips', name: 'Tricepsdips' } → bröst-Dips)
+ * och skriver dessutom över modellens korrekta namn med det felaktiga.
+ *
+ * Vilken dag som helst som bär en `exercises`-array normaliseras — modellens
+ * `type` får inte litas på, annars skulle ett pass felmärkt som "nutrition"
+ * skriva okanoniserade övningar rakt in i plan_day.content.
+ *
+ * Töms en dag helt på övningar görs den om till en vilodag (nutritionen för
+ * veckodagen behålls) — men bara så länge planen fortfarande har fler
+ * träningsdagar kvar än tomma. Överlever ingen dag (eller är fler än hälften
+ * tomma) kastar vi i stället — routes/plan.ts sätter då planens status till
+ * "error", vilket är ärligare än ett i praktiken tomt schema.
  */
 export function normalizePlanExercises<T extends GeneratedPlanDay>(days: T[]): T[] {
   if (!Array.isArray(days) || days.length === 0) {
     throw new Error('Plan generation returned no days')
   }
 
-  for (const day of days) {
-    if (day?.type !== 'workout') continue
+  // Dagar som ska vara träningsdagar (deklarerad typ ELLER en exercises-array),
+  // och hur många av dem som överlevde normaliseringen.
+  let workoutDays = 0
+  let daysSurvived = 0
+  const emptied: T[] = []
 
-    const content = day.content as Partial<WorkoutDay> | undefined
-    const rawExercises = Array.isArray(content?.exercises) ? (content.exercises as RawExercise[]) : []
+  for (const day of days) {
+    const content = day?.content as Partial<WorkoutDay> | undefined
+    const rawExercises = Array.isArray(content?.exercises)
+      ? (content.exercises as RawExercise[])
+      : []
+    // Modellens `type` är bara en av två indikationer: ett pass felmärkt som
+    // "nutrition"/"rest" känns igen på sina övningar, och en "workout" utan
+    // övningar är en tom träningsdag som ska fångas nedan. En vilodag med en
+    // TOM exercises-array är däremot bara en vilodag — den ska inte räknas.
+    if (day?.type !== 'workout' && rawExercises.length === 0) continue
+    workoutDays++
 
     const exercises: Exercise[] = []
     for (const raw of rawExercises) {
@@ -380,8 +406,8 @@ export function normalizePlanExercises<T extends GeneratedPlanDay>(days: T[]): T
       // matcha mot vad som helst och tyst byta ut övningen.
       const hit =
         (id ? getExerciseById(id) : undefined) ??
-        (id ? matchExercise(id) : undefined) ??
-        (name ? matchExercise(name) : undefined)
+        (name ? matchExercise(name) : undefined) ??
+        (id ? matchExercise(id) : undefined)
 
       if (!hit) {
         console.warn(
@@ -404,12 +430,43 @@ export function normalizePlanExercises<T extends GeneratedPlanDay>(days: T[]): T
     }
 
     if (exercises.length === 0) {
-      throw new Error(
-        `Plan generation produced a workout day (weekday ${day.weekday}) with no exercises from the catalog`
-      )
+      // Avgörs först när alla dagar gåtts igenom: en enstaka tom dag offras,
+      // men är hela planen tom är ett fel ärligare än ett tomt schema.
+      emptied.push(day)
+      continue
     }
 
+    daysSurvived++
     day.content = { ...(content as WorkoutDay), exercises }
+    // Modellen kan felmärka ett pass (t.ex. type "nutrition"). En dag med
+    // katalogövningar ÄR en träningsdag — annars hamnar innehållet i fel
+    // plan_day-rad (och krockar med den härledda nutrition-raden).
+    if (day.type !== 'workout') {
+      console.warn(
+        `Plan: retyping day ${day.weekday} from "${String(day.type)}" to "workout" (it carries exercises)`
+      )
+      day.type = 'workout'
+    }
+  }
+
+  // Regel: en enstaka trasig dag får inte kasta bort sex bra. Kasta bara när
+  // INGEN träningsdag överlevde, eller när fler än hälften av dagarna med
+  // övningar tömdes (då är svaret systematiskt trasigt, inte en engångsmiss).
+  if (workoutDays > 0 && (daysSurvived === 0 || emptied.length > workoutDays / 2)) {
+    throw new Error(
+      `Plan generation produced ${emptied.length}/${workoutDays} workout days with no exercises from the catalog (weekdays ${emptied
+        .map((d) => d.weekday)
+        .join(', ')})`
+    )
+  }
+
+  for (const day of emptied) {
+    console.warn(
+      `Plan: workout day (weekday ${day.weekday}) had no exercises from the catalog — converted to a rest day`
+    )
+    day.type = 'rest'
+    // Nutritionen för veckodagen ligger utanför content och behålls.
+    day.content = { notes: 'Vila' } satisfies RestDay
   }
 
   return days

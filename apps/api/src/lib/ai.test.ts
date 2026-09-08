@@ -87,6 +87,53 @@ describe('normalizePlanExercises', () => {
     expect(ex?.name).toBe('Bänkpress')
   })
 
+  // Ett påhittat id fick tidigare gå genom fritextmatchningen FÖRE namnet.
+  // "dips" matchar bröstövningen Dips i katalogen, så modellens korrekta
+  // "Tricepsdips" byttes tyst ut mot fel övning (och fel namn skrevs).
+  it('prefers the model name over a free-text match on a bogus exercise_id', () => {
+    const days = normalizePlanExercises([
+      workoutDay([
+        { exercise_id: 'dips', name: 'Tricepsdips', sets: 3, reps: '12', rest_seconds: 60 },
+      ]),
+    ])
+
+    const [ex] = exercisesOf(days[0]!)
+    expect(ex?.exercise_id).toBe('tricepsdips')
+    expect(ex?.name).toBe('Tricepsdips')
+  })
+
+  // Id med understreck i stället för bindestreck: namnet är ändå igenkännbart
+  // och ska avgöra — den sittande varianten får aldrig bli den stående.
+  it('resolves a typo:d exercise_id via the name (seated calf press stays seated)', () => {
+    const days = normalizePlanExercises([
+      workoutDay([
+        {
+          exercise_id: 'vadpress_sittande',
+          name: 'Sittande vadpress',
+          sets: 4,
+          reps: '15',
+          rest_seconds: 60,
+        },
+      ]),
+    ])
+
+    const [ex] = exercisesOf(days[0]!)
+    expect(ex?.exercise_id).toBe('vadpress-sittande')
+    expect(ex?.name).toBe('Sittande vadpress')
+  })
+
+  // Sista utvägen: namnet säger ingenting, men id:t går att tolka.
+  it('falls back to matching on the exercise_id when the name is useless', () => {
+    const days = normalizePlanExercises([
+      workoutDay([
+        { exercise_id: 'vadpress_sittande', name: 'Övning 1', sets: 4, reps: '15', rest_seconds: 60 },
+      ]),
+    ])
+
+    const [ex] = exercisesOf(days[0]!)
+    expect(ex?.exercise_id).toBe('vadpress-sittande')
+  })
+
   it('drops an exercise that cannot be resolved at all', () => {
     const days = normalizePlanExercises([
       workoutDay([
@@ -106,6 +153,62 @@ describe('normalizePlanExercises', () => {
     ).toThrow(/no exercises/i)
   })
 
+  // Modellens `type` får inte avgöra om normaliseringen körs: ett pass som
+  // felmärkts (t.ex. "nutrition") skulle annars skriva råa, okanoniserade
+  // övningar rakt in i plan_day.content.
+  it('normalizes exercises on a day that is mislabelled as another type', () => {
+    const mislabelled = {
+      ...workoutDay([
+        { exercise_id: 'flat-bench-press-barbell', name: 'Bench press', sets: 3, reps: '10', rest_seconds: 90 },
+      ]),
+      type: 'nutrition',
+    } as unknown as GeneratedPlanDay
+
+    const days = normalizePlanExercises([mislabelled])
+
+    expect(exercisesOf(days[0]!)).toEqual([
+      { exercise_id: 'bankpress', name: 'Bänkpress', sets: 3, reps: '10', rest_seconds: 90 },
+    ])
+    // Dagen bär katalogövningar ⇒ den ÄR en träningsdag.
+    expect(days[0]!.type).toBe('workout')
+  })
+
+  // En trasig dag får inte kasta bort hela veckan: den blir en vilodag
+  // (nutritionen behålls) så länge merparten av passen överlevde.
+  it('turns a single unusable workout day into a rest day and keeps the rest', () => {
+    const good = (weekday: number): GeneratedPlanDay => ({
+      ...workoutDay([{ exercise_id: 'bankpress', name: 'Bänkpress', sets: 4, reps: '8', rest_seconds: 120 }]),
+      weekday,
+    })
+    const bad: GeneratedPlanDay = {
+      ...workoutDay([{ exercise_id: 'trollstavsviftning', name: 'Trollstavsviftning', sets: 3, reps: '12', rest_seconds: 60 }]),
+      weekday: 3,
+    }
+
+    const days = normalizePlanExercises([good(1), bad, good(5)])
+
+    expect(days).toHaveLength(3)
+    expect(days.map((d) => d.type)).toEqual(['workout', 'rest', 'workout'])
+    expect(days[1]!.content).toEqual({ notes: 'Vila' })
+    // Nutritionen för veckodagen finns kvar.
+    expect(days[1]!.nutrition).toBe(nutrition)
+    expect(exercisesOf(days[0]!)).toHaveLength(1)
+    expect(exercisesOf(days[2]!)).toHaveLength(1)
+  })
+
+  it('throws when more than half of the workout days end up empty', () => {
+    const good: GeneratedPlanDay = {
+      ...workoutDay([{ exercise_id: 'bankpress', name: 'Bänkpress', sets: 4, reps: '8', rest_seconds: 120 }]),
+      weekday: 1,
+    }
+    const bad = (weekday: number): GeneratedPlanDay => ({
+      ...workoutDay([{ exercise_id: 'trollstavsviftning', name: 'Trollstavsviftning', sets: 3, reps: '12', rest_seconds: 60 }]),
+      weekday,
+    })
+
+    expect(() => normalizePlanExercises([good, bad(3), bad(5)])).toThrow(/no exercises/i)
+  })
+
   it('leaves rest days untouched', () => {
     const restDay: GeneratedPlanDay = {
       weekday: 3,
@@ -115,6 +218,25 @@ describe('normalizePlanExercises', () => {
     }
     const days = normalizePlanExercises([restDay])
     expect(days[0]!.content).toEqual({ notes: 'Vila' })
+  })
+
+  // En vilodag som bär en TOM exercises-array är fortfarande bara en vilodag —
+  // den får inte räknas som en misslyckad träningsdag och sänka hela planen.
+  it('does not count rest days with an empty exercises array as failed workouts', () => {
+    const restWithEmptyArray = {
+      weekday: 2,
+      type: 'rest',
+      content: { notes: 'Vila', exercises: [] },
+      nutrition,
+    } as unknown as GeneratedPlanDay
+    const good: GeneratedPlanDay = {
+      ...workoutDay([{ exercise_id: 'bankpress', name: 'Bänkpress', sets: 4, reps: '8', rest_seconds: 120 }]),
+      weekday: 1,
+    }
+
+    const days = normalizePlanExercises([good, restWithEmptyArray, { ...restWithEmptyArray, weekday: 4 }])
+    expect(days.map((d) => d.type)).toEqual(['workout', 'rest', 'rest'])
+    expect(exercisesOf(days[0]!)).toHaveLength(1)
   })
 })
 

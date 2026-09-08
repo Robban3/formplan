@@ -25,5 +25,23 @@ jobs:
       - name: Test
         run: npm test
 
+      # apps/api/src/lib/exerciseCatalog.ts och apps/web/src/lib/exerciseCatalog.ts
+      # genereras från EN källa (scripts/build-exercise-catalog.mjs) men committas
+      # var för sig. Utan den här kontrollen passerar en handredigerad eller
+      # inaktuell fil både typecheck, tester och bygge — och API:t kan låsa AI:n
+      # till id:n som webben inte kan slå upp (ingen bild/teknik för övningen).
+      # Bilderna finns redan i repot, så generatorn laddar inte ner något och
+      # behöver därför aldrig `sharp` (importen är lazy).
+      - name: Verify generated exercise catalogs are in sync with the generator
+        run: |
+          node scripts/build-exercise-catalog.mjs
+          git diff --exit-code -- \
+            apps/api/src/lib/exerciseCatalog.ts \
+            apps/web/src/lib/exerciseCatalog.ts \
+            || {
+              echo "::error::De genererade övningskatalogerna är inaktuella eller handredigerade. Kör 'node scripts/build-exercise-catalog.mjs' och committa resultatet."
+              exit 1
+            }
+
       - name: Build web
         run: npm run build

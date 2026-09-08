@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { app } from '../index'
+import { createMockKV } from '../lib/kvMock'
 
 // The API routes hit Supabase and Anthropic. For unit-level tests we only verify
 // the handler wiring and auth guard — not the Supabase responses.
@@ -122,6 +123,157 @@ describe('isUserPremium fail-closed on persistent DB error (no cache)', () => {
     expect(res.status).toBe(402)
     const body = (await res.json()) as { code?: string }
     expect(body.code).toBe('premium_required')
+  })
+})
+
+// KV-vägarna (RATE_LIMIT_KV) kördes tidigare aldrig i testerna: mockEnv saknade
+// bindningen, så allt föll tillbaka på in-memory-varianterna. Med en stubbad
+// KVNamespace testas de på riktigt — inklusive premium-cachen och den
+// distribuerade rate limitern.
+describe('KV-backed paths (RATE_LIMIT_KV bound)', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const HOUR = 60 * 60 * 1000
+  const future = () => new Date(Date.now() + 30 * 86_400_000).toISOString()
+
+  // Autentiserad användare med bekräftad e-post. `subscriptions` styrs per test.
+  function mockUser(opts: {
+    createdAt: string
+    subscriptions: () => Response
+    gemini?: () => Response
+  }) {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url.includes('/auth/v1/user')) {
+        return new Response(
+          JSON.stringify({
+            id: 'user-1',
+            email: 'kv@example.com',
+            created_at: opts.createdAt,
+            email_confirmed_at: opts.createdAt,
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      if (url.includes('/subscriptions')) return opts.subscriptions()
+      if (url.includes('generativelanguage.googleapis.com') && opts.gemini) return opts.gemini()
+      return new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } })
+    })
+  }
+
+  const okSubscription = () =>
+    new Response(JSON.stringify([{ premium_until: future(), status: 'active' }]), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+  it('isUserPremium writes the premium cache after a successful read', async () => {
+    const kv = createMockKV()
+    mockUser({ createdAt: '2020-01-01T00:00:00Z', subscriptions: okSubscription })
+
+    const res = await app.request(
+      '/plan/list',
+      { headers: { Authorization: 'Bearer token' } },
+      { ...mockEnv, RATE_LIMIT_KV: kv.kv }
+    )
+    expect(res.status).toBe(200)
+
+    const cached = kv.store.get('premium_cache:user-1')
+    expect(cached, 'premium cache should have been written').toBeDefined()
+    expect(JSON.parse(cached!.value).v).toBe('1')
+    // TTL måste sättas, annars ligger värdet kvar för evigt.
+    expect(cached!.expiresAt).not.toBeNull()
+  })
+
+  it('serves the cached premium value when the subscription read keeps failing', async () => {
+    const kv = createMockKV()
+    kv.seed('premium_cache:user-1', JSON.stringify({ v: '1', exp: Date.now() + 30 * 60 * 1000 }))
+    // Provperioden är slut (konto från 2020) ⇒ endast cachen kan ge åtkomst.
+    mockUser({
+      createdAt: '2020-01-01T00:00:00Z',
+      subscriptions: () => new Response('db down', { status: 500 }),
+    })
+
+    const res = await app.request(
+      '/plan/list',
+      { headers: { Authorization: 'Bearer token' } },
+      { ...mockEnv, RATE_LIMIT_KV: kv.kv }
+    )
+    expect(res.status).toBe(200)
+  })
+
+  it('fails closed (402) when the read fails and the cache is empty', async () => {
+    const kv = createMockKV()
+    mockUser({
+      createdAt: '2020-01-01T00:00:00Z',
+      subscriptions: () => new Response('db down', { status: 500 }),
+    })
+
+    const res = await app.request(
+      '/plan/list',
+      { headers: { Authorization: 'Bearer token' } },
+      { ...mockEnv, RATE_LIMIT_KV: kv.kv }
+    )
+    expect(res.status).toBe(402)
+    const body = (await res.json()) as { code?: string }
+    expect(body.code).toBe('premium_required')
+  })
+
+  it('rate limits with the KV counter: last allowed request, then 429', async () => {
+    const kv = createMockKV()
+    // Aktiv provperiod (nyss skapad) + bekräftad e-post ⇒ igenom paywallen.
+    mockUser({
+      createdAt: new Date(Date.now() - 86_400_000).toISOString(),
+      subscriptions: () =>
+        new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } }),
+      gemini: () =>
+        new Response(
+          JSON.stringify({
+            candidates: [
+              {
+                content: {
+                  parts: [
+                    { text: '{"name":"Ägg","kcal":150,"protein_g":13,"fat_g":10,"carbs_g":1}' },
+                  ],
+                },
+                finishReason: 'STOP',
+              },
+            ],
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        ),
+    })
+
+    // rateLimit('ai-estimate-meal', 30) i routes/ai.ts — starta på 29 så bara
+    // en förfrågan ryms innan gränsen nås.
+    const windowStart = Math.floor(Date.now() / HOUR) * HOUR
+    kv.seed(`rl:ai-estimate-meal:user-1:${windowStart}`, '29')
+
+    const env = {
+      ...mockEnv,
+      AI_PROVIDER: 'gemini',
+      GEMINI_API_KEY: 'test-gemini-key',
+      RATE_LIMIT_KV: kv.kv,
+    }
+    const call = () =>
+      app.request(
+        '/ai/estimate-meal',
+        {
+          method: 'POST',
+          headers: { Authorization: 'Bearer token', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description: 'två ägg' }),
+        },
+        env
+      )
+
+    const allowed = await call()
+    expect(allowed.status).toBe(200)
+
+    const blocked = await call()
+    expect(blocked.status).toBe(429)
+    expect(Number(blocked.headers.get('Retry-After'))).toBeGreaterThan(0)
   })
 })
 
