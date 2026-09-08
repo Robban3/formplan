@@ -17,7 +17,6 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import sharp from 'sharp'
 
 const DB_URL = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json'
 const IMG_BASE = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises'
@@ -36,7 +35,7 @@ const CATALOG = [
   // ── Bröst ──────────────────────────────────────────────────────────────
   { slug: 'bankpress', name: 'Bänkpress', category: 'Bröst', db: 'Barbell_Bench_Press_-_Medium_Grip', aliases: ['bänkpress med skivstång', 'bench press', 'flatbänk'] },
   { slug: 'hantelpress-brost', name: 'Hantelpress', category: 'Bröst', db: 'Dumbbell_Bench_Press', aliases: ['hantelbänkpress', 'dumbbell press'] },
-  { slug: 'lutande-bankpress', name: 'Lutande bänkpress', category: 'Bröst', db: 'Barbell_Incline_Bench_Press_-_Medium_Grip', aliases: ['incline bench press', 'snedbänk'] },
+  { slug: 'lutande-bankpress', name: 'Lutande bänkpress', category: 'Bröst', db: 'Barbell_Incline_Bench_Press_-_Medium_Grip', aliases: ['incline bench press', 'snedbänk', 'sned bänkpress'] },
   { slug: 'lutande-hantelpress', name: 'Lutande hantelpress', category: 'Bröst', db: 'Incline_Dumbbell_Press', aliases: ['incline dumbbell press'] },
   { slug: 'armhavningar', name: 'Armhävningar', category: 'Bröst', db: 'Pushups', aliases: ['push-ups', 'pushups', 'armhävning'] },
   { slug: 'flyes', name: 'Flyes', category: 'Bröst', db: 'Dumbbell_Flyes', aliases: ['hantelflyes', 'flys'] },
@@ -50,9 +49,9 @@ const CATALOG = [
   { slug: 'pull-ups', name: 'Pull-ups', category: 'Rygg', db: 'Pullups', aliases: ['pullups', 'räckhäv'] },
   { slug: 'chins', name: 'Chins', category: 'Rygg', db: 'Chin-Up', aliases: ['chin-up', 'chinups'] },
   { slug: 'latsdrag', name: 'Latsdrag', category: 'Rygg', db: 'Wide-Grip_Lat_Pulldown', aliases: ['lat pulldown', 'latsdrag brett grepp'] },
-  { slug: 'skivstangsrodd', name: 'Skivstångsrodd', category: 'Rygg', db: 'Bent_Over_Barbell_Row', aliases: ['stångrodd', 'barbell row', 'framåtböjd rodd'] },
+  { slug: 'skivstangsrodd', name: 'Skivstångsrodd', category: 'Rygg', db: 'Bent_Over_Barbell_Row', aliases: ['stångrodd', 'barbell row', 'framåtböjd rodd', 'rodd med skivstång'] },
   { slug: 'hantelrodd', name: 'Hantelrodd', category: 'Rygg', db: 'One-Arm_Dumbbell_Row', aliases: ['enarmsrodd', 'dumbbell row'] },
-  { slug: 'sittande-kabelrodd', name: 'Sittande kabelrodd', category: 'Rygg', db: 'Seated_Cable_Rows', aliases: ['kabelrodd', 'seated row'] },
+  { slug: 'sittande-kabelrodd', name: 'Sittande kabelrodd', category: 'Rygg', db: 'Seated_Cable_Rows', aliases: ['kabelrodd', 'seated row', 'sittande rodd'] },
   { slug: 't-bar-rodd', name: 'T-bar rodd', category: 'Rygg', db: 'Lying_T-Bar_Row', aliases: ['t-bar row', 'tbar rodd'] },
   { slug: 'pullover', name: 'Pullover', category: 'Rygg', db: 'Straight-Arm_Dumbbell_Pullover', aliases: ['hantelpullover'] },
   { slug: 'rygglyft', name: 'Rygglyft', category: 'Rygg', db: 'Hyperextensions_Back_Extensions', aliases: ['ryggresning', 'back extension', 'hyperextension'] },
@@ -99,7 +98,7 @@ const CATALOG = [
   { slug: 'repdrag-triceps', name: 'Repdrag triceps', category: 'Armar', db: 'Triceps_Pushdown_-_Rope_Attachment', aliases: ['rope pushdown', 'tricepsrep'] },
   { slug: 'tricepsextension', name: 'Tricepsextension över huvud', category: 'Armar', db: 'Triceps_Overhead_Extension_with_Rope', aliases: ['overhead extension', 'fransk press'] },
   { slug: 'skullcrushers', name: 'Skullcrushers', category: 'Armar', db: 'Lying_Triceps_Press', aliases: ['skullcrusher', 'liggande tricepspress'] },
-  { slug: 'tricepsdips', name: 'Tricepsdips', category: 'Armar', db: 'Bench_Dips', aliases: ['bench dips', 'bänkdips'] },
+  { slug: 'tricepsdips', name: 'Tricepsdips', category: 'Armar', db: 'Bench_Dips', aliases: ['bench dips', 'bänkdips', 'triceps dips'] },
 
   // ── Core ───────────────────────────────────────────────────────────────
   { slug: 'plankan', name: 'Plankan', category: 'Core', db: 'Plank', aliases: ['planka', 'plank'] },
@@ -128,6 +127,56 @@ const CATALOG = [
   { slug: 'battle-ropes', name: 'Battle ropes', category: 'Kondition', db: 'Battling_Ropes', aliases: ['kamprep'] },
 ]
 
+// ── Speglingar av den genererade matchningslogiken ──────────────────────────
+// Används bara för validering här i generatorn. Måste hållas i synk med
+// normalize()/matchExercise() i mallarna nedan — valideringen är meningslös
+// annars, så ändra alltid båda samtidigt.
+
+function normalizeJs(s) {
+  return s
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[åä]/g, 'a')
+    .replace(/ö/g, 'o')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+}
+
+const STOPWORDS_JS = new Set(['med', 'och', 'pa', 'i', 'for', 'till', 'av', 'the', 'with'])
+
+/** Returnerar en matchare (namn → slug) med samma regler som den genererade. */
+function buildMatcher(catalog) {
+  const byName = new Map()
+  for (const e of catalog) {
+    byName.set(normalizeJs(e.slug), e.slug)
+    byName.set(normalizeJs(e.name), e.slug)
+    for (const a of e.aliases ?? []) byName.set(normalizeJs(a), e.slug)
+  }
+  return (name) => {
+    const n = normalizeJs(name)
+    const exact = byName.get(n)
+    if (exact) return exact
+    if (n.length < 4) return undefined
+    const nameTokens = n.split(' ').filter(Boolean)
+    const mustCover = nameTokens.filter((t) => t.length >= 4 && !STOPWORDS_JS.has(t))
+    let best
+    let bestLen = 0
+    for (const [key, slug] of byName) {
+      if (key.length < 4) continue
+      const keyTokens = key.split(' ').filter(Boolean)
+      if (!keyTokens.every((t) => nameTokens.includes(t))) continue
+      if (!mustCover.every((t) => keyTokens.includes(t))) continue
+      if (key.length > bestLen) {
+        best = slug
+        bestLen = key.length
+      }
+    }
+    return best
+  }
+}
+
 async function loadDb() {
   if (existsSync(CACHE)) return JSON.parse(await readFile(CACHE, 'utf8'))
   const res = await fetch(DB_URL)
@@ -151,6 +200,39 @@ async function main() {
     if (!src) problems.push(`${item.name}: okänt free-exercise-db-id "${item.db}"`)
     else if (!src.images || src.images.length < 2) problems.push(`${item.name}: saknar två bildrutor`)
   }
+
+  // Två poster får inte peka på samma källövning — då skulle de få identiska
+  // bilder och användaren se samma foto för två olika övningar.
+  const byDb = new Map()
+  for (const item of CATALOG) {
+    const prev = byDb.get(item.db)
+    if (prev) problems.push(`${item.name} och ${prev} delar free-exercise-db-id "${item.db}"`)
+    else byDb.set(item.db, item.name)
+  }
+
+  // Namn/alias måste vara unika över hela katalogen — annars "stjäl" en post
+  // en annans nyckel och matchningen pekar tyst fel.
+  const keyOwner = new Map()
+  for (const item of CATALOG) {
+    for (const key of [item.name, ...(item.aliases ?? [])].map(normalizeJs)) {
+      const prev = keyOwner.get(key)
+      if (prev && prev !== item.slug) {
+        problems.push(`Nyckeln "${key}" används av både ${prev} och ${item.slug}`)
+      } else keyOwner.set(key, item.slug)
+    }
+  }
+
+  // Varje id måste mappa tillbaka till sig självt. Annars är migreringen av
+  // träningshistoriken inte idempotent — en omkörning skulle flytta serier
+  // till fel övning och dubbelräkna volym.
+  const matcher = buildMatcher(CATALOG)
+  for (const item of CATALOG) {
+    const back = matcher(item.id ?? item.slug)
+    if (back !== item.slug) {
+      problems.push(`id "${item.slug}" matchar tillbaka till "${back ?? 'undefined'}" — inte idempotent`)
+    }
+  }
+
   if (problems.length) {
     console.error('Katalogen är ogiltig:\n' + problems.map((p) => '  - ' + p).join('\n'))
     process.exit(1)
@@ -166,6 +248,9 @@ async function main() {
       if (existsSync(out)) continue
       const res = await fetch(`${IMG_BASE}/${src.images[i]}`)
       if (!res.ok) throw new Error(`Bild saknas för ${item.name}: ${src.images[i]} (${res.status})`)
+      // sharp importeras lazy — behövs bara när en ny bild faktiskt ska hämtas,
+      // så katalogen kan regenereras även utan den installerad.
+      const { default: sharp } = await import('sharp')
       const buf = Buffer.from(await res.arrayBuffer())
       await sharp(buf).resize({ width: 480, withoutEnlargement: true }).webp({ quality: 72 }).toFile(out)
       downloaded++
@@ -237,28 +322,67 @@ export function getExerciseById(id: string): CatalogExercise | undefined {
 }
 
 function normalize(s: string): string {
-  return s.toLowerCase().trim().replace(/[åä]/g, 'a').replace(/ö/g, 'o').replace(/[^a-z0-9]+/g, ' ').trim()
+  // NFD + borttagna kombinerande tecken gör att dekomponerade â/ä/ö (som iOS
+  // och vissa tangentbord producerar) normaliseras likadant som precomponerade.
+  return s
+    .normalize('NFD')
+    .replace(/[\\u0300-\\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[åä]/g, 'a')
+    .replace(/ö/g, 'o')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
 }
 
 const BY_NAME = new Map<string, CatalogExercise>()
 for (const e of EXERCISE_CATALOG) {
+  // Id:t registreras som egen nyckel så matchExercise(id) === id alltid gäller.
+  // Utan det blir historik-migreringen icke-idempotent: en omkörning skulle
+  // flytta serier till fel övning och dubbelräkna volym.
+  BY_NAME.set(normalize(e.id), e)
   BY_NAME.set(normalize(e.name), e)
   for (const a of e.aliases) BY_NAME.set(normalize(a), e)
 }
 
+/** Ord som inte bär betydelse när övningsnamn jämförs. */
+const STOPWORDS = new Set(['med', 'och', 'pa', 'i', 'for', 'till', 'av', 'the', 'with'])
+
+function significantTokens(tokens: string[]): string[] {
+  return tokens.filter((t) => t.length >= 4 && !STOPWORDS.has(t))
+}
+
 /**
- * Mappar ett fritextnamn (från AI eller äldre scheman) till en katalogövning.
- * Exakt namn/alias först, därefter en försiktig delsträngsmatchning. Returnerar
- * undefined hellre än att gissa fel — då visas ingen bild i stället för fel bild.
+ * Mappar ett fritextnamn (från AI, egna pass eller äldre scheman) till en
+ * katalogövning. Exakt namn/alias först, därefter en STRIKT tokenmatchning:
+ * varje ord i nyckeln måste finnas som eget ord i namnet, OCH nyckeln måste
+ * täcka namnets alla betydelsebärande ord. Returnerar hellre undefined än en
+ * gissning — ingen bild är bättre än fel bild.
+ *
+ * Ersätter en delsträngsmatchning som kunde mappa "Sittande rodd" till
+ * roddmaskinen, "Sned bänkpress" till plan bänkpress, och — allvarligast —
+ * allt som normaliserade till tomt (emoji, icke-latinsk skrift, interpunktion)
+ * till katalogens längsta nyckel.
  */
 export function matchExercise(name: string): CatalogExercise | undefined {
   const n = normalize(name)
+  // Exakt namn/alias först — korta alias (t.ex. "rdl") måste fortfarande fungera.
   const exact = BY_NAME.get(n)
   if (exact) return exact
+  // Längdspärren skyddar bara den luddiga matchningen nedan.
+  if (n.length < 4) return undefined
+
+  const nameTokens = n.split(' ').filter(Boolean)
+  const mustCover = significantTokens(nameTokens)
+
   let best: CatalogExercise | undefined
   let bestLen = 0
   for (const [key, ex] of BY_NAME) {
-    if (key.length > 3 && (n.includes(key) || key.includes(n)) && key.length > bestLen) {
+    if (key.length < 4) continue
+    const keyTokens = key.split(' ').filter(Boolean)
+    if (!keyTokens.every((t) => nameTokens.includes(t))) continue
+    if (!mustCover.every((t) => keyTokens.includes(t))) continue
+    if (key.length > bestLen) {
       best = ex
       bestLen = key.length
     }
@@ -294,11 +418,25 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = ${JSON.stringify(apiEntrie
 const BY_ID = new Map(EXERCISE_CATALOG.map((e) => [e.id, e]))
 
 function normalize(s: string): string {
-  return s.toLowerCase().trim().replace(/[åä]/g, 'a').replace(/ö/g, 'o').replace(/[^a-z0-9]+/g, ' ').trim()
+  // NFD + borttagna kombinerande tecken gör att dekomponerade â/ä/ö (som iOS
+  // och vissa tangentbord producerar) normaliseras likadant som precomponerade.
+  return s
+    .normalize('NFD')
+    .replace(/[\\u0300-\\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[åä]/g, 'a')
+    .replace(/ö/g, 'o')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
 }
 
 const BY_NAME = new Map<string, ApiCatalogExercise>()
 for (const e of EXERCISE_CATALOG) {
+  // Id:t registreras som egen nyckel så matchExercise(id) === id alltid gäller.
+  // Utan det blir historik-migreringen icke-idempotent: en omkörning skulle
+  // flytta serier till fel övning och dubbelräkna volym.
+  BY_NAME.set(normalize(e.id), e)
   BY_NAME.set(normalize(e.name), e)
   for (const a of e.aliases) BY_NAME.set(normalize(a), e)
 }
@@ -307,15 +445,38 @@ export function getExerciseById(id: string): ApiCatalogExercise | undefined {
   return BY_ID.get(id)
 }
 
-/** Mappar ett fritextnamn till en katalogövning (exakt först, sedan delsträng). */
+/** Ord som inte bär betydelse när övningsnamn jämförs. */
+const STOPWORDS = new Set(['med', 'och', 'pa', 'i', 'for', 'till', 'av', 'the', 'with'])
+
+function significantTokens(tokens: string[]): string[] {
+  return tokens.filter((t) => t.length >= 4 && !STOPWORDS.has(t))
+}
+
+/**
+ * Mappar ett fritextnamn till en katalogövning. Exakt namn/alias först, sedan
+ * STRIKT tokenmatchning: varje ord i nyckeln måste finnas som eget ord i
+ * namnet, OCH nyckeln måste täcka namnets alla betydelsebärande ord.
+ * Returnerar hellre undefined än en gissning.
+ */
 export function matchExercise(name: string): ApiCatalogExercise | undefined {
   const n = normalize(name)
+  // Exakt namn/alias först — korta alias (t.ex. "rdl") måste fortfarande fungera.
   const exact = BY_NAME.get(n)
   if (exact) return exact
+  // Längdspärren skyddar bara den luddiga matchningen nedan.
+  if (n.length < 4) return undefined
+
+  const nameTokens = n.split(' ').filter(Boolean)
+  const mustCover = significantTokens(nameTokens)
+
   let best: ApiCatalogExercise | undefined
   let bestLen = 0
   for (const [key, ex] of BY_NAME) {
-    if (key.length > 3 && (n.includes(key) || key.includes(n)) && key.length > bestLen) {
+    if (key.length < 4) continue
+    const keyTokens = key.split(' ').filter(Boolean)
+    if (!keyTokens.every((t) => nameTokens.includes(t))) continue
+    if (!mustCover.every((t) => keyTokens.includes(t))) continue
+    if (key.length > bestLen) {
       best = ex
       bestLen = key.length
     }

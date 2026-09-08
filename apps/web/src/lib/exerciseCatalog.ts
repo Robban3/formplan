@@ -100,7 +100,8 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
     ],
     "aliases": [
       "incline bench press",
-      "snedbänk"
+      "snedbänk",
+      "sned bänkpress"
     ]
   },
   {
@@ -353,7 +354,8 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
     "aliases": [
       "stångrodd",
       "barbell row",
-      "framåtböjd rodd"
+      "framåtböjd rodd",
+      "rodd med skivstång"
     ]
   },
   {
@@ -397,7 +399,8 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
     ],
     "aliases": [
       "kabelrodd",
-      "seated row"
+      "seated row",
+      "sittande rodd"
     ]
   },
   {
@@ -1216,7 +1219,8 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
     ],
     "aliases": [
       "bench dips",
-      "bänkdips"
+      "bänkdips",
+      "triceps dips"
     ]
   },
   {
@@ -1670,28 +1674,67 @@ export function getExerciseById(id: string): CatalogExercise | undefined {
 }
 
 function normalize(s: string): string {
-  return s.toLowerCase().trim().replace(/[åä]/g, 'a').replace(/ö/g, 'o').replace(/[^a-z0-9]+/g, ' ').trim()
+  // NFD + borttagna kombinerande tecken gör att dekomponerade â/ä/ö (som iOS
+  // och vissa tangentbord producerar) normaliseras likadant som precomponerade.
+  return s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[åä]/g, 'a')
+    .replace(/ö/g, 'o')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
 }
 
 const BY_NAME = new Map<string, CatalogExercise>()
 for (const e of EXERCISE_CATALOG) {
+  // Id:t registreras som egen nyckel så matchExercise(id) === id alltid gäller.
+  // Utan det blir historik-migreringen icke-idempotent: en omkörning skulle
+  // flytta serier till fel övning och dubbelräkna volym.
+  BY_NAME.set(normalize(e.id), e)
   BY_NAME.set(normalize(e.name), e)
   for (const a of e.aliases) BY_NAME.set(normalize(a), e)
 }
 
+/** Ord som inte bär betydelse när övningsnamn jämförs. */
+const STOPWORDS = new Set(['med', 'och', 'pa', 'i', 'for', 'till', 'av', 'the', 'with'])
+
+function significantTokens(tokens: string[]): string[] {
+  return tokens.filter((t) => t.length >= 4 && !STOPWORDS.has(t))
+}
+
 /**
- * Mappar ett fritextnamn (från AI eller äldre scheman) till en katalogövning.
- * Exakt namn/alias först, därefter en försiktig delsträngsmatchning. Returnerar
- * undefined hellre än att gissa fel — då visas ingen bild i stället för fel bild.
+ * Mappar ett fritextnamn (från AI, egna pass eller äldre scheman) till en
+ * katalogövning. Exakt namn/alias först, därefter en STRIKT tokenmatchning:
+ * varje ord i nyckeln måste finnas som eget ord i namnet, OCH nyckeln måste
+ * täcka namnets alla betydelsebärande ord. Returnerar hellre undefined än en
+ * gissning — ingen bild är bättre än fel bild.
+ *
+ * Ersätter en delsträngsmatchning som kunde mappa "Sittande rodd" till
+ * roddmaskinen, "Sned bänkpress" till plan bänkpress, och — allvarligast —
+ * allt som normaliserade till tomt (emoji, icke-latinsk skrift, interpunktion)
+ * till katalogens längsta nyckel.
  */
 export function matchExercise(name: string): CatalogExercise | undefined {
   const n = normalize(name)
+  // Exakt namn/alias först — korta alias (t.ex. "rdl") måste fortfarande fungera.
   const exact = BY_NAME.get(n)
   if (exact) return exact
+  // Längdspärren skyddar bara den luddiga matchningen nedan.
+  if (n.length < 4) return undefined
+
+  const nameTokens = n.split(' ').filter(Boolean)
+  const mustCover = significantTokens(nameTokens)
+
   let best: CatalogExercise | undefined
   let bestLen = 0
   for (const [key, ex] of BY_NAME) {
-    if (key.length > 3 && (n.includes(key) || key.includes(n)) && key.length > bestLen) {
+    if (key.length < 4) continue
+    const keyTokens = key.split(' ').filter(Boolean)
+    if (!keyTokens.every((t) => nameTokens.includes(t))) continue
+    if (!mustCover.every((t) => keyTokens.includes(t))) continue
+    if (key.length > bestLen) {
       best = ex
       bestLen = key.length
     }

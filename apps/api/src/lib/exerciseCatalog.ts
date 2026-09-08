@@ -39,7 +39,8 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "equipment": "barbell",
     "aliases": [
       "incline bench press",
-      "snedbänk"
+      "snedbänk",
+      "sned bänkpress"
     ]
   },
   {
@@ -158,7 +159,8 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "aliases": [
       "stångrodd",
       "barbell row",
-      "framåtböjd rodd"
+      "framåtböjd rodd",
+      "rodd med skivstång"
     ]
   },
   {
@@ -178,7 +180,8 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "equipment": "cable",
     "aliases": [
       "kabelrodd",
-      "seated row"
+      "seated row",
+      "sittande rodd"
     ]
   },
   {
@@ -587,7 +590,8 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "equipment": "body only",
     "aliases": [
       "bench dips",
-      "bänkdips"
+      "bänkdips",
+      "triceps dips"
     ]
   },
   {
@@ -809,11 +813,25 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
 const BY_ID = new Map(EXERCISE_CATALOG.map((e) => [e.id, e]))
 
 function normalize(s: string): string {
-  return s.toLowerCase().trim().replace(/[åä]/g, 'a').replace(/ö/g, 'o').replace(/[^a-z0-9]+/g, ' ').trim()
+  // NFD + borttagna kombinerande tecken gör att dekomponerade â/ä/ö (som iOS
+  // och vissa tangentbord producerar) normaliseras likadant som precomponerade.
+  return s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[åä]/g, 'a')
+    .replace(/ö/g, 'o')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
 }
 
 const BY_NAME = new Map<string, ApiCatalogExercise>()
 for (const e of EXERCISE_CATALOG) {
+  // Id:t registreras som egen nyckel så matchExercise(id) === id alltid gäller.
+  // Utan det blir historik-migreringen icke-idempotent: en omkörning skulle
+  // flytta serier till fel övning och dubbelräkna volym.
+  BY_NAME.set(normalize(e.id), e)
   BY_NAME.set(normalize(e.name), e)
   for (const a of e.aliases) BY_NAME.set(normalize(a), e)
 }
@@ -822,15 +840,38 @@ export function getExerciseById(id: string): ApiCatalogExercise | undefined {
   return BY_ID.get(id)
 }
 
-/** Mappar ett fritextnamn till en katalogövning (exakt först, sedan delsträng). */
+/** Ord som inte bär betydelse när övningsnamn jämförs. */
+const STOPWORDS = new Set(['med', 'och', 'pa', 'i', 'for', 'till', 'av', 'the', 'with'])
+
+function significantTokens(tokens: string[]): string[] {
+  return tokens.filter((t) => t.length >= 4 && !STOPWORDS.has(t))
+}
+
+/**
+ * Mappar ett fritextnamn till en katalogövning. Exakt namn/alias först, sedan
+ * STRIKT tokenmatchning: varje ord i nyckeln måste finnas som eget ord i
+ * namnet, OCH nyckeln måste täcka namnets alla betydelsebärande ord.
+ * Returnerar hellre undefined än en gissning.
+ */
 export function matchExercise(name: string): ApiCatalogExercise | undefined {
   const n = normalize(name)
+  // Exakt namn/alias först — korta alias (t.ex. "rdl") måste fortfarande fungera.
   const exact = BY_NAME.get(n)
   if (exact) return exact
+  // Längdspärren skyddar bara den luddiga matchningen nedan.
+  if (n.length < 4) return undefined
+
+  const nameTokens = n.split(' ').filter(Boolean)
+  const mustCover = significantTokens(nameTokens)
+
   let best: ApiCatalogExercise | undefined
   let bestLen = 0
   for (const [key, ex] of BY_NAME) {
-    if (key.length > 3 && (n.includes(key) || key.includes(n)) && key.length > bestLen) {
+    if (key.length < 4) continue
+    const keyTokens = key.split(' ').filter(Boolean)
+    if (!keyTokens.every((t) => nameTokens.includes(t))) continue
+    if (!mustCover.every((t) => keyTokens.includes(t))) continue
+    if (key.length > bestLen) {
       best = ex
       bestLen = key.length
     }
