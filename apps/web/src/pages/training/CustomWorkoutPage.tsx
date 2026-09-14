@@ -80,13 +80,15 @@ export function CustomWorkoutPage() {
     }
     const w = parseFloat(exWeight)
     const name = catalog?.name ?? n
+    // Katalogposten avgör hur övningen loggas när den finns.
+    const ref = { name, exercise_id: catalog?.id }
     setExercises((prev) => [...prev, {
       name,
       ...(catalog ? { exercise_id: catalog.id } : {}),
       sets: parseInt(exSets, 10) || 3,
       reps: exReps || '10',
       rest_seconds: parseInt(exRest, 10) || 60,
-      weight_kg: !isCardioExercise(name) && exerciseUsesWeight(name) && w > 0 ? w : null,
+      weight_kg: !isCardioExercise(ref) && exerciseUsesWeight(ref) && w > 0 ? w : null,
     }])
     resetExerciseForm()
     setAddingEx(false)
@@ -208,7 +210,7 @@ export function CustomWorkoutPage() {
                           setExId(ex.id)
                           setExWeight('')
                           setExError(null)
-                          if (isCardioExercise(ex.name)) { setExSets('1'); setExReps('20') }
+                          if (isCardioExercise(ex)) { setExSets('1'); setExReps('20') }
                           else { setExSets('3'); setExReps('10') }
                         }}
                         className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
@@ -232,7 +234,7 @@ export function CustomWorkoutPage() {
                           className="mt-1 w-full bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
                       </div>
                       <div className="min-w-0">
-                        <label className="text-xs text-stone-500">{isCardioExercise(exName) ? 'Tid (min)' : 'Reps'}</label>
+                        <label className="text-xs text-stone-500">{isCardioExercise({ name: exName, exercise_id: exId }) ? 'Tid (min)' : 'Reps'}</label>
                         <input value={exReps} onChange={(e) => setExReps(e.target.value)}
                           className="mt-1 w-full bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
                       </div>
@@ -243,7 +245,8 @@ export function CustomWorkoutPage() {
                       </div>
                     </div>
 
-                    {!isCardioExercise(exName) && exerciseUsesWeight(exName) && (
+                    {!isCardioExercise({ name: exName, exercise_id: exId }) &&
+                      exerciseUsesWeight({ name: exName, exercise_id: exId }) && (
                       <div>
                         <label className="text-xs text-stone-500">Vikt (kg, valfritt)</label>
                         <input type="number" inputMode="decimal" value={exWeight} placeholder="t.ex. 60"

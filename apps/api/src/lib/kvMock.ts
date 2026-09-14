@@ -10,7 +10,12 @@
 //  * utgångna nycklar läses som null,
 //  * getWithMetadata returnerar { value, metadata } som produktionskoden läser.
 //
-// Använd `__advance(ms)` för att låta TTL:er löpa ut utan att vänta i realtid.
+// Klockan: stubben läser Date.now() direkt, så den följer vi.setSystemTime().
+// `advance(ms)` flyttar BARA stubbens egen klocka och desynkar den därför från
+// koden under test — ett test som flyttade den 41 dygn framåt lät markören löpa
+// ut medan jobbet fortfarande räknade användaren som 5 dygn gammal, ett läge som
+// inte kan uppstå i produktion. Använd vi.useFakeTimers()/setSystemTime när både
+// koden och TTL:erna ska följa med; `advance` finns kvar för rena TTL-tester.
 
 interface MockEntry {
   value: string
@@ -88,8 +93,24 @@ export function createMockKV(): MockKV {
     async delete(key: string): Promise<void> {
       store.delete(key)
     },
-    async list(): Promise<{ keys: { name: string }[]; list_complete: boolean }> {
-      return { keys: [...store.keys()].map((name) => ({ name })), list_complete: true }
+    async list(options?: { prefix?: string }): Promise<{
+      keys: { name: string; expiration?: number }[]
+      list_complete: boolean
+      cursor?: string
+    }> {
+      // Går via live() så utgångna nycklar inte listas, och respekterar prefix —
+      // annars beskriver stubben ett KV som inte finns.
+      const prefix = options?.prefix ?? ''
+      const keys = [...store.keys()]
+        .filter((name) => name.startsWith(prefix))
+        .filter((name) => live(name) !== undefined)
+        .map((name) => {
+          const entry = store.get(name)!
+          return entry.expiresAt != null
+            ? { name, expiration: Math.floor(entry.expiresAt / 1000) }
+            : { name }
+        })
+      return { keys, list_complete: true }
     },
   }
 

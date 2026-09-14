@@ -81,15 +81,50 @@ describe('sendTrialReminders KV dedup marker', () => {
     expect(sent).toHaveLength(1)
   })
 
-  it('sends again once the marker has expired', async () => {
+  // Markörens TTL måste överleva HELA påminnelsefönstret. Testet flyttade
+  // tidigare bara stubbens klocka 41 dygn framåt och förväntade sig ett nytt
+  // utskick — men jobbet läser den riktiga klockan, så användaren var kvar på
+  // 5,5 dygn och alltså fortfarande inne i fönstret. Det läget kan inte uppstå:
+  // 41 dygn senare filtreras användaren bort långt innan markören ens läses.
+  // Nu flyttas BÅDA klockorna, en dag i taget genom hela fönstret.
+  it('keeps the marker alive for the whole reminder window', async () => {
     const kv = createMockKV()
     const { sent } = mockGoTrueAndResend()
 
     await sendTrialReminders(baseEnv(kv.kv))
     expect(sent).toHaveLength(1)
 
-    // Markören har ~40 dygns TTL.
-    kv.advance(41 * DAY)
+    // Flytta klockan som BÅDE jobbet och stubben läser (Date.now) — inte bara
+    // stubbens egen offset. Riktiga timers lämnas orörda så fetch-mockar och
+    // väntande promises fungerar som vanligt.
+    const realNow = Date.now
+    let offset = 0
+    vi.spyOn(Date, 'now').mockImplementation(() => realNow.call(Date) + offset)
+    try {
+      // Kör om var fjärde timme resten av fönstret. Användaren (5,5 dygn) är
+      // kvar inne i [4, 6) hela vägen till 5,83 dygn, så det enda som kan
+      // stoppa ett nytt utskick är markören.
+      for (let i = 0; i < 2; i++) {
+        offset += DAY / 6
+        await sendTrialReminders(baseEnv(kv.kv))
+      }
+    } finally {
+      vi.mocked(Date.now).mockRestore()
+    }
+    expect(sent).toHaveLength(1)
+    expect(kv.store.has('trial_reminder:user-trial')).toBe(true)
+  })
+
+  it('sends again if the marker is gone', async () => {
+    const kv = createMockKV()
+    const { sent } = mockGoTrueAndResend()
+
+    await sendTrialReminders(baseEnv(kv.kv))
+    expect(sent).toHaveLength(1)
+
+    // Markören försvinner (KV-utgång eller manuell rensning) medan användaren
+    // fortfarande är inne i fönstret ⇒ påminnelsen går ut igen.
+    kv.store.delete('trial_reminder:user-trial')
     await sendTrialReminders(baseEnv(kv.kv))
     expect(sent).toHaveLength(2)
   })

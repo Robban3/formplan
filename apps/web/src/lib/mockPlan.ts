@@ -33,15 +33,21 @@ interface Exercise {
  * som en riktig plan (giltigt exercise_id + kanoniskt svenskt namn) och därmed
  * alltid visar rätt bild. Speglar `ex()` i apps/api/src/lib/mockPlan.ts.
  *
- * Ett okänt id kastar direkt vid modulinläsning i stället för att tyst ge
- * mockdata som produktionskoden aldrig skulle acceptera.
+ * Ett okänt id får INTE kasta här. Modulen ligger i appens statiska importkedja
+ * (App.tsx → parseMockPlanId, api.ts → getMockPlanResponse) och evalueras före
+ * ReactDOM.render — ErrorBoundary ligger inuti App och kan alltså inte fånga
+ * det. Ett borttappat id hade gett vit skärm för ALLA användare på ALLA vyer.
+ * Katalogen är sanningen: faller uppslagningen används id:t som namn, ingen bild
+ * visas, och smoke-testet (som kör i CI) är det som faktiskt fäller bygget.
  */
 function ex(id: string, sets: number, reps: string, rest_seconds: number, notes?: string): Exercise {
   const c = getExerciseById(id)
-  if (!c) throw new Error(`mockPlan: okänt exercise_id "${id}"`)
+  if (!c && import.meta.env.DEV) {
+    console.error(`mockPlan: okänt exercise_id "${id}" — kör om katalogbygget.`)
+  }
   return {
-    exercise_id: c.id,
-    name: c.name,
+    exercise_id: c?.id ?? id,
+    name: c?.name ?? id,
     sets,
     reps,
     rest_seconds,

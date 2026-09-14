@@ -29,9 +29,19 @@ export interface ExerciseMediaProps {
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
 
+// MediaQueryList:en skapas EN gång och hålls kvar på modulnivå. Ett nytt objekt
+// per anrop gjorde att lyssnaren nedan satt på en referens ingen höll i — WebKit
+// (Capacitors iOS-runtime) håller inte en MediaQueryList vid liv åt sina
+// lyssnare, så efter en GC slutade "reducera rörelse" fungera mitt i sessionen.
+let motionMql: MediaQueryList | null | undefined
+
 function motionQuery(): MediaQueryList | null {
-  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return null
-  return window.matchMedia(REDUCED_MOTION_QUERY)
+  if (motionMql !== undefined) return motionMql
+  motionMql =
+    typeof window === 'undefined' || typeof window.matchMedia !== 'function'
+      ? null
+      : window.matchMedia(REDUCED_MOTION_QUERY)
+  return motionMql
 }
 
 function prefersReducedMotion(): boolean {
@@ -39,6 +49,10 @@ function prefersReducedMotion(): boolean {
 }
 
 let tickCount = 0
+// Sant när rörelsen är pausad — då ska ALLA kort visa startbilden. Utan den
+// egna flaggan användes tickCount = 0, men rutan är (tick + phase(id)) % 2, så
+// de 41 övningar vars fas är 1 frös på SLUTläget i stället för startläget.
+let frozen = false
 let intervalId: ReturnType<typeof setInterval> | null = null
 let motionListenerAttached = false
 const tickListeners = new Set<() => void>()
@@ -49,6 +63,7 @@ function emitTick() {
 
 function startTicker() {
   if (intervalId !== null || prefersReducedMotion() || tickListeners.size === 0) return
+  frozen = false
   intervalId = setInterval(() => {
     tickCount++
     emitTick()
@@ -74,7 +89,8 @@ function attachMotionListener() {
     if (prefersReducedMotion()) {
       stopTicker()
       // Frys på startläget så alla kort visar samma (första) bildruta.
-      tickCount = 0
+      frozen = true
+      tickCount++
       emitTick()
     } else {
       startTicker()
@@ -94,6 +110,10 @@ function subscribeTick(listener: () => void): () => void {
 
 function getTick(): number {
   return tickCount
+}
+
+function isFrozen(): boolean {
+  return frozen || prefersReducedMotion()
 }
 
 /** Stabil fasgrupp (0 eller 1) härledd ur övningens id. */
@@ -122,8 +142,9 @@ export function ExerciseMedia({
   className = '',
 }: ExerciseMediaProps) {
   const tick = useSyncExternalStore(subscribeTick, getTick, () => 0)
-  // Fasgrupp per övning, så en hel lista inte växlar helt i takt.
-  const frame = (tick + phase(exercise.id)) % 2
+  // Fasgrupp per övning, så en hel lista inte växlar helt i takt. Är rörelsen
+  // avstängd visar varje kort startbilden — inte sin fas.
+  const frame = isFrozen() ? 0 : (tick + phase(exercise.id)) % 2
 
   // Fel-flaggorna hör ihop med en *specifik* övning. Utan id:t i state skulle
   // en tidigare övnings misslyckade bilder visa platshållaren en frame innan en

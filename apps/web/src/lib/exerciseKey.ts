@@ -19,8 +19,14 @@ import type { PersonalRecord } from './prStore'
  * importcykel.
  */
 
-/** Sätts när engångsmigrationen till id-nycklar är körd. */
-const MIGRATION_FLAG = 'formplan_exercise_key_v2'
+/**
+ * Sätts när migrationen till id-nycklar är körd. Namnet bär en VERSION: härleds
+ * nyckeln om (matchningsreglerna ändras, alias läggs till) måste migreringen
+ * köras igen, annars läser appen med nya regler ur en butik som nycklades med
+ * de gamla — och all historik för de namn som bytt nyckel blir osynlig. Bumpa
+ * den här när `exerciseKey` eller katalogens matchning ändras.
+ */
+const MIGRATION_FLAG = 'formplan_exercise_key_v3'
 
 // Samma nycklar som exerciseHistoryStore/prStore använder. De dupliceras här
 // (i stället för att importeras) för att hålla migrationen fri från importcykler.
@@ -29,13 +35,22 @@ const PR_STORAGE_KEY = 'formplan_personal_records'
 
 /** Gemensam normalisering: gemener, å/ä→a, ö→o, allt annat blir mellanslag. */
 export function normalizeExerciseName(name: string): string {
-  return name
-    .toLowerCase()
+  return (
+    name
+      // Samma NFD-prelud som katalogens normalize. Utan den blev ett dekomponerat
+      // ö (som iOS tangentbord kan skicka) "o" + kombinerande tecken → tecknet
+      // föll ut som mellanslag och "Björnkrypning" fick två olika nycklar
+      // beroende på hur användaren råkade skriva det.
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .toLowerCase()
     .trim()
-    .replace(/[åä]/g, 'a')
-    .replace(/ö/g, 'o')
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim()
+      .trim()
+      .replace(/[åä]/g, 'a')
+      .replace(/ö/g, 'o')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim()
+  )
 }
 
 /**

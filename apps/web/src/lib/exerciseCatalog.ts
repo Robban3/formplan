@@ -24,6 +24,8 @@ export const MUSCLE_LABELS: Record<Muscle, string> = {
 export const EXERCISE_CATEGORIES = ['Bröst', 'Rygg', 'Ben', 'Axlar', 'Armar', 'Core', 'Kondition'] as const
 export type ExerciseCategory = (typeof EXERCISE_CATEGORIES)[number]
 
+export type ExerciseLogStyle = 'reps' | 'bodyweight' | 'time'
+
 export interface CatalogExercise {
   /** Stabilt id — används i scheman, historik och progression. */
   id: string
@@ -34,6 +36,15 @@ export interface CatalogExercise {
   secondaryMuscles: Muscle[]
   /** [startläge, slutläge] — växlas i UI:t för att visa rörelsen. */
   images: [string, string]
+  /**
+   * Hur övningen loggas. Nyckelordsgissning på namnet räcker inte: "Cykelcrunch"
+   * innehåller "cykl" och klassades som kondition, medan "Gång" och "Battle
+   * ropes" inte innehåller något konditionsord och fick ett viktfält.
+   *  - 'time'       tid/distans (konditionspass)
+   *  - 'bodyweight' reps utan externt viktfält
+   *  - 'reps'       reps + vikt
+   */
+  logStyle: ExerciseLogStyle
   /** Varianter som AI:n eller äldre scheman kan ha skrivit. */
   aliases: string[]
 }
@@ -55,6 +66,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/bankpress-0.webp",
       "/exercises/bankpress-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "bänkpress med skivstång",
       "bench press",
@@ -77,6 +89,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/hantelpress-brost-0.webp",
       "/exercises/hantelpress-brost-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "hantelbänkpress",
       "dumbbell press"
@@ -98,6 +111,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/lutande-bankpress-0.webp",
       "/exercises/lutande-bankpress-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "incline bench press",
       "snedbänk",
@@ -120,6 +134,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/lutande-hantelpress-0.webp",
       "/exercises/lutande-hantelpress-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "incline dumbbell press"
     ]
@@ -140,10 +155,12 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/armhavningar-0.webp",
       "/exercises/armhavningar-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "push-ups",
       "pushups",
-      "armhävning"
+      "armhävning",
+      "armhävning med kroppsvikt"
     ]
   },
   {
@@ -159,6 +176,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/flyes-0.webp",
       "/exercises/flyes-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "hantelflyes",
       "flys"
@@ -177,6 +195,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/pec-deck-0.webp",
       "/exercises/pec-deck-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "butterfly",
       "maskinflyes"
@@ -198,6 +217,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/maskinpress-brost-0.webp",
       "/exercises/maskinpress-brost-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "bröstpress maskin"
     ]
@@ -218,6 +238,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/dips-brost-0.webp",
       "/exercises/dips-brost-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "dips bröst"
     ]
@@ -237,6 +258,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/kabelcross-0.webp",
       "/exercises/kabelcross-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "cable crossover",
       "kabelkryss"
@@ -264,6 +286,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/marklyft-0.webp",
       "/exercises/marklyft-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "deadlift",
       "konventionell marklyft"
@@ -285,9 +308,11 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/pull-ups-0.webp",
       "/exercises/pull-ups-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "pullups",
-      "räckhäv"
+      "räckhäv",
+      "pull ups"
     ]
   },
   {
@@ -307,6 +332,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/chins-0.webp",
       "/exercises/chins-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "chin-up",
       "chinups"
@@ -329,6 +355,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/latsdrag-0.webp",
       "/exercises/latsdrag-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "lat pulldown",
       "latsdrag brett grepp"
@@ -351,6 +378,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/skivstangsrodd-0.webp",
       "/exercises/skivstangsrodd-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "stångrodd",
       "barbell row",
@@ -375,9 +403,11 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/hantelrodd-0.webp",
       "/exercises/hantelrodd-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "enarmsrodd",
-      "dumbbell row"
+      "dumbbell row",
+      "enarms hantelrodd"
     ]
   },
   {
@@ -397,6 +427,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/sittande-kabelrodd-0.webp",
       "/exercises/sittande-kabelrodd-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "kabelrodd",
       "seated row",
@@ -419,6 +450,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/t-bar-rodd-0.webp",
       "/exercises/t-bar-rodd-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "t-bar row",
       "tbar rodd"
@@ -441,6 +473,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/pullover-0.webp",
       "/exercises/pullover-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "hantelpullover"
     ]
@@ -461,6 +494,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/rygglyft-0.webp",
       "/exercises/rygglyft-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "ryggresning",
       "back extension",
@@ -480,6 +514,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/shrugs-0.webp",
       "/exercises/shrugs-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "axelryckningar",
       "shrug"
@@ -503,6 +538,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/knaboj-0.webp",
       "/exercises/knaboj-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "squat",
       "benböj",
@@ -526,6 +562,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/frontboj-0.webp",
       "/exercises/frontboj-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "front squat",
       "frontknäböj"
@@ -549,6 +586,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/goblet-squat-0.webp",
       "/exercises/goblet-squat-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "gobletsquat"
     ]
@@ -570,6 +608,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/benpress-0.webp",
       "/exercises/benpress-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "leg press"
     ]
@@ -591,10 +630,13 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/utfallssteg-0.webp",
       "/exercises/utfallssteg-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "utfall",
       "lunges",
-      "lunge"
+      "lunge",
+      "utfallsgång",
+      "utfallsgang"
     ]
   },
   {
@@ -614,6 +656,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/bulgarisk-split-squat-0.webp",
       "/exercises/bulgarisk-split-squat-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "split squat",
       "bulgarian split squat"
@@ -636,9 +679,12 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/step-up-0.webp",
       "/exercises/step-up-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "stepup",
-      "uppsteg"
+      "uppsteg",
+      "step-ups",
+      "step ups"
     ]
   },
   {
@@ -658,6 +704,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/rumansk-marklyft-0.webp",
       "/exercises/rumansk-marklyft-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "rdl",
       "romanian deadlift",
@@ -681,6 +728,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/good-morning-0.webp",
       "/exercises/good-morning-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "goodmorning"
     ]
@@ -698,6 +746,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/bencurl-0.webp",
       "/exercises/bencurl-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "lårcurl",
       "leg curl",
@@ -717,6 +766,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/benspark-0.webp",
       "/exercises/benspark-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "leg extension",
       "lårspark"
@@ -738,6 +788,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/hoftlyft-0.webp",
       "/exercises/hoftlyft-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "glute bridge",
       "bäckenlyft"
@@ -759,6 +810,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/hip-thrust-0.webp",
       "/exercises/hip-thrust-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "höftstöt",
       "hipthrust"
@@ -777,6 +829,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/hoftadduktion-0.webp",
       "/exercises/hoftadduktion-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "adduktion",
       "inåtföring lår"
@@ -795,11 +848,13 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/vadpress-staende-0.webp",
       "/exercises/vadpress-staende-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "vadpress",
       "stående vadpress",
       "calf raise",
-      "tåhävningar"
+      "tåhävningar",
+      "calf raises"
     ]
   },
   {
@@ -815,6 +870,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/vadpress-sittande-0.webp",
       "/exercises/vadpress-sittande-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "seated calf raise"
     ]
@@ -838,6 +894,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/box-jump-0.webp",
       "/exercises/box-jump-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "boxhopp",
       "lådhopp"
@@ -859,6 +916,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/axelpress-0.webp",
       "/exercises/axelpress-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "shoulder press",
       "skivstångspress axlar"
@@ -879,6 +937,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/militarpress-0.webp",
       "/exercises/militarpress-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "military press",
       "stående press"
@@ -899,6 +958,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/hantelpress-axlar-0.webp",
       "/exercises/hantelpress-axlar-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "hantelaxelpress",
       "dumbbell shoulder press"
@@ -919,6 +979,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/arnoldpress-0.webp",
       "/exercises/arnoldpress-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "arnold press"
     ]
@@ -936,9 +997,12 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/sidolyft-0.webp",
       "/exercises/sidolyft-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "lateral raise",
-      "sidolyft hantlar"
+      "sidolyft hantlar",
+      "lateral raises",
+      "sidolyft med hantlar"
     ]
   },
   {
@@ -954,6 +1018,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/frontlyft-0.webp",
       "/exercises/frontlyft-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "front raise"
     ]
@@ -973,6 +1038,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/face-pull-0.webp",
       "/exercises/face-pull-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "face pull",
       "ansiktsdrag"
@@ -991,6 +1057,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/omvand-flyes-0.webp",
       "/exercises/omvand-flyes-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "reverse flyes",
       "omvända flyes",
@@ -1012,6 +1079,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/upright-row-0.webp",
       "/exercises/upright-row-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "stående rodd",
       "uprightrow"
@@ -1032,10 +1100,13 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/bicepscurl-0.webp",
       "/exercises/bicepscurl-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "biceps curl",
       "skivstångscurl",
-      "curl"
+      "curl",
+      "bicep curl",
+      "hantelcurl"
     ]
   },
   {
@@ -1051,6 +1122,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/hammarcurl-0.webp",
       "/exercises/hammarcurl-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "hammer curl"
     ]
@@ -1068,6 +1140,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/preacher-curl-0.webp",
       "/exercises/preacher-curl-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "scottcurl",
       "preachercurl"
@@ -1088,6 +1161,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/koncentrationscurl-0.webp",
       "/exercises/koncentrationscurl-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "concentration curl"
     ]
@@ -1105,6 +1179,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/kabelcurl-0.webp",
       "/exercises/kabelcurl-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "cable curl"
     ]
@@ -1124,6 +1199,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/reverse-curl-0.webp",
       "/exercises/reverse-curl-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "reverse curl",
       "omvänd bicepscurl"
@@ -1142,6 +1218,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/tricepspress-0.webp",
       "/exercises/tricepspress-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "triceps pushdown",
       "tricepsnedpress"
@@ -1160,6 +1237,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/repdrag-triceps-0.webp",
       "/exercises/repdrag-triceps-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "rope pushdown",
       "tricepsrep"
@@ -1178,6 +1256,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/tricepsextension-0.webp",
       "/exercises/tricepsextension-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "overhead extension",
       "fransk press"
@@ -1196,6 +1275,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/skullcrushers-0.webp",
       "/exercises/skullcrushers-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "skullcrusher",
       "liggande tricepspress"
@@ -1217,6 +1297,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/tricepsdips-0.webp",
       "/exercises/tricepsdips-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "bench dips",
       "bänkdips",
@@ -1236,6 +1317,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/plankan-0.webp",
       "/exercises/plankan-1.webp"
     ],
+    "logStyle": "bodyweight",
     "aliases": [
       "planka",
       "plank"
@@ -1256,6 +1338,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/sidoplanka-0.webp",
       "/exercises/sidoplanka-1.webp"
     ],
+    "logStyle": "bodyweight",
     "aliases": [
       "side plank",
       "sidplanka"
@@ -1274,9 +1357,11 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/sit-ups-0.webp",
       "/exercises/sit-ups-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "situps",
-      "magböj"
+      "magböj",
+      "sit ups"
     ]
   },
   {
@@ -1292,6 +1377,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/crunches-0.webp",
       "/exercises/crunches-1.webp"
     ],
+    "logStyle": "bodyweight",
     "aliases": [
       "crunch",
       "magcrunch"
@@ -1310,6 +1396,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/cykelcrunch-0.webp",
       "/exercises/cykelcrunch-1.webp"
     ],
+    "logStyle": "bodyweight",
     "aliases": [
       "bicycle crunch",
       "cykelmage"
@@ -1330,6 +1417,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/russian-twist-0.webp",
       "/exercises/russian-twist-1.webp"
     ],
+    "logStyle": "bodyweight",
     "aliases": [
       "rysk twist"
     ]
@@ -1347,6 +1435,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/hangande-benlyft-0.webp",
       "/exercises/hangande-benlyft-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "hanging leg raise"
     ]
@@ -1364,6 +1453,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/benlyft-liggande-0.webp",
       "/exercises/benlyft-liggande-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "lying leg raise",
       "benlyft"
@@ -1386,6 +1476,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/mountain-climbers-0.webp",
       "/exercises/mountain-climbers-1.webp"
     ],
+    "logStyle": "bodyweight",
     "aliases": [
       "bergsklättrare"
     ]
@@ -1403,6 +1494,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/dead-bug-0.webp",
       "/exercises/dead-bug-1.webp"
     ],
+    "logStyle": "bodyweight",
     "aliases": [
       "deadbug"
     ]
@@ -1422,6 +1514,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/ab-wheel-0.webp",
       "/exercises/ab-wheel-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "maghjul",
       "ab roller"
@@ -1440,6 +1533,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/sidoboj-0.webp",
       "/exercises/sidoboj-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "side bend"
     ]
@@ -1460,6 +1554,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/superman-0.webp",
       "/exercises/superman-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "ryggresning golv"
     ]
@@ -1481,6 +1576,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/lopning-0.webp",
       "/exercises/lopning-1.webp"
     ],
+    "logStyle": "time",
     "aliases": [
       "löpband",
       "running",
@@ -1505,6 +1601,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/gang-0.webp",
       "/exercises/gang-1.webp"
     ],
+    "logStyle": "time",
     "aliases": [
       "promenad",
       "walking"
@@ -1527,6 +1624,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/cykling-0.webp",
       "/exercises/cykling-1.webp"
     ],
+    "logStyle": "time",
     "aliases": [
       "cykel",
       "spinning",
@@ -1553,6 +1651,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/roddmaskin-0.webp",
       "/exercises/roddmaskin-1.webp"
     ],
+    "logStyle": "time",
     "aliases": [
       "rodd",
       "rowing"
@@ -1575,6 +1674,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/crosstrainer-0.webp",
       "/exercises/crosstrainer-1.webp"
     ],
+    "logStyle": "time",
     "aliases": [
       "elliptical"
     ]
@@ -1596,6 +1696,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/stairmaster-0.webp",
       "/exercises/stairmaster-1.webp"
     ],
+    "logStyle": "time",
     "aliases": [
       "trappmaskin"
     ]
@@ -1616,6 +1717,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/hopprep-0.webp",
       "/exercises/hopprep-1.webp"
     ],
+    "logStyle": "time",
     "aliases": [
       "hoppa rep",
       "jump rope"
@@ -1639,9 +1741,12 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/kettlebell-swing-0.webp",
       "/exercises/kettlebell-swing-1.webp"
     ],
+    "logStyle": "reps",
     "aliases": [
       "kb swing",
-      "kettlebellsving"
+      "kettlebellsving",
+      "kettlebell swings",
+      "kettlebell sving"
     ]
   },
   {
@@ -1660,6 +1765,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
       "/exercises/battle-ropes-0.webp",
       "/exercises/battle-ropes-1.webp"
     ],
+    "logStyle": "time",
     "aliases": [
       "kamprep"
     ]

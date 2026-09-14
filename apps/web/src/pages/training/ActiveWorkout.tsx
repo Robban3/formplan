@@ -278,8 +278,10 @@ export function ActiveWorkout() {
   // Samma nyckel som historik/PR lagras på — id först, annars namnet.
   const exKey = exerciseKey(ex)
   const prevSetsForEx = previousSets[exKey]
-  const isCardio = isCardioExercise(ex.name)
-  const showWeight = exerciseUsesWeight(ex.name, ex.targetReps)
+  // Skicka hela referensen: bär övningen ett katalog-id avgör katalogens
+  // logStyle, inte nyckelordsgissning på namnet.
+  const isCardio = isCardioExercise(ex)
+  const showWeight = exerciseUsesWeight(ex, ex.targetReps)
   const setGrid = showWeight || isCardio
     ? 'grid-cols-[2rem_1fr_1fr_2.5rem]'
     : 'grid-cols-[2rem_1fr_2.5rem]'

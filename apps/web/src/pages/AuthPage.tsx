@@ -1,15 +1,34 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { supabase, supabaseConfigured } from '../lib/supabase'
-import { isPasswordRecovery, setPasswordRecovery } from '../lib/authRecovery'
+import {
+  endPasswordRecovery,
+  getRecoveryState,
+  subscribePasswordRecovery,
+} from '../lib/authRecovery'
 import { toast } from '../lib/toast'
+
+/**
+ * Samma svar oavsett om adressen har ett konto eller inte — annars går det att
+ * ta reda på vilka e-postadresser som är registrerade.
+ */
+const NEUTRAL_SIGNUP_NOTICE =
+  'Om adressen inte redan är registrerad får du ett bekräftelsemejl. Har du redan ett konto — logga in.'
 
 /** Översätt de vanligaste GoTrue-felen till svenska. */
 export function translateAuthError(msg: string): string {
   const m = msg.toLowerCase()
-  if (m.includes('invalid login')) return 'Fel e-post eller lösenord.'
+  // Fel lösenord, okänd adress och obekräftad adress måste ge EXAKT samma svar —
+  // annars går det att ta reda på vilka e-postadresser som har konto. Hjälpen om
+  // bekräftelsemejlet ligger därför i samma text som fel lösenord ger.
+  if (m.includes('invalid login') || m.includes('email not confirmed'))
+    return 'Fel e-post eller lösenord. Har du precis skapat kontot behöver du först bekräfta det via mejlet.'
+  // Samma neutrala besked som vid lyckad registrering (se isObfuscatedExistingUser).
   if (m.includes('already registered') || m.includes('already been registered'))
-    return 'Ett konto finns redan för den här e-posten. Logga in i stället.'
-  if (m.includes('email not confirmed')) return 'Bekräfta din e-post först — kolla inkorgen.'
+    return NEUTRAL_SIGNUP_NOTICE
+  // Länken är använd/utgången, eller sessionen hann rensas innan formuläret
+  // skickades. Skulle annars visas rått på engelska ("Auth session missing!").
+  if (m.includes('session missing') || m.includes('session_not_found') || m.includes('session not found'))
+    return 'Länken är inte längre giltig. Begär en ny återställningslänk.'
   // GoTrues egen throttling ("For security purposes, you can only request this
   // after 47 seconds") — skulle annars visas rå på engelska.
   if (m.includes('for security purposes') || m.includes('only request this'))
@@ -36,7 +55,15 @@ function isObfuscatedExistingUser(user: { identities?: unknown[] | null } | null
   return !!user && (user.identities?.length ?? 0) === 0
 }
 
-const MIN_PASSWORD_LENGTH = 6
+/**
+ * Kravet sätts i projektets Supabase-inställningar. Höjs det där utan att den
+ * här siffran följer med lovar formuläret "minst 6 tecken" och servern säger
+ * nej — därför läses den ur miljön i stället för att vara hårdkodad.
+ */
+const MIN_PASSWORD_LENGTH = (() => {
+  const raw = Number(import.meta.env.VITE_SUPABASE_MIN_PASSWORD_LENGTH)
+  return Number.isFinite(raw) && raw >= 6 && raw <= 72 ? Math.floor(raw) : 6
+})()
 
 export function AuthPage() {
   const [email, setEmail] = useState('')
@@ -48,22 +75,39 @@ export function AuthPage() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
-  // Användaren kom tillbaka via återställningslänken och ska sätta nytt lösenord.
-  const [recovering, setRecovering] = useState(isPasswordRecovery)
   const [newPassword, setNewPassword] = useState('')
+
+  // Återställningsläget ägs av authRecovery (lyssnaren ligger på modulnivå där,
+  // så den är armad även när den här vyn inte är monterad).
+  const recoveryState = useSyncExternalStore(
+    subscribePasswordRecovery,
+    getRecoveryState,
+    () => 'none' as const
+  )
+  // Formuläret visas BARA när PASSWORD_RECOVERY faktiskt kommit. En markör i
+  // adressen räcker inte — se kommentaren i authRecovery.ts.
+  const recovering = recoveryState === 'active'
+  const verifyingLink = recoveryState === 'pending'
 
   const busy = loading || googleLoading
 
+  // En utgången eller redan använd länk landar på #error=… utan type=recovery.
+  // Utan det här står användaren på en vanlig inloggningsruta och tror att
+  // återställningen gick igenom.
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setPasswordRecovery(true)
-        setRecovering(true)
-        setError(null)
-        setNotice(null)
-      }
-    })
-    return () => data.subscription.unsubscribe()
+    const hash = window.location.hash
+    if (!hash.includes('error')) return
+    const params = new URLSearchParams(hash.replace(/^#/, ''))
+    const code = params.get('error_code')
+    const description = params.get('error_description')
+    if (!code && !description) return
+    setError(
+      code === 'otp_expired' || /expired|invalid/i.test(description ?? '')
+        ? 'Länken har gått ut eller är redan använd. Begär en ny.'
+        : translateAuthError(description ?? 'Länken kunde inte verifieras.')
+    )
+    // Rensa hashen så felet inte kommer tillbaka vid navigering i appen.
+    window.history.replaceState(null, '', window.location.pathname + window.location.search)
   }, [])
 
   if (!supabaseConfigured) {
@@ -197,8 +241,7 @@ export function AuthPage() {
       // Sessionen är redan inloggad — släpp fram appen igen. Bekräftelsen visas
       // som toast eftersom sidan byts ut i samma ögonblick.
       toast.success('Lösenordet är uppdaterat.')
-      setRecovering(false)
-      setPasswordRecovery(false)
+      endPasswordRecovery()
     } catch (err) {
       setError(unexpected(err))
     } finally {
@@ -218,10 +261,15 @@ export function AuthPage() {
         provider: 'google',
         options: { redirectTo },
       })
-      if (error) setError(translateAuthError(error.message))
+      // Lyckas anropet sätter auth-js window.location och löser ut direkt —
+      // sidan står kvar synlig medan navigeringen sker. Släpp därför INTE
+      // knappen på success-vägen, annars går det att starta en andra OAuth-resa.
+      if (error) {
+        setError(translateAuthError(error.message))
+        setGoogleLoading(false)
+      }
     } catch (err) {
       setError(unexpected(err))
-    } finally {
       setGoogleLoading(false)
     }
   }
@@ -283,7 +331,14 @@ export function AuthPage() {
                 <img src="/logo.png" alt="FormPlan" style={{ height: '210px', width: 'auto' }} />
               </div>
 
-              {recovering ? (
+              {verifyingLink ? (
+                /* Markören finns i adressen men länken är inte verifierad ännu.
+                   Visa ingenting som kan ändra lösenordet förrän den är det. */
+                <div className="text-center py-6">
+                  <div className="w-8 h-8 mx-auto mb-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <p className="text-slate-300 text-sm">Verifierar återställningslänken…</p>
+                </div>
+              ) : recovering ? (
                 /* Tillbaka via återställningslänken — sätt ett nytt lösenord. */
                 <form onSubmit={handleSetNewPassword} className="space-y-3">
                   <h2 className="text-white text-2xl font-bold text-center mb-1">Nytt lösenord</h2>
@@ -311,7 +366,7 @@ export function AuthPage() {
                   </button>
                   <p className="text-center text-xs text-slate-400 pt-1">
                     <button type="button"
-                      onClick={() => { setRecovering(false); setPasswordRecovery(false); setNewPassword(''); resetFormState() }}
+                      onClick={() => { endPasswordRecovery(); setNewPassword(''); resetFormState() }}
                       className="font-semibold" style={{ color: 'var(--brand)' }}>
                       Avbryt
                     </button>

@@ -31,17 +31,29 @@ jobs:
       # inaktuell fil både typecheck, tester och bygge — och API:t kan låsa AI:n
       # till id:n som webben inte kan slå upp (ingen bild/teknik för övningen).
       # Bilderna finns redan i repot, så generatorn laddar inte ner något och
-      # behöver därför aldrig `sharp` (importen är lazy).
+      # behöver därför aldrig `sharp` (importen är lazy). Källdatan läses ur den
+      # incheckade snapshoten (scripts/exercise-db-snapshot.json), så steget gör
+      # inga nätverksanrop alls — tidigare hämtades ~870 kB från
+      # raw.githubusercontent.com vid varje körning, utan timeout eller omförsök,
+      # och ett glapp eller en 429 fällde bygget på något orelaterat.
       - name: Verify generated exercise catalogs are in sync with the generator
         run: |
           node scripts/build-exercise-catalog.mjs
           git diff --exit-code -- \
             apps/api/src/lib/exerciseCatalog.ts \
             apps/web/src/lib/exerciseCatalog.ts \
+            scripts/exercise-db-snapshot.json \
             || {
               echo "::error::De genererade övningskatalogerna är inaktuella eller handredigerade. Kör 'node scripts/build-exercise-catalog.mjs' och committa resultatet."
               exit 1
             }
+          # Nya bildrutor landar otrackade och syns inte i git diff — de måste
+          # committas tillsammans med katalogen, annars saknar övningen bild i
+          # produktion.
+          if [ -n "$(git status --porcelain --untracked-files=all -- apps/web/public/exercises)" ]; then
+            echo "::error::Generatorn skapade nya övningsbilder som inte är committade. Lägg till apps/web/public/exercises/."
+            exit 1
+          fi
 
       - name: Build web
         run: npm run build

@@ -49,6 +49,9 @@ function refLabel(exercise: ExerciseRef | string): string {
  */
 export function getPRForExercise(exercise: ExerciseRef | string): PersonalRecord | null {
   const key = exerciseKey(exercise)
+  // Namn utan bokstäver eller siffror ("💪") normaliseras till tomt — utan
+  // spärren delade alla sådana övningar ETT rekord under nyckeln "".
+  if (!key) return null
   return load().find((r) => r.exercise === key) ?? null
 }
 
@@ -61,6 +64,8 @@ export function checkAndUpdatePR(
   if (weight_kg <= 0 || reps <= 0) return false
   const est1rm = Math.round(weight_kg * (1 + reps / 30))
   const key = exerciseKey(exercise)
+  // Se getPRForExercise — ett tomt nyckelvärde får aldrig lagras.
+  if (!key) return false
   const records = load()
   const existing = records.find((r) => r.exercise === key)
   if (existing && existing.estimated_1rm >= est1rm) return false

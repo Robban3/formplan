@@ -23,6 +23,10 @@ const setSchema = z.object({
 
 const exerciseSchema = z.object({
   name: z.string().min(1).max(120),
+  // Katalogens stabila id. Utan fältet i schemat strippade Zod det tyst ur varje
+  // sparat pass — klienten skickade det, men historiken kunde aldrig matcha på
+  // annat än exakt namn, så samma lyft under två stavningar blev två serier.
+  exercise_id: z.string().max(80).optional(),
   sets: z.array(setSchema).max(50),
 })
 
@@ -96,20 +100,26 @@ workoutRouter.post(
   }
 )
 
-// GET /workout/exercise-history?name= — last N sessions containing the named exercise.
+// GET /workout/exercise-history?name=&exercise_id= — last N sessions containing
+// the exercise. Matchar i första hand på katalog-id:t (stabilt över namnbyten
+// och stavningsvarianter) och faller tillbaka på exakt namn för äldre pass som
+// sparades innan id:t följde med.
 workoutRouter.get('/exercise-history', async (c) => {
   const user = c.get('user')
   const name = (c.req.query('name') ?? '').trim().toLowerCase()
-  if (!name) return c.json({ history: [] })
+  const exerciseId = (c.req.query('exercise_id') ?? '').trim()
+  if (!name && !exerciseId) return c.json({ history: [] })
   const db = supabaseAdmin(c.env)
 
-  const { data } = await db.query<{ completed_at: string; exercises: { name: string; sets: { reps: number; weight_kg: number | null; done: boolean }[] }[] }[]>(
+  const { data } = await db.query<{ completed_at: string; exercises: { name: string; exercise_id?: string; sets: { reps: number; weight_kg: number | null; done: boolean }[] }[] }[]>(
     `/workout_session?user_id=eq.${user.sub}&select=completed_at,exercises&order=completed_at.desc&limit=20`
   )
 
   const history: { date: string; sets: { reps: number; weight_kg: number | null }[] }[] = []
   for (const session of data ?? []) {
-    const match = session.exercises.find((e) => e.name.toLowerCase() === name)
+    const match =
+      (exerciseId ? session.exercises.find((e) => e.exercise_id === exerciseId) : undefined) ??
+      (name ? session.exercises.find((e) => e.name.toLowerCase() === name) : undefined)
     if (match) {
       history.push({
         date: session.completed_at,

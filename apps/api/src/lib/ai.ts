@@ -404,10 +404,17 @@ export function normalizePlanExercises<T extends GeneratedPlanDay>(days: T[]): T
 
       // Tom sträng får aldrig gå till matchExercise — den skulle delsträngs-
       // matcha mot vad som helst och tyst byta ut övningen.
+      // Id:t är den enda exakta signalen. Går det inte att slå upp används
+      // namnet. Ett trasigt id får däremot ALDRIG gissas fram när det finns ett
+      // namn som inte gick att lösa upp: id "dips" + namn "Tricepsdips på bänk"
+      // blev då Dips (bröst) i stället för Tricepsdips (armar), och id "rodd" +
+      // "Rodd med skivstång" blev konditionsmaskinen Roddmaskin. Fel bild, fel
+      // muskelgrupp och historik som slås ihop med en annan övning — precis det
+      // gissningen skulle bort från. Saknas namn helt är id:t allt vi har.
       const hit =
         (id ? getExerciseById(id) : undefined) ??
         (name ? matchExercise(name) : undefined) ??
-        (id ? matchExercise(id) : undefined)
+        (!name && id ? matchExercise(id) : undefined)
 
       if (!hit) {
         console.warn(
@@ -437,7 +444,16 @@ export function normalizePlanExercises<T extends GeneratedPlanDay>(days: T[]): T
     }
 
     daysSurvived++
-    day.content = { ...(content as WorkoutDay), exercises }
+    // Bygg om content i träningsdagens form i stället för att sprida in det
+    // modellen råkade skicka. En dag felmärkt som "nutrition" bär nutrition-
+    // innehåll: spridningen gav då en workout-rad utan name/focus/
+    // duration_minutes, och klienten renderade tom rubrik och "undefined min".
+    day.content = {
+      name: typeof content?.name === 'string' && content.name.trim() ? content.name.trim() : 'Pass',
+      focus: typeof content?.focus === 'string' ? content.focus.trim() : '',
+      duration_minutes: Math.round(toNumber(content?.duration_minutes, 45)),
+      exercises,
+    } satisfies WorkoutDay
     // Modellen kan felmärka ett pass (t.ex. type "nutrition"). En dag med
     // katalogövningar ÄR en träningsdag — annars hamnar innehållet i fel
     // plan_day-rad (och krockar med den härledda nutrition-raden).
@@ -449,10 +465,15 @@ export function normalizePlanExercises<T extends GeneratedPlanDay>(days: T[]): T
     }
   }
 
-  // Regel: en enstaka trasig dag får inte kasta bort sex bra. Kasta bara när
-  // INGEN träningsdag överlevde, eller när fler än hälften av dagarna med
-  // övningar tömdes (då är svaret systematiskt trasigt, inte en engångsmiss).
-  if (workoutDays > 0 && (daysSurvived === 0 || emptied.length > workoutDays / 2)) {
+  // Regel: en enstaka trasig dag får inte kasta bort sex bra, men en STRIKT
+  // majoritet av träningsdagarna måste överleva.
+  //  - Villkoret hade tidigare ett `workoutDays > 0`-skydd, så ett svar helt
+  //    utan träningsdagar slank igenom och planen markerades "ready". Klienten
+  //    visar då "inget schema" trots att API:t säger klart — och generering är
+  //    hårt kvotad (3/h, en plan på gratisnivån).
+  //  - `emptied.length > workoutDays / 2` släppte dessutom igenom exakt hälften:
+  //    den som bad om 4 träningsdagar fick tyst 2.
+  if (daysSurvived === 0 || daysSurvived * 2 <= workoutDays) {
     throw new Error(
       `Plan generation produced ${emptied.length}/${workoutDays} workout days with no exercises from the catalog (weekdays ${emptied
         .map((d) => d.weekday)
@@ -466,6 +487,19 @@ export function normalizePlanExercises<T extends GeneratedPlanDay>(days: T[]): T
     )
     day.type = 'rest'
     // Nutritionen för veckodagen ligger utanför content och behålls.
+    day.content = { notes: 'Vila' } satisfies RestDay
+  }
+
+  // Varje dag får dessutom en härledd nutrition-rad (se generatePlan). En dag
+  // som modellen själv typat "nutrition" — eller något helt utanför schemat —
+  // skulle då bli två rader med samma (plan_id, weekday, type) och spränga
+  // unik-indexet: hela insert:en fallerar och planen sparas som "error". Efter
+  // normaliseringen har en icke-workout-dag inga övningar kvar, så vilodag är
+  // den ärliga typen. (CHECK-villkoret tillåter bara workout/nutrition/rest.)
+  for (const day of days) {
+    if (day.type === 'workout' || day.type === 'rest') continue
+    console.warn(`Plan: day ${day.weekday} had type "${String(day.type)}" — stored as a rest day`)
+    day.type = 'rest'
     day.content = { notes: 'Vila' } satisfies RestDay
   }
 

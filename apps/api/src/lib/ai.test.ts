@@ -36,8 +36,23 @@ const profile: FitnessProfile = {
 }
 
 // Ett minimalt men giltigt plan-JSON-svar från modellen.
+// Måste innehålla en riktig träningsdag: en plan helt utan pass är inte en
+// giltig plan och normaliseringen kastar på den.
 const planJson = JSON.stringify({
-  days: [{ weekday: 1, type: 'rest', content: { notes: 'vila' }, nutrition: { total_calories: 2000, protein_g: 150, carbs_g: 200, fat_g: 60, meals: [] } }],
+  days: [
+    {
+      weekday: 1,
+      type: 'workout',
+      content: {
+        name: 'Överkropp',
+        focus: 'Bröst',
+        duration_minutes: 60,
+        exercises: [{ exercise_id: 'bankpress', name: 'Bänkpress', sets: 4, reps: '8', rest_seconds: 120 }],
+      },
+      nutrition: { total_calories: 2000, protein_g: 150, carbs_g: 200, fat_g: 60, meals: [] },
+    },
+    { weekday: 2, type: 'rest', content: { notes: 'vila' }, nutrition: { total_calories: 2000, protein_g: 150, carbs_g: 200, fat_g: 60, meals: [] } },
+  ],
 })
 
 const geminiOk = () =>
@@ -122,16 +137,37 @@ describe('normalizePlanExercises', () => {
     expect(ex?.name).toBe('Sittande vadpress')
   })
 
-  // Sista utvägen: namnet säger ingenting, men id:t går att tolka.
-  it('falls back to matching on the exercise_id when the name is useless', () => {
+  // Sista utvägen: namnet saknas helt, men id:t går att tolka.
+  it('falls back to matching on the exercise_id when there is no name at all', () => {
     const days = normalizePlanExercises([
       workoutDay([
-        { exercise_id: 'vadpress_sittande', name: 'Övning 1', sets: 4, reps: '15', rest_seconds: 60 },
+        { exercise_id: 'vadpress_sittande', name: '', sets: 4, reps: '15', rest_seconds: 60 },
       ]),
     ])
 
     const [ex] = exercisesOf(days[0]!)
     expect(ex?.exercise_id).toBe('vadpress-sittande')
+  })
+
+  // Finns ett namn som inte går att lösa upp är ett trasigt id INGEN ledtråd.
+  // Gissningen gav tidigare en annan muskelgrupp — eller en konditionsmaskin —
+  // med fel bild och historiken hopslagen med fel lyft.
+  it.each([
+    ['dips', 'Tricepsdips på bänk'],
+    ['rodd', 'Rodd med skivstång, tung'],
+    ['rodd', 'Sittande rodd med kabel'],
+    ['vadpress', 'Sittande vadpress i maskin'],
+  ])('drops %s/%s instead of guessing from the id', (exercise_id, name) => {
+    const good = workoutDay([
+      { exercise_id: 'bankpress', name: 'Bänkpress', sets: 4, reps: '8', rest_seconds: 120 },
+    ])
+    const risky: GeneratedPlanDay = {
+      ...workoutDay([{ exercise_id, name, sets: 3, reps: '10', rest_seconds: 60 }]),
+      weekday: 2,
+    }
+    // Dagen töms och blir vilodag — men ingen övning byts tyst ut mot en annan.
+    const days = normalizePlanExercises([good, good, risky])
+    expect(days[2]!.type).toBe('rest')
   })
 
   it('drops an exercise that cannot be resolved at all', () => {
@@ -216,8 +252,72 @@ describe('normalizePlanExercises', () => {
       content: { notes: 'Vila' },
       nutrition,
     }
-    const days = normalizePlanExercises([restDay])
-    expect(days[0]!.content).toEqual({ notes: 'Vila' })
+    const workout = workoutDay([
+      { exercise_id: 'bankpress', name: 'Bänkpress', sets: 4, reps: '8', rest_seconds: 120 },
+    ])
+    const days = normalizePlanExercises([workout, restDay])
+    expect(days[1]!.content).toEqual({ notes: 'Vila' })
+  })
+
+  // En plan helt utan träningsdagar är ingen träningsplan. Den slank tidigare
+  // igenom och markerades "ready" — klienten visade "inget schema" medan API:t
+  // sa klart, och genereringen är hårt kvotad.
+  it('throws when the response contains no workout day at all', () => {
+    const restDay: GeneratedPlanDay = { weekday: 3, type: 'rest', content: { notes: 'Vila' }, nutrition }
+    expect(() => normalizePlanExercises([restDay])).toThrow(/no exercises/i)
+  })
+
+  // Exakt hälften räckte tidigare: den som bad om 4 träningsdagar fick tyst 2.
+  it('throws when only half of the workout days survive', () => {
+    const good = (weekday: number): GeneratedPlanDay => ({
+      ...workoutDay([{ exercise_id: 'bankpress', name: 'Bänkpress', sets: 4, reps: '8', rest_seconds: 120 }]),
+      weekday,
+    })
+    const bad = (weekday: number): GeneratedPlanDay => ({
+      ...workoutDay([{ exercise_id: 'trollstav', name: 'Trollstavsviftning', sets: 3, reps: '12', rest_seconds: 60 }]),
+      weekday,
+    })
+    expect(() => normalizePlanExercises([good(1), good(2), bad(3), bad(4)])).toThrow(/no exercises/i)
+  })
+
+  // Ett pass felmärkt som "nutrition" bär nutrition-innehåll. Spridningen gav
+  // en workout-rad utan name/duration_minutes → tom rubrik och "undefined min".
+  it('rebuilds workout content when the day was mislabelled as nutrition', () => {
+    const mislabelled = {
+      weekday: 1,
+      type: 'nutrition',
+      content: {
+        total_calories: 2200,
+        meals: [{ name: 'Frukost' }],
+        exercises: [{ exercise_id: 'bankpress', name: 'Bänkpress', sets: 4, reps: '8', rest_seconds: 120 }],
+      },
+      nutrition,
+    } as unknown as GeneratedPlanDay
+
+    const days = normalizePlanExercises([mislabelled])
+    expect(days[0]!.type).toBe('workout')
+    const content = days[0]!.content as WorkoutDay & { total_calories?: number }
+    expect(content.name).toBe('Pass')
+    expect(typeof content.duration_minutes).toBe('number')
+    expect(content.total_calories).toBeUndefined()
+  })
+
+  // Två rader med samma (plan_id, weekday, type) spränger unik-indexet: hela
+  // insert:en fallerar och planen sparas som "error".
+  it('stores a type outside the schema as a rest day (no nutrition row collision)', () => {
+    const workout = workoutDay([
+      { exercise_id: 'bankpress', name: 'Bänkpress', sets: 4, reps: '8', rest_seconds: 120 },
+    ])
+    const nutritionDay = {
+      weekday: 2,
+      type: 'nutrition',
+      content: { meals: [] },
+      nutrition,
+    } as unknown as GeneratedPlanDay
+
+    const days = normalizePlanExercises([workout, nutritionDay])
+    expect(days[1]!.type).toBe('rest')
+    expect(days[1]!.content).toEqual({ notes: 'Vila' })
   })
 
   // En vilodag som bär en TOM exercises-array är fortfarande bara en vilodag —

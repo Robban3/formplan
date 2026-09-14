@@ -60,7 +60,8 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "aliases": [
       "push-ups",
       "pushups",
-      "armhävning"
+      "armhävning",
+      "armhävning med kroppsvikt"
     ]
   },
   {
@@ -128,7 +129,8 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "equipment": "body only",
     "aliases": [
       "pullups",
-      "räckhäv"
+      "räckhäv",
+      "pull ups"
     ]
   },
   {
@@ -170,7 +172,8 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "equipment": "dumbbell",
     "aliases": [
       "enarmsrodd",
-      "dumbbell row"
+      "dumbbell row",
+      "enarms hantelrodd"
     ]
   },
   {
@@ -271,7 +274,9 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "aliases": [
       "utfall",
       "lunges",
-      "lunge"
+      "lunge",
+      "utfallsgång",
+      "utfallsgang"
     ]
   },
   {
@@ -291,7 +296,9 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "equipment": "dumbbell",
     "aliases": [
       "stepup",
-      "uppsteg"
+      "uppsteg",
+      "step-ups",
+      "step ups"
     ]
   },
   {
@@ -374,7 +381,8 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
       "vadpress",
       "stående vadpress",
       "calf raise",
-      "tåhävningar"
+      "tåhävningar",
+      "calf raises"
     ]
   },
   {
@@ -442,7 +450,9 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "equipment": "dumbbell",
     "aliases": [
       "lateral raise",
-      "sidolyft hantlar"
+      "sidolyft hantlar",
+      "lateral raises",
+      "sidolyft med hantlar"
     ]
   },
   {
@@ -493,7 +503,9 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "aliases": [
       "biceps curl",
       "skivstångscurl",
-      "curl"
+      "curl",
+      "bicep curl",
+      "hantelcurl"
     ]
   },
   {
@@ -621,7 +633,8 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "equipment": "body only",
     "aliases": [
       "situps",
-      "magböj"
+      "magböj",
+      "sit ups"
     ]
   },
   {
@@ -796,7 +809,9 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "equipment": "kettlebells",
     "aliases": [
       "kb swing",
-      "kettlebellsving"
+      "kettlebellsving",
+      "kettlebell swings",
+      "kettlebell sving"
     ]
   },
   {

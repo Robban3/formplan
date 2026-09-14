@@ -31,8 +31,12 @@ function save(h: ExerciseHistory) {
  * series instead of splitting into two.
  */
 export function getExerciseHistory(exercise: ExerciseRef | string): ExerciseEntry[] {
+  const key = exerciseKey(exercise)
+  // Namn utan bokstäver eller siffror ("💪", "深蹲") normaliseras till tomt.
+  // Utan spärren delade alla sådana övningar EN serie under nyckeln "".
+  if (!key) return []
   const h = load()
-  return (h[exerciseKey(exercise)] ?? []).sort((a, b) => a.date.localeCompare(b.date))
+  return (h[key] ?? []).sort((a, b) => a.date.localeCompare(b.date))
 }
 
 /** Storage keys (catalog ids where resolvable), not display names. */
@@ -64,6 +68,8 @@ export function recordExerciseSession(
   }
 
   const key = exerciseKey(exercise)
+  // Se getExerciseHistory: en tom nyckel skulle slå ihop alla namnlösa övningar.
+  if (!key) return
   const h = load()
   const entries = h[key] ?? []
   const idx = entries.findIndex((e) => e.date === date)

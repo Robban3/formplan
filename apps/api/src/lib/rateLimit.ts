@@ -95,9 +95,21 @@ export function rateLimit(name: string, max: number, windowMs: number = 60 * 60 
   return createMiddleware<{ Bindings: Env; Variables: { user: JwtPayload } }>(async (c, next) => {
     const user = c.get('user')
     const key = `${name}:${user.sub}`
-    const { allowed, retryAfterSeconds } = c.env.RATE_LIMIT_KV
-      ? await consumeRateLimitKV(c.env.RATE_LIMIT_KV, key, max, windowMs)
-      : consumeRateLimit(key, max, windowMs)
+    // KV kan kasta (avbrott, eller write-rate-avvisning på en het nyckel — och
+    // limitern skriver samma nyckel vid varje anrop, precis det mönstret). Utan
+    // fångsten propagerar felet ur middlewaren, och API:t har ingen onError:
+    // varje anrop till /ai/*, /plan/generate, /email/* och matsöket hade blivit
+    // 500. Falla tillbaka på per-isolate-räknaren i stället.
+    let allowed: boolean
+    let retryAfterSeconds: number
+    try {
+      ;({ allowed, retryAfterSeconds } = c.env.RATE_LIMIT_KV
+        ? await consumeRateLimitKV(c.env.RATE_LIMIT_KV, key, max, windowMs)
+        : consumeRateLimit(key, max, windowMs))
+    } catch (err) {
+      console.error('rate limit KV failed, falling back to in-memory:', err)
+      ;({ allowed, retryAfterSeconds } = consumeRateLimit(key, max, windowMs))
+    }
     if (!allowed) {
       c.header('Retry-After', String(retryAfterSeconds))
       return c.json(

@@ -20,7 +20,8 @@ vi.stubGlobal('localStorage', storage)
 
 const HISTORY_KEY = 'formplan_exercise_history'
 const PR_KEY = 'formplan_personal_records'
-const FLAG = 'formplan_exercise_key_v2'
+// Versionerad: bumpas i exerciseKey.ts när nyckelhärledningen ändras.
+const FLAG = 'formplan_exercise_key_v3'
 
 // Legacy data keyed on the free-text exercise name: the same lift split across
 // two names, plus one exercise that isn't in the catalog at all.
@@ -48,8 +49,10 @@ storage.setItem(
 )
 
 const { exerciseKey, normalizeExerciseName } = await import('./exerciseKey')
-const { getExerciseHistory, getAllTrackedExercises } = await import('./exerciseHistoryStore')
-const { getPRForExercise, getPersonalRecords } = await import('./prStore')
+const { getExerciseHistory, getAllTrackedExercises, recordExerciseSession } = await import(
+  './exerciseHistoryStore'
+)
+const { getPRForExercise, getPersonalRecords, checkAndUpdatePR } = await import('./prStore')
 
 describe('exerciseKey', () => {
   it('maps name variants of the same lift to one catalog id', () => {
@@ -80,6 +83,29 @@ describe('exerciseKey', () => {
     expect(exerciseKey({})).toBe('')
     expect(exerciseKey(null)).toBe('')
     expect(exerciseKey('💪')).toBe('')
+  })
+
+  // Dekomponerade å/ä/ö (iOS-tangentbord) måste ge samma nyckel som de
+  // prekomponerade — annars två serier för samma egna övning.
+  it('normalizes decomposed accents the same as precomposed ones', () => {
+    const precomposed = 'Björnkrypning'
+    const decomposed = precomposed.normalize('NFD')
+    expect(decomposed).not.toBe(precomposed)
+    expect(exerciseKey(decomposed)).toBe(exerciseKey(precomposed))
+    expect(exerciseKey(precomposed)).toBe('bjornkrypning')
+  })
+})
+
+// En tom nyckel skulle bli EN gemensam hink: "💪" och "深蹲" delade historik
+// och personbästa, så ett avklarat set i den ena utropade personbästa i den andra.
+describe('empty keys are never stored', () => {
+  it('ignores reads and writes for a name that normalizes to nothing', () => {
+    recordExerciseSession('💪', '2026-02-01', [{ reps: 10, weight_kg: 50, done: true }])
+    expect(getExerciseHistory('💪')).toEqual([])
+    expect(getExerciseHistory('深蹲')).toEqual([])
+    expect(checkAndUpdatePR('💪', 50, 10)).toBe(false)
+    expect(getPRForExercise('深蹲')).toBeNull()
+    expect(Object.keys(JSON.parse(storage.getItem(HISTORY_KEY)!))).not.toContain('')
   })
 })
 

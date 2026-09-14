@@ -1,5 +1,7 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
+import { useLocation } from 'react-router-dom'
 import { billingApi, type BillingStatus } from '../lib/billingApi'
+import { isPasswordRecovery, subscribePasswordRecovery } from '../lib/authRecovery'
 import { PaywallPage } from '../pages/PaywallPage'
 
 function Spinner() {
@@ -42,6 +44,15 @@ export function BillingGate({ user, children }: { user: unknown; children: React
   const [failed, setFailed] = useState(false)
   // Bump to force the effect to re-run (retry button).
   const [reloadKey, setReloadKey] = useState(0)
+  // Återställningslänken loggar in användaren innan lösenordet är satt. Låg
+  // provperioden ute skulle betalväggen då lägga sig över "sätt nytt lösenord"
+  // och göra återställningen omöjlig — just för den grupp som oftast glömt det.
+  const recovering = useSyncExternalStore(
+    subscribePasswordRecovery,
+    isPasswordRecovery,
+    () => false
+  )
+  const onAuthRoute = useLocation().pathname === '/auth'
 
   useEffect(() => {
     if (!user) {
@@ -97,6 +108,7 @@ export function BillingGate({ user, children }: { user: unknown; children: React
   }, [user, reloadKey])
 
   if (!user) return <>{children}</>
+  if (recovering && onAuthRoute) return <>{children}</>
   if (checking) return <Spinner />
   if (failed) return <RetryScreen onRetry={() => setReloadKey((k) => k + 1)} />
   if (status && !status.access) return <PaywallPage status={status} />
