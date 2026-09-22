@@ -22,6 +22,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!--
+                Inloggningslänkar från Supabase (magisk länk, Google,
+                lösenordsåterställning). Utan det här filtret vet Android inte
+                att app.formplan.app:// hör till appen, och länken öppnades i
+                webbläsaren i stället — knapparna var döda i den installerade
+                appen. Schemat ligger i strings.xml (custom_url_scheme) och
+                måste också vara tillåtet i Supabase under
+                Authentication → URL Configuration → Redirect URLs.
+                MainActivity har launchMode="singleTask", så en länk återanvänder
+                den öppna appen i stället för att starta en andra kopia.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="@string/custom_url_scheme" />
+            </intent-filter>
+
         </activity>
 
         <provider

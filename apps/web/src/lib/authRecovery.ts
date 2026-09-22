@@ -71,6 +71,20 @@ export function endPasswordRecovery() {
   setState('none')
 }
 
+/**
+ * Armar återställningen från native-appens deep link.
+ *
+ * I native finns ingen adress för auth-js att läsa, så `PASSWORD_RECOVERY`
+ * kommer aldrig — länken växlas i stället in manuellt med `setSession`, som
+ * ger SIGNED_IN. Anropas ENDAST av `nativeAuthLinks` och ENDAST efter att den
+ * växlingen lyckats: token:et i länken är då beviset, exakt som händelsen är
+ * det på webben. Anropa aldrig utifrån en markör i en adress — det var precis
+ * så `/auth?type=recovery` kunde byta lösenord på en redan inloggad session.
+ */
+export function beginPasswordRecoveryFromVerifiedLink() {
+  setState('active')
+}
+
 export function subscribePasswordRecovery(listener: () => void): () => void {
   listeners.add(listener)
   return () => {

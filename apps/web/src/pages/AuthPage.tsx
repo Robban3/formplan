@@ -5,6 +5,7 @@ import {
   getRecoveryState,
   subscribePasswordRecovery,
 } from '../lib/authRecovery'
+import { authRedirectUrl } from '../lib/authRedirect'
 import { toast } from '../lib/toast'
 
 /**
@@ -132,7 +133,7 @@ export function AuthPage() {
     setError(null)
     setNotice(null)
     try {
-      const redirectTo = `${window.location.origin}/auth`
+      const redirectTo = authRedirectUrl()
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: { emailRedirectTo: redirectTo },
@@ -161,7 +162,7 @@ export function AuthPage() {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/auth` },
+          options: { emailRedirectTo: authRedirectUrl() },
         })
         if (error) {
           setError(translateAuthError(error.message))
@@ -206,7 +207,7 @@ export function AuthPage() {
     setLoading(true)
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/auth`,
+        redirectTo: authRedirectUrl(),
       })
       if (error) setError(translateAuthError(error.message))
       else
@@ -256,7 +257,7 @@ export function AuthPage() {
     setNotice(null)
     setGoogleLoading(true)
     try {
-      const redirectTo = `${window.location.origin}/auth`
+      const redirectTo = authRedirectUrl()
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo },

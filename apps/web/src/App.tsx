@@ -1,5 +1,5 @@
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth, whenAuthReconciled } from './hooks/useAuth'
 import { AuthPage } from './pages/AuthPage'
 import { OnboardingPage } from './pages/OnboardingPage'
@@ -16,6 +16,8 @@ import { WeeklySessionsProvider } from './contexts/WeeklySessionsContext'
 import { api } from './lib/api'
 import { parseMockPlanId } from './lib/mockPlan'
 import { isPasswordRecovery, subscribePasswordRecovery } from './lib/authRecovery'
+import { registerNativeAuthLinks } from './lib/nativeAuthLinks'
+import { toast } from './lib/toast'
 
 /**
  * Redirect a freshly-authenticated user with no profile to onboarding. Without
@@ -67,8 +69,24 @@ export default function App() {
     isPasswordRecovery,
     () => false
   )
+  const navigate = useNavigate()
   useNotificationScheduler()
   useSessionsSync()
+
+  // Native-appen får inloggningssvaret som en deep link, inte i adressfältet.
+  // Registreras en gång; lyssnaren i modulen är idempotent.
+  useEffect(() => {
+    registerNativeAuthLinks((outcome) => {
+      if (outcome.kind === 'error') {
+        toast.error(outcome.message)
+        navigate('/auth', { replace: true })
+      } else if (outcome.kind === 'recovery') {
+        // Formuläret för nytt lösenord bor på /auth — länken kan ha öppnat
+        // appen var som helst.
+        navigate('/auth', { replace: true })
+      }
+    })
+  }, [navigate])
   // Push any water logged offline to the server on app start (flush-on-reconnect).
   // Wait for the session to be reconciled first, so a pending offline row from a
   // previous account can't be POSTed before the uid-guard purge clears it.
