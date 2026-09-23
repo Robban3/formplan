@@ -30,3 +30,34 @@ export function isNativeApp(): boolean {
 export function authRedirectUrl(): string {
   return isNativeApp() ? NATIVE_AUTH_REDIRECT : `${window.location.origin}/auth`
 }
+
+/**
+ * Öppnar Googles inloggning i systemets webbläsare i stället för i appens
+ * WebView.
+ *
+ * Google BLOCKERAR OAuth i inbäddade WebViews (policyn mot `disallowed_useragent`)
+ * — och en Capacitor-app är just en WebView. `signInWithOAuth` navigerar som
+ * standard den egna vyn dit, vilket gav Googles "Something went wrong, sign in
+ * another way" i stället för en inloggningsruta. Det går inte att koda sig runt:
+ * flödet måste ut i en riktig webbläsare.
+ *
+ * Custom Tabs (Android) och SFSafariViewController (iOS) räknas som riktiga
+ * webbläsare av Google, delar systemets inloggning (så användaren oftast redan
+ * är inloggad på sitt Google-konto) och kan skicka tillbaka till appens schema.
+ * Fliken stängs av `nativeAuthLinks` när länken kommit tillbaka.
+ */
+export async function openExternalAuth(url: string): Promise<void> {
+  const { Browser } = await import('@capacitor/browser')
+  await Browser.open({ url, presentationStyle: 'popover' })
+}
+
+/** Stänger fliken ovan. Tyst no-op om ingen är öppen. */
+export async function closeExternalAuth(): Promise<void> {
+  if (!isNativeApp()) return
+  try {
+    const { Browser } = await import('@capacitor/browser')
+    await Browser.close()
+  } catch {
+    /* ingen flik öppen — inget att stänga */
+  }
+}

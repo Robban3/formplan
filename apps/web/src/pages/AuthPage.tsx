@@ -5,7 +5,7 @@ import {
   getRecoveryState,
   subscribePasswordRecovery,
 } from '../lib/authRecovery'
-import { authRedirectUrl } from '../lib/authRedirect'
+import { authRedirectUrl, isNativeApp, openExternalAuth } from '../lib/authRedirect'
 import { toast } from '../lib/toast'
 
 /**
@@ -258,15 +258,35 @@ export function AuthPage() {
     setGoogleLoading(true)
     try {
       const redirectTo = authRedirectUrl()
-      const { error } = await supabase.auth.signInWithOAuth({
+      const native = isNativeApp()
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo },
+        options: {
+          redirectTo,
+          // I native får auth-js INTE navigera själv: den skulle skicka appens
+          // egen WebView till Google, som blockerar OAuth i inbäddade vyer
+          // ("Something went wrong, sign in another way"). Vi tar URL:en och
+          // öppnar den i systemets webbläsare i stället.
+          ...(native ? { skipBrowserRedirect: true } : {}),
+        },
       })
-      // Lyckas anropet sätter auth-js window.location och löser ut direkt —
-      // sidan står kvar synlig medan navigeringen sker. Släpp därför INTE
-      // knappen på success-vägen, annars går det att starta en andra OAuth-resa.
+      // Lyckas anropet på WEBBEN sätter auth-js window.location och löser ut
+      // direkt — sidan står kvar synlig medan navigeringen sker. Släpp därför
+      // INTE knappen på success-vägen, annars går det att starta en andra resa.
       if (error) {
         setError(translateAuthError(error.message))
+        setGoogleLoading(false)
+        return
+      }
+      if (native) {
+        if (!data?.url) {
+          setError('Kunde inte öppna Google-inloggningen. Försök igen.')
+          setGoogleLoading(false)
+          return
+        }
+        await openExternalAuth(data.url)
+        // Användaren kan stänga fliken utan att logga in — då kommer ingen deep
+        // link och knappen måste bli klickbar igen.
         setGoogleLoading(false)
       }
     } catch (err) {

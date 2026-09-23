@@ -1,6 +1,6 @@
 import { App } from '@capacitor/app'
 import { supabase } from './supabase'
-import { isNativeApp, NATIVE_AUTH_SCHEME } from './authRedirect'
+import { closeExternalAuth, isNativeApp, NATIVE_AUTH_SCHEME } from './authRedirect'
 import { beginPasswordRecoveryFromVerifiedLink } from './authRecovery'
 
 /**
@@ -102,7 +102,11 @@ export function registerNativeAuthLinks(onOutcome?: (outcome: NativeAuthOutcome)
 
   void App.addListener('appUrlOpen', ({ url }) => {
     void handleAuthUrl(url).then((outcome) => {
-      if (outcome.kind !== 'none') onOutcome?.(outcome)
+      if (outcome.kind === 'none') return
+      // Google öppnades i en Custom Tab / SFSafariViewController. Den ligger
+      // kvar ovanpå appen efter redirecten om den inte stängs aktivt.
+      void closeExternalAuth()
+      onOutcome?.(outcome)
     })
   })
 
