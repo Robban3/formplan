@@ -11,8 +11,8 @@ import { ChevronLeftIcon } from '../components/ui/Icons'
  *
  * Innehållet speglar vad koden FAKTISKT gör — tabellerna i Supabase, de
  * utgående anropen i apps/api och betalflödet. Ändras något av det måste den
- * här sidan ändras med. Platshållarna markerade med [...] måste fyllas i med
- * verkliga uppgifter innan publicering.
+ * här sidan ändras med: läggs en ny tredjepartstjänst till, eller börjar vi
+ * spara något nytt, är den här filen en del av den ändringen.
  */
 
 const UPDATED = '2026-10-01'
@@ -59,7 +59,7 @@ export function PrivacyPage() {
         <Section title="Vem ansvarar för uppgifterna">
           <p>
             Personuppgiftsansvarig är Applabbet Nordic AB, org.nr 559550-0249,
-            Säljåsbacken 3, [POSTNUMMER ORT]. Kontakta oss på{' '}
+            Säljåsbacken 3, 437 93 Lindome. Kontakta oss på{' '}
             <a href="mailto:support@applabbet.com" className="underline">
               support@applabbet.com
             </a>{' '}
