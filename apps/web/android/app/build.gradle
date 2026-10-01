@@ -16,10 +16,46 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // Signeringsnyckeln för Google Play. Den läses ur miljövariabler (eller
+    // gradle.properties i din användarkatalog) och får ALDRIG checkas in:
+    // den som har keystoren kan publicera uppdateringar i ditt namn, och
+    // tappar du bort den kan appen aldrig uppdateras igen.
+    //
+    // Skapa nyckeln en gång och lägg undan den på två säkra ställen:
+    //   keytool -genkeypair -v -keystore formplan-upload.jks \
+    //     -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+    //
+    // Sätt sedan, t.ex. i %USERPROFILE%\.gradle\gradle.properties:
+    //   formplan.keystore=C:/sokvag/till/formplan-upload.jks
+    //   formplan.keystorePassword=...
+    //   formplan.keyAlias=upload
+    //   formplan.keyPassword=...
+    //
+    // Saknas uppgifterna byggs release osignerad i stället för att bygget
+    // kraschar — så en utvecklare utan nyckel fortfarande kan bygga.
+    def keystorePath = System.getenv('FORMPLAN_KEYSTORE') ?: project.findProperty('formplan.keystore')
+    def hasSigningKey = keystorePath != null && !keystorePath.toString().isEmpty() && file(keystorePath).exists()
+
+    signingConfigs {
+        release {
+            if (hasSigningKey) {
+                storeFile file(keystorePath)
+                storePassword System.getenv('FORMPLAN_KEYSTORE_PASSWORD') ?: project.findProperty('formplan.keystorePassword')
+                keyAlias System.getenv('FORMPLAN_KEY_ALIAS') ?: project.findProperty('formplan.keyAlias')
+                keyPassword System.getenv('FORMPLAN_KEY_PASSWORD') ?: project.findProperty('formplan.keyPassword')
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (hasSigningKey) {
+                signingConfig signingConfigs.release
+            } else {
+                logger.warn('FormPlan: ingen signeringsnyckel hittad — release byggs OSIGNERAD och kan inte laddas upp till Google Play. Se kommentaren i app/build.gradle.')
+            }
         }
     }
 }

@@ -20,6 +20,7 @@ import {
   Heart,
   HelpCircle,
   Info,
+  ShieldCheck,
   LogOut,
   Target,
   BookOpen,
@@ -79,6 +80,7 @@ export const ClockIcon = wrap(Clock)
 export const HeartIcon = wrap(Heart)
 export const HelpCircleIcon = wrap(HelpCircle)
 export const InfoIcon = wrap(Info)
+export const ShieldIcon = wrap(ShieldCheck)
 export const LogOutIcon = wrap(LogOut)
 export const TargetIcon = wrap(Target)
 export const BookOpenIcon = wrap(BookOpen)

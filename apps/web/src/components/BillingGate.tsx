@@ -52,7 +52,11 @@ export function BillingGate({ user, children }: { user: unknown; children: React
     isPasswordRecovery,
     () => false
   )
-  const onAuthRoute = useLocation().pathname === '/auth'
+  const pathname = useLocation().pathname
+  const onAuthRoute = pathname === '/auth'
+  // Integritetspolicyn är ett butikskrav och måste vara läsbar även för den
+  // vars provperiod gått ut — betalväggen får inte lägga sig över den.
+  const onPublicRoute = pathname === '/integritet'
 
   useEffect(() => {
     if (!user) {
@@ -108,6 +112,7 @@ export function BillingGate({ user, children }: { user: unknown; children: React
   }, [user, reloadKey])
 
   if (!user) return <>{children}</>
+  if (onPublicRoute) return <>{children}</>
   if (recovering && onAuthRoute) return <>{children}</>
   if (checking) return <Spinner />
   if (failed) return <RetryScreen onRetry={() => setReloadKey((k) => k + 1)} />

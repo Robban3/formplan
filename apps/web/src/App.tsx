@@ -2,6 +2,7 @@ import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth, whenAuthReconciled } from './hooks/useAuth'
 import { AuthPage } from './pages/AuthPage'
+import { PrivacyPage } from './pages/PrivacyPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { TabLayout } from './components/TabLayout'
 import { BillingGate } from './components/BillingGate'
@@ -109,6 +110,10 @@ export default function App() {
       <BillingGate user={user}>
       <Routes>
         <Route path="/auth" element={user && !recovering ? <Navigate to="/hem" replace /> : <AuthPage />} />
+        {/* Integritetspolicyn måste nås UTAN inloggning — det är den publika
+            URL som anges i Google Play och App Store, och granskaren öppnar den
+            utan konto. */}
+        <Route path="/integritet" element={<PrivacyPage />} />
         <Route path="/onboarding" element={user ? <OnboardingPage /> : <Navigate to="/auth" replace />} />
         {/* Plan generation/preview is full-screen, outside the tab layout */}
         <Route

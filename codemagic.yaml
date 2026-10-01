@@ -41,6 +41,10 @@ workflows:
           npm run build
           npx cap add ios || true   # första bygget skapar ios/, sedan no-op
           npx cap sync ios
+          # iOS-projektet genereras här, så ikonerna skapas också här — annars
+          # skeppas Capacitors standardikon till App Store. Källbilderna ligger
+          # i apps/web/assets/ och delas med Android.
+          npx capacitor-assets generate --ios
       # iOS-projektet genereras här i CI, och Capacitors mall registrerar inget
       # eget URL-schema. Utan det vet iOS inte att app.formplan.app:// hör till
       # appen: magisk länk, Google och lösenordsåterställning blir döda knappar

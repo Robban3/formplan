@@ -22,6 +22,7 @@ import {
   BarChartIcon,
   TrophyIcon,
   BotIcon,
+  ShieldIcon,
 } from '../components/ui/Icons'
 
 type IconComponent = React.ComponentType<{ className?: string }>
@@ -39,6 +40,7 @@ const rows: { label: string; Icon: IconComponent; to: string }[] = [
   { label: 'Apple Health',  Icon: HeartIcon,       to: '/mer/apple-health' },
   { label: 'Hjälp & support', Icon: HelpCircleIcon, to: '/mer/hjalp' },
   { label: 'Om appen',      Icon: InfoIcon,        to: '/mer/om' },
+  { label: 'Integritetspolicy', Icon: ShieldIcon,  to: '/integritet' },
 ]
 
 export function MorePage() {

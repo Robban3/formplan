@@ -47,9 +47,12 @@ captures/
 .idea/
 
 # Keystore files
-# Uncomment the following lines if you do not want to check your keystore files in.
-#*.jks
-#*.keystore
+# ALDRIG i repot. Den som har keystoren kan publicera uppdateringar i ditt namn,
+# och Google Play binder appen till just den nyckeln för all framtid.
+*.jks
+*.keystore
+*.p12
+keystore.properties
 
 # External native build folder generated in Android Studio 2.2 and later
 .externalNativeBuild
