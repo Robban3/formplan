@@ -146,9 +146,18 @@ export function PrivacyPage() {
 
         <Section title="Var uppgifterna lagras">
           <p>
-            Uppgifterna lagras hos våra leverantörer i [REGION]. Vissa av dem är
-            amerikanska bolag och kan behandla uppgifter utanför EU/EES; överföringen sker då med
-            stöd av EU-kommissionens standardavtalsklausuler.
+            Ditt konto och all data du matar in — profil, pass, matdagbok, mätningar och
+            scheman — lagras hos Supabase i regionen EU West (Irland), alltså inom EU.
+          </p>
+          <p>
+            Appen och API:t körs i Cloudflares globala nätverk, nära dig. En liten mängd
+            driftdata kopplad till ditt användar-id (till exempel räknare som begränsar antalet
+            förfrågningar) replikeras i det nätverket och kan därmed befinna sig utanför EU/EES.
+          </p>
+          <p>
+            Våra leverantörer för betalning, e-post och AI — Stripe, Resend och Google — är
+            amerikanska bolag och kan behandla uppgifter utanför EU/EES. Sådan överföring sker
+            med stöd av EU-kommissionens standardavtalsklausuler.
           </p>
         </Section>
 
