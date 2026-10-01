@@ -13,6 +13,15 @@ dist/
 .dev.vars
 .dev.vars.*
 
+# Signeringsnycklar — får ALDRIG checkas in, var som helst i repot.
+# Den som har keystoren kan publicera uppdateringar i ditt namn, och Google Play
+# binder appen till just den nyckeln för all framtid. Android-projektet har en
+# egen regel, men den gäller bara den katalogen — den här fångar hela trädet.
+*.jks
+*.keystore
+*.p12
+keystore.properties
+
 # Editor / OS
 .DS_Store
 *.log
