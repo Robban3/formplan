@@ -58,8 +58,12 @@ export function PrivacyPage() {
 
         <Section title="Vem ansvarar för uppgifterna">
           <p>
-            Personuppgiftsansvarig är [FÖRETAGSNAMN], [ORGANISATIONSNUMMER], [ADRESS]. Kontakta
-            oss på [KONTAKT-E-POST] med frågor om dina uppgifter.
+            Personuppgiftsansvarig är Applabbet Nordic AB, org.nr 559550-0249,
+            Säljåsbacken 3, [POSTNUMMER ORT]. Kontakta oss på{' '}
+            <a href="mailto:support@applabbet.com" className="underline">
+              support@applabbet.com
+            </a>{' '}
+            med frågor om dina uppgifter.
           </p>
         </Section>
 
@@ -161,7 +165,11 @@ export function PrivacyPage() {
             Du har rätt att få veta vilka uppgifter vi har om dig, att få dem rättade eller
             raderade, att invända mot behandlingen och att få ut dem i maskinläsbart format.
             Radering gör du enklast själv under <em>Mer → Profil → Radera konto</em>. För övriga
-            frågor, kontakta [KONTAKT-E-POST].
+            frågor, kontakta{' '}
+            <a href="mailto:support@applabbet.com" className="underline">
+              support@applabbet.com
+            </a>
+            .
           </p>
           <p>
             Är du missnöjd med hur vi hanterar dina uppgifter kan du klaga hos
