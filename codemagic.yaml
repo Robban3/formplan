@@ -28,7 +28,6 @@ workflows:
         BUNDLE_ID: "app.formplan.app"
         XCODE_WORKSPACE: "App.xcworkspace"
         XCODE_SCHEME: "App"
-        APP_STORE_APPLE_ID: "0000000000" # byt till appens Apple ID från App Store Connect
       node: 20
       xcode: latest
       cocoapods: default
@@ -51,18 +50,42 @@ workflows:
       # i den installerade appen (samma sak som intent-filtret löser på Android).
       # Schemat måste också vara tillåtet i Supabase under
       # Authentication → URL Configuration → Redirect URLs.
-      - name: Registrera app-schemat för inloggningslänkar
+      - name: Info.plist — URL-schema, kameratext, exportdeklaration, byggnummer
         script: |
           PLIST=apps/web/ios/App/App/Info.plist
           PB=/usr/libexec/PlistBuddy
-          # Idempotent: ta bort en ev. tidigare post innan den skrivs igen.
+          set -e
+
+          # 1. Appens eget URL-schema, för inloggningslänkarna.
+          #    Idempotent: ta bort en ev. tidigare post innan den skrivs igen.
           $PB -c "Delete :CFBundleURLTypes" "$PLIST" 2>/dev/null || true
           $PB -c "Add :CFBundleURLTypes array" "$PLIST"
           $PB -c "Add :CFBundleURLTypes:0 dict" "$PLIST"
           $PB -c "Add :CFBundleURLTypes:0:CFBundleURLName string $BUNDLE_ID" "$PLIST"
           $PB -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes array" "$PLIST"
           $PB -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes:0 string $BUNDLE_ID" "$PLIST"
-          $PB -c "Print :CFBundleURLTypes" "$PLIST"
+
+          # 2. Syftestexter för kamera och bildbibliotek. Appen använder kameran
+          #    till streckkodsskanning (getUserMedia) och matfoto. iOS KRASCHAR
+          #    appen direkt om texten saknas när kameran öppnas, och App Review
+          #    avvisar appar utan syftestext. Texterna visas i systemets dialog.
+          $PB -c "Delete :NSCameraUsageDescription" "$PLIST" 2>/dev/null || true
+          $PB -c "Add :NSCameraUsageDescription string 'FormPlan använder kameran för att skanna streckkoder på livsmedel och för att ta bilder på måltider.'" "$PLIST"
+          $PB -c "Delete :NSPhotoLibraryUsageDescription" "$PLIST" 2>/dev/null || true
+          $PB -c "Add :NSPhotoLibraryUsageDescription string 'FormPlan behöver åtkomst till dina bilder när du väljer ett foto på en måltid.'" "$PLIST"
+
+          # 3. Exportdeklaration. Appen använder bara standard-HTTPS, vilket är
+          #    undantaget. Utan nyckeln frågar App Store Connect manuellt vid
+          #    VARJE uppladdning och bygget fastnar tills någon svarar.
+          $PB -c "Delete :ITSAppUsesNonExemptEncryption" "$PLIST" 2>/dev/null || true
+          $PB -c "Add :ITSAppUsesNonExemptEncryption bool false" "$PLIST"
+
+          # 4. Byggnummer. TestFlight avvisar en uppladdning vars byggnummer
+          #    redan använts, och Capacitors mall sätter alltid 1 — andra
+          #    uppladdningen hade alltså failat. Codemagics räknare är unik.
+          $PB -c "Set :CFBundleVersion $BUILD_NUMBER" "$PLIST"
+
+          $PB -c "Print" "$PLIST"
 
       - name: Hämta signeringsfiler
         script: |
