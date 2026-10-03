@@ -131,7 +131,7 @@ export function FoodDiary() {
           </button>
           <button
             onClick={() => navigate('/kost/vatten')}
-            className="w-9 h-9 flex-shrink-0 rounded-xl bg-sky-50 flex items-center justify-center hover:bg-sky-100 transition-colors"
+            className="w-9 h-9 flex-shrink-0 rounded-xl bg-sky-50 dark:bg-sky-900/30 flex items-center justify-center hover:bg-sky-100 dark:hover:bg-sky-900/45 transition-colors"
             aria-label="Vatten"
           >
             <DropletIcon className="w-4 h-4 stroke-sky-500" />

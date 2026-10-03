@@ -502,7 +502,7 @@ export function AnalyticsPage() {
                 <LineChart points={waterPoints} color="#38bdf8" height={72} showDots />
                 <div className="flex justify-between mt-1">
                   {last7.map((date, i) => (
-                    <span key={date} className={`text-[9px] ${i === 6 ? 'text-sky-600 font-semibold' : 'text-stone-400 dark:text-stone-500'}`}>
+                    <span key={date} className={`text-[9px] ${i === 6 ? 'text-sky-600 dark:text-sky-400 font-semibold' : 'text-stone-400 dark:text-stone-500'}`}>
                       {new Date(date + 'T12:00').toLocaleDateString('sv-SE', { weekday: 'short' })}
                     </span>
                   ))}
@@ -643,7 +643,7 @@ export function AnalyticsPage() {
                             style={{ height: `${Math.max(pct, ml > 0 ? 4 : 0)}%` }}
                           />
                         </div>
-                        <span className={`text-[9px] ${isToday ? 'text-sky-600 font-semibold' : 'text-stone-400 dark:text-stone-500'}`}>
+                        <span className={`text-[9px] ${isToday ? 'text-sky-600 dark:text-sky-400 font-semibold' : 'text-stone-400 dark:text-stone-500'}`}>
                           {new Date(last7[i]! + 'T12:00').toLocaleDateString('sv-SE', { weekday: 'short' })}
                         </span>
                       </div>
@@ -656,7 +656,7 @@ export function AnalyticsPage() {
                 </div>
 
                 {/* Vattenring idag */}
-                <div className="mt-4 flex items-center gap-4 bg-sky-50 rounded-xl p-3">
+                <div className="mt-4 flex items-center gap-4 bg-sky-50 dark:bg-sky-900/30 rounded-xl p-3">
                   <Ring value={waterToday} goal={settings.water_goal_ml} color="#38bdf8" size={56} strokeWidth={6} />
                   <div>
                     <p className="text-sm font-bold text-stone-900 dark:text-stone-100">

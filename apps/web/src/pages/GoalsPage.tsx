@@ -394,7 +394,7 @@ export function GoalsPage() {
       </div>
 
       {tab === 'aktiva' && !adding && (
-        <div className="fixed bottom-[calc(64px+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 w-full max-w-lg px-5 pb-4 pt-3 bg-gradient-to-t from-stone-50">
+        <div className="fixed bottom-[calc(64px+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 w-full max-w-lg px-5 pb-4 pt-3 bg-gradient-to-t from-stone-50 dark:from-stone-900">
           <button
             onClick={() => setAdding(true)}
             className="w-full flex items-center justify-center gap-2 py-3.5 bg-forest-700 text-white rounded-2xl text-sm font-semibold shadow-lg"

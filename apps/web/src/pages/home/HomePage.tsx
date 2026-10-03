@@ -49,7 +49,7 @@ type QuickLink = {
 
 const QUICK_LINKS: QuickLink[] = [
   { Icon: DumbbellIcon, label: 'Träning', sub: 'Schema & pass', path: '/traning', iconBg: 'bg-forest-50 dark:bg-forest-900/30', iconStroke: 'stroke-forest-600' },
-  { Icon: LeafIcon, label: 'Kost', sub: 'Logga måltider', path: '/kost', iconBg: 'bg-sky-50', iconStroke: 'stroke-sky-500' },
+  { Icon: LeafIcon, label: 'Kost', sub: 'Logga måltider', path: '/kost', iconBg: 'bg-sky-50 dark:bg-sky-900/30', iconStroke: 'stroke-sky-500' },
   { Icon: BarChartIcon, label: 'Analys', sub: 'Statistik & trender', path: '/analys', iconBg: 'bg-amber-50 dark:bg-amber-900/25', iconStroke: 'stroke-amber-500' },
   { Icon: TargetIcon, label: 'Mina mål', sub: 'Följ dina mål', path: '/mer/mina-mal', iconBg: 'bg-purple-50', iconStroke: 'stroke-purple-500' },
 ]
@@ -486,7 +486,7 @@ export function HomePage() {
                 </p>
                 <button
                   onClick={handleQuickWater}
-                  className="text-[10px] font-semibold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full active:bg-sky-100"
+                  className="text-[10px] font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/30 px-2 py-0.5 rounded-full active:bg-sky-100 dark:active:bg-sky-900/45"
                 >
                   +250 ml
                 </button>

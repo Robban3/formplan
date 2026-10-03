@@ -34,7 +34,7 @@ const ICON_STYLE: Record<ChallengeIconKey, { bg: string; stroke: string }> = {
   flame:    { bg: 'bg-red-50 dark:bg-red-900/25',    stroke: 'stroke-red-500' },
   dumbbell: { bg: 'bg-forest-50 dark:bg-forest-900/30', stroke: 'stroke-forest-600' },
   zap:      { bg: 'bg-amber-50 dark:bg-amber-900/25',  stroke: 'stroke-amber-500' },
-  droplet:  { bg: 'bg-sky-50',    stroke: 'stroke-sky-500' },
+  droplet:  { bg: 'bg-sky-50 dark:bg-sky-900/30',    stroke: 'stroke-sky-500' },
   target:   { bg: 'bg-purple-50', stroke: 'stroke-purple-500' },
   trophy:   { bg: 'bg-amber-50 dark:bg-amber-900/25',  stroke: 'stroke-amber-500' },
 }
@@ -47,7 +47,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const CATEGORY_COLORS: Record<string, string> = {
   training: 'bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 border-forest-200 dark:border-forest-800',
-  nutrition: 'bg-sky-50 text-sky-700 border-sky-200',
+  nutrition: 'bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 border-sky-200',
   body: 'bg-purple-50 text-purple-700 border-purple-200',
 }
 

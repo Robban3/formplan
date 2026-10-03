@@ -317,7 +317,10 @@ export function TrainingOverview() {
             </div>
           )}
 
-          {/* Always show quick-access buttons at bottom */}
+          {/* Snabbknappar — bara när ett schema finns. Utan schema visar det
+              tomma tillståndet ovanför redan samma två val, och raden blev en
+              dubblett av sig själv. */}
+          {plan && (
           <div className="flex gap-2">
             <button
               onClick={handleGenerate}
@@ -335,6 +338,7 @@ export function TrainingOverview() {
               Egna pass
             </button>
           </div>
+          )}
         </div>
       )}
 

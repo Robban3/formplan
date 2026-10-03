@@ -22,7 +22,7 @@ const FEATURES = [
     Icon: LeafIcon,
     title: 'Kostdagbok & makrospårning',
     desc: 'Logga måltider snabbt med vår livsmedelsdatabas. Följ protein, kolhydrater, fett och kalorier dag för dag.',
-    bg: 'bg-sky-50',
+    bg: 'bg-sky-50 dark:bg-sky-900/30',
     stroke: 'stroke-sky-600',
   },
   {
