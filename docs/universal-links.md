@@ -20,11 +20,19 @@ Schemat finns kvar registrerat och fungerar fortfarande, som reserv.
 | `Content-Type: application/json` | `apps/web/public/_headers` |
 | `com.apple.developer.associated-domains` | skrivs i CI, se `codemagic.yaml` |
 
-**Kvar att göra en gång, manuellt:** slå på **Associated Domains** på App ID:t i
-Apples portal (Certificates, Identifiers & Profiles → Identifiers →
-`app.formplan.app` → Capabilities). Utan den vägrar Apple utfärda en
-provisioning profile som tillåter entitlementet, och bygget faller på
-signeringen.
+**Kvar att göra en gång, manuellt — i den här ordningen:**
+
+1. Slå på **Associated Domains** på App ID:t i Apples portal (Certificates,
+   Identifiers & Profiles → Identifiers → `app.formplan.app` → Capabilities).
+   Kräver rollen **Admin** eller **Account Holder**; App Manager räcker inte.
+2. Sätt `ENABLE_ASSOCIATED_DOMAINS=true` i Codemagics variabelgrupp
+   `formplan_ios`.
+
+Entitlementet är avstängt som standard just för att steg 1 kräver en roll som
+inte alltid finns till hands. Skrivs entitlementet utan att capability:n är
+påslagen utfärdar Apple ingen profil som tillåter det, och bygget faller på
+signeringen — appen går då inte att bygga alls. Hellre en app utan Universal
+Links än ingen app.
 
 ### Verifiera
 

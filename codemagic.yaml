@@ -126,6 +126,21 @@ workflows:
       - name: Associated Domains (Universal Links)
         script: |
           set -e
+          # Entitlementet kräver att Associated Domains är PÅSLAGET på App ID:t i
+          # Apples portal. Är det inte det utfärdas ingen profil som tillåter det,
+          # och bygget faller på signeringen — alltså går appen inte att bygga
+          # alls. Eftersom det steget kräver Admin/Account Holder, och den rollen
+          # inte alltid finns till hands, är entitlementet avstängt som standard.
+          #
+          # Slå på det genom att sätta miljövariabeln ENABLE_ASSOCIATED_DOMAINS=true
+          # i gruppen formplan_ios — EFTER att capability:n är påslagen hos Apple.
+          # Utan det byggs appen utan Universal Links och inloggningslänkarna
+          # öppnas i Safari i stället för i appen (det egna schemat fungerar dock).
+          if [ "${ENABLE_ASSOCIATED_DOMAINS:-false}" != "true" ]; then
+            echo "ENABLE_ASSOCIATED_DOMAINS är inte satt — hoppar över entitlementet."
+            echo "Universal Links kommer INTE att fungera i det här bygget."
+            exit 0
+          fi
           APP_DIR=apps/web/ios/App/App
           cat > "$APP_DIR/App.entitlements" <<'PLIST'
           <?xml version="1.0" encoding="UTF-8"?>
@@ -176,14 +191,17 @@ workflows:
           set -e
           cd apps/web/ios/App
           ls -la
+          # Peka bara ut entitlement-filen om steget faktiskt skrev den.
+          ENTITLEMENT_ARG=""
+          if [ -f "App/App.entitlements" ]; then
+            ENTITLEMENT_ARG='--archive-xcargs CODE_SIGN_ENTITLEMENTS=App/App.entitlements'
+          fi
           if [ -d "App.xcworkspace" ]; then
             echo "--- bygger från workspace (CocoaPods) ---"
-            xcode-project build-ipa --workspace "App.xcworkspace" --scheme "$XCODE_SCHEME" \
-              --archive-xcargs "CODE_SIGN_ENTITLEMENTS=App/App.entitlements"
+            xcode-project build-ipa --workspace "App.xcworkspace" --scheme "$XCODE_SCHEME" $ENTITLEMENT_ARG
           else
             echo "--- bygger från projekt (SPM) ---"
-            xcode-project build-ipa --project "App.xcodeproj" --scheme "$XCODE_SCHEME" \
-              --archive-xcargs "CODE_SIGN_ENTITLEMENTS=App/App.entitlements"
+            xcode-project build-ipa --project "App.xcodeproj" --scheme "$XCODE_SCHEME" $ENTITLEMENT_ARG
           fi
     artifacts:
       - apps/web/ios/App/build/ios/ipa/*.ipa
