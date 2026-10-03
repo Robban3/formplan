@@ -33,7 +33,6 @@ workflows:
         - formplan_ios
       vars:
         BUNDLE_ID: "app.formplan.app"
-        XCODE_WORKSPACE: "App.xcworkspace"
         XCODE_SCHEME: "App"
       # Capacitor 8:s CLI kräver Node >= 22 — med 20 dog `cap add ios` med
       # "[fatal] The Capacitor CLI requires NodeJS >=22.0.0".
@@ -142,12 +141,22 @@ workflows:
         script: keychain add-certificates
       - name: Applicera provisioning profiles på Xcode-projektet
         script: xcode-project use-profiles
+      # Capacitor 8 skapar iOS-projektet med Swift Package Manager i stället för
+      # CocoaPods, och då finns bara App.xcodeproj — ingen App.xcworkspace.
+      # Hårdkodad --workspace föll därför på "Path does not exist". Välj den som
+      # faktiskt genererats, så fungerar bygget oavsett vilket Capacitor väljer.
       - name: Bygg IPA
         script: |
+          set -e
           cd apps/web/ios/App
-          xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME"
+          ls -la
+          if [ -d "App.xcworkspace" ]; then
+            echo "--- bygger från workspace (CocoaPods) ---"
+            xcode-project build-ipa --workspace "App.xcworkspace" --scheme "$XCODE_SCHEME"
+          else
+            echo "--- bygger från projekt (SPM) ---"
+            xcode-project build-ipa --project "App.xcodeproj" --scheme "$XCODE_SCHEME"
+          fi
     artifacts:
       - apps/web/ios/App/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
