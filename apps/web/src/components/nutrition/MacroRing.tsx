@@ -19,7 +19,7 @@ export function MacroRing({ eaten, goal, size = 120 }: Props) {
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         {/* Track */}
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#e7e5e4" strokeWidth={size * 0.09} />
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--ring-track)" strokeWidth={size * 0.09} />
         {/* Progress */}
         <circle
           cx={cx} cy={cy} r={r}

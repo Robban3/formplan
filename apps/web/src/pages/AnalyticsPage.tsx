@@ -66,7 +66,7 @@ function Ring({
   const cx = size / 2
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      <circle cx={cx} cy={cx} r={r} fill="none" stroke="#e7e5e4" strokeWidth={strokeWidth} />
+      <circle cx={cx} cy={cx} r={r} fill="none" stroke="var(--ring-track)" strokeWidth={strokeWidth} />
       <circle
         cx={cx} cy={cx} r={r} fill="none"
         stroke={color} strokeWidth={strokeWidth}

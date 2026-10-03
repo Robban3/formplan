@@ -179,7 +179,7 @@ export function WaterPage() {
           <div className="flex flex-col items-center">
             <div className="relative" style={{ width: cx * 2, height: cy * 2 }}>
               <svg width={cx * 2} height={cy * 2}>
-                <circle cx={cx} cy={cy} r={r} fill="none" stroke="#e7e5e4" strokeWidth={14} />
+                <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--ring-track)" strokeWidth={14} />
                 <circle
                   cx={cx} cy={cy} r={r}
                   fill="none"

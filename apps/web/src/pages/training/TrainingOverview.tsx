@@ -624,7 +624,7 @@ function WeeklyRing({ done, total }: { done: number; total: number }) {
   const pct = total > 0 ? done / total : 0
   return (
     <svg width="56" height="56" viewBox="0 0 56 56">
-      <circle cx="28" cy="28" r={r} fill="none" stroke="#e7e5e4" strokeWidth="4" />
+      <circle cx="28" cy="28" r={r} fill="none" stroke="var(--ring-track)" strokeWidth="4" />
       <circle
         cx="28" cy="28" r={r}
         fill="none"

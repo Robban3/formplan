@@ -53,7 +53,7 @@ export function MacroSummary({ eaten, goals, size = 110 }: Props) {
       <div className="flex items-center gap-5">
         <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
           <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-            <circle cx={cx} cy={cy} r={r} fill="none" stroke="#e7e5e4" strokeWidth={strokeW} />
+            <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--ring-track)" strokeWidth={strokeW} />
             {segments.map((seg, i) => {
               const dash = seg.pct * circ
               const el = (

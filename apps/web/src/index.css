@@ -9,9 +9,12 @@
   --brand-glow: rgba(34, 230, 198, 0.2);
   /* App-bakgrund (Mintbris). Flippar till stone-900 i mörkt läge. */
   --canvas: #edf6f1;
+  /* Spåret i förloppsringarna (SVG, nås inte av Tailwind-klasser). */
+  --ring-track: #e7e5e4; /* stone-200 */
 }
 html.dark {
   --canvas: #1c1917; /* stone-900 */
+  --ring-track: #44403c; /* stone-700 — annars lyser spåret mot mörk platta */
 }
 
 @layer base {

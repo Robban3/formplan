@@ -87,7 +87,7 @@ function MiniRing({ value, goal, size = 52 }: { value: number; goal: number; siz
   const cx = size / 2
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      <circle cx={cx} cy={cx} r={r} fill="none" stroke="#e7e5e4" strokeWidth="3.5" />
+      <circle cx={cx} cy={cx} r={r} fill="none" stroke="var(--ring-track)" strokeWidth="3.5" />
       <circle
         cx={cx} cy={cx} r={r}
         fill="none"
@@ -138,7 +138,7 @@ function WeeklyRing({ done, total, size = 56 }: { done: number; total: number; s
   const cx = size / 2
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      <circle cx={cx} cy={cx} r={r} fill="none" stroke="#e7e5e4" strokeWidth="4" />
+      <circle cx={cx} cy={cx} r={r} fill="none" stroke="var(--ring-track)" strokeWidth="4" />
       <circle
         cx={cx} cy={cx} r={r}
         fill="none"
