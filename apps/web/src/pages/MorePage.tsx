@@ -6,6 +6,7 @@ import { billingApi, type BillingStatus } from '../lib/billingApi'
 import { toast } from '../lib/toast'
 import { clearLocalUserData } from '../lib/localData'
 import { flushLocalWater } from '../lib/waterStore'
+import { isNativeApp } from '../lib/authRedirect'
 import { workoutApi } from '../lib/workoutApi'
 import {
   UserIcon,
@@ -27,7 +28,21 @@ import {
 
 type IconComponent = React.ComponentType<{ className?: string }>
 
-const rows: { label: string; Icon: IconComponent; to: string }[] = [
+interface MoreRow {
+  label: string
+  Icon: IconComponent
+  to: string
+  /**
+   * Visas bara på webben. Apple Health-sidan förklarar att integrationen kräver
+   * native-appen — i native-appen vore det en sida som lovar en funktion "i
+   * appen" till någon som redan sitter i den. Apple avvisar rutinmässigt
+   * platshållar- och "kommer snart"-innehåll (riktlinje 2.1), och en menypost
+   * som leder till "finns inte här" är dålig UX oavsett granskning.
+   */
+  webOnly?: boolean
+}
+
+const rows: MoreRow[] = [
   { label: 'Mina mål',          Icon: TargetIcon,      to: '/mer/mina-mal' },
   { label: 'Utmaningar',        Icon: TrophyIcon,      to: '/mer/utmaningar' },
   { label: 'AI-coach',          Icon: BotIcon,         to: '/mer/ai-coach' },
@@ -37,7 +52,7 @@ const rows: { label: string; Icon: IconComponent; to: string }[] = [
   { label: 'Inställningar', Icon: SettingsIcon,    to: '/mer/installningar' },
   { label: 'Notiser',       Icon: BellIcon,        to: '/mer/notiser' },
   { label: 'Påminnelser',   Icon: ClockIcon,       to: '/mer/paminnelser' },
-  { label: 'Apple Health',  Icon: HeartIcon,       to: '/mer/apple-health' },
+  { label: 'Apple Health',  Icon: HeartIcon,       to: '/mer/apple-health', webOnly: true },
   { label: 'Hjälp & support', Icon: HelpCircleIcon, to: '/mer/hjalp' },
   { label: 'Om appen',      Icon: InfoIcon,        to: '/mer/om' },
   { label: 'Integritetspolicy', Icon: ShieldIcon,  to: '/integritet' },
@@ -45,6 +60,7 @@ const rows: { label: string; Icon: IconComponent; to: string }[] = [
 
 export function MorePage() {
   const navigate = useNavigate()
+  const visibleRows = rows.filter((r) => !(r.webOnly && isNativeApp()))
   const [billing, setBilling] = useState<BillingStatus | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -148,7 +164,7 @@ export function MorePage() {
       )}
 
       <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
-        {rows.map((row, i) => (
+        {visibleRows.map((row, i) => (
           <button
             key={row.label}
             onClick={() => navigate(row.to)}
