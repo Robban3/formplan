@@ -5,7 +5,11 @@ export const TRIAL_DAYS = 7
 export const PRICE_SEK_ORE = 9900 // 99,00 kr/mån
 
 // Konton som alltid har full åtkomst (test/admin) — kringgår provperiod & paywall.
-export const FULL_ACCESS_EMAILS = new Set(['oliver@dronarkompaniet.se', 'rvdv1122@gmail.com'])
+export const FULL_ACCESS_EMAILS = new Set([
+  'oliver@dronarkompaniet.se',
+  'rvdv1122@gmail.com',
+  'robert@applabbet.com',
+])
 
 export interface AccessStatus {
   access: boolean
