@@ -110,7 +110,7 @@ export function NotificationsPage() {
       {permState === 'granted' && (
         <button
           onClick={sendTestNotification}
-          className="w-full py-3 border border-stone-200 dark:border-stone-700 rounded-xl text-sm text-stone-600 dark:text-stone-300 dark:text-stone-600 hover:border-forest-400 hover:text-forest-600 transition-colors"
+          className="w-full py-3 border border-stone-200 dark:border-stone-700 rounded-xl text-sm text-stone-600 dark:text-stone-300 hover:border-forest-400 hover:text-forest-600 transition-colors"
         >
           Skicka testnotis
         </button>

@@ -16,7 +16,7 @@ interface Props {
 function StatLine({ label, eaten, goal, unit }: { label: string; eaten: number; goal: number; unit: string }) {
   return (
     <div className="flex items-baseline justify-between gap-2">
-      <span className="text-sm text-stone-600 dark:text-stone-300 dark:text-stone-600">{label}</span>
+      <span className="text-sm text-stone-600 dark:text-stone-300">{label}</span>
       <span className="text-sm font-semibold text-stone-900 dark:text-stone-100 tabular-nums">
         {Math.round(eaten).toLocaleString('sv-SE')}
         <span className="text-stone-400 dark:text-stone-500 font-normal"> / {goal.toLocaleString('sv-SE')} {unit}</span>

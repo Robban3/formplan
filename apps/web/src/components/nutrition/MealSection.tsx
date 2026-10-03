@@ -42,7 +42,7 @@ export function MealSection({ slot, entries, date, onAdd, onTapEntry, onLogged }
       <div className="flex items-center justify-between px-4 py-3 border-b border-stone-50">
         <span className="font-semibold text-stone-800 dark:text-stone-200">{SLOT_LABELS[slot]}</span>
         {totalKcal > 0 && (
-          <span className="text-sm font-medium text-stone-500 dark:text-stone-400 dark:text-stone-500">{totalKcal} kcal</span>
+          <span className="text-sm font-medium text-stone-500 dark:text-stone-400">{totalKcal} kcal</span>
         )}
       </div>
 
@@ -50,7 +50,7 @@ export function MealSection({ slot, entries, date, onAdd, onTapEntry, onLogged }
         <button
           key={entry.id}
           onClick={() => onTapEntry(entry)}
-          className="w-full flex items-center justify-between px-4 py-3 border-b border-stone-50 hover:bg-stone-50 dark:bg-stone-800 active:bg-stone-100 dark:bg-stone-700 transition-colors"
+          className="w-full flex items-center justify-between px-4 py-3 border-b border-stone-50 hover:bg-stone-50 dark:hover:bg-stone-800 active:bg-stone-100 dark:active:bg-stone-700 transition-colors"
         >
           <div className="flex items-center gap-3 min-w-0">
             <FoodAvatar name={entry.food_name} slot={slot} />
@@ -61,13 +61,13 @@ export function MealSection({ slot, entries, date, onAdd, onTapEntry, onLogged }
               </p>
             </div>
           </div>
-          <span className="text-sm font-medium text-stone-500 dark:text-stone-400 dark:text-stone-500 flex-shrink-0 ml-2">{entry.kcal} kcal</span>
+          <span className="text-sm font-medium text-stone-500 dark:text-stone-400 flex-shrink-0 ml-2">{entry.kcal} kcal</span>
         </button>
       ))}
 
       <button
         onClick={() => onAdd(slot)}
-        className="w-full flex items-center justify-center gap-2 py-3.5 text-sm text-forest-600 font-medium hover:bg-forest-50 dark:bg-forest-900/30 transition-colors"
+        className="w-full flex items-center justify-center gap-2 py-3.5 text-sm text-forest-600 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
       >
         <PlusIcon className="w-4 h-4 stroke-forest-600" />
         Lägg till mat

@@ -87,7 +87,7 @@ export function RemindersPage() {
       {adding ? (
         <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-5 space-y-4">
           <label className="block">
-            <span className="text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500">Etikett</span>
+            <span className="text-sm text-stone-500 dark:text-stone-400">Etikett</span>
             <input
               value={newLabel}
               onChange={(e) => setNewLabel(e.target.value)}
@@ -96,7 +96,7 @@ export function RemindersPage() {
           </label>
 
           <div>
-            <span className="text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500">Dagar</span>
+            <span className="text-sm text-stone-500 dark:text-stone-400">Dagar</span>
             <div className="flex gap-2 mt-2">
               {DAY_LABELS.map((label, i) => {
                 const day = i + 1
@@ -105,7 +105,7 @@ export function RemindersPage() {
                     key={day}
                     onClick={() => toggleDay(day)}
                     className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-colors ${
-                      newDays.includes(day) ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 dark:text-stone-500'
+                      newDays.includes(day) ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400'
                     }`}
                   >
                     {label}
@@ -116,7 +116,7 @@ export function RemindersPage() {
           </div>
 
           <label className="block">
-            <span className="text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500">Tid</span>
+            <span className="text-sm text-stone-500 dark:text-stone-400">Tid</span>
             <input
               type="time"
               value={newTime}
@@ -128,7 +128,7 @@ export function RemindersPage() {
           <div className="flex gap-3">
             <button
               onClick={() => setAdding(false)}
-              className="flex-1 py-3 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600 font-medium text-sm"
+              className="flex-1 py-3 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 font-medium text-sm"
             >
               Avbryt
             </button>
@@ -143,7 +143,7 @@ export function RemindersPage() {
       ) : (
         <button
           onClick={() => setAdding(true)}
-          className="w-full flex items-center justify-center gap-2 py-3 border border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-600 font-medium hover:bg-forest-50 dark:bg-forest-900/30 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3 border border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-600 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
         >
           <PlusIcon className="w-4 h-4 stroke-forest-600" />
           Ny påminnelse

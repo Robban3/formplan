@@ -176,7 +176,7 @@ export function MeasurementsPage() {
             <div className="grid grid-cols-2 gap-3">
               {FIELDS.map((f) => (
                 <div key={f.key} className="min-w-0">
-                  <label className="text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500 font-medium">{f.label}</label>
+                  <label className="text-xs text-stone-500 dark:text-stone-400 font-medium">{f.label}</label>
                   <div className="flex items-center gap-1 mt-1">
                     <input
                       type="number" inputMode="decimal"
@@ -241,8 +241,8 @@ export function MeasurementsPage() {
                     const val = (e as unknown as Record<string, unknown>)[f.key] as number | undefined
                     if (!val) return null
                     return (
-                      <span key={f.key} className="text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500">
-                        <span className="font-medium text-stone-700 dark:text-stone-300 dark:text-stone-600">{f.label}:</span>{' '}
+                      <span key={f.key} className="text-xs text-stone-500 dark:text-stone-400">
+                        <span className="font-medium text-stone-700 dark:text-stone-300">{f.label}:</span>{' '}
                         {formatKg(val)} {f.unit}
                       </span>
                     )

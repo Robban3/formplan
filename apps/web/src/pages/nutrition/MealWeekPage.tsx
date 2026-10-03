@@ -153,7 +153,7 @@ export function MealWeekPage() {
                 key={k}
                 onClick={() => update({ ...plan, kcal: k })}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  plan.kcal === k ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600'
+                  plan.kcal === k ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
                 }`}
               >
                 {k}
@@ -167,7 +167,7 @@ export function MealWeekPage() {
                 key={n}
                 onClick={() => update({ ...plan, mealCount: n })}
                 className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-colors ${
-                  plan.mealCount === n ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600'
+                  plan.mealCount === n ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
                 }`}
               >
                 {n} måltider
@@ -183,7 +183,7 @@ export function MealWeekPage() {
                 className={`py-2 rounded-xl text-xs font-semibold border-2 transition-colors ${
                   plan.focus === opt.key
                     ? 'border-forest-600 bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300'
-                    : 'border-stone-100 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-300 dark:text-stone-600'
+                    : 'border-stone-100 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-300'
                 }`}
               >
                 {opt.label}
@@ -210,7 +210,7 @@ export function MealWeekPage() {
                 key={d}
                 onClick={() => setSelected(d)}
                 className={`rounded-xl py-1.5 flex flex-col items-center border transition-colors ${
-                  isSel ? 'bg-forest-700 border-forest-700 text-white' : 'bg-white dark:bg-stone-800 border-stone-100 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600'
+                  isSel ? 'bg-forest-700 border-forest-700 text-white' : 'bg-white dark:bg-stone-800 border-stone-100 dark:border-stone-700 text-stone-600 dark:text-stone-300'
                 } ${d === today && !isSel ? 'ring-1 ring-forest-300' : ''}`}
               >
                 <span className="text-[10px] font-medium">{DAY_SHORT[d - 1]}</span>
@@ -234,7 +234,7 @@ export function MealWeekPage() {
             </div>
             <button
               onClick={() => regenerateDay(selected)}
-              className="text-xs px-3 py-1.5 rounded-full border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600 font-medium hover:border-forest-400 hover:text-forest-700 dark:text-forest-300 transition-colors"
+              className="text-xs px-3 py-1.5 rounded-full border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 font-medium hover:border-forest-400 hover:text-forest-700 dark:hover:text-forest-300 transition-colors"
             >
               Regenerera dag
             </button>
@@ -251,7 +251,7 @@ export function MealWeekPage() {
             <div key={`gen-${i}`} className="border-b border-stone-50 py-3 last:border-0">
               <div className="flex items-center justify-between mb-1">
                 <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">{meal.label}</p>
-                <span className="text-xs font-medium text-stone-500 dark:text-stone-400 dark:text-stone-500">{meal.total.kcal} kcal</span>
+                <span className="text-xs font-medium text-stone-500 dark:text-stone-400">{meal.total.kcal} kcal</span>
               </div>
               <p className="text-xs text-stone-400 dark:text-stone-500 leading-relaxed">
                 {meal.foods.map((f) => `${f.name} (${f.amount_g} g)`).join(' · ')}
@@ -274,7 +274,7 @@ export function MealWeekPage() {
 
           <button
             onClick={() => setAddSlot('frukost')}
-            className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 border border-dashed border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-600 font-medium hover:bg-forest-50 dark:bg-forest-900/30 transition-colors"
+            className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 border border-dashed border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-600 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
           >
             <PlusIcon className="w-4 h-4 stroke-forest-600" />
             Lägg till egen måltid
@@ -301,7 +301,7 @@ export function MealWeekPage() {
                   key={s}
                   onClick={() => setAddSlot(s)}
                   className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
-                    addSlot === s ? 'bg-forest-700 text-white border-forest-700' : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600'
+                    addSlot === s ? 'bg-forest-700 text-white border-forest-700' : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300'
                   }`}
                 >
                   {SLOT_LABELS[s]}

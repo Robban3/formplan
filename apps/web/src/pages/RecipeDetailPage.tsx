@@ -119,7 +119,7 @@ export function RecipeDetailPage() {
           {recipe.ingredients.map((ing, i) => (
             <div key={i} className={`flex items-center gap-3 px-4 py-3 ${i > 0 ? 'border-t border-stone-50' : ''}`}>
               <div className="w-1.5 h-1.5 rounded-full bg-forest-500 flex-shrink-0" />
-              <span className="text-sm text-stone-700 dark:text-stone-300 dark:text-stone-600">{ing}</span>
+              <span className="text-sm text-stone-700 dark:text-stone-300">{ing}</span>
             </div>
           ))}
         </div>
@@ -134,7 +134,7 @@ export function RecipeDetailPage() {
               <div className="w-6 h-6 rounded-full bg-forest-700 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                 {i + 1}
               </div>
-              <p className="text-sm text-stone-700 dark:text-stone-300 dark:text-stone-600 leading-relaxed">{step}</p>
+              <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed">{step}</p>
             </div>
           ))}
         </div>

@@ -85,9 +85,9 @@ export function AboutPage() {
       <div className="mx-5 bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-5 mb-5">
         <div className="flex items-center gap-2 mb-2">
           <HeartIcon className="w-4 h-4 stroke-rose-400" />
-          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 dark:text-stone-500 uppercase tracking-wide">Vår tanke</p>
+          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Vår tanke</p>
         </div>
-        <p className="text-sm text-stone-600 dark:text-stone-300 dark:text-stone-600 leading-relaxed">
+        <p className="text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
           Vi tror att bra träning och hållbar kost inte ska kräva en personlig tränare eller
           dietist. Genom att kombinera modern AI med ett enkelt gränssnitt vill vi göra det
           lätt för alla att ta kontroll över sin hälsa — på sina egna villkor.
@@ -104,7 +104,7 @@ export function AboutPage() {
             </div>
             <div>
               <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm">{title}</p>
-              <p className="text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500 mt-0.5 leading-relaxed">{desc}</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 leading-relaxed">{desc}</p>
             </div>
           </div>
         ))}

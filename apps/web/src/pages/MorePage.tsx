@@ -134,7 +134,7 @@ export function MorePage() {
                 <button
                   onClick={managePortal}
                   disabled={busy}
-                  className="mt-3 w-full py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-sm font-semibold text-stone-700 dark:text-stone-300 dark:text-stone-600 hover:border-forest-400 hover:text-forest-700 dark:text-forest-300 transition-colors disabled:opacity-60"
+                  className="mt-3 w-full py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-sm font-semibold text-stone-700 dark:text-stone-300 hover:border-forest-400 hover:text-forest-700 dark:hover:text-forest-300 transition-colors disabled:opacity-60"
                 >
                   Hantera prenumeration
                 </button>
@@ -175,7 +175,7 @@ export function MorePage() {
           <button
             key={row.label}
             onClick={() => navigate(row.to)}
-            className={`w-full flex items-center gap-3 px-4 py-4 hover:bg-stone-50 dark:bg-stone-800 transition-colors ${
+            className={`w-full flex items-center gap-3 px-4 py-4 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors ${
               i > 0 ? 'border-t border-stone-100 dark:border-stone-700' : ''
             }`}
           >

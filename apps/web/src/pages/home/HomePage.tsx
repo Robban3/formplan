@@ -412,7 +412,7 @@ export function HomePage() {
               <div className="px-4 py-3">
                 <div className="flex gap-2 flex-wrap">
                   {todayWorkout.content.exercises.slice(0, 3).map((ex, i) => (
-                    <span key={i} className="text-xs bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 dark:text-stone-500 px-2 py-1 rounded-lg">
+                    <span key={i} className="text-xs bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 px-2 py-1 rounded-lg">
                       {ex.name}
                     </span>
                   ))}
@@ -524,7 +524,7 @@ export function HomePage() {
                   <button
                     key={goal.id}
                     onClick={() => navigate('/mer/mina-mal')}
-                    className="w-full px-4 py-3 text-left hover:bg-stone-50 dark:bg-stone-800 active:bg-stone-100 dark:bg-stone-700 transition-colors"
+                    className="w-full px-4 py-3 text-left hover:bg-stone-50 dark:hover:bg-stone-800 active:bg-stone-100 dark:active:bg-stone-700 transition-colors"
                   >
                     <div className="flex items-center justify-between mb-1.5">
                       <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate pr-2">{goal.text}</p>
@@ -562,7 +562,7 @@ export function HomePage() {
               onClick={() => navigate('/kost')}
               className="w-full bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 text-left active:scale-[0.98] transition-transform"
             >
-              <p className="text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500">Inga måltider loggade ännu.</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400">Inga måltider loggade ännu.</p>
               <p className="text-xs text-forest-600 font-medium mt-1">Lägg till din första måltid →</p>
             </button>
           ) : (
@@ -574,7 +574,7 @@ export function HomePage() {
                   <button
                     key={slot}
                     onClick={() => navigate('/kost')}
-                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-stone-50 dark:bg-stone-800 active:bg-stone-100 dark:bg-stone-700 transition-colors"
+                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-stone-50 dark:hover:bg-stone-800 active:bg-stone-100 dark:active:bg-stone-700 transition-colors"
                   >
                     <span className="text-sm font-medium text-stone-800 dark:text-stone-200">{MEAL_LABELS[slot]}</span>
                     <div className="flex items-center gap-2">
@@ -598,7 +598,7 @@ export function HomePage() {
               <button
                 key={path}
                 onClick={() => navigate(path)}
-                className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-stone-50 dark:bg-stone-800 active:bg-stone-100 dark:bg-stone-700 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-stone-50 dark:hover:bg-stone-800 active:bg-stone-100 dark:active:bg-stone-700 transition-colors"
               >
                 <div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center flex-shrink-0`}>
                   <Icon className={`w-5 h-5 ${iconStroke}`} />

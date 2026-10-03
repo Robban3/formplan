@@ -140,7 +140,7 @@ export function HelpPage() {
                     </button>
                     {isOpen && (
                       <div className="px-4 pb-4">
-                        <p className="text-stone-500 dark:text-stone-400 dark:text-stone-500 text-sm leading-relaxed">{faq.a}</p>
+                        <p className="text-stone-500 dark:text-stone-400 text-sm leading-relaxed">{faq.a}</p>
                       </div>
                     )}
                   </div>
@@ -152,7 +152,7 @@ export function HelpPage() {
       </div>
 
       <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-5 mt-6 text-center">
-        <p className="font-medium text-stone-700 dark:text-stone-300 dark:text-stone-600 text-sm mb-1">Hittar du inte svaret?</p>
+        <p className="font-medium text-stone-700 dark:text-stone-300 text-sm mb-1">Hittar du inte svaret?</p>
         <p className="text-stone-400 dark:text-stone-500 text-xs mb-3">Vi svarar inom 24 timmar på vardagar.</p>
         <a
           href="mailto:support@formplan.app"

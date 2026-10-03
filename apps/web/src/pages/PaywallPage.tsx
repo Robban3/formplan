@@ -57,7 +57,7 @@ export function PaywallPage({ status }: { status: BillingStatus }) {
             <span className="text-4xl font-extrabold">{price}</span>
             <span className="text-stone-400 dark:text-stone-500 font-medium">kr/mån</span>
           </div>
-          <p className="text-center text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500 mt-1">Avsluta när du vill</p>
+          <p className="text-center text-xs text-stone-500 dark:text-stone-400 mt-1">Avsluta när du vill</p>
 
           <ul className="mt-5 space-y-2.5">
             {FEATURES.map((f) => (
@@ -81,7 +81,7 @@ export function PaywallPage({ status }: { status: BillingStatus }) {
           {loading ? 'Öppnar betalning…' : `Starta prenumeration – ${price} kr/mån`}
         </button>
 
-        <button onClick={logout} className="mt-4 w-full text-stone-500 dark:text-stone-400 dark:text-stone-500 text-sm py-2">
+        <button onClick={logout} className="mt-4 w-full text-stone-500 dark:text-stone-400 text-sm py-2">
           Logga ut
         </button>
       </div>

@@ -43,7 +43,7 @@ function MacroBar({ plan }: { plan: GeneratedMealPlan }) {
         {segs.map((s) => (
           <div key={s.key} className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: MACRO_COLORS[s.key] }} />
-            <span className="text-[10px] text-stone-500 dark:text-stone-400 dark:text-stone-500">{s.label} <span className="font-semibold text-stone-700 dark:text-stone-300 dark:text-stone-600">{s.g}g</span></span>
+            <span className="text-[10px] text-stone-500 dark:text-stone-400">{s.label} <span className="font-semibold text-stone-700 dark:text-stone-300">{s.g}g</span></span>
           </div>
         ))}
       </div>
@@ -127,7 +127,7 @@ export function MealPlanPage() {
                 key={k}
                 onClick={() => { kcalTouched.current = true; setKcal(k) }}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  kcal === k ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600'
+                  kcal === k ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
                 }`}
               >
                 {k}
@@ -147,7 +147,7 @@ export function MealPlanPage() {
                 className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-colors ${
                   mealCount === n
                     ? 'bg-forest-700 text-white'
-                    : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600'
+                    : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
                 }`}
               >
                 {n} måltider
@@ -237,7 +237,7 @@ export function MealPlanPage() {
                             {food.amount_g} g · P {food.protein_g}g · F {food.fat_g}g · K {food.carbs_g}g
                           </p>
                         </div>
-                        <span className="text-sm font-semibold text-stone-700 dark:text-stone-300 dark:text-stone-600 ml-3 flex-shrink-0">
+                        <span className="text-sm font-semibold text-stone-700 dark:text-stone-300 ml-3 flex-shrink-0">
                           {food.kcal} kcal
                         </span>
                       </div>
@@ -250,7 +250,7 @@ export function MealPlanPage() {
             {/* Regenerate */}
             <button
               onClick={regenerate}
-              className="w-full py-3 border border-stone-200 dark:border-stone-700 rounded-2xl text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
+              className="w-full py-3 border border-stone-200 dark:border-stone-700 rounded-2xl text-sm text-stone-500 dark:text-stone-400 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
             >
               Generera nytt förslag
             </button>
@@ -263,9 +263,9 @@ export function MealPlanPage() {
                   `/kost/inkopslista?kcal=${clampedKcal()}&focus=${focus}&meals=${mealCount}`
                 )
               }
-              className="w-full py-3 bg-stone-100 dark:bg-stone-700 rounded-2xl text-sm text-stone-700 dark:text-stone-300 dark:text-stone-600 font-semibold flex items-center justify-center gap-2 hover:bg-stone-200 dark:bg-stone-700 transition-colors"
+              className="w-full py-3 bg-stone-100 dark:bg-stone-700 rounded-2xl text-sm text-stone-700 dark:text-stone-300 font-semibold flex items-center justify-center gap-2 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
             >
-              <ShoppingCartIcon className="w-4 h-4 stroke-stone-600 dark:stroke-stone-300 dark:stroke-stone-600" />
+              <ShoppingCartIcon className="w-4 h-4 stroke-stone-600 dark:stroke-stone-300" />
               Skapa inköpslista för veckan
             </button>
           </div>

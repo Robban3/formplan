@@ -237,7 +237,7 @@ export function TrainingOverview() {
             <div className="bg-stone-100 dark:bg-stone-700 rounded-2xl p-4 flex items-center gap-4">
               <WeeklyRing done={thisWeekDone} total={totalWeek} />
               <div className="flex-1">
-                <p className="text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500">Denna vecka</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400">Denna vecka</p>
                 <p className="font-bold text-stone-900 dark:text-stone-100 text-lg">{thisWeekDone} av {totalWeek} pass</p>
               </div>
               {streak > 0 && (
@@ -308,7 +308,7 @@ export function TrainingOverview() {
                 </button>
                 <button
                   onClick={() => navigate('/traning/egna')}
-                  className="border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600 font-semibold px-5 py-3 rounded-xl flex items-center gap-2 hover:border-forest-400 hover:text-forest-600 transition-colors"
+                  className="border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 font-semibold px-5 py-3 rounded-xl flex items-center gap-2 hover:border-forest-400 hover:text-forest-600 transition-colors"
                 >
                   <DumbbellIcon className="w-4 h-4" />
                   Egna pass
@@ -322,14 +322,14 @@ export function TrainingOverview() {
             <button
               onClick={handleGenerate}
               disabled={generating}
-              className="flex-1 flex items-center justify-center gap-2 border border-stone-200 dark:border-stone-700 rounded-xl py-3 text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500 hover:border-forest-400 hover:text-forest-600 transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 border border-stone-200 dark:border-stone-700 rounded-xl py-3 text-sm text-stone-500 dark:text-stone-400 hover:border-forest-400 hover:text-forest-600 transition-colors"
             >
               <PlusIcon className="w-4 h-4" />
               {generating ? 'Genererar...' : 'AI-schema'}
             </button>
             <button
               onClick={() => navigate('/traning/egna')}
-              className="flex-1 flex items-center justify-center gap-2 border border-stone-200 dark:border-stone-700 rounded-xl py-3 text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500 hover:border-forest-400 hover:text-forest-600 transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 border border-stone-200 dark:border-stone-700 rounded-xl py-3 text-sm text-stone-500 dark:text-stone-400 hover:border-forest-400 hover:text-forest-600 transition-colors"
             >
               <DumbbellIcon className="w-4 h-4" />
               Egna pass
@@ -343,7 +343,7 @@ export function TrainingOverview() {
           {/* Ditt AI-schema (om det finns) */}
           {workoutDays.length > 0 && (
             <div className="space-y-3">
-              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 dark:text-stone-500 uppercase tracking-wide">Ditt schema</p>
+              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Ditt schema</p>
               {workoutDays.map((day) => (
                 <div key={day.id} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
                   <div className="flex items-center justify-between mb-3">
@@ -363,7 +363,7 @@ export function TrainingOverview() {
 
           {/* Färdiga program — alltid tillgängliga */}
           <div className="space-y-3">
-            <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 dark:text-stone-500 uppercase tracking-wide">Färdiga program</p>
+            <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Färdiga program</p>
             {PROGRAM_TEMPLATES.map((t) => (
               <ProgramTemplateCard key={t.id} template={t} onStartDay={startTemplateDay} />
             ))}
@@ -390,7 +390,7 @@ function ProgramExerciseList({
           <div key={i} className="py-2.5 first:pt-0">
             <div className="flex items-center gap-2.5">
               {catalog && <ExerciseMedia key={catalog.id} exercise={catalog} variant="thumb" />}
-              <span className="text-sm text-stone-700 dark:text-stone-300 dark:text-stone-600 flex-1 min-w-0 truncate">{ex.name}</span>
+              <span className="text-sm text-stone-700 dark:text-stone-300 flex-1 min-w-0 truncate">{ex.name}</span>
               <span className="text-xs text-stone-400 dark:text-stone-500 shrink-0">{ex.sets} × {ex.reps}</span>
             </div>
           </div>
@@ -451,7 +451,7 @@ function WorkoutCard({
       {/* Exercise preview */}
       <div className="flex gap-2 mt-3 flex-wrap">
         {day.content.exercises.slice(0, 3).map((ex, i) => (
-          <span key={i} className="text-xs bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 dark:text-stone-500 px-2 py-1 rounded-lg">
+          <span key={i} className="text-xs bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 px-2 py-1 rounded-lg">
             {ex.name}
           </span>
         ))}
@@ -505,7 +505,7 @@ function ExerciseLibrary() {
             className={`flex-shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
               category === c
                 ? 'bg-forest-700 border-forest-700 text-white'
-                : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 dark:text-stone-500'
+                : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400'
             }`}
           >
             {c}
@@ -519,7 +519,7 @@ function ExerciseLibrary() {
 
       {groups.map((g) => (
         <div key={g.category}>
-          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 dark:text-stone-500 uppercase tracking-wide mt-3 mb-1.5 px-1">
+          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mt-3 mb-1.5 px-1">
             {g.category}
           </p>
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
@@ -605,7 +605,7 @@ function ProgramTemplateCard({
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {day.exercises.map((ex) => (
-                  <span key={ex.name} className="text-[11px] bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 dark:text-stone-500 px-2 py-1 rounded-lg">
+                  <span key={ex.name} className="text-[11px] bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 px-2 py-1 rounded-lg">
                     {ex.name} {ex.sets}×{ex.reps}
                   </span>
                 ))}

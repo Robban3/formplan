@@ -12,7 +12,7 @@ export function MacroBar({ label, eaten, goal, unit = 'g', color }: Props) {
   return (
     <div>
       <div className="flex justify-between items-baseline mb-1">
-        <span className="text-sm font-medium text-stone-700 dark:text-stone-300 dark:text-stone-600">{label}</span>
+        <span className="text-sm font-medium text-stone-700 dark:text-stone-300">{label}</span>
         <span className="text-xs text-stone-400 dark:text-stone-500">
           {eaten} / {goal} {unit}
         </span>

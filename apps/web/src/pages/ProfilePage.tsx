@@ -78,7 +78,7 @@ export function ProfilePage() {
               key={row.label}
               className={`flex items-center justify-between px-4 py-3 ${i > 0 ? 'border-t border-stone-50' : ''}`}
             >
-              <span className="text-stone-500 dark:text-stone-400 dark:text-stone-500 text-sm">{row.label}</span>
+              <span className="text-stone-500 dark:text-stone-400 text-sm">{row.label}</span>
               <span className="text-stone-800 dark:text-stone-200 font-medium text-sm text-right max-w-[60%]">{row.value}</span>
             </div>
           ))}
@@ -89,7 +89,7 @@ export function ProfilePage() {
 
       <button
         onClick={() => navigate('/onboarding')}
-        className="w-full mt-4 border border-stone-200 dark:border-stone-700 rounded-xl py-3 text-sm text-stone-600 dark:text-stone-300 dark:text-stone-600 hover:border-forest-400 hover:text-forest-600 transition-colors"
+        className="w-full mt-4 border border-stone-200 dark:border-stone-700 rounded-xl py-3 text-sm text-stone-600 dark:text-stone-300 hover:border-forest-400 hover:text-forest-600 transition-colors"
       >
         Uppdatera mina uppgifter
       </button>

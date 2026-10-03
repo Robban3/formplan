@@ -334,7 +334,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
               className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border font-medium transition-colors disabled:opacity-50 ${
                 category === c.key
                   ? 'bg-forest-700 text-white border-forest-700'
-                  : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600 hover:border-forest-300'
+                  : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:border-forest-300'
               }`}
             >
               <c.Icon className="w-3.5 h-3.5" />
@@ -350,7 +350,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
             key={s}
             onClick={() => generate(s)}
             disabled={loading}
-            className="text-[11px] bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full px-3 py-1.5 text-stone-600 dark:text-stone-300 dark:text-stone-600 hover:border-forest-300 hover:text-forest-700 dark:text-forest-300 transition-colors disabled:opacity-50"
+            className="text-[11px] bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full px-3 py-1.5 text-stone-600 dark:text-stone-300 hover:border-forest-300 hover:text-forest-700 dark:hover:text-forest-300 transition-colors disabled:opacity-50"
           >
             {s}
           </button>
@@ -423,20 +423,20 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
             ))}
           </div>
 
-          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-2">Ingredienser</p>
+          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-2">Ingredienser</p>
           <ul className="space-y-1.5 mb-4">
             {recipe.ingredients.map((ing, i) => (
-              <li key={i} className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300 dark:text-stone-600">
+              <li key={i} className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300">
                 <span className="w-1.5 h-1.5 rounded-full bg-forest-400 flex-shrink-0" />
                 {ing}
               </li>
             ))}
           </ul>
 
-          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-2">Tillagning</p>
+          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-2">Tillagning</p>
           <ol className="space-y-2">
             {recipe.steps.map((step, i) => (
-              <li key={i} className="flex gap-3 text-sm text-stone-700 dark:text-stone-300 dark:text-stone-600">
+              <li key={i} className="flex gap-3 text-sm text-stone-700 dark:text-stone-300">
                 <span className="w-5 h-5 rounded-full bg-forest-700 text-white text-xs flex items-center justify-center flex-shrink-0 font-semibold">
                   {i + 1}
                 </span>
@@ -448,7 +448,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
           <button
             onClick={() => generate()}
             disabled={loading}
-            className="w-full mt-4 py-2.5 border border-stone-200 dark:border-stone-700 rounded-xl text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors disabled:opacity-50"
+            className="w-full mt-4 py-2.5 border border-stone-200 dark:border-stone-700 rounded-xl text-sm text-stone-500 dark:text-stone-400 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors disabled:opacity-50"
           >
             Generera nytt förslag
           </button>
@@ -499,7 +499,7 @@ export function RecipesPage() {
               key={t}
               onClick={() => setActiveTab(t)}
               className={`text-xs px-4 py-1.5 rounded-full font-medium transition-colors ${
-                activeTab === t ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600'
+                activeTab === t ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
               }`}
             >
               {t}
@@ -519,7 +519,7 @@ export function RecipesPage() {
           <button
             key={recipe.id}
             onClick={() => navigate(`/mer/recept/${recipe.id}`)}
-            className="w-full flex items-center gap-4 px-4 py-4 text-left bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 hover:bg-stone-50 dark:bg-stone-800 active:bg-stone-100 dark:bg-stone-700 transition-colors"
+            className="w-full flex items-center gap-4 px-4 py-4 text-left bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 active:bg-stone-100 dark:active:bg-stone-700 transition-colors"
           >
             <RecipeIllustration kind={recipe.illustration} bg={recipe.bg} />
 

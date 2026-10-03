@@ -113,7 +113,7 @@ export function ShoppingListPage() {
                 className={`py-2.5 rounded-xl text-sm font-medium border-2 transition-colors ${
                   focus === opt.key
                     ? 'border-forest-600 bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300'
-                    : 'border-stone-100 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-300 dark:text-stone-600'
+                    : 'border-stone-100 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-300'
                 }`}
               >
                 {opt.label}
@@ -126,7 +126,7 @@ export function ShoppingListPage() {
                 key={n}
                 onClick={() => setMealCount(n)}
                 className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
-                  mealCount === n ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600'
+                  mealCount === n ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
                 }`}
               >
                 {n} måltider
@@ -138,7 +138,7 @@ export function ShoppingListPage() {
 
         {/* Progress */}
         <div className="flex items-center justify-between">
-          <p className="text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500">
+          <p className="text-sm text-stone-500 dark:text-stone-400">
             {checkedCount}/{totalItems} varor i kundvagnen
           </p>
           {checkedCount > 0 && (
@@ -152,7 +152,7 @@ export function ShoppingListPage() {
         {categories.map((cat) => (
           <div key={cat.category} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
             <div className="px-4 py-2.5 bg-stone-50 dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
-              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 dark:text-stone-500 uppercase tracking-wide">{cat.category}</p>
+              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">{cat.category}</p>
             </div>
             {cat.items.map((item, i) => {
               const isChecked = checked.has(item.name)
@@ -185,7 +185,7 @@ export function ShoppingListPage() {
         {!fromPlan && (
           <button
             onClick={() => setSeed((s) => s + 1)}
-            className="w-full py-3 border border-stone-200 dark:border-stone-700 rounded-2xl text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
+            className="w-full py-3 border border-stone-200 dark:border-stone-700 rounded-2xl text-sm text-stone-500 dark:text-stone-400 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
           >
             Generera ny lista
           </button>

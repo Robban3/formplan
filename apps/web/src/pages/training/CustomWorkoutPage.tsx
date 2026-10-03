@@ -216,7 +216,7 @@ export function CustomWorkoutPage() {
                         className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
                           exId === ex.id
                             ? 'bg-forest-700 text-white border-forest-700'
-                            : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600 hover:border-forest-300'
+                            : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:border-forest-300'
                         }`}
                       >
                         {ex.name}
@@ -229,18 +229,20 @@ export function CustomWorkoutPage() {
                   <>
                     <div className="grid grid-cols-3 gap-2">
                       <div className="min-w-0">
-                        <label className="text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500">Set</label>
-                        <input type="number" value={exSets} onChange={(e) => setExSets(e.target.value)}
+                        <label className="text-xs text-stone-500 dark:text-stone-400">Set</label>
+                        <input type="number" aria-label="Antal set" value={exSets} onChange={(e) => setExSets(e.target.value)}
                           className="mt-1 w-full bg-white dark:bg-stone-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
                       </div>
                       <div className="min-w-0">
-                        <label className="text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500">{isCardioExercise({ name: exName, exercise_id: exId }) ? 'Tid (min)' : 'Reps'}</label>
-                        <input value={exReps} onChange={(e) => setExReps(e.target.value)}
+                        <label className="text-xs text-stone-500 dark:text-stone-400">{isCardioExercise({ name: exName, exercise_id: exId }) ? 'Tid (min)' : 'Reps'}</label>
+                        <input
+                          aria-label={isCardioExercise({ name: exName, exercise_id: exId }) ? 'Tid i minuter' : 'Antal reps'}
+                          value={exReps} onChange={(e) => setExReps(e.target.value)}
                           className="mt-1 w-full bg-white dark:bg-stone-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
                       </div>
                       <div className="min-w-0">
-                        <label className="text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500">Vila (sek)</label>
-                        <input type="number" value={exRest} onChange={(e) => setExRest(e.target.value)}
+                        <label className="text-xs text-stone-500 dark:text-stone-400">Vila (sek)</label>
+                        <input type="number" aria-label="Vila i sekunder" value={exRest} onChange={(e) => setExRest(e.target.value)}
                           className="mt-1 w-full bg-white dark:bg-stone-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
                       </div>
                     </div>
@@ -248,7 +250,7 @@ export function CustomWorkoutPage() {
                     {!isCardioExercise({ name: exName, exercise_id: exId }) &&
                       exerciseUsesWeight({ name: exName, exercise_id: exId }) && (
                       <div>
-                        <label className="text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500">Vikt (kg, valfritt)</label>
+                        <label className="text-xs text-stone-500 dark:text-stone-400">Vikt (kg, valfritt)</label>
                         <input type="number" inputMode="decimal" value={exWeight} placeholder="t.ex. 60"
                           onChange={(e) => setExWeight(e.target.value)}
                           className="mt-1 w-full bg-white dark:bg-stone-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
@@ -259,7 +261,7 @@ export function CustomWorkoutPage() {
                 {exError && <p className="text-xs text-red-500">{exError}</p>}
                 <div className="flex gap-2">
                   <button onClick={() => { setAddingEx(false); resetExerciseForm() }}
-                    className="flex-1 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600 text-sm">
+                    className="flex-1 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 text-sm">
                     Avbryt
                   </button>
                   <button onClick={addExercise} disabled={!exName.trim()}
@@ -309,7 +311,7 @@ export function CustomWorkoutPage() {
               </div>
               <div className="flex gap-1.5 flex-wrap mt-3">
                 {w.exercises.slice(0, 4).map((ex, i) => (
-                  <span key={i} className="text-xs bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 dark:text-stone-500 px-2 py-1 rounded-lg">{ex.name}</span>
+                  <span key={i} className="text-xs bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 px-2 py-1 rounded-lg">{ex.name}</span>
                 ))}
                 {w.exercises.length > 4 && (
                   <span className="text-xs bg-stone-100 dark:bg-stone-700 text-stone-400 dark:text-stone-500 px-2 py-1 rounded-lg">+{w.exercises.length - 4}</span>

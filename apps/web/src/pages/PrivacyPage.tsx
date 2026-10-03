@@ -21,7 +21,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <section className="mb-7">
       <h2 className="text-base font-bold text-stone-900 dark:text-stone-100 mb-2">{title}</h2>
-      <div className="text-sm text-stone-600 dark:text-stone-300 dark:text-stone-600 leading-relaxed space-y-2">{children}</div>
+      <div className="text-sm text-stone-600 dark:text-stone-300 leading-relaxed space-y-2">{children}</div>
     </section>
   )
 }
@@ -36,9 +36,9 @@ export function PrivacyPage() {
           <button
             onClick={() => navigate(-1)}
             aria-label="Tillbaka"
-            className="p-1 -ml-1 rounded-lg hover:bg-stone-100 dark:bg-stone-700"
+            className="p-1 -ml-1 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700"
           >
-            <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300 dark:stroke-stone-600" />
+            <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
           </button>
           <h1 className="text-lg font-bold text-stone-900 dark:text-stone-100">Integritetspolicy</h1>
         </div>

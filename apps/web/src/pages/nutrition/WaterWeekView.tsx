@@ -93,10 +93,10 @@ export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
         <button
           type="button"
           onClick={() => setWeekOffset((o) => o - 1)}
-          className="p-2 rounded-full hover:bg-stone-100 dark:bg-stone-700 active:bg-stone-200 dark:bg-stone-700 transition-colors"
+          className="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700 active:bg-stone-200 dark:active:bg-stone-700 transition-colors"
           aria-label="Föregående vecka"
         >
-          <ChevronLeftIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400 dark:stroke-stone-500" />
+          <ChevronLeftIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400" />
         </button>
         <span className="text-sm font-semibold text-stone-800 dark:text-stone-200 capitalize">
           {formatWeekTitle(from, to, isCurrentWeek)}
@@ -105,10 +105,10 @@ export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
           type="button"
           onClick={() => setWeekOffset((o) => o + 1)}
           disabled={isCurrentWeek}
-          className="p-2 rounded-full hover:bg-stone-100 dark:bg-stone-700 active:bg-stone-200 dark:bg-stone-700 transition-colors disabled:opacity-30"
+          className="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700 active:bg-stone-200 dark:active:bg-stone-700 transition-colors disabled:opacity-30"
           aria-label="Nästa vecka"
         >
-          <ChevronRightIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400 dark:stroke-stone-500" />
+          <ChevronRightIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400" />
         </button>
       </div>
 
@@ -163,7 +163,7 @@ export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
 
       {/* Daglista */}
       <div>
-        <p className="text-xs font-medium text-stone-500 dark:text-stone-400 dark:text-stone-500 mb-2">Dag för dag</p>
+        <p className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">Dag för dag</p>
         <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
           {[...days].reverse().map((day, i, arr) => {
             const pct = goalMl > 0 ? Math.min((day.total_ml / goalMl) * 100, 100) : 0

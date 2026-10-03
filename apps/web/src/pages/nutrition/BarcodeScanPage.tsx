@@ -161,8 +161,8 @@ export function BarcodeScanPage() {
     <div className="flex flex-col min-h-full bg-canvas pb-6">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-header pb-3 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
-        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:bg-stone-700">
-          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300 dark:stroke-stone-600" />
+        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700">
+          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
         </button>
         <div>
           <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">Skanna streckkod</h1>
@@ -185,7 +185,7 @@ export function BarcodeScanPage() {
         )}
 
         {looking && (
-          <div className="flex items-center justify-center gap-2 py-4 text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500">
+          <div className="flex items-center justify-center gap-2 py-4 text-sm text-stone-500 dark:text-stone-400">
             <div className="w-5 h-5 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
             Söker produkt…
           </div>
@@ -217,7 +217,7 @@ export function BarcodeScanPage() {
                 placeholder="Märke (valfritt)"
                 className="w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-800 dark:text-stone-200 outline-none focus:ring-2 focus:ring-forest-400"
               />
-              <p className="text-xs font-medium text-stone-500 dark:text-stone-400 dark:text-stone-500 pt-1">Per 100 g</p>
+              <p className="text-xs font-medium text-stone-500 dark:text-stone-400 pt-1">Per 100 g</p>
               <div className="grid grid-cols-2 gap-2">
                 {([
                   ['kcal', 'Kalorier'],
@@ -269,7 +269,7 @@ export function BarcodeScanPage() {
                 />
                 <span className="text-sm text-stone-400 dark:text-stone-500">g</span>
               </div>
-              <p className="text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500">
+              <p className="text-sm text-stone-500 dark:text-stone-400">
                 {amount ? Math.round((product.kcal_per_100g * parseFloat(amount)) / 100) : 0} kcal
               </p>
             </div>

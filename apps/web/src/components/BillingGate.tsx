@@ -16,7 +16,7 @@ function RetryScreen({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="min-h-[100dvh] flex flex-col items-center justify-center gap-4 bg-canvas px-6 text-center">
       <p className="font-semibold text-stone-800 dark:text-stone-200">Kunde inte kontrollera ditt konto</p>
-      <p className="text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500 max-w-xs">
+      <p className="text-sm text-stone-500 dark:text-stone-400 max-w-xs">
         Vi kunde inte nå servern. Kontrollera din anslutning och försök igen.
       </p>
       <button

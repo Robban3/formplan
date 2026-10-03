@@ -93,6 +93,8 @@ function GoalCard({
         {/* Icon / toggle */}
         <button
           onClick={onToggle}
+          aria-label={goal.done ? `Markera "${goal.text}" som ej klart` : `Markera "${goal.text}" som klart`}
+          aria-pressed={goal.done}
           className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
             goal.done ? 'bg-forest-700' : 'bg-forest-50 dark:bg-forest-900/30'
           }`}
@@ -127,7 +129,7 @@ function GoalCard({
             onClick={() => !isAuto && !goal.done && setEditingProgress((v) => !v)}
           >
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-semibold text-stone-700 dark:text-stone-300 dark:text-stone-600">{pct}%</span>
+              <span className="text-xs font-semibold text-stone-700 dark:text-stone-300">{pct}%</span>
               {!isAuto && !goal.done && (
                 <span className="text-[10px] text-stone-400 dark:text-stone-500">Tryck för att justera</span>
               )}
@@ -145,7 +147,7 @@ function GoalCard({
             <div className="flex items-center gap-2 mt-3">
               <button
                 onClick={() => onSetProgress(Math.max(0, goal.progress - 10))}
-                className="w-8 h-8 rounded-lg bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600 font-bold text-sm flex items-center justify-center"
+                className="w-8 h-8 rounded-lg bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 font-bold text-sm flex items-center justify-center"
               >−</button>
               <div className="flex-1 text-center text-sm font-semibold text-stone-900 dark:text-stone-100">{goal.progress}%</div>
               <button
@@ -156,7 +158,11 @@ function GoalCard({
           )}
         </div>
 
-        <button onClick={onDelete} className="p-1 -mr-1 -mt-1 flex-shrink-0">
+        <button
+          onClick={onDelete}
+          aria-label={`Ta bort målet "${goal.text}"`}
+          className="p-1 -mr-1 -mt-1 flex-shrink-0"
+        >
           <XIcon className="w-4 h-4 text-stone-300 dark:text-stone-600" />
         </button>
       </div>
@@ -167,7 +173,7 @@ function GoalCard({
       {adjustment && !goal.done && (
         <button
           onClick={onApply}
-          className="mt-3 w-full py-2.5 rounded-xl border border-forest-200 dark:border-forest-800 bg-forest-50 dark:bg-forest-900/30 text-sm font-semibold text-forest-700 dark:text-forest-300 hover:bg-forest-100 dark:bg-forest-900/40 transition-colors"
+          className="mt-3 w-full py-2.5 rounded-xl border border-forest-200 dark:border-forest-800 bg-forest-50 dark:bg-forest-900/30 text-sm font-semibold text-forest-700 dark:text-forest-300 hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors"
         >
           Anpassa mitt schema efter det här målet
         </button>
@@ -314,15 +320,15 @@ export function GoalsPage() {
           <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-4 pb-6">
             <div className="bg-white dark:bg-stone-800 rounded-2xl p-5 w-full max-w-sm">
               <p className="font-bold text-stone-900 dark:text-stone-100">Anpassa schemat?</p>
-              <p className="text-sm text-stone-600 dark:text-stone-300 dark:text-stone-600 mt-2">{pending.adjustment.description}</p>
-              <p className="text-sm text-stone-600 dark:text-stone-300 dark:text-stone-600 mt-2">
+              <p className="text-sm text-stone-600 dark:text-stone-300 mt-2">{pending.adjustment.description}</p>
+              <p className="text-sm text-stone-600 dark:text-stone-300 mt-2">
                 Ditt nuvarande schema ersätts med ett nytt.
               </p>
               <div className="flex gap-2 mt-5">
                 <button
                   onClick={() => setPending(null)}
                   disabled={applying}
-                  className="flex-1 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-sm font-semibold text-stone-600 dark:text-stone-300 dark:text-stone-600 disabled:opacity-60"
+                  className="flex-1 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-sm font-semibold text-stone-600 dark:text-stone-300 disabled:opacity-60"
                 >
                   Avbryt
                 </button>
@@ -367,7 +373,7 @@ export function GoalsPage() {
                   <button
                     key={s.text}
                     onClick={() => addGoal(s.text)}
-                    className="text-xs bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 border border-forest-100 dark:border-forest-800 px-3 py-1.5 rounded-full hover:bg-forest-100 dark:bg-forest-900/40 transition-colors"
+                    className="text-xs bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 border border-forest-100 dark:border-forest-800 px-3 py-1.5 rounded-full hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors"
                   >
                     {s.text}
                   </button>
@@ -376,7 +382,7 @@ export function GoalsPage() {
             </div>
 
             <div className="flex gap-3">
-              <button onClick={() => setAdding(false)} className="flex-1 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600 text-sm font-medium">
+              <button onClick={() => setAdding(false)} className="flex-1 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 text-sm font-medium">
                 Avbryt
               </button>
               <button onClick={() => addGoal(text)} className="flex-1 py-2.5 rounded-xl bg-forest-700 text-white text-sm font-semibold">

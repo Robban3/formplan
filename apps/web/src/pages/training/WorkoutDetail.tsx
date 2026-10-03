@@ -154,7 +154,7 @@ export function WorkoutDetail() {
 
       {/* Description */}
       <div className="px-5 py-4">
-        <p className="text-stone-500 dark:text-stone-400 dark:text-stone-500 text-sm">
+        <p className="text-stone-500 dark:text-stone-400 text-sm">
           Ett balanserat pass som tränar {content.focus.toLowerCase()} med fokus på styrka och teknik.
         </p>
       </div>

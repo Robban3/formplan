@@ -56,8 +56,8 @@ export function MacroPage() {
   return (
     <div className="pb-6">
       <div className="px-4 pt-header pb-3 flex items-center gap-3">
-        <button onClick={() => navigate('/kost')} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:bg-stone-700">
-          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300 dark:stroke-stone-600" />
+        <button onClick={() => navigate('/kost')} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700">
+          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
         </button>
         <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">Makro</h1>
       </div>
@@ -84,7 +84,7 @@ export function MacroPage() {
         <div className="px-5 pt-6 space-y-5">
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-6 flex flex-col items-center">
             <MacroRing eaten={Math.round(eaten.kcal)} goal={goals.kcal} size={160} />
-            <p className="text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500 mt-3">Kalorier idag</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-3">Kalorier idag</p>
           </div>
 
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 space-y-4">
@@ -109,7 +109,7 @@ export function MacroPage() {
           </div>
 
           {kcalLeft > 0 && (
-            <p className="text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500 text-center">
+            <p className="text-sm text-stone-500 dark:text-stone-400 text-center">
               Du har {Math.round(kcalLeft)} kcal kvar att äta idag.
             </p>
           )}
@@ -127,7 +127,7 @@ export function MacroPage() {
                       <p className="text-sm font-medium text-stone-800 dark:text-stone-200">{e.food_name}</p>
                       <p className="text-xs text-stone-400 dark:text-stone-500 capitalize">{SLOT_LABELS[e.meal_slot] ?? e.meal_slot}</p>
                     </div>
-                    <span className="text-sm font-semibold text-stone-700 dark:text-stone-300 dark:text-stone-600">{e.kcal} kcal</span>
+                    <span className="text-sm font-semibold text-stone-700 dark:text-stone-300">{e.kcal} kcal</span>
                   </div>
                   <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
                     P {Math.round(e.protein_g)}g · F {Math.round(e.fat_g)}g · K {Math.round(e.carbs_g)}g

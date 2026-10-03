@@ -218,7 +218,7 @@ function MacroDonut({ protein, carbs, fat, kcal }: { protein: number; carbs: num
         {segs.map((s) => (
           <div key={s.label}>
             <div className="flex justify-between mb-1 text-xs">
-              <span className="font-medium text-stone-700 dark:text-stone-300 dark:text-stone-600">{s.label}</span>
+              <span className="font-medium text-stone-700 dark:text-stone-300">{s.label}</span>
               <span className="text-stone-400 dark:text-stone-500">{s.g}g · {Math.round(s.pct * 100)}%</span>
             </div>
             <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-1.5">
@@ -808,7 +808,7 @@ export function AnalyticsPage() {
                       </p>
                       <p className="text-xs text-stone-400 dark:text-stone-500">P {d.protein_g}g · K {d.carbs_g}g · F {d.fat_g}g</p>
                     </div>
-                    <span className="text-sm font-semibold text-stone-700 dark:text-stone-300 dark:text-stone-600">{d.kcal} kcal</span>
+                    <span className="text-sm font-semibold text-stone-700 dark:text-stone-300">{d.kcal} kcal</span>
                   </div>
                 ))}
               </div>

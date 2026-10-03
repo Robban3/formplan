@@ -12,7 +12,7 @@ type SearchTab = 'alla' | 'mina' | 'maltider'
 
 function FoodInitial({ name }: { name: string }) {
   return (
-    <div className="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-700 flex items-center justify-center font-bold text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500 flex-shrink-0">
+    <div className="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-700 flex items-center justify-center font-bold text-sm text-stone-500 dark:text-stone-400 flex-shrink-0">
       {name.trim()[0]?.toUpperCase() ?? '?'}
     </div>
   )
@@ -160,8 +160,8 @@ export function FoodSearch() {
   return (
     <div className="flex flex-col min-h-full bg-white dark:bg-stone-800 pb-4">
       <div className="flex items-center gap-3 px-4 pt-header pb-3">
-        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:bg-stone-700">
-          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300 dark:stroke-stone-600" />
+        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700">
+          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
         </button>
         <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100 flex-1">Livsmedelssökning</h1>
       </div>
@@ -176,7 +176,7 @@ export function FoodSearch() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Sök livsmedel..."
-            className="flex-1 bg-transparent text-sm text-stone-800 dark:text-stone-200 placeholder:text-stone-400 dark:text-stone-500 outline-none"
+            className="flex-1 bg-transparent text-sm text-stone-800 dark:text-stone-200 placeholder:text-stone-400 dark:placeholder:text-stone-500 outline-none"
           />
           {query && (
             <button onClick={() => { setQuery(''); setResults([]); setSelected(null) }}>
@@ -190,14 +190,14 @@ export function FoodSearch() {
         <div className="flex gap-2 mt-3">
           <button
             onClick={() => navigate(`/kost/skanna?slot=${slot}&date=${date}`)}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 text-sm font-semibold hover:bg-forest-100 dark:bg-forest-900/40 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 text-sm font-semibold hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors"
           >
             <ScanBarcodeIcon className="w-4 h-4 stroke-forest-600" />
             Skanna streckkod
           </button>
           <button
             onClick={() => navigate(`/kost/foto?slot=${slot}&date=${date}`)}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 text-sm font-semibold hover:bg-forest-100 dark:bg-forest-900/40 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 text-sm font-semibold hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors"
           >
             <CameraIcon className="w-4 h-4 stroke-forest-600" />
             Fotografera
@@ -233,7 +233,7 @@ export function FoodSearch() {
           <div className="px-4 py-3 space-y-3">
             <button
               onClick={() => navigate('/kost/skapa-maltid')}
-              className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-600 font-medium hover:bg-forest-50 dark:bg-forest-900/30 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-600 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
             >
               <PlusIcon className="w-4 h-4 stroke-forest-600" />
               Skapa egen måltid
@@ -265,7 +265,7 @@ export function FoodSearch() {
                     </button>
                     <button
                       onClick={() => navigate(`/kost/skapa-maltid?id=${meal.id}`)}
-                      className="text-xs font-medium text-forest-600 px-2 py-1.5 rounded-lg hover:bg-forest-50 dark:bg-forest-900/30 flex-shrink-0"
+                      className="text-xs font-medium text-forest-600 px-2 py-1.5 rounded-lg hover:bg-forest-50 dark:hover:bg-forest-900/30 flex-shrink-0"
                     >
                       Ändra
                     </button>
@@ -300,7 +300,7 @@ export function FoodSearch() {
                   setSelected(item)
                   setAmount(item.serving_size_g ? String(item.serving_size_g) : '100')
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 border-b border-stone-50 hover:bg-stone-50 dark:bg-stone-800 active:bg-stone-100 dark:bg-stone-700 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 border-b border-stone-50 hover:bg-stone-50 dark:hover:bg-stone-800 active:bg-stone-100 dark:active:bg-stone-700 transition-colors"
               >
                 <FoodInitial name={item.name} />
                 <div className="flex-1 text-left min-w-0">

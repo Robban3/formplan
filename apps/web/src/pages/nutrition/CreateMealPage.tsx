@@ -99,8 +99,8 @@ export function CreateMealPage() {
   return (
     <div className="flex flex-col min-h-full bg-white dark:bg-stone-800 pb-28">
       <div className="flex items-center justify-between px-4 pt-header pb-4 border-b border-stone-100 dark:border-stone-700">
-        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:bg-stone-700">
-          <XIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400 dark:stroke-stone-500" />
+        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700">
+          <XIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400" />
         </button>
         <h1 className="font-bold text-stone-900 dark:text-stone-100">Skapa egen måltid</h1>
         <button onClick={handleSave} className="text-sm font-semibold text-forest-600">
@@ -116,7 +116,7 @@ export function CreateMealPage() {
         </div>
 
         <label className="block">
-          <span className="text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500">Måltidsnamn</span>
+          <span className="text-sm text-stone-500 dark:text-stone-400">Måltidsnamn</span>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -145,7 +145,7 @@ export function CreateMealPage() {
           {!pick ? (
             <button
               onClick={() => setPick({ id: '', name: '', kcal_per_100g: 0, protein_per_100g: 0, fat_per_100g: 0, carbs_per_100g: 0 })}
-              className="w-full flex items-center justify-center gap-2 py-3 mt-2 text-sm text-forest-600 font-medium border border-dashed border-stone-200 dark:border-stone-700 rounded-xl hover:bg-forest-50 dark:bg-forest-900/30 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3 mt-2 text-sm text-forest-600 font-medium border border-dashed border-stone-200 dark:border-stone-700 rounded-xl hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
             >
               <PlusIcon className="w-4 h-4 stroke-forest-600" />
               Lägg till livsmedel
@@ -167,7 +167,7 @@ export function CreateMealPage() {
                     setPick(item)
                     setAmount(String(item.serving_size_g ?? 100))
                   }}
-                  className="w-full text-left py-2 text-sm text-stone-700 dark:text-stone-300 dark:text-stone-600 hover:text-forest-600"
+                  className="w-full text-left py-2 text-sm text-stone-700 dark:text-stone-300 hover:text-forest-600"
                 >
                   {item.name} · {item.kcal_per_100g} kcal/100g
                 </button>
@@ -187,7 +187,7 @@ export function CreateMealPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => { setPick(null); setQuery(''); setResults([]) }}
-                      className="flex-1 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-sm text-stone-600 dark:text-stone-300 dark:text-stone-600"
+                      className="flex-1 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-sm text-stone-600 dark:text-stone-300"
                     >
                       Avbryt
                     </button>

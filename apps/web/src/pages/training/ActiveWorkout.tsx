@@ -224,15 +224,15 @@ export function ActiveWorkout() {
             <DumbbellIcon className="w-8 h-8 stroke-forest-600" />
           </div>
           <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Bra jobbat!</h2>
-          <p className="text-stone-500 dark:text-stone-400 dark:text-stone-500 mt-1">{pendingWorkoutName}</p>
+          <p className="text-stone-500 dark:text-stone-400 mt-1">{pendingWorkoutName}</p>
         </div>
 
         {/* Dela pass */}
         <button
           onClick={() => shareWorkout(pendingWorkoutName, finalElapsed, doneSetCount, totalSetCount)}
-          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-stone-800 rounded-full border border-stone-200 dark:border-stone-700 text-sm font-medium text-stone-700 dark:text-stone-300 dark:text-stone-600 shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-stone-800 rounded-full border border-stone-200 dark:border-stone-700 text-sm font-medium text-stone-700 dark:text-stone-300 shadow-sm"
         >
-          <ShareIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400 dark:stroke-stone-500" />
+          <ShareIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
           Dela passet
         </button>
 
@@ -529,6 +529,7 @@ export function ActiveWorkout() {
         </div>
         <button
           onClick={togglePause}
+          aria-label={paused ? 'Återuppta passet' : 'Pausa passet'}
           className="text-forest-600"
         >
           {paused
@@ -693,7 +694,7 @@ export function ActiveWorkout() {
               }`}
             >
               <div className="flex flex-col">
-                <span className="text-sm font-mono text-stone-500 dark:text-stone-400 dark:text-stone-500">{si + 1}</span>
+                <span className="text-sm font-mono text-stone-500 dark:text-stone-400">{si + 1}</span>
                 {oneRM && (
                   <span className="text-[9px] text-forest-600 font-semibold">1RM~{formatWeight(oneRM)}</span>
                 )}
@@ -767,7 +768,7 @@ export function ActiveWorkout() {
         <p className="text-xs text-stone-400 dark:text-stone-500 text-center mb-1">
           {doneSets}/{totalSets} set · {ex.name}
         </p>
-        <p className="text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500 text-center mb-2">
+        <p className="text-xs text-stone-500 dark:text-stone-400 text-center mb-2">
           {workoutDoneSets}/{workoutTotalSets} set i hela passet
         </p>
         <div className="w-full bg-stone-200 dark:bg-stone-700 rounded-full h-1.5 mb-6">
@@ -794,7 +795,7 @@ export function ActiveWorkout() {
               ) : null
             })()}
             <div className="text-stone-400 dark:text-stone-500 text-xs">Nästa övning</div>
-            <div className="font-semibold text-sm text-stone-700 dark:text-stone-300 dark:text-stone-600">{nextIncompleteEx.name}</div>
+            <div className="font-semibold text-sm text-stone-700 dark:text-stone-300">{nextIncompleteEx.name}</div>
           </div>
         )}
       </div>
@@ -825,7 +826,7 @@ export function ActiveWorkout() {
             className={`w-full py-2.5 rounded-2xl text-sm font-medium border transition-colors ${
               ex.supersetGroup !== undefined
                 ? 'bg-purple-50 border-purple-200 text-purple-700'
-                : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 dark:text-stone-500'
+                : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400'
             }`}
           >
             <ZapIcon className="w-3.5 h-3.5 inline mr-1" />

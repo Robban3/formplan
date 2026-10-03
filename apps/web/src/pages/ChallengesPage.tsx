@@ -76,14 +76,14 @@ function ChallengeCard({ challenge, onAbandon }: { challenge: Challenge; onAband
         <ChallengeIcon iconKey={challenge.iconKey} />
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-stone-900 dark:text-stone-100">{challenge.title}</p>
-          <p className="text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500 mt-0.5">{challenge.description}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{challenge.description}</p>
         </div>
         <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[challenge.category]}`}>
           {CATEGORY_LABELS[challenge.category]}
         </span>
       </div>
 
-      <div className="mb-1 flex justify-between text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500">
+      <div className="mb-1 flex justify-between text-xs text-stone-500 dark:text-stone-400">
         <span>{challenge.currentValue} / {challenge.targetValue} {challenge.unit}</span>
         <span>{daysLeft} dagar kvar</span>
       </div>
@@ -146,8 +146,8 @@ export function ChallengesPage() {
   return (
     <div className="pb-8">
       <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:bg-stone-700">
-          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300 dark:stroke-stone-600" />
+        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700">
+          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
         </button>
         <div>
           <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Utmaningar</h1>
@@ -161,7 +161,7 @@ export function ChallengesPage() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <ZapIcon className="w-4 h-4 stroke-amber-500" />
-              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 dark:text-stone-500 uppercase tracking-wide">Pågående</p>
+              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Pågående</p>
             </div>
             <div className="space-y-3">
               {active.map((c) => (
@@ -174,7 +174,7 @@ export function ChallengesPage() {
         {/* Tillgängliga utmaningar */}
         {available.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-3">Starta en utmaning</p>
+            <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Starta en utmaning</p>
             <div className="space-y-3">
               {available.map((c) => (
                 <div key={c.id} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
@@ -182,7 +182,7 @@ export function ChallengesPage() {
                     <ChallengeIcon iconKey={c.iconKey} />
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-stone-900 dark:text-stone-100">{c.title}</p>
-                      <p className="text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500 mt-0.5">{c.description}</p>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{c.description}</p>
                     </div>
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[c.category]}`}>
                       {CATEGORY_LABELS[c.category]}
@@ -208,7 +208,7 @@ export function ChallengesPage() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <TrophyIcon className="w-4 h-4 stroke-amber-500" />
-              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 dark:text-stone-500 uppercase tracking-wide">Avklarade</p>
+              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Avklarade</p>
             </div>
             <div className="space-y-2">
               {completed.map((c) => (
@@ -230,7 +230,7 @@ export function ChallengesPage() {
             <div className="w-14 h-14 rounded-2xl bg-stone-100 dark:bg-stone-700 flex items-center justify-center mx-auto mb-4">
               <TargetIcon className="w-7 h-7 stroke-stone-300 dark:stroke-stone-600" />
             </div>
-            <p className="font-semibold text-stone-700 dark:text-stone-300 dark:text-stone-600">Inga utmaningar ännu</p>
+            <p className="font-semibold text-stone-700 dark:text-stone-300">Inga utmaningar ännu</p>
             <p className="text-sm text-stone-400 dark:text-stone-500 mt-1">Starta en utmaning för att hålla motivationen uppe!</p>
           </div>
         )}

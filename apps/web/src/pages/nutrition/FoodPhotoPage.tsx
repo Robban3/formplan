@@ -85,8 +85,8 @@ export function FoodPhotoPage() {
     <div className="flex flex-col min-h-full bg-canvas pb-6">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-header pb-3 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
-        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:bg-stone-700">
-          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300 dark:stroke-stone-600" />
+        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700">
+          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
         </button>
         <div>
           <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">Fotografera måltid</h1>
@@ -122,7 +122,7 @@ export function FoodPhotoPage() {
               <div className="w-14 h-14 rounded-2xl bg-forest-50 dark:bg-forest-900/30 flex items-center justify-center">
                 <CameraIcon className="w-7 h-7 stroke-forest-600" />
               </div>
-              <p className="text-sm font-medium text-stone-600 dark:text-stone-300 dark:text-stone-600">Ta en bild eller välj från galleriet</p>
+              <p className="text-sm font-medium text-stone-600 dark:text-stone-300">Ta en bild eller välj från galleriet</p>
               <p className="text-xs text-stone-400 dark:text-stone-500">AI uppskattar kalorier och makron</p>
             </>
           )}
@@ -131,14 +131,14 @@ export function FoodPhotoPage() {
         {preview && !analyzing && (
           <button
             onClick={() => fileRef.current?.click()}
-            className="w-full py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
+            className="w-full py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-sm text-stone-500 dark:text-stone-400 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
           >
             Ta ny bild
           </button>
         )}
 
         {analyzing && (
-          <div className="flex items-center justify-center gap-2 py-4 text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500">
+          <div className="flex items-center justify-center gap-2 py-4 text-sm text-stone-500 dark:text-stone-400">
             <div className="w-5 h-5 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
             Analyserar bilden…
           </div>
@@ -153,7 +153,7 @@ export function FoodPhotoPage() {
 
             {hasItems ? (
               <>
-                <div className="mt-3 flex items-center gap-2 text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500">
+                <div className="mt-3 flex items-center gap-2 text-sm text-stone-500 dark:text-stone-400">
                   <FireIcon className="w-4 h-4 stroke-forest-600" />
                   <span className="font-bold text-stone-800 dark:text-stone-200">{analysis.total.kcal} kcal</span>
                   <span className="text-stone-400 dark:text-stone-500">
@@ -171,7 +171,7 @@ export function FoodPhotoPage() {
                           {item.amount_g} g · P {item.protein_g}g · F {item.fat_g}g · K {item.carbs_g}g
                         </p>
                       </div>
-                      <span className="text-sm font-semibold text-stone-700 dark:text-stone-300 dark:text-stone-600 ml-3 flex-shrink-0">{item.kcal} kcal</span>
+                      <span className="text-sm font-semibold text-stone-700 dark:text-stone-300 ml-3 flex-shrink-0">{item.kcal} kcal</span>
                     </div>
                   ))}
                 </div>

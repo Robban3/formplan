@@ -102,8 +102,8 @@ export function AiCoachPage() {
     <div className="flex flex-col h-[100dvh] bg-canvas max-w-lg mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700 flex-shrink-0">
-        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:bg-stone-700">
-          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300 dark:stroke-stone-600" />
+        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700">
+          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
         </button>
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-forest-100 dark:bg-forest-900/40 rounded-full flex items-center justify-center">
@@ -159,7 +159,7 @@ export function AiCoachPage() {
               <button
                 key={s}
                 onClick={() => send(s)}
-                className="text-xs bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full px-3 py-1.5 text-stone-600 dark:text-stone-300 dark:text-stone-600 hover:border-forest-300 hover:text-forest-700 dark:text-forest-300 transition-colors"
+                className="text-xs bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full px-3 py-1.5 text-stone-600 dark:text-stone-300 hover:border-forest-300 hover:text-forest-700 dark:hover:text-forest-300 transition-colors"
               >
                 {s}
               </button>
