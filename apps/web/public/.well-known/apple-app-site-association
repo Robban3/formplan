@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["S7KPSJD73Z.app.formplan.app"],
+        "components": [
+          { "/": "/auth", "comment": "Inloggning, magisk länk och lösenordsåterställning" },
+          { "/": "/auth/*", "comment": "Undersidor till /auth" }
+        ]
+      }
+    ]
+  }
+}

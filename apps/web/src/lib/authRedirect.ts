@@ -22,13 +22,31 @@ import { Capacitor } from '@capacitor/core'
 export const NATIVE_AUTH_SCHEME = 'app.formplan.app'
 export const NATIVE_AUTH_REDIRECT = `${NATIVE_AUTH_SCHEME}://auth`
 
+/**
+ * Webbadressen som ÄVEN öppnar appen (Universal Link / App Link).
+ *
+ * Det egna schemat ovan fungerar bara på telefonen. Öppnade användaren
+ * återställningsmejlet på en dator följde webbläsaren länken, Supabase brände
+ * engångstoken och försökte skicka vidare till en adress datorn inte känner
+ * till — resultatet blev en tom sida OCH en förbrukad länk. Nästa klick på
+ * telefonen sa då bara "ogiltig länk".
+ *
+ * Med en https-adress gäller samma länk överallt: iOS öppnar appen direkt när
+ * domänen är kopplad (se public/.well-known/apple-app-site-association), och på
+ * en dator öppnas webbversionen där återställningen också fungerar. Misslyckas
+ * kopplingen av någon anledning hamnar användaren i webbappen i stället för i
+ * ett dödläge — degraderingen är mjuk.
+ */
+export const UNIVERSAL_AUTH_ORIGIN = 'https://app.formplan.app'
+export const UNIVERSAL_AUTH_REDIRECT = `${UNIVERSAL_AUTH_ORIGIN}/auth`
+
 export function isNativeApp(): boolean {
   return Capacitor.isNativePlatform()
 }
 
-/** Redirect-URL för inloggningsflödena — schema i native, origin på webben. */
+/** Redirect-URL för inloggningsflödena. */
 export function authRedirectUrl(): string {
-  return isNativeApp() ? NATIVE_AUTH_REDIRECT : `${window.location.origin}/auth`
+  return isNativeApp() ? UNIVERSAL_AUTH_REDIRECT : `${window.location.origin}/auth`
 }
 
 /**

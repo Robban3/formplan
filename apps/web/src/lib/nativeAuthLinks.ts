@@ -1,6 +1,11 @@
 import { App } from '@capacitor/app'
 import { supabase } from './supabase'
-import { closeExternalAuth, isNativeApp, NATIVE_AUTH_SCHEME } from './authRedirect'
+import {
+  closeExternalAuth,
+  isNativeApp,
+  NATIVE_AUTH_SCHEME,
+  UNIVERSAL_AUTH_ORIGIN,
+} from './authRedirect'
 import { beginPasswordRecoveryFromVerifiedLink } from './authRecovery'
 
 /**
@@ -49,8 +54,21 @@ function describeError(params: URLSearchParams): string {
  * Växlar in en öppnad länk mot en session. Exporterad för test — appen anropar
  * `registerNativeAuthLinks`.
  */
+/**
+ * Sant för de adresser som hör till inloggningen: appens eget schema och
+ * Universal Link-adressen. Allt annat som öppnar appen (delningslänkar,
+ * framtida djuplänkar) ska passera orört.
+ */
+function isAuthUrl(url: string): boolean {
+  if (url.startsWith(`${NATIVE_AUTH_SCHEME}://`)) return true
+  // Universal Link: bara /auth under den egna domänen, inte vilken sida som helst.
+  if (!url.startsWith(`${UNIVERSAL_AUTH_ORIGIN}/`)) return false
+  const path = url.slice(UNIVERSAL_AUTH_ORIGIN.length).split(/[?#]/)[0] ?? ''
+  return path === '/auth' || path.startsWith('/auth/')
+}
+
 export async function handleAuthUrl(url: string): Promise<NativeAuthOutcome> {
-  if (!url.startsWith(`${NATIVE_AUTH_SCHEME}://`)) return { kind: 'none' }
+  if (!isAuthUrl(url)) return { kind: 'none' }
   const params = paramsFromUrl(url)
 
   if (params.get('error') || params.get('error_code')) {

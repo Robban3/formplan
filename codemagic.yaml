@@ -116,6 +116,32 @@ workflows:
 
           $PB -c "Print" "$PLIST"
 
+      # Universal Links: iOS måste veta att app.formplan.app hör till appen,
+      # annars öppnas inloggningslänkarna i Safari i stället för i FormPlan.
+      # Kräver TVÅ saker som båda måste stämma:
+      #   1. Associated Domains påslaget på App ID:t i Apples portal
+      #      (Certificates, Identifiers & Profiles → Identifiers → app.formplan.app)
+      #   2. entitlementet nedan, som Capacitors mall inte skapar
+      # Filen serveras från apps/web/public/.well-known/apple-app-site-association.
+      - name: Associated Domains (Universal Links)
+        script: |
+          set -e
+          APP_DIR=apps/web/ios/App/App
+          cat > "$APP_DIR/App.entitlements" <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>com.apple.developer.associated-domains</key>
+            <array>
+              <string>applinks:app.formplan.app</string>
+            </array>
+          </dict>
+          </plist>
+          PLIST
+          echo "--- entitlements skrivet ---"
+          cat "$APP_DIR/App.entitlements"
+
       # Keychainen måste finnas INNAN certifikaten hämtas — annars har
       # fetch-signing-files ingenstans att lägga dem.
       - name: Initiera keychain
@@ -152,10 +178,12 @@ workflows:
           ls -la
           if [ -d "App.xcworkspace" ]; then
             echo "--- bygger från workspace (CocoaPods) ---"
-            xcode-project build-ipa --workspace "App.xcworkspace" --scheme "$XCODE_SCHEME"
+            xcode-project build-ipa --workspace "App.xcworkspace" --scheme "$XCODE_SCHEME" \
+              --archive-xcargs "CODE_SIGN_ENTITLEMENTS=App/App.entitlements"
           else
             echo "--- bygger från projekt (SPM) ---"
-            xcode-project build-ipa --project "App.xcodeproj" --scheme "$XCODE_SCHEME"
+            xcode-project build-ipa --project "App.xcodeproj" --scheme "$XCODE_SCHEME" \
+              --archive-xcargs "CODE_SIGN_ENTITLEMENTS=App/App.entitlements"
           fi
     artifacts:
       - apps/web/ios/App/build/ios/ipa/*.ipa

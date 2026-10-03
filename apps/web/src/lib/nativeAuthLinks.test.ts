@@ -24,9 +24,26 @@ beforeEach(() => {
 })
 
 describe('handleAuthUrl', () => {
-  it('ignores URLs that are not the app scheme', async () => {
-    expect(await handleAuthUrl('https://app.formplan.app/auth#' + TOKENS)).toEqual({ kind: 'none' })
+  it('ignores URLs that belong to neither the scheme nor /auth', async () => {
+    // Annan domän, och den egna domänen men en annan sida.
+    expect(await handleAuthUrl('https://example.com/auth#' + TOKENS)).toEqual({ kind: 'none' })
+    expect(await handleAuthUrl('https://app.formplan.app/kost#' + TOKENS)).toEqual({ kind: 'none' })
     expect(setSession).not.toHaveBeenCalled()
+  })
+
+  // Universal Link: samma länk fungerar på telefon och dator. Öppnades
+  // återställningsmejlet på en dator brändes annars engångstoken utan att något
+  // hände, och klicket på telefonen möttes av "ogiltig länk".
+  it('accepts the universal link form', async () => {
+    const outcome = await handleAuthUrl(`https://app.formplan.app/auth#${TOKENS}`)
+    expect(setSession).toHaveBeenCalledWith({ access_token: 'abc', refresh_token: 'def' })
+    expect(outcome).toEqual({ kind: 'signed-in' })
+  })
+
+  it('accepts recovery over the universal link', async () => {
+    const outcome = await handleAuthUrl(`https://app.formplan.app/auth#${TOKENS}&type=recovery`)
+    expect(outcome).toEqual({ kind: 'recovery' })
+    expect(getRecoveryState()).toBe('active')
   })
 
   it('exchanges implicit-flow tokens from the fragment', async () => {

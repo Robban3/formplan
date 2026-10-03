@@ -1,0 +1,8 @@
+# Apples fil för Universal Links MÅSTE serveras som application/json och utan
+# filändelse. Utan rätt Content-Type vägrar iOS koppla domänen till appen, och
+# inloggningslänkarna öppnas i Safari i stället för i FormPlan.
+/.well-known/apple-app-site-association
+  Content-Type: application/json
+
+/.well-known/assetlinks.json
+  Content-Type: application/json
