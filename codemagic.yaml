@@ -28,7 +28,9 @@ workflows:
         BUNDLE_ID: "app.formplan.app"
         XCODE_WORKSPACE: "App.xcworkspace"
         XCODE_SCHEME: "App"
-      node: 20
+      # Capacitor 8:s CLI kräver Node >= 22 — med 20 dog `cap add ios` med
+      # "[fatal] The Capacitor CLI requires NodeJS >=22.0.0".
+      node: 22
       xcode: latest
       cocoapods: default
     scripts:

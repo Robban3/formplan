@@ -15,7 +15,7 @@
     "test": "npm run test --workspaces --if-present"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "overrides": {
     "@rollup/plugin-node-resolve": "^15.3.0"

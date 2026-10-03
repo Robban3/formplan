@@ -13,7 +13,10 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # Samma som codemagic.yaml och engines i package.json: Capacitor 8:s
+          # CLI kräver Node >= 22. CI kör visserligen inte `cap`, men en lägre
+          # version här skulle påstå att 20 räcker för projektet.
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
