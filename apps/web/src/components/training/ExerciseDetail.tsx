@@ -49,7 +49,7 @@ export function ExerciseDetail({ exercise, className = '' }: ExerciseDetailProps
       </div>
 
       <div>
-        <p className="text-[11px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-1.5">
+        <p className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-1.5">
           Muskler som tränas
         </p>
         <MuscleMap

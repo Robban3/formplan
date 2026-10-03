@@ -101,7 +101,7 @@ export function AiCoachPage() {
   return (
     <div className="flex flex-col h-[100dvh] bg-canvas max-w-lg mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-3 px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700 flex-shrink-0">
+      <div className="flex items-center gap-3 px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700 flex-shrink-0">
         <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700">
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
         </button>
@@ -111,7 +111,7 @@ export function AiCoachPage() {
           </div>
           <div>
             <p className="font-semibold text-stone-900 dark:text-stone-100">AI-coach</p>
-            <p className="text-[10px] text-forest-600">Online</p>
+            <p className="text-[10px] text-forest-800 dark:text-forest-400">Online</p>
           </div>
         </div>
       </div>
@@ -129,7 +129,7 @@ export function AiCoachPage() {
               className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                 msg.role === 'user'
                   ? 'bg-forest-700 text-white rounded-tr-sm'
-                  : 'bg-white dark:bg-stone-800 border border-stone-100 dark:border-stone-700 text-stone-800 dark:text-stone-200 rounded-tl-sm'
+                  : 'bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 rounded-tl-sm'
               }`}
             >
               {msg.content}
@@ -142,7 +142,7 @@ export function AiCoachPage() {
             <div className="w-7 h-7 bg-forest-100 dark:bg-forest-900/40 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
               <BotIcon className="w-3.5 h-3.5 stroke-forest-600" />
             </div>
-            <div className="bg-white dark:bg-stone-800 border border-stone-100 dark:border-stone-700 rounded-2xl rounded-tl-sm px-4 py-3">
+            <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl rounded-tl-sm px-4 py-3">
               <div className="flex gap-1">
                 <span className="w-2 h-2 bg-stone-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                 <span className="w-2 h-2 bg-stone-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -171,7 +171,7 @@ export function AiCoachPage() {
       </div>
 
       {/* Input */}
-      <div className="flex-shrink-0 px-5 pb-6 pt-3 bg-white dark:bg-stone-800 border-t border-stone-100 dark:border-stone-700">
+      <div className="flex-shrink-0 px-5 pb-6 pt-3 bg-white dark:bg-stone-800 border-t border-stone-200 dark:border-stone-700">
         <div className="flex gap-2">
           <input
             type="text"

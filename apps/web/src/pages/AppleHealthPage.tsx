@@ -5,18 +5,18 @@ export function AppleHealthPage() {
   const navigate = useNavigate()
   return (
     <div className="px-5 pt-header pb-4">
-      <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-4">
-        <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
+      <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-4">
+        <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
         Mer
       </button>
       <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">Apple Health</h1>
 
-      <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-6 text-center space-y-4">
+      <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-6 text-center space-y-4">
         <div className="w-16 h-16 rounded-2xl bg-red-50 dark:bg-red-900/25 flex items-center justify-center mx-auto">
           <HeartIcon className="w-8 h-8 stroke-red-500" />
         </div>
         <p className="font-semibold text-stone-800 dark:text-stone-200">Kommer i native-appen</p>
-        <p className="text-stone-400 dark:text-stone-500 text-sm leading-relaxed">
+        <p className="text-stone-500 dark:text-stone-400 text-sm leading-relaxed">
           Apple Health-integrationen kräver en native iOS-app och är inte tillgänglig i
           webbversionen. Dina pass och vikt loggas redan i FormPlan och kan synkroniseras
           när iOS-appen lanseras.

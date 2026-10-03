@@ -53,23 +53,23 @@ export function RemindersPage() {
 
   return (
     <div className="px-5 pt-header pb-4">
-      <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-4">
-        <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
+      <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-4">
+        <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
         Mer
       </button>
       <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">Påminnelser</h1>
-      <p className="text-stone-400 dark:text-stone-500 text-sm mb-6">Schemalägg påminnelser om dina träningspass.</p>
+      <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Schemalägg påminnelser om dina träningspass.</p>
 
       {settings.reminders.length === 0 && !adding && (
-        <p className="text-stone-400 dark:text-stone-500 text-sm text-center py-8">Inga påminnelser ännu.</p>
+        <p className="text-stone-500 dark:text-stone-400 text-sm text-center py-8">Inga påminnelser ännu.</p>
       )}
 
       <div className="space-y-3 mb-4">
         {settings.reminders.map((r) => (
-          <div key={r.id} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 flex items-center justify-between gap-3">
+          <div key={r.id} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 flex items-center justify-between gap-3">
             <div className="flex-1">
               <p className="font-semibold text-stone-800 dark:text-stone-200">{r.label}</p>
-              <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{formatDays(r.days)} · {r.time}</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{formatDays(r.days)} · {r.time}</p>
             </div>
             <button
               onClick={() => toggleReminder(r.id, !r.enabled)}
@@ -85,7 +85,7 @@ export function RemindersPage() {
       </div>
 
       {adding ? (
-        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-5 space-y-4">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-5 space-y-4">
           <label className="block">
             <span className="text-sm text-stone-500 dark:text-stone-400">Etikett</span>
             <input
@@ -143,7 +143,7 @@ export function RemindersPage() {
       ) : (
         <button
           onClick={() => setAdding(true)}
-          className="w-full flex items-center justify-center gap-2 py-3 border border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-600 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3 border border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-800 dark:text-forest-400 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
         >
           <PlusIcon className="w-4 h-4 stroke-forest-600" />
           Ny påminnelse

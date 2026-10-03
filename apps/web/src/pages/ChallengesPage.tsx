@@ -71,7 +71,7 @@ function ChallengeCard({ challenge, onAbandon }: { challenge: Challenge; onAband
     : challenge.durationDays
 
   return (
-    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
       <div className="flex items-start gap-3 mb-3">
         <ChallengeIcon iconKey={challenge.iconKey} />
         <div className="flex-1 min-w-0">
@@ -96,7 +96,7 @@ function ChallengeCard({ challenge, onAbandon }: { challenge: Challenge; onAband
 
       <button
         onClick={onAbandon}
-        className="text-xs text-stone-400 dark:text-stone-500 hover:text-red-400 transition-colors"
+        className="text-xs text-stone-500 dark:text-stone-400 hover:text-red-400 transition-colors"
       >
         Avbryt utmaning
       </button>
@@ -145,13 +145,13 @@ export function ChallengesPage() {
 
   return (
     <div className="pb-8">
-      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700 flex items-center gap-3">
+      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700">
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
         </button>
         <div>
           <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Utmaningar</h1>
-          <p className="text-xs text-stone-400 dark:text-stone-500">Sätt extra mål och håll motivationen uppe</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Sätt extra mål och håll motivationen uppe</p>
         </div>
       </div>
 
@@ -177,7 +177,7 @@ export function ChallengesPage() {
             <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Starta en utmaning</p>
             <div className="space-y-3">
               {available.map((c) => (
-                <div key={c.id} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+                <div key={c.id} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
                   <div className="flex items-start gap-3 mb-3">
                     <ChallengeIcon iconKey={c.iconKey} />
                     <div className="flex-1 min-w-0">
@@ -189,7 +189,7 @@ export function ChallengesPage() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-stone-400 dark:text-stone-500">{c.durationDays} dagar · Mål: {c.targetValue} {c.unit}</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400">{c.durationDays} dagar · Mål: {c.targetValue} {c.unit}</p>
                     <button
                       onClick={() => handleStart(c.id)}
                       className="px-4 py-1.5 bg-forest-700 text-white text-xs font-semibold rounded-full"
@@ -216,7 +216,7 @@ export function ChallengesPage() {
                   <ChallengeIcon iconKey={c.iconKey} />
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">{c.title}</p>
-                    <p className="text-xs text-stone-400 dark:text-stone-500">{c.completedDate ?? ''}</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400">{c.completedDate ?? ''}</p>
                   </div>
                   <TrophyIcon className="w-5 h-5 stroke-amber-400" />
                 </div>
@@ -231,7 +231,7 @@ export function ChallengesPage() {
               <TargetIcon className="w-7 h-7 stroke-stone-300 dark:stroke-stone-600" />
             </div>
             <p className="font-semibold text-stone-700 dark:text-stone-300">Inga utmaningar ännu</p>
-            <p className="text-sm text-stone-400 dark:text-stone-500 mt-1">Starta en utmaning för att hålla motivationen uppe!</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">Starta en utmaning för att hålla motivationen uppe!</p>
           </div>
         )}
       </div>

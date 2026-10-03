@@ -236,7 +236,7 @@ export function ActiveWorkout() {
           Dela passet
         </button>
 
-        <div className="w-full max-w-sm bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-5">
+        <div className="w-full max-w-sm bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-5">
           <p className="font-semibold text-stone-800 dark:text-stone-200 text-center mb-4">Hur ansträngande var passet?</p>
           <div className="grid grid-cols-5 gap-2 mb-4">
             {[1,2,3,4,5,6,7,8,9,10].map((n) => (
@@ -257,11 +257,11 @@ export function ActiveWorkout() {
               </button>
             ))}
           </div>
-          <p className="text-xs text-stone-400 dark:text-stone-500 text-center">1 = Extremt lätt · 10 = Maximalt</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400 text-center">1 = Extremt lätt · 10 = Maximalt</p>
         </div>
         <button
           onClick={() => { setShowRpe(false); navigate('/hem', { replace: true }) }}
-          className="text-sm text-stone-400 dark:text-stone-500"
+          className="text-sm text-stone-500 dark:text-stone-400"
         >
           Hoppa över
         </button>
@@ -520,17 +520,17 @@ export function ActiveWorkout() {
   return (
     <div className="min-h-[100dvh] bg-canvas flex flex-col max-w-lg mx-auto overflow-x-hidden">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
-        <button onClick={requestFinish} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm">
-          <XIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" /> Avsluta
+      <div className="flex items-center justify-between px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
+        <button onClick={requestFinish} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm">
+          <XIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" /> Avsluta
         </button>
         <div className="text-center">
-          <p className="text-xs text-stone-400 dark:text-stone-500">{workout.workoutName}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">{workout.workoutName}</p>
         </div>
         <button
           onClick={togglePause}
           aria-label={paused ? 'Återuppta passet' : 'Pausa passet'}
-          className="text-forest-600"
+          className="text-forest-800 dark:text-forest-400"
         >
           {paused
             ? <PlayIcon className="w-5 h-5" />
@@ -544,14 +544,14 @@ export function ActiveWorkout() {
         <span className="text-5xl font-mono font-bold tracking-tight text-stone-900 dark:text-stone-100">
           {formatTime(elapsed)}
         </span>
-        <p className="text-stone-400 dark:text-stone-500 text-xs mt-1">Tid</p>
+        <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">Tid</p>
       </div>
 
       {/* Rest countdown overlay */}
       {restTimer !== null && (
         <div className="mx-5 mb-4 bg-forest-50 dark:bg-forest-900/30 border border-forest-200 dark:border-forest-800 rounded-2xl p-4 text-center">
           <p className="text-forest-700 dark:text-forest-300 font-semibold">Vila</p>
-          <p className="text-3xl font-bold font-mono text-forest-600">{formatTime(restTimer)}</p>
+          <p className="text-3xl font-bold font-mono text-forest-800 dark:text-forest-400">{formatTime(restTimer)}</p>
           <button
             onClick={() => {
               // Perform any pending exercise advance immediately instead of
@@ -578,10 +578,10 @@ export function ActiveWorkout() {
             disabled={workout.currentExerciseIndex === 0}
             className="p-2 disabled:opacity-30"
           >
-            <ChevronLeftIcon className="w-5 h-5 stroke-stone-400 dark:stroke-stone-500" />
+            <ChevronLeftIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400" />
           </button>
           <div className="text-center">
-            <p className="text-xs text-stone-400 dark:text-stone-500">
+            <p className="text-xs text-stone-500 dark:text-stone-400">
               Övning {workout.currentExerciseIndex + 1} av {workout.exercises.length}
             </p>
             <div className="flex items-center gap-2 justify-center">
@@ -613,7 +613,7 @@ export function ActiveWorkout() {
               const kg = prev[0]?.weight_kg
               const reps = prev[0]?.reps
               return (
-                <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                   Förra: {kg != null ? formatWeight(kg) : '—'} × {reps ?? '—'} reps
                 </p>
               )
@@ -624,13 +624,13 @@ export function ActiveWorkout() {
             disabled={workout.currentExerciseIndex === workout.exercises.length - 1}
             className="p-2 disabled:opacity-30"
           >
-            <ChevronRightIcon className="w-5 h-5 stroke-stone-400 dark:stroke-stone-500" />
+            <ChevronRightIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400" />
           </button>
         </div>
 
         {/* Övningsbeskrivning — bara på begäran, så set-loggningen syns direkt */}
         {showDetail && catalogEx && (
-          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 mb-4">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 mb-4">
             <ExerciseDetail exercise={catalogEx} />
           </div>
         )}
@@ -646,7 +646,7 @@ export function ActiveWorkout() {
                 <p className="text-sm font-semibold text-forest-800 dark:text-forest-200">
                   Dags att öka till {formatWeight(rec.recommendedWeight_kg)}
                 </p>
-                <p className="text-[11px] text-forest-600 mt-0.5">
+                <p className="text-[11px] text-forest-800 dark:text-forest-400 mt-0.5">
                   Du klarade {rec.reachedReps} reps på {formatWeight(rec.lastWeight_kg)} två pass i rad.
                 </p>
               </div>
@@ -662,9 +662,9 @@ export function ActiveWorkout() {
         })()}
 
         {/* Set rows */}
-        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden mb-4">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden mb-4">
           {/* Header */}
-          <div className={`grid ${setGrid} gap-2 px-4 py-2 bg-stone-50 dark:bg-stone-800 text-xs text-stone-400 dark:text-stone-500 font-medium`}>
+          <div className={`grid ${setGrid} gap-2 px-4 py-2 bg-stone-50 dark:bg-stone-800 text-xs text-stone-500 dark:text-stone-400 font-medium`}>
             <span>Set</span>
             <span>{isCardio ? 'Tid (min)' : 'Reps'}</span>
             {isCardio ? <span>Distans (km)</span> : showWeight && <span>Vikt ({weightLabel})</span>}
@@ -672,11 +672,11 @@ export function ActiveWorkout() {
           </div>
 
           {isCardio ? (
-            <p className="px-4 py-2 text-xs text-stone-400 dark:text-stone-500 border-b border-stone-50">
+            <p className="px-4 py-2 text-xs text-stone-500 dark:text-stone-400 border-b border-stone-50">
               Kondition — fyll i tid och distans per pass.
             </p>
           ) : !showWeight && (
-            <p className="px-4 py-2 text-xs text-stone-400 dark:text-stone-500 border-b border-stone-50">
+            <p className="px-4 py-2 text-xs text-stone-500 dark:text-stone-400 border-b border-stone-50">
               Kroppsvikt — fyll i antal reps per set.
             </p>
           )}
@@ -689,14 +689,14 @@ export function ActiveWorkout() {
             return (
             <div
               key={si}
-              className={`grid ${setGrid} gap-2 items-center px-4 py-3 border-t border-stone-100 dark:border-stone-700 ${
+              className={`grid ${setGrid} gap-2 items-center px-4 py-3 border-t border-stone-200 dark:border-stone-700 ${
                 set.done ? 'bg-stone-50 dark:bg-stone-800' : ''
               }`}
             >
               <div className="flex flex-col">
                 <span className="text-sm font-mono text-stone-500 dark:text-stone-400">{si + 1}</span>
                 {oneRM && (
-                  <span className="text-[9px] text-forest-600 font-semibold">1RM~{formatWeight(oneRM)}</span>
+                  <span className="text-[9px] text-forest-800 dark:text-forest-400 font-semibold">1RM~{formatWeight(oneRM)}</span>
                 )}
               </div>
               {isCardio ? (
@@ -765,7 +765,7 @@ export function ActiveWorkout() {
         </div>
 
         {/* Progress */}
-        <p className="text-xs text-stone-400 dark:text-stone-500 text-center mb-1">
+        <p className="text-xs text-stone-500 dark:text-stone-400 text-center mb-1">
           {doneSets}/{totalSets} set · {ex.name}
         </p>
         <p className="text-xs text-stone-500 dark:text-stone-400 text-center mb-2">
@@ -781,27 +781,27 @@ export function ActiveWorkout() {
         {workoutComplete && (
           <div className="bg-forest-50 dark:bg-forest-900/30 border border-forest-200 dark:border-forest-800 rounded-2xl p-4 mb-4 text-center">
             <p className="font-bold text-forest-800 dark:text-forest-200">Alla set klara!</p>
-            <p className="text-sm text-forest-600 mt-1">Tryck på knappen nedan för att spara passet.</p>
+            <p className="text-sm text-forest-800 dark:text-forest-400 mt-1">Tryck på knappen nedan för att spara passet.</p>
           </div>
         )}
 
         {/* Next exercise */}
         {nextIncompleteEx && !workoutComplete && (
-          <div className="flex items-center gap-3 bg-white dark:bg-stone-800 rounded-xl border border-stone-100 dark:border-stone-700 p-3 mb-4">
+          <div className="flex items-center gap-3 bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 p-3 mb-4">
             {(() => {
               const nextCatalog = resolveExercise(nextIncompleteEx)
               return nextCatalog ? (
                 <ExerciseMedia key={nextCatalog.id} exercise={nextCatalog} variant="thumb" />
               ) : null
             })()}
-            <div className="text-stone-400 dark:text-stone-500 text-xs">Nästa övning</div>
+            <div className="text-stone-500 dark:text-stone-400 text-xs">Nästa övning</div>
             <div className="font-semibold text-sm text-stone-700 dark:text-stone-300">{nextIncompleteEx.name}</div>
           </div>
         )}
       </div>
 
       {/* Bottom action */}
-      <div className="px-5 pb-8 bg-white dark:bg-stone-800 border-t border-stone-100 dark:border-stone-700 pt-4 space-y-3">
+      <div className="px-5 pb-8 bg-white dark:bg-stone-800 border-t border-stone-200 dark:border-stone-700 pt-4 space-y-3">
         {/* Superset toggle */}
         {workout.currentExerciseIndex < workout.exercises.length - 1 && (
           <button

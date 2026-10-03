@@ -19,7 +19,7 @@ function StatLine({ label, eaten, goal, unit }: { label: string; eaten: number; 
       <span className="text-sm text-stone-600 dark:text-stone-300">{label}</span>
       <span className="text-sm font-semibold text-stone-900 dark:text-stone-100 tabular-nums">
         {Math.round(eaten).toLocaleString('sv-SE')}
-        <span className="text-stone-400 dark:text-stone-500 font-normal"> / {goal.toLocaleString('sv-SE')} {unit}</span>
+        <span className="text-stone-500 dark:text-stone-400 font-normal"> / {goal.toLocaleString('sv-SE')} {unit}</span>
       </span>
     </div>
   )
@@ -77,7 +77,7 @@ export function MacroSummary({ eaten, goals, size = 110 }: Props) {
             <span className="font-bold text-stone-900 dark:text-stone-100 text-lg leading-none">
               {Math.round(eaten.kcal).toLocaleString('sv-SE')}
             </span>
-            <span className="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">
+            <span className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">
               / {goals.kcal.toLocaleString('sv-SE')}
             </span>
           </div>
@@ -92,7 +92,7 @@ export function MacroSummary({ eaten, goals, size = 110 }: Props) {
       </div>
 
       {kcalLeft > 0 && (
-        <p className="text-xs text-stone-400 dark:text-stone-500 text-center mt-3">
+        <p className="text-xs text-stone-500 dark:text-stone-400 text-center mt-3">
           Du har {Math.round(kcalLeft)} kcal kvar att äta idag.
         </p>
       )}

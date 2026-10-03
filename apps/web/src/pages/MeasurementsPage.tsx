@@ -143,15 +143,15 @@ export function MeasurementsPage() {
 
   return (
     <div className="pb-10">
-      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-3">
-          <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
+      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-3">
+          <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
           Mer
         </button>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Kroppsmätningar</h1>
-            <p className="text-sm text-stone-400 dark:text-stone-500 mt-0.5">Följ din kroppssammansättning</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Följ din kroppssammansättning</p>
           </div>
           <button
             onClick={() => setAdding(true)}
@@ -166,11 +166,11 @@ export function MeasurementsPage() {
       <div className="px-5 mt-5 space-y-4">
         {/* Add form */}
         {adding && (
-          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 space-y-4">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 space-y-4">
             <div className="flex items-center justify-between">
               <p className="font-semibold text-stone-800 dark:text-stone-200">Ny mätning</p>
               <button onClick={() => { setAdding(false); setForm({}) }}>
-                <XIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
+                <XIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
               </button>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -185,7 +185,7 @@ export function MeasurementsPage() {
                       onChange={(e) => setForm((prev) => ({ ...prev, [f.key]: e.target.value }))}
                       className="flex-1 min-w-0 bg-stone-100 dark:bg-stone-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
                     />
-                    <span className="text-xs text-stone-400 dark:text-stone-500 w-6">{f.unit}</span>
+                    <span className="text-xs text-stone-500 dark:text-stone-400 w-6">{f.unit}</span>
                   </div>
                 </div>
               ))}
@@ -208,8 +208,8 @@ export function MeasurementsPage() {
               if (vals.length === 0) return null
               const color = f.key === 'weight_kg' ? '#22e6c6' : '#6366f1'
               return (
-                <div key={f.key} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-3">
-                  <p className="text-xs text-stone-400 dark:text-stone-500 font-medium">{f.label}</p>
+                <div key={f.key} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-3">
+                  <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">{f.label}</p>
                   {latestVal && (
                     <p className="text-lg font-bold text-stone-900 dark:text-stone-100 mt-0.5">
                       {formatKg(latestVal)} {f.unit}
@@ -226,7 +226,7 @@ export function MeasurementsPage() {
 
         {/* History list */}
         {entries.length > 0 && (
-          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
             <p className="font-semibold text-stone-800 dark:text-stone-200 px-4 py-3 border-b border-stone-50">Historik</p>
             {[...entries].reverse().map((e) => (
               <div key={e.id} className="px-4 py-3 border-b border-stone-50 last:border-0">
@@ -256,10 +256,10 @@ export function MeasurementsPage() {
         {entries.length === 0 && !adding && (
           <div className="text-center py-16">
             <div className="w-14 h-14 rounded-2xl bg-stone-100 dark:bg-stone-700 flex items-center justify-center mx-auto mb-3">
-              <RulerIcon className="w-7 h-7 stroke-stone-400 dark:stroke-stone-500" />
+              <RulerIcon className="w-7 h-7 stroke-stone-500 dark:stroke-stone-400" />
             </div>
             <p className="font-semibold text-stone-800 dark:text-stone-200">Inga mätningar ännu</p>
-            <p className="text-sm text-stone-400 dark:text-stone-500 mt-1">Tryck på + för att logga din första mätning</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">Tryck på + för att logga din första mätning</p>
           </div>
         )}
       </div>

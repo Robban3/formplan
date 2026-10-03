@@ -42,7 +42,7 @@ function ExerciseRow({ exercise }: { exercise: Exercise }) {
   const catalog = resolveExercise(exercise)
 
   return (
-    <div className="bg-white dark:bg-stone-800 rounded-2xl p-4 shadow-sm border border-stone-100 dark:border-stone-700">
+    <div className="bg-white dark:bg-stone-800 rounded-2xl p-4 shadow-sm border border-stone-200 dark:border-stone-700">
       <div className="flex items-center gap-3">
         {catalog && <ExerciseMedia key={catalog.id} exercise={catalog} variant="thumb" />}
         <div className="flex-1 min-w-0">
@@ -62,7 +62,7 @@ function ExerciseRow({ exercise }: { exercise: Exercise }) {
           ) : (
             <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm">{exercise.name}</p>
           )}
-          <p className="text-stone-400 dark:text-stone-500 text-xs mt-0.5">
+          <p className="text-stone-500 dark:text-stone-400 text-xs mt-0.5">
             {exercise.sets} set × {exercise.reps} reps
           </p>
           {exercise.notes && <p className="text-stone-300 dark:text-stone-600 text-xs mt-0.5">{exercise.notes}</p>}
@@ -133,9 +133,9 @@ export function WorkoutDetail() {
 
   if (!day) {
     return (
-      <div className="px-5 pt-12 text-center text-stone-400 dark:text-stone-500">
+      <div className="px-5 pt-12 text-center text-stone-500 dark:text-stone-400">
         <p>Passet hittades inte.</p>
-        <button onClick={() => navigate('/traning')} className="text-forest-600 mt-2">
+        <button onClick={() => navigate('/traning')} className="text-forest-800 dark:text-forest-400 mt-2">
           Tillbaka
         </button>
       </div>

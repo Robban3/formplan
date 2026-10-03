@@ -45,7 +45,7 @@ export function PrivacyPage() {
       </header>
 
       <div className="px-5 py-6 max-w-2xl mx-auto">
-        <p className="text-xs text-stone-400 dark:text-stone-500 mb-6">Senast uppdaterad: {UPDATED}</p>
+        <p className="text-xs text-stone-500 dark:text-stone-400 mb-6">Senast uppdaterad: {UPDATED}</p>
 
         <Section title="Kort sammanfattning">
           <p>

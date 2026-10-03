@@ -13,7 +13,7 @@ export function MacroRing({ eaten, goal, size = 120 }: Props) {
   const cy = size / 2
 
   // Color: green if on track, amber if over
-  const stroke = pct > 1.05 ? '#f59e0b' : '#1e6e42'
+  const stroke = pct > 1.05 ? '#f59e0b' : '#0d9480'
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -37,7 +37,7 @@ export function MacroRing({ eaten, goal, size = 120 }: Props) {
         <span className="font-bold text-stone-900 dark:text-stone-100" style={{ fontSize: size * 0.19 }}>
           {eaten.toLocaleString('sv-SE')}
         </span>
-        <span className="text-stone-400 dark:text-stone-500" style={{ fontSize: size * 0.1 }}>
+        <span className="text-stone-500 dark:text-stone-400" style={{ fontSize: size * 0.1 }}>
           / {goal.toLocaleString('sv-SE')} kcal
         </span>
       </div>

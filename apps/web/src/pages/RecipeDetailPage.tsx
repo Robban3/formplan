@@ -30,9 +30,9 @@ export function RecipeDetailPage() {
 
   if (!recipe) {
     return (
-      <div className="px-5 pt-12 text-center text-stone-400 dark:text-stone-500">
+      <div className="px-5 pt-12 text-center text-stone-500 dark:text-stone-400">
         <p>Receptet hittades inte.</p>
-        <button onClick={() => navigate(-1)} className="text-forest-600 mt-2">Tillbaka</button>
+        <button onClick={() => navigate(-1)} className="text-forest-800 dark:text-forest-400 mt-2">Tillbaka</button>
       </div>
     )
   }
@@ -83,11 +83,11 @@ export function RecipeDetailPage() {
 
       {/* Content */}
       <div className="px-5 -mt-6 relative">
-        <div className="bg-white dark:bg-stone-800 rounded-3xl p-5 shadow-sm border border-stone-100 dark:border-stone-700">
+        <div className="bg-white dark:bg-stone-800 rounded-3xl p-5 shadow-sm border border-stone-200 dark:border-stone-700">
           <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100 mb-1">{recipe.name}</h1>
-          <div className="flex items-center gap-3 text-sm text-stone-400 dark:text-stone-500 mb-4">
+          <div className="flex items-center gap-3 text-sm text-stone-500 dark:text-stone-400 mb-4">
             <span className="flex items-center gap-1">
-              <ClockIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
+              <ClockIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
               {recipe.prepMinutes} min
             </span>
             <span>·</span>
@@ -112,7 +112,7 @@ export function RecipeDetailPage() {
         </div>
 
         {/* Ingredients */}
-        <div className="mt-4 bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
+        <div className="mt-4 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
           <div className="px-4 py-3 border-b border-stone-50">
             <h2 className="font-semibold text-stone-900 dark:text-stone-100">Ingredienser</h2>
           </div>
@@ -125,7 +125,7 @@ export function RecipeDetailPage() {
         </div>
 
         {/* Steps */}
-        <div className="mt-4 bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
+        <div className="mt-4 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
           <div className="px-4 py-3 border-b border-stone-50">
             <h2 className="font-semibold text-stone-900 dark:text-stone-100">Gör så här</h2>
           </div>

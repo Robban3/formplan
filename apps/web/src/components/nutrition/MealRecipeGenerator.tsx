@@ -125,7 +125,7 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
     return (
       <button
         onClick={() => { setOpen(true); if (!ingredient.trim() && defaultIngredient) setIngredient(defaultIngredient) }}
-        className="w-full flex items-center justify-center gap-2 py-3 border-t border-stone-50 text-sm text-forest-600 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
+        className="w-full flex items-center justify-center gap-2 py-3 border-t border-stone-50 text-sm text-forest-800 dark:text-forest-400 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
       >
         <ZapIcon className="w-4 h-4 stroke-forest-600" />
         Generera recept med AI
@@ -136,7 +136,7 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
   return (
     <div className="border-t border-stone-50 p-4 space-y-3 bg-stone-50 dark:bg-stone-800/60">
       {defaultIngredient && (
-        <p className="text-[11px] text-stone-400 dark:text-stone-500">Utgår från måltidens livsmedel — ändra fritt</p>
+        <p className="text-[11px] text-stone-500 dark:text-stone-400">Utgår från måltidens livsmedel — ändra fritt</p>
       )}
       <div className="flex items-center gap-2">
         <input
@@ -153,7 +153,7 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
             onChange={(e) => setKcal(e.target.value)}
             className="w-14 text-sm text-center focus:outline-none"
           />
-          <span className="text-xs text-stone-400 dark:text-stone-500">kcal</span>
+          <span className="text-xs text-stone-500 dark:text-stone-400">kcal</span>
         </div>
       </div>
 
@@ -176,11 +176,11 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
       {error && <p className="text-xs text-red-500 text-center">{error}</p>}
 
       {recipe && (
-        <div className="bg-white dark:bg-stone-800 rounded-xl border border-stone-100 dark:border-stone-700 p-3">
+        <div className="bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 p-3">
           <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm">{recipe.name}</h3>
-          <div className="flex items-center gap-2 text-[11px] text-stone-400 dark:text-stone-500 mt-0.5 mb-2">
+          <div className="flex items-center gap-2 text-[11px] text-stone-500 dark:text-stone-400 mt-0.5 mb-2">
             <span className="flex items-center gap-1">
-              <ClockIcon className="w-3 h-3 stroke-stone-400 dark:stroke-stone-500" />
+              <ClockIcon className="w-3 h-3 stroke-stone-500 dark:stroke-stone-400" />
               {recipe.prep_minutes} min
             </span>
             <span>·</span>

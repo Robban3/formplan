@@ -153,13 +153,13 @@ export function WaterPage() {
         <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100 flex-1">Vatten</h1>
       </div>
 
-      <div className="px-4 flex gap-5 border-b border-stone-100 dark:border-stone-700">
+      <div className="px-4 flex gap-5 border-b border-stone-200 dark:border-stone-700">
         {(['idag', 'vecka'] as WaterTab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className={`pb-3 text-sm font-medium capitalize transition-colors ${
-              tab === t ? 'text-forest-600 border-b-2 border-forest-600' : 'text-stone-400 dark:text-stone-500'
+              tab === t ? 'text-forest-800 dark:text-forest-400 border-b-2 border-forest-600' : 'text-stone-500 dark:text-stone-400'
             }`}
           >
             {t === 'idag' ? 'Idag' : 'Vecka'}
@@ -196,8 +196,8 @@ export function WaterPage() {
                 <span className="text-2xl font-bold text-stone-900 dark:text-stone-100">
                   {formatLiters(total)} L
                 </span>
-                <span className="text-sm text-stone-400 dark:text-stone-500">av {formatLiters(GOAL_ML)} L</span>
-                <span className={`text-sm font-semibold mt-0.5 ${goalReached ? 'text-forest-600' : 'text-sky-500'}`}>
+                <span className="text-sm text-stone-500 dark:text-stone-400">av {formatLiters(GOAL_ML)} L</span>
+                <span className={`text-sm font-semibold mt-0.5 ${goalReached ? 'text-forest-800 dark:text-forest-400' : 'text-sky-500'}`}>
                   ({Math.round(pct * 100)}%)
                 </span>
               </div>
@@ -211,7 +211,7 @@ export function WaterPage() {
               </div>
               <div>
                 <p className="font-semibold text-forest-800 dark:text-forest-200">Dagsmål uppnått!</p>
-                <p className="text-sm text-forest-600">
+                <p className="text-sm text-forest-800 dark:text-forest-400">
                   Du har druckit {formatLiters(total)} L idag — bra jobbat.
                 </p>
               </div>
@@ -259,7 +259,7 @@ export function WaterPage() {
           <div>
             <p className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">Logg</p>
             {entries.length === 0 ? (
-              <p className="text-sm text-stone-400 dark:text-stone-500 text-center py-6">Inget loggat ännu idag</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400 text-center py-6">Inget loggat ännu idag</p>
             ) : (
               <div className="space-y-0">
                 {entries.map((entry) => (
@@ -272,7 +272,7 @@ export function WaterPage() {
                       {formatVolume(entry.amount_ml)}
                     </span>
                     <span className="flex-1" />
-                    <span className="text-sm text-stone-400 dark:text-stone-500 tabular-nums">
+                    <span className="text-sm text-stone-500 dark:text-stone-400 tabular-nums">
                       {formatTime(entry.logged_at)}
                     </span>
                   </div>

@@ -107,7 +107,7 @@ export function FoodDiary() {
   return (
     <div className="pb-6">
       {/* Header */}
-      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
+      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-3">Kostdagbok</h1>
         <div className="flex items-center gap-2">
           <button
@@ -143,7 +143,7 @@ export function FoodDiary() {
           onClick={() => navigate(`/kost/sok?slot=frukost&date=${dateKey(date)}`)}
           className="w-full mt-2 flex items-center gap-3 bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-500 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
         >
-          <SearchIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500 flex-shrink-0" />
+          <SearchIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400 flex-shrink-0" />
           Sök livsmedel & näringsvärden
         </button>
 
@@ -178,24 +178,24 @@ export function FoodDiary() {
           )}
           <button
             onClick={() => navigate('/kost/makro')}
-            className="w-full bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 text-left active:scale-[0.98] transition-transform"
+            className="w-full bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 text-left active:scale-[0.98] transition-transform"
           >
             <MacroSummary
               eaten={{ kcal: totalKcal, protein_g: totalProtein, fat_g: totalFat, carbs_g: totalCarbs }}
               goals={goals}
             />
-            <p className="text-xs text-forest-600 font-medium text-center mt-2">Se makrotracker →</p>
+            <p className="text-xs text-forest-800 dark:text-forest-400 font-medium text-center mt-2">Se makrotracker →</p>
           </button>
 
           {/* Makro per måltid */}
           {entries.length > 0 && (
-            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
               <button
                 onClick={() => setShowMealMacros((v) => !v)}
                 className="w-full flex items-center justify-between px-4 py-3"
               >
                 <span className="text-sm font-semibold text-stone-800 dark:text-stone-200">Makro per måltid</span>
-                <span className="text-xs text-forest-600">{showMealMacros ? 'Dölj ▲' : 'Visa ▼'}</span>
+                <span className="text-xs text-forest-800 dark:text-forest-400">{showMealMacros ? 'Dölj ▲' : 'Visa ▼'}</span>
               </button>
               {showMealMacros && (
                 <div className="border-t border-stone-50">
@@ -207,7 +207,7 @@ export function FoodDiary() {
                         <span className="text-sm text-stone-700 dark:text-stone-300">{MEAL_LABELS[slot]}</span>
                         <div className="text-right">
                           <span className="text-sm font-semibold text-stone-800 dark:text-stone-200">{m.kcal} kcal</span>
-                          <span className="text-xs text-stone-400 dark:text-stone-500 ml-2">{m.protein_g.toFixed(0)}g protein</span>
+                          <span className="text-xs text-stone-500 dark:text-stone-400 ml-2">{m.protein_g.toFixed(0)}g protein</span>
                         </div>
                       </div>
                     )
@@ -219,7 +219,7 @@ export function FoodDiary() {
 
           {/* Snabblogg favoriter */}
           {favorites.length > 0 && (
-            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <StarIcon className="w-4 h-4 stroke-amber-400" />
                 <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">Snabblogg</p>
@@ -229,10 +229,10 @@ export function FoodDiary() {
                   <button
                     key={fav.food_id}
                     onClick={() => navigate(`/kost/sok?slot=${slotForNow()}&date=${dateKey(date)}&prefill=${encodeURIComponent(fav.food_id)}`)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-50 dark:bg-stone-800 rounded-full border border-stone-100 dark:border-stone-700 text-xs text-stone-700 dark:text-stone-300 hover:bg-forest-50 dark:hover:bg-forest-900/30 hover:border-forest-200 dark:hover:border-forest-800 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-50 dark:bg-stone-800 rounded-full border border-stone-200 dark:border-stone-700 text-xs text-stone-700 dark:text-stone-300 hover:bg-forest-50 dark:hover:bg-forest-900/30 hover:border-forest-200 dark:hover:border-forest-800 transition-colors"
                   >
                     <span>{fav.food_name}</span>
-                    <span className="text-stone-400 dark:text-stone-500">{Math.round(fav.kcal_per_100g * fav.default_amount_g / 100)} kcal</span>
+                    <span className="text-stone-500 dark:text-stone-400">{Math.round(fav.kcal_per_100g * fav.default_amount_g / 100)} kcal</span>
                   </button>
                 ))}
               </div>

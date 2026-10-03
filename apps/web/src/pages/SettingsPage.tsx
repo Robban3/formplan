@@ -21,7 +21,7 @@ function Toggle({ label, sub, settingKey }: { label: string; sub: string; settin
     <div className="flex items-center justify-between px-4 py-4">
       <div className="flex-1 mr-4">
         <p className="text-stone-800 dark:text-stone-200 font-medium text-sm">{label}</p>
-        {sub && <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{sub}</p>}
+        {sub && <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{sub}</p>}
       </div>
       <button
         onClick={() => settingsStore.set(settingKey, !on)}
@@ -44,7 +44,7 @@ function NumberInput({ label, sub, settingKey, unit, min, max, step = 1, onCommi
     <div className="flex items-center justify-between px-4 py-4">
       <div className="flex-1 mr-4">
         <p className="text-stone-800 dark:text-stone-200 font-medium text-sm">{label}</p>
-        {sub && <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{sub}</p>}
+        {sub && <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{sub}</p>}
       </div>
       <div className="flex items-center gap-1.5">
         <input
@@ -63,7 +63,7 @@ function NumberInput({ label, sub, settingKey, unit, min, max, step = 1, onCommi
           }}
           className="w-20 text-right bg-stone-100 dark:bg-stone-700 rounded-xl px-3 py-2 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400"
         />
-        <span className="text-xs text-stone-400 dark:text-stone-500 w-8">{unit}</span>
+        <span className="text-xs text-stone-500 dark:text-stone-400 w-8">{unit}</span>
       </div>
     </div>
   )
@@ -78,7 +78,7 @@ function SelectInput({ label, sub, settingKey, options }: {
     <div className="flex items-center justify-between px-4 py-4">
       <div className="flex-1 mr-4">
         <p className="text-stone-800 dark:text-stone-200 font-medium text-sm">{label}</p>
-        {sub && <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{sub}</p>}
+        {sub && <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{sub}</p>}
       </div>
       <select
         value={value}
@@ -96,8 +96,8 @@ function SelectInput({ label, sub, settingKey, options }: {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide px-1 mb-2">{title}</p>
-      <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden divide-y divide-stone-100">
+      <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide px-1 mb-2">{title}</p>
+      <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden divide-y divide-stone-100">
         {children}
       </div>
     </div>
@@ -144,7 +144,7 @@ function NotificationToggle() {
     <div className="flex items-center justify-between px-4 py-4">
       <div className="flex-1 mr-4">
         <p className="text-stone-800 dark:text-stone-200 font-medium text-sm">Aktivera notifikationer</p>
-        <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
+        <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
           {permissionStatus ?? 'Tillåt FormPlan att skicka påminnelser'}
         </p>
       </div>
@@ -233,9 +233,9 @@ export function SettingsPage() {
 
   return (
     <div className="pb-10">
-      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
-        <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-3">
-          <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
+      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
+        <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-3">
+          <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
           Mer
         </button>
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Inställningar</h1>

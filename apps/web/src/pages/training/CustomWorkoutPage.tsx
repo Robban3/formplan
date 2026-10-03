@@ -134,15 +134,15 @@ export function CustomWorkoutPage() {
 
   return (
     <div className="pb-10">
-      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-3">
-          <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
+      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-3">
+          <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
           Träning
         </button>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Egna pass</h1>
-            <p className="text-sm text-stone-400 dark:text-stone-500 mt-0.5">Bygg dina egna träningspass</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Bygg dina egna träningspass</p>
           </div>
           {!creating && (
             <button onClick={() => setCreating(true)} className="w-10 h-10 bg-forest-700 rounded-xl flex items-center justify-center">
@@ -155,11 +155,11 @@ export function CustomWorkoutPage() {
       <div className="px-5 mt-5 space-y-4">
         {/* Create form */}
         {creating && (
-          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 space-y-4">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 space-y-4">
             <div className="flex items-center justify-between">
               <p className="font-bold text-stone-900 dark:text-stone-100">Nytt pass</p>
               <button onClick={() => { setCreating(false); setExercises([]) }}>
-                <XIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
+                <XIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
               </button>
             </div>
 
@@ -178,7 +178,7 @@ export function CustomWorkoutPage() {
                     <DumbbellIcon className="w-4 h-4 stroke-forest-600 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-stone-800 dark:text-stone-200">{ex.name}</p>
-                      <p className="text-xs text-stone-400 dark:text-stone-500">{ex.sets} set × {ex.reps} reps · {ex.rest_seconds}s vila</p>
+                      <p className="text-xs text-stone-500 dark:text-stone-400">{ex.sets} set × {ex.reps} reps · {ex.rest_seconds}s vila</p>
                     </div>
                     <button onClick={() => setExercises((prev) => prev.filter((_, j) => j !== i))}>
                       <XIcon className="w-4 h-4 stroke-stone-300 dark:stroke-stone-600" />
@@ -272,7 +272,7 @@ export function CustomWorkoutPage() {
               </div>
             ) : (
               <button onClick={() => setAddingEx(true)}
-                className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-600">
+                className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-800 dark:text-forest-400">
                 <PlusIcon className="w-4 h-4 stroke-forest-600" />
                 Lägg till övning
               </button>
@@ -293,17 +293,17 @@ export function CustomWorkoutPage() {
           <div className="text-center py-16">
             <DumbbellIcon className="w-12 h-12 stroke-stone-200 mx-auto mb-3" />
             <p className="font-semibold text-stone-800 dark:text-stone-200">Inga egna pass ännu</p>
-            <p className="text-sm text-stone-400 dark:text-stone-500 mt-1">Tryck på + för att bygga ditt första pass</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">Tryck på + för att bygga ditt första pass</p>
           </div>
         )}
 
         {workouts.map((w) => (
-          <div key={w.id} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
+          <div key={w.id} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
             <div className="px-4 py-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <p className="font-bold text-stone-900 dark:text-stone-100">{w.name}</p>
-                  <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{w.exercises.length} övningar</p>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{w.exercises.length} övningar</p>
                 </div>
                 <button onClick={() => deleteWorkout(w.id)} className="p-1">
                   <XIcon className="w-4 h-4 stroke-stone-300 dark:stroke-stone-600" />
@@ -314,7 +314,7 @@ export function CustomWorkoutPage() {
                   <span key={i} className="text-xs bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 px-2 py-1 rounded-lg">{ex.name}</span>
                 ))}
                 {w.exercises.length > 4 && (
-                  <span className="text-xs bg-stone-100 dark:bg-stone-700 text-stone-400 dark:text-stone-500 px-2 py-1 rounded-lg">+{w.exercises.length - 4}</span>
+                  <span className="text-xs bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 px-2 py-1 rounded-lg">+{w.exercises.length - 4}</span>
                 )}
               </div>
             </div>

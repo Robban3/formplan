@@ -120,11 +120,11 @@ export function MorePage() {
       <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-6">Mer</h1>
 
       {billing && (
-        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 mb-4">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 mb-4">
           {billing.premium ? (
             <>
               <p className="font-semibold text-stone-900 dark:text-stone-100">Premium aktivt ✓</p>
-              <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">Tack för att du stödjer FormPlan!</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Tack för att du stödjer FormPlan!</p>
               {/* Knappen visas bara när det finns en Stripe-prenumeration att
                   öppna portalen för. Premium kan också komma från ett konto med
                   permanent tillgång — då svarade portalen 404 och ett rött
@@ -143,7 +143,7 @@ export function MorePage() {
           ) : billing.inTrial ? (
             <>
               <p className="font-semibold text-stone-900 dark:text-stone-100">Provperiod</p>
-              <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                 {billing.trialDaysLeft} {billing.trialDaysLeft === 1 ? 'dag' : 'dagar'} kvar gratis
               </p>
               <button
@@ -157,7 +157,7 @@ export function MorePage() {
           ) : (
             <>
               <p className="font-semibold text-stone-900 dark:text-stone-100">Provperioden är slut</p>
-              <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">Bli Premium för att fortsätta.</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Bli Premium för att fortsätta.</p>
               <button
                 onClick={upgrade}
                 disabled={busy}
@@ -170,16 +170,16 @@ export function MorePage() {
         </div>
       )}
 
-      <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
+      <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
         {visibleRows.map((row, i) => (
           <button
             key={row.label}
             onClick={() => navigate(row.to)}
             className={`w-full flex items-center gap-3 px-4 py-4 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors ${
-              i > 0 ? 'border-t border-stone-100 dark:border-stone-700' : ''
+              i > 0 ? 'border-t border-stone-200 dark:border-stone-700' : ''
             }`}
           >
-            <row.Icon className="w-5 h-5 stroke-stone-400 dark:stroke-stone-500 flex-shrink-0" />
+            <row.Icon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400 flex-shrink-0" />
             <span className="flex-1 text-left text-stone-800 dark:text-stone-200 font-medium">{row.label}</span>
             <ChevronRightIcon className="w-4 h-4 stroke-stone-300 dark:stroke-stone-600" />
           </button>
@@ -196,7 +196,7 @@ export function MorePage() {
 
       <button
         onClick={deleteAccount}
-        className="w-full text-center text-xs text-stone-400 dark:text-stone-500 underline py-2"
+        className="w-full text-center text-xs text-stone-500 dark:text-stone-400 underline py-2"
       >
         Radera konto
       </button>

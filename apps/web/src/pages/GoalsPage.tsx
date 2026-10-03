@@ -88,7 +88,7 @@ function GoalCard({
   const isAuto = goal.goalMeta && goal.goalMeta.type !== 'manual'
 
   return (
-    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
       <div className="flex items-start gap-3">
         {/* Icon / toggle */}
         <button
@@ -99,13 +99,13 @@ function GoalCard({
             goal.done ? 'bg-forest-700' : 'bg-forest-50 dark:bg-forest-900/30'
           }`}
         >
-          <TargetIcon className={`w-5 h-5 ${goal.done ? 'text-white' : 'text-forest-600'}`} />
+          <TargetIcon className={`w-5 h-5 ${goal.done ? 'text-white' : 'text-forest-800 dark:text-forest-400'}`} />
         </button>
 
         <div className="flex-1 min-w-0">
           {/* Title + auto badge */}
           <div className="flex items-start gap-2">
-            <p className={`text-sm font-semibold flex-1 ${goal.done ? 'text-stone-400 dark:text-stone-500 line-through' : 'text-stone-900 dark:text-stone-100'}`}>
+            <p className={`text-sm font-semibold flex-1 ${goal.done ? 'text-stone-500 dark:text-stone-400 line-through' : 'text-stone-900 dark:text-stone-100'}`}>
               {goal.text}
             </p>
             {isAuto && !goal.done && (
@@ -117,10 +117,10 @@ function GoalCard({
 
           {/* Live status */}
           {statusText && !goal.done && (
-            <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{statusText}</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{statusText}</p>
           )}
           {!statusText && !goal.done && (
-            <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">Framsteg</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Framsteg</p>
           )}
 
           {/* Progress bar */}
@@ -131,7 +131,7 @@ function GoalCard({
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-semibold text-stone-700 dark:text-stone-300">{pct}%</span>
               {!isAuto && !goal.done && (
-                <span className="text-[10px] text-stone-400 dark:text-stone-500">Tryck för att justera</span>
+                <span className="text-[10px] text-stone-500 dark:text-stone-400">Tryck för att justera</span>
               )}
             </div>
             <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-2">
@@ -266,20 +266,20 @@ export function GoalsPage() {
 
   return (
     <div className="pb-24">
-      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
-        <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-3">
-          <ChevronLeftIcon className="w-4 h-4 text-stone-400 dark:text-stone-500" />
+      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
+        <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-3">
+          <ChevronLeftIcon className="w-4 h-4 text-stone-500 dark:text-stone-400" />
           Mer
         </button>
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Mina mål</h1>
 
-        <div className="flex gap-5 mt-4 border-b border-stone-100 dark:border-stone-700 -mb-4">
+        <div className="flex gap-5 mt-4 border-b border-stone-200 dark:border-stone-700 -mb-4">
           {(['aktiva', 'tidigare'] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={`pb-4 text-sm font-medium capitalize transition-colors ${
-                tab === t ? 'text-forest-600 border-b-2 border-forest-600' : 'text-stone-400 dark:text-stone-500'
+                tab === t ? 'text-forest-800 dark:text-forest-400 border-b-2 border-forest-600' : 'text-stone-500 dark:text-stone-400'
               }`}
             >
               {t === 'aktiva' ? `Aktiva mål${active.length > 0 ? ` (${active.length})` : ''}` : 'Tidigare mål'}
@@ -292,7 +292,7 @@ export function GoalsPage() {
         {shown.length === 0 && (
           <div className="text-center py-12">
             <TargetIcon className="w-12 h-12 text-stone-200 mx-auto mb-3" />
-            <p className="text-stone-400 dark:text-stone-500 text-sm">
+            <p className="text-stone-500 dark:text-stone-400 text-sm">
               {tab === 'aktiva' ? 'Inga aktiva mål ännu.' : 'Inga avklarade mål ännu.'}
             </p>
           </div>
@@ -346,7 +346,7 @@ export function GoalsPage() {
 
         {/* Add form */}
         {adding && tab === 'aktiva' && (
-          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 space-y-3">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 space-y-3">
             <input
               autoFocus
               value={text}
@@ -359,7 +359,7 @@ export function GoalsPage() {
             {/* Auto-detection preview */}
             {preview && (
               <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-xl ${
-                previewIsAuto ? 'bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300' : 'bg-stone-50 dark:bg-stone-800 text-stone-400 dark:text-stone-500'
+                previewIsAuto ? 'bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300' : 'bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400'
               }`}>
                 <span>{previewIsAuto ? '✓ Automatisk spårning detekterad' : '○ Manuell uppföljning'}</span>
               </div>
@@ -367,7 +367,7 @@ export function GoalsPage() {
 
             {/* Suggestions */}
             <div className="space-y-1">
-              <p className="text-xs text-stone-400 dark:text-stone-500 font-medium">Förslag med automatisk spårning:</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">Förslag med automatisk spårning:</p>
               <div className="flex flex-wrap gap-2">
                 {SUGGESTIONS.filter((s) => s.hint.includes('Auto')).map((s) => (
                   <button

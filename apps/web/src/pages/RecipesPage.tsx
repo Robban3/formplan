@@ -301,14 +301,14 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
     : []
 
   return (
-    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
       <div className="flex items-center gap-2 mb-3">
         <div className="w-8 h-8 rounded-xl bg-forest-50 dark:bg-forest-900/30 flex items-center justify-center">
           <ZapIcon className="w-4 h-4 stroke-forest-600" />
         </div>
         <div>
           <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm">Skapa recept med AI</p>
-          <p className="text-[11px] text-stone-400 dark:text-stone-500">
+          <p className="text-[11px] text-stone-500 dark:text-stone-400">
             {mealTab !== 'Alla' ? `${mealTab} · anpassat efter dina mål` : 'Anpassat efter dina mål och allergier'}
           </p>
         </div>
@@ -324,7 +324,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
 
       {/* Kategori — styr huvudråvara/kosthållning */}
       <div className="mt-3">
-        <p className="text-[10px] text-stone-400 dark:text-stone-500 font-medium mb-1.5">Kategori</p>
+        <p className="text-[10px] text-stone-500 dark:text-stone-400 font-medium mb-1.5">Kategori</p>
         <div className="flex flex-wrap gap-2">
           {RECIPE_CATEGORIES.map((c) => (
             <button
@@ -359,7 +359,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
 
       <div className="flex gap-2 mt-3">
         <div className="flex-1">
-          <label className="text-[10px] text-stone-400 dark:text-stone-500 font-medium">Kcal/portion</label>
+          <label className="text-[10px] text-stone-500 dark:text-stone-400 font-medium">Kcal/portion</label>
           <input
             type="number"
             inputMode="numeric"
@@ -370,7 +370,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
           />
         </div>
         <div className="flex-1">
-          <label className="text-[10px] text-stone-400 dark:text-stone-500 font-medium">Min. protein (g)</label>
+          <label className="text-[10px] text-stone-500 dark:text-stone-400 font-medium">Min. protein (g)</label>
           <input
             type="number"
             inputMode="numeric"
@@ -383,7 +383,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
       </div>
 
       {allergies.length > 0 && (
-        <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-2">Undviker: {allergies.join(', ')}</p>
+        <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-2">Undviker: {allergies.join(', ')}</p>
       )}
 
       <button
@@ -397,11 +397,11 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
       {error && <p className="text-xs text-red-500 mt-2 text-center">{error}</p>}
 
       {recipe && (
-        <div className="mt-4 border-t border-stone-100 dark:border-stone-700 pt-4">
+        <div className="mt-4 border-t border-stone-200 dark:border-stone-700 pt-4">
           <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100">{recipe.name}</h3>
-          <div className="flex items-center gap-3 text-xs text-stone-400 dark:text-stone-500 mt-1 mb-3">
+          <div className="flex items-center gap-3 text-xs text-stone-500 dark:text-stone-400 mt-1 mb-3">
             <span className="flex items-center gap-1">
-              <ClockIcon className="w-3.5 h-3.5 stroke-stone-400 dark:stroke-stone-500" />
+              <ClockIcon className="w-3.5 h-3.5 stroke-stone-500 dark:stroke-stone-400" />
               {recipe.prep_minutes} min
             </span>
             <span>·</span>
@@ -472,16 +472,16 @@ export function RecipesPage() {
   return (
     <div className="pb-6">
       {/* Header */}
-      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
-        <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-3">
-          <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
+      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
+        <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-3">
+          <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
           Mer
         </button>
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Recept</h1>
 
         {/* Search */}
         <div className="relative mt-3">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 stroke-stone-400 dark:stroke-stone-500" viewBox="0 0 24 24" fill="none" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 stroke-stone-500 dark:stroke-stone-400" viewBox="0 0 24 24" fill="none" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
           </svg>
           <input
@@ -512,26 +512,26 @@ export function RecipesPage() {
         <AiRecipeGenerator mealTab={activeTab} />
 
         {filtered.length === 0 && (
-          <p className="text-center text-stone-400 dark:text-stone-500 text-sm py-8">Inga recept hittades.</p>
+          <p className="text-center text-stone-500 dark:text-stone-400 text-sm py-8">Inga recept hittades.</p>
         )}
 
         {filtered.map((recipe) => (
           <button
             key={recipe.id}
             onClick={() => navigate(`/mer/recept/${recipe.id}`)}
-            className="w-full flex items-center gap-4 px-4 py-4 text-left bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 active:bg-stone-100 dark:active:bg-stone-700 transition-colors"
+            className="w-full flex items-center gap-4 px-4 py-4 text-left bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 active:bg-stone-100 dark:active:bg-stone-700 transition-colors"
           >
             <RecipeIllustration kind={recipe.illustration} bg={recipe.bg} />
 
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm leading-tight">{recipe.name}</p>
               <div className="flex items-center gap-3 mt-1.5">
-                <span className="flex items-center gap-1 text-xs text-stone-400 dark:text-stone-500">
-                  <ClockIcon className="w-3 h-3 stroke-stone-400 dark:stroke-stone-500" />
+                <span className="flex items-center gap-1 text-xs text-stone-500 dark:text-stone-400">
+                  <ClockIcon className="w-3 h-3 stroke-stone-500 dark:stroke-stone-400" />
                   {recipe.prepMinutes} min
                 </span>
-                <span className="flex items-center gap-1 text-xs text-stone-400 dark:text-stone-500">
-                  <FireIcon className="w-3 h-3 stroke-stone-400 dark:stroke-stone-500" />
+                <span className="flex items-center gap-1 text-xs text-stone-500 dark:text-stone-400">
+                  <FireIcon className="w-3 h-3 stroke-stone-500 dark:stroke-stone-400" />
                   {recipe.calories} kcal
                 </span>
               </div>

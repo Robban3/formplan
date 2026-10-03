@@ -51,12 +51,12 @@ export function NotificationsPage() {
 
   return (
     <div className="px-5 pt-header pb-4">
-      <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-4">
-        <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
+      <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-4">
+        <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
         Mer
       </button>
       <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">Notiser</h1>
-      <p className="text-stone-400 dark:text-stone-500 text-sm mb-6">Välj vilka notiser du vill ta emot.</p>
+      <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Välj vilka notiser du vill ta emot.</p>
 
       {/* Permission banner */}
       {permState !== 'granted' && (
@@ -80,15 +80,15 @@ export function NotificationsPage() {
         </div>
       )}
 
-      <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden mb-4">
+      <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden mb-4">
         {rows.map((row, i) => (
           <div
             key={row.key}
-            className={`flex items-center justify-between px-4 py-4 ${i > 0 ? 'border-t border-stone-100 dark:border-stone-700' : ''}`}
+            className={`flex items-center justify-between px-4 py-4 ${i > 0 ? 'border-t border-stone-200 dark:border-stone-700' : ''}`}
           >
             <div>
               <p className="text-stone-800 dark:text-stone-200 font-medium">{row.label}</p>
-              <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{row.sub}</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{row.sub}</p>
             </div>
             <button
               disabled={permState !== 'granted'}

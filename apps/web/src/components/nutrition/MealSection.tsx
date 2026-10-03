@@ -38,7 +38,7 @@ export function MealSection({ slot, entries, date, onAdd, onTapEntry, onLogged }
   const totalKcal = entries.reduce((s, e) => s + e.kcal, 0)
 
   return (
-    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
+    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-stone-50">
         <span className="font-semibold text-stone-800 dark:text-stone-200">{SLOT_LABELS[slot]}</span>
         {totalKcal > 0 && (
@@ -56,7 +56,7 @@ export function MealSection({ slot, entries, date, onAdd, onTapEntry, onLogged }
             <FoodAvatar name={entry.food_name} slot={slot} />
             <div className="text-left min-w-0">
               <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate">{entry.food_name}</p>
-              <p className="text-xs text-stone-400 dark:text-stone-500">
+              <p className="text-xs text-stone-500 dark:text-stone-400">
                 {entry.serving_label ?? `${entry.amount_g} g`}
               </p>
             </div>
@@ -67,7 +67,7 @@ export function MealSection({ slot, entries, date, onAdd, onTapEntry, onLogged }
 
       <button
         onClick={() => onAdd(slot)}
-        className="w-full flex items-center justify-center gap-2 py-3.5 text-sm text-forest-600 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
+        className="w-full flex items-center justify-center gap-2 py-3.5 text-sm text-forest-800 dark:text-forest-400 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
       >
         <PlusIcon className="w-4 h-4 stroke-forest-600" />
         Lägg till mat

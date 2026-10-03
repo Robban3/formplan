@@ -196,7 +196,7 @@ export function TrainingOverview() {
         }
       />
 
-      <div className="px-5 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
+      <div className="px-5 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
         <div className="flex gap-5">
           {(['pass', 'program', 'ovningar'] as const).map((t) => (
             <button
@@ -204,8 +204,8 @@ export function TrainingOverview() {
               onClick={() => setTab(t)}
               className={`pb-3 pt-1 text-sm font-medium capitalize transition-colors ${
                 tab === t
-                  ? 'text-forest-600 border-b-2 border-forest-600'
-                  : 'text-stone-400 dark:text-stone-500'
+                  ? 'text-forest-800 dark:text-forest-400 border-b-2 border-forest-600'
+                  : 'text-stone-500 dark:text-stone-400'
               }`}
             >
               {t === 'pass' ? 'Pass' : t === 'program' ? 'Program' : 'Övningar'}
@@ -245,7 +245,7 @@ export function TrainingOverview() {
                   <span className="text-lg font-bold text-amber-500">{streak}</span>
                   <span className="text-[9px] text-amber-400">dag streak</span>
                   {longestStreak > streak && (
-                    <span className="text-[8px] text-stone-400 dark:text-stone-500">rekord: {longestStreak}</span>
+                    <span className="text-[8px] text-stone-500 dark:text-stone-400">rekord: {longestStreak}</span>
                   )}
                 </div>
               )}
@@ -263,7 +263,7 @@ export function TrainingOverview() {
                   <div
                     key={wd}
                     className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl text-xs font-medium ${
-                      isToday ? 'bg-forest-700 text-white' : 'text-stone-400 dark:text-stone-500'
+                      isToday ? 'bg-forest-700 text-white' : 'text-stone-500 dark:text-stone-400'
                     }`}
                   >
                     {s}
@@ -296,7 +296,7 @@ export function TrainingOverview() {
                 <DumbbellIcon className="w-12 h-12 stroke-stone-300 dark:stroke-stone-600" />
               </div>
               <h2 className="text-lg font-semibold mb-1">Inget schema ännu</h2>
-              <p className="text-stone-400 dark:text-stone-500 text-sm mb-6">Generera ett AI-schema eller bygg ett eget pass.</p>
+              <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Generera ett AI-schema eller bygg ett eget pass.</p>
               <div className="flex gap-3 justify-center">
                 <button
                   onClick={handleGenerate}
@@ -349,13 +349,13 @@ export function TrainingOverview() {
             <div className="space-y-3">
               <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Ditt schema</p>
               {workoutDays.map((day) => (
-                <div key={day.id} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+                <div key={day.id} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <span className="text-xs text-stone-400 dark:text-stone-500 font-medium">{WEEKDAYS[(day.weekday ?? 1) - 1]}</span>
+                      <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">{WEEKDAYS[(day.weekday ?? 1) - 1]}</span>
                       <p className="font-semibold text-stone-900 dark:text-stone-100">{day.content.name}</p>
                     </div>
-                    <span className="text-xs text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-700 px-2 py-1 rounded-lg">
+                    <span className="text-xs text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-700 px-2 py-1 rounded-lg">
                       {day.content.duration_minutes} min
                     </span>
                   </div>
@@ -395,7 +395,7 @@ function ProgramExerciseList({
             <div className="flex items-center gap-2.5">
               {catalog && <ExerciseMedia key={catalog.id} exercise={catalog} variant="thumb" />}
               <span className="text-sm text-stone-700 dark:text-stone-300 flex-1 min-w-0 truncate">{ex.name}</span>
-              <span className="text-xs text-stone-400 dark:text-stone-500 shrink-0">{ex.sets} × {ex.reps}</span>
+              <span className="text-xs text-stone-500 dark:text-stone-400 shrink-0">{ex.sets} × {ex.reps}</span>
             </div>
           </div>
         )
@@ -423,7 +423,7 @@ function WorkoutCard({
   return (
     <button
       onClick={onClick}
-      className="w-full text-left bg-white dark:bg-stone-800 rounded-2xl p-4 shadow-sm border border-stone-100 dark:border-stone-700 active:scale-[0.98] transition-transform"
+      className="w-full text-left bg-white dark:bg-stone-800 rounded-2xl p-4 shadow-sm border border-stone-200 dark:border-stone-700 active:scale-[0.98] transition-transform"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
@@ -433,12 +433,12 @@ function WorkoutCard({
                 Idag
               </span>
             )}
-            <span className="text-xs text-stone-400 dark:text-stone-500">
+            <span className="text-xs text-stone-500 dark:text-stone-400">
               {WEEKDAYS[(day.weekday ?? 1) - 1]}
             </span>
           </div>
           <p className="font-semibold text-stone-900 dark:text-stone-100 truncate">{day.content.name}</p>
-          <p className="text-sm text-stone-400 dark:text-stone-500 mt-0.5">
+          <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
             {day.content.duration_minutes} min · {day.content.focus}
           </p>
         </div>
@@ -447,7 +447,7 @@ function WorkoutCard({
             {diffLabel}
           </span>
           {isToday && (
-            <span className="text-xs text-forest-600 font-medium">Starta →</span>
+            <span className="text-xs text-forest-800 dark:text-forest-400 font-medium">Starta →</span>
           )}
         </div>
       </div>
@@ -460,7 +460,7 @@ function WorkoutCard({
           </span>
         ))}
         {day.content.exercises.length > 3 && (
-          <span className="text-xs bg-stone-100 dark:bg-stone-700 text-stone-400 dark:text-stone-500 px-2 py-1 rounded-lg">
+          <span className="text-xs bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 px-2 py-1 rounded-lg">
             +{day.content.exercises.length - 3} till
           </span>
         )}
@@ -518,7 +518,7 @@ function ExerciseLibrary() {
       </div>
 
       {groups.length === 0 && (
-        <p className="text-stone-400 dark:text-stone-500 text-sm text-center py-6">Inga träffar.</p>
+        <p className="text-stone-500 dark:text-stone-400 text-sm text-center py-6">Inga träffar.</p>
       )}
 
       {groups.map((g) => (
@@ -526,7 +526,7 @@ function ExerciseLibrary() {
           <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mt-3 mb-1.5 px-1">
             {g.category}
           </p>
-          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
             {g.items.map((ex, i) => {
               const open = openId === ex.id
               return (
@@ -581,16 +581,16 @@ function ProgramTemplateCard({
 }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
+    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
       <button onClick={() => setOpen((v) => !v)} className="w-full text-left p-4">
         <div className="flex items-center justify-between">
           <p className="font-semibold text-stone-900 dark:text-stone-100">{template.name}</p>
-          <span className="text-xs text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-700 px-2 py-1 rounded-lg flex-shrink-0">
+          <span className="text-xs text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-700 px-2 py-1 rounded-lg flex-shrink-0">
             {template.days_per_week} dgr/v
           </span>
         </div>
-        <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">{template.description}</p>
-        <p className="text-[11px] text-forest-600 font-medium mt-2">{open ? 'Dölj pass ▲' : 'Visa pass ▼'}</p>
+        <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{template.description}</p>
+        <p className="text-[11px] text-forest-800 dark:text-forest-400 font-medium mt-2">{open ? 'Dölj pass ▲' : 'Visa pass ▼'}</p>
       </button>
 
       {open && (
@@ -632,7 +632,7 @@ function WeeklyRing({ done, total }: { done: number; total: number }) {
       <circle
         cx="28" cy="28" r={r}
         fill="none"
-        stroke="#1e6e42"
+        stroke="#0d9480"
         strokeWidth="4"
         strokeDasharray={circ}
         strokeDashoffset={circ * (1 - pct)}

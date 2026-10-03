@@ -89,7 +89,7 @@ function StatRing({
 }) {
   const pct = goal > 0 ? Math.min((value / goal) * 100, 100) : 0
   return (
-    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-3 flex flex-col items-center gap-2">
+    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-3 flex flex-col items-center gap-2">
       <div className="relative">
         <Ring value={value} goal={goal} color={color} size={72} strokeWidth={7}>
           <foreignObject x="16" y="16" width="40" height="40">
@@ -109,7 +109,7 @@ function StatRing({
             ? `${formatLiters(value)} ${unit}`
             : `${value.toLocaleString('sv-SE')} ${unit}`}
         </p>
-        <p className="text-[10px] text-stone-400 dark:text-stone-500">{label}</p>
+        <p className="text-[10px] text-stone-500 dark:text-stone-400">{label}</p>
         <p className="text-[9px] text-stone-300 dark:text-stone-600">mål: {goalLabel}</p>
       </div>
     </div>
@@ -130,14 +130,14 @@ function WeeklyBars({ weekly }: { weekly: number[] }) {
         const label = isNow ? 'Nu' : `v.${getISOWeek(d)}`
         return (
           <div key={i} className="flex-1 flex flex-col items-center gap-1 min-w-0">
-            {count > 0 && <span className="text-[9px] font-bold text-forest-600">{count}</span>}
+            {count > 0 && <span className="text-[9px] font-bold text-forest-800 dark:text-forest-400">{count}</span>}
             <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-sm flex items-end" style={{ height: '72px' }}>
               <div
                 className={`w-full rounded-sm transition-all ${isNow ? 'bg-forest-700' : 'bg-forest-300'}`}
                 style={{ height: `${Math.max((count / max) * 100, count > 0 ? 6 : 0)}%` }}
               />
             </div>
-            <span className={`text-[9px] truncate w-full text-center ${isNow ? 'text-forest-600 font-semibold' : 'text-stone-400 dark:text-stone-500'}`}>
+            <span className={`text-[9px] truncate w-full text-center ${isNow ? 'text-forest-800 dark:text-forest-400 font-semibold' : 'text-stone-500 dark:text-stone-400'}`}>
               {label}
             </span>
           </div>
@@ -211,7 +211,7 @@ function MacroDonut({ protein, carbs, fat, kcal }: { protein: number; carbs: num
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-xl font-bold text-stone-900 dark:text-stone-100">{kcal.toLocaleString('sv-SE')}</span>
-          <span className="text-[10px] text-stone-400 dark:text-stone-500">kcal/dag</span>
+          <span className="text-[10px] text-stone-500 dark:text-stone-400">kcal/dag</span>
         </div>
       </div>
       <div className="flex-1 space-y-3">
@@ -219,7 +219,7 @@ function MacroDonut({ protein, carbs, fat, kcal }: { protein: number; carbs: num
           <div key={s.label}>
             <div className="flex justify-between mb-1 text-xs">
               <span className="font-medium text-stone-700 dark:text-stone-300">{s.label}</span>
-              <span className="text-stone-400 dark:text-stone-500">{s.g}g · {Math.round(s.pct * 100)}%</span>
+              <span className="text-stone-500 dark:text-stone-400">{s.g}g · {Math.round(s.pct * 100)}%</span>
             </div>
             <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-1.5">
               <div className="h-1.5 rounded-full" style={{ width: `${s.pct * 100}%`, backgroundColor: s.color }} />
@@ -294,9 +294,9 @@ function WeightChart({ entries }: { entries: WeightEntry[] }) {
         <span className="text-3xl font-bold" style={{ color }}>
           {sign}{formatKg(change)} kg
         </span>
-        <span className="text-sm text-stone-400 dark:text-stone-500">förändring sedan start</span>
+        <span className="text-sm text-stone-500 dark:text-stone-400">förändring sedan start</span>
       </div>
-      <div className="flex gap-4 mb-3 text-[10px] text-stone-400 dark:text-stone-500">
+      <div className="flex gap-4 mb-3 text-[10px] text-stone-500 dark:text-stone-400">
         <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-forest-500 rounded" />Faktisk vikt</span>
         <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-amber-400 rounded opacity-70" style={{ backgroundImage: 'repeating-linear-gradient(to right, #f59e0b 0, #f59e0b 4px, transparent 4px, transparent 7px)' }} />7-dagars snitt</span>
       </div>
@@ -307,7 +307,7 @@ function WeightChart({ entries }: { entries: WeightEntry[] }) {
         ]}
         height={80}
       />
-      <div className="flex justify-between mt-1 text-[9px] text-stone-400 dark:text-stone-500">
+      <div className="flex justify-between mt-1 text-[9px] text-stone-500 dark:text-stone-400">
         <span>{fmtDate(entries[0]!.date)}</span>
         <span>{formatKg(entries[entries.length - 1]!.weight_kg)} kg · {fmtDate(entries[entries.length - 1]!.date)}</span>
       </div>
@@ -446,10 +446,10 @@ export function AnalyticsPage() {
       {/* Header */}
       <div className="px-5 mb-4">
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Analys</h1>
-        <div className="flex gap-5 mt-3 border-b border-stone-100 dark:border-stone-700">
+        <div className="flex gap-5 mt-3 border-b border-stone-200 dark:border-stone-700">
           {TABS.map(({ key, label }) => (
             <button key={key} onClick={() => setTab(key)}
-              className={`pb-3 text-sm font-medium transition-colors ${tab === key ? 'text-forest-600 border-b-2 border-forest-600' : 'text-stone-400 dark:text-stone-500'}`}>
+              className={`pb-3 text-sm font-medium transition-colors ${tab === key ? 'text-forest-800 dark:text-forest-400 border-b-2 border-forest-600' : 'text-stone-500 dark:text-stone-400'}`}>
               {label}
             </button>
           ))}
@@ -461,7 +461,7 @@ export function AnalyticsPage() {
         <div className="px-5 space-y-4">
           {/* Ringar — Träning, Vatten, Tid */}
           <div>
-            <p className="text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-3">Denna vecka</p>
+            <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Denna vecka</p>
             <div className="grid grid-cols-3 gap-2">
               <StatRing
                 Icon={DumbbellIcon} label="Pass" unit="pass"
@@ -482,17 +482,17 @@ export function AnalyticsPage() {
           </div>
 
           {/* Pass per vecka — stapeldiagram */}
-          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
             <p className="font-semibold text-stone-800 dark:text-stone-200 mb-4">Pass per vecka</p>
             <WeeklyBars weekly={weekly} />
           </div>
 
           {/* Vatten 7 dagar — linjediagram */}
-          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
             <div className="flex items-baseline justify-between mb-3">
               <p className="font-semibold text-stone-800 dark:text-stone-200">Vatten senaste 7 dagar</p>
               {avgWater > 0 && (
-                <span className="text-xs text-stone-400 dark:text-stone-500">
+                <span className="text-xs text-stone-500 dark:text-stone-400">
                   snitt {formatLiters(avgWater)} L/dag
                 </span>
               )}
@@ -502,7 +502,7 @@ export function AnalyticsPage() {
                 <LineChart points={waterPoints} color="#38bdf8" height={72} showDots />
                 <div className="flex justify-between mt-1">
                   {last7.map((date, i) => (
-                    <span key={date} className={`text-[9px] ${i === 6 ? 'text-sky-600 dark:text-sky-400 font-semibold' : 'text-stone-400 dark:text-stone-500'}`}>
+                    <span key={date} className={`text-[9px] ${i === 6 ? 'text-sky-600 dark:text-sky-400 font-semibold' : 'text-stone-500 dark:text-stone-400'}`}>
                       {new Date(date + 'T12:00').toLocaleDateString('sv-SE', { weekday: 'short' })}
                     </span>
                   ))}
@@ -511,18 +511,18 @@ export function AnalyticsPage() {
             ) : (
               <div className="flex flex-col items-center py-6 gap-1">
                 <DropletIcon className="w-8 h-8 stroke-stone-200" />
-                <p className="text-xs text-stone-400 dark:text-stone-500">Ingen vattendata loggad ännu</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400">Ingen vattendata loggad ännu</p>
               </div>
             )}
           </div>
 
           {/* Senaste pass */}
-          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
             <p className="font-semibold text-stone-800 dark:text-stone-200 px-4 py-3 border-b border-stone-50">Senaste pass</p>
             {sessions.length === 0 ? (
               <div className="px-4 py-8 text-center">
                 <DumbbellIcon className="w-10 h-10 stroke-stone-200 mx-auto mb-2" />
-                <p className="text-sm text-stone-400 dark:text-stone-500">Genomför ditt första pass!</p>
+                <p className="text-sm text-stone-500 dark:text-stone-400">Genomför ditt första pass!</p>
               </div>
             ) : (
               sessions.slice(0, 5).map((s) => (
@@ -532,7 +532,7 @@ export function AnalyticsPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate">{s.workout_name}</p>
-                    <p className="text-xs text-stone-400 dark:text-stone-500">
+                    <p className="text-xs text-stone-500 dark:text-stone-400">
                       {fmtDate(s.completed_at)}
                       {s.completed_sets > 0 && ` · ${s.completed_sets} set`}
                       {s.duration_seconds > 0 && ` · ${fmt(s.duration_seconds)}`}
@@ -551,11 +551,11 @@ export function AnalyticsPage() {
         <div className="px-5 space-y-4">
 
           {/* Vikt */}
-          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
             <div className="flex items-center justify-between mb-3">
               <p className="font-semibold text-stone-800 dark:text-stone-200">Viktutveckling</p>
               <button onClick={() => setShowWeightInput((v) => !v)}
-                className="flex items-center gap-1 text-xs text-forest-600 font-medium">
+                className="flex items-center gap-1 text-xs text-forest-800 dark:text-forest-400 font-medium">
                 <PlusIcon className="w-3.5 h-3.5 stroke-forest-600" />
                 Logga vikt
               </button>
@@ -568,7 +568,7 @@ export function AnalyticsPage() {
                   onKeyDown={(e) => e.key === 'Enter' && logWeight()}
                   className="flex-1 bg-stone-100 dark:bg-stone-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
                 />
-                <span className="flex items-center text-sm text-stone-400 dark:text-stone-500">kg</span>
+                <span className="flex items-center text-sm text-stone-500 dark:text-stone-400">kg</span>
                 <button onClick={logWeight} className="px-3 py-2 bg-forest-700 text-white text-sm font-semibold rounded-xl">
                   Spara
                 </button>
@@ -580,22 +580,22 @@ export function AnalyticsPage() {
             ) : weightEntries.length === 1 ? (
               <div className="text-center py-4">
                 <p className="text-2xl font-bold text-stone-900 dark:text-stone-100">{formatKg(weightEntries[0]!.weight_kg)} kg</p>
-                <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">Logga igen imorgon för att se trenden</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">Logga igen imorgon för att se trenden</p>
               </div>
             ) : (
-              <p className="text-center text-sm text-stone-400 dark:text-stone-500 py-6">Logga din vikt för att se utvecklingen</p>
+              <p className="text-center text-sm text-stone-500 dark:text-stone-400 py-6">Logga din vikt för att se utvecklingen</p>
             )}
           </div>
 
           {/* Viktlogg */}
           {weightEntries.length > 0 && (
-            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
               <p className="font-semibold text-stone-800 dark:text-stone-200 px-4 py-3 border-b border-stone-50">Viktlogg</p>
               {[...weightEntries].reverse().map((e) => (
                 <div key={e.id} className="flex items-center justify-between px-4 py-3 border-b border-stone-50 last:border-0">
                   <div>
                     <p className="text-sm font-medium text-stone-800 dark:text-stone-200">{formatKg(e.weight_kg)} kg</p>
-                    <p className="text-xs text-stone-400 dark:text-stone-500">{fmtDate(e.date)}</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400">{fmtDate(e.date)}</p>
                   </div>
                   <button onClick={() => { deleteWeightEntry(e.id); setWeightEntries(getWeightEntries()) }} className="p-1">
                     <XIcon className="w-4 h-4 stroke-stone-300 dark:stroke-stone-600" />
@@ -607,10 +607,10 @@ export function AnalyticsPage() {
 
           {/* RPE-trend */}
           {rpeEntries.length > 0 && (
-            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
               <p className="font-semibold text-stone-800 dark:text-stone-200 mb-3">Belastningsgrad (RPE)</p>
               <LineChart points={rpeEntries.map((e) => e.rpe)} color="#f59e0b" height={64} showDots />
-              <div className="flex justify-between mt-1 text-[9px] text-stone-400 dark:text-stone-500">
+              <div className="flex justify-between mt-1 text-[9px] text-stone-500 dark:text-stone-400">
                 <span>{fmtDate(rpeEntries[0]!.date)}</span>
                 <span>Senast: {rpeEntries[rpeEntries.length-1]!.rpe}/10 · {rpeEntries[rpeEntries.length-1]!.workoutName}</span>
               </div>
@@ -621,11 +621,11 @@ export function AnalyticsPage() {
           )}
 
           {/* Vatten 7 dagar */}
-          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
             <div className="flex items-baseline justify-between mb-3">
               <p className="font-semibold text-stone-800 dark:text-stone-200">Vatten senaste 7 dagar</p>
               {avgWater > 0 && (
-                <span className="text-xs text-stone-400 dark:text-stone-500">snitt {formatLiters(avgWater)} L</span>
+                <span className="text-xs text-stone-500 dark:text-stone-400">snitt {formatLiters(avgWater)} L</span>
               )}
             </div>
             {waterPoints.some((v) => v > 0) ? (
@@ -643,7 +643,7 @@ export function AnalyticsPage() {
                             style={{ height: `${Math.max(pct, ml > 0 ? 4 : 0)}%` }}
                           />
                         </div>
-                        <span className={`text-[9px] ${isToday ? 'text-sky-600 dark:text-sky-400 font-semibold' : 'text-stone-400 dark:text-stone-500'}`}>
+                        <span className={`text-[9px] ${isToday ? 'text-sky-600 dark:text-sky-400 font-semibold' : 'text-stone-500 dark:text-stone-400'}`}>
                           {new Date(last7[i]! + 'T12:00').toLocaleDateString('sv-SE', { weekday: 'short' })}
                         </span>
                       </div>
@@ -662,7 +662,7 @@ export function AnalyticsPage() {
                     <p className="text-sm font-bold text-stone-900 dark:text-stone-100">
                       {formatLiters(waterToday)} L idag
                     </p>
-                    <p className="text-xs text-stone-400 dark:text-stone-500">
+                    <p className="text-xs text-stone-500 dark:text-stone-400">
                       av {formatLiters(settings.water_goal_ml)} L · {settings.water_goal_ml > 0 ? Math.round((waterToday / settings.water_goal_ml) * 100) : 0}%
                     </p>
                   </div>
@@ -671,7 +671,7 @@ export function AnalyticsPage() {
             ) : (
               <div className="flex flex-col items-center py-6 gap-2">
                 <DropletIcon className="w-8 h-8 stroke-stone-200" />
-                <p className="text-xs text-stone-400 dark:text-stone-500">Logga vatten för att se trenden</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400">Logga vatten för att se trenden</p>
               </div>
             )}
           </div>
@@ -689,21 +689,21 @@ export function AnalyticsPage() {
             <div className="text-center py-16">
               <LeafIcon className="w-12 h-12 stroke-stone-200 mx-auto mb-3" />
               <h2 className="text-lg font-semibold mb-1">Ingen kostdata</h2>
-              <p className="text-stone-400 dark:text-stone-500 text-sm">Logga dina måltider via Kost-fliken.</p>
+              <p className="text-stone-500 dark:text-stone-400 text-sm">Logga dina måltider via Kost-fliken.</p>
             </div>
           ) : (
             <>
               {/* Makro donut */}
-              <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+              <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
                 <p className="font-semibold text-stone-800 dark:text-stone-200 mb-4">Makronutrienter (snitt per dag)</p>
                 <MacroDonut protein={avgProtein} carbs={avgCarbs} fat={avgFat} kcal={avgKcal} />
               </div>
 
               {/* Kalori-linjediagram */}
-              <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+              <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
                 <div className="flex items-baseline justify-between mb-3">
                   <p className="font-semibold text-stone-800 dark:text-stone-200">Kalorier senaste 7 dagar</p>
-                  <span className="text-xs text-stone-400 dark:text-stone-500">snitt {avgKcal} kcal</span>
+                  <span className="text-xs text-stone-500 dark:text-stone-400">snitt {avgKcal} kcal</span>
                 </div>
                 <LineChart
                   points={last7.map((date) => daySummaries.find((d) => d.date === date)?.kcal ?? 0)}
@@ -711,7 +711,7 @@ export function AnalyticsPage() {
                 />
                 <div className="flex justify-between mt-1">
                   {last7.map((date, i) => (
-                    <span key={date} className={`text-[9px] ${i === 6 ? 'text-amber-600 font-semibold' : 'text-stone-400 dark:text-stone-500'}`}>
+                    <span key={date} className={`text-[9px] ${i === 6 ? 'text-amber-600 font-semibold' : 'text-stone-500 dark:text-stone-400'}`}>
                       {new Date(date + 'T12:00').toLocaleDateString('sv-SE', { weekday: 'short' })}
                     </span>
                   ))}
@@ -719,7 +719,7 @@ export function AnalyticsPage() {
               </div>
 
               {/* Stapeldiagram makron */}
-              <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+              <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
                 <p className="font-semibold text-stone-800 dark:text-stone-200 mb-4">Kalorier per dag</p>
                 <div className="flex items-end gap-1.5 h-28">
                   {last7.map((date, i) => {
@@ -729,14 +729,14 @@ export function AnalyticsPage() {
                     const isToday = i === 6
                     return (
                       <div key={date} className="flex-1 flex flex-col items-center gap-1">
-                        {kcal > 0 && <span className="text-[8px] text-stone-400 dark:text-stone-500">{kcal}</span>}
+                        {kcal > 0 && <span className="text-[8px] text-stone-500 dark:text-stone-400">{kcal}</span>}
                         <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-sm flex items-end" style={{ height: '88px' }}>
                           <div
                             className={`w-full rounded-sm transition-all ${isToday ? 'bg-amber-400' : 'bg-amber-200'}`}
                             style={{ height: `${Math.max(pct, kcal > 0 ? 4 : 0)}%` }}
                           />
                         </div>
-                        <span className={`text-[9px] ${isToday ? 'text-amber-600 font-semibold' : 'text-stone-400 dark:text-stone-500'}`}>
+                        <span className={`text-[9px] ${isToday ? 'text-amber-600 font-semibold' : 'text-stone-500 dark:text-stone-400'}`}>
                           {new Date(date + 'T12:00').toLocaleDateString('sv-SE', { weekday: 'short' })}
                         </span>
                       </div>
@@ -747,9 +747,9 @@ export function AnalyticsPage() {
 
               {/* Kaloribalans */}
               {calorieGoal > 0 && (
-                <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+                <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
                   <p className="font-semibold text-stone-800 dark:text-stone-200 mb-1">Kaloribalans</p>
-                  <p className="text-xs text-stone-400 dark:text-stone-500 mb-4">Mål: {calorieGoal} kcal/dag · + överskott · – underskott</p>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mb-4">Mål: {calorieGoal} kcal/dag · + överskott · – underskott</p>
                   <div className="flex items-center gap-1.5 h-28">
                     {last7.map((date, i) => {
                       const d = daySummaries.find((x) => x.date === date)
@@ -783,7 +783,7 @@ export function AnalyticsPage() {
                               />
                             )}
                           </div>
-                          <span className={`text-[9px] ${isToday ? 'text-amber-600 font-semibold' : 'text-stone-400 dark:text-stone-500'}`}>
+                          <span className={`text-[9px] ${isToday ? 'text-amber-600 font-semibold' : 'text-stone-500 dark:text-stone-400'}`}>
                             {new Date(date + 'T12:00').toLocaleDateString('sv-SE', { weekday: 'short' })}
                           </span>
                         </div>
@@ -798,7 +798,7 @@ export function AnalyticsPage() {
               )}
 
               {/* Daglig lista */}
-              <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
+              <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
                 <p className="font-semibold text-stone-800 dark:text-stone-200 px-4 py-3 border-b border-stone-50">Daglig uppdelning</p>
                 {[...daySummaries].reverse().map((d) => (
                   <div key={d.date} className="flex items-center justify-between px-4 py-3 border-b border-stone-50 last:border-0">
@@ -806,7 +806,7 @@ export function AnalyticsPage() {
                       <p className="text-sm font-medium text-stone-800 dark:text-stone-200 capitalize">
                         {new Date(d.date + 'T12:00').toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}
                       </p>
-                      <p className="text-xs text-stone-400 dark:text-stone-500">P {d.protein_g}g · K {d.carbs_g}g · F {d.fat_g}g</p>
+                      <p className="text-xs text-stone-500 dark:text-stone-400">P {d.protein_g}g · K {d.carbs_g}g · F {d.fat_g}g</p>
                     </div>
                     <span className="text-sm font-semibold text-stone-700 dark:text-stone-300">{d.kcal} kcal</span>
                   </div>

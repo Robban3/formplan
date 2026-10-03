@@ -65,14 +65,14 @@ export function ProfilePage() {
 
   return (
     <div className="px-5 pt-header pb-4">
-      <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-4">
-        <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
+      <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-4">
+        <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
         Mer
       </button>
       <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-6">Profil</h1>
 
       {profile ? (
-        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
           {rows.map((row, i) => (
             <div
               key={row.label}
@@ -84,7 +84,7 @@ export function ProfilePage() {
           ))}
         </div>
       ) : (
-        <p className="text-stone-400 dark:text-stone-500 text-sm">Ingen profil hittades.</p>
+        <p className="text-stone-500 dark:text-stone-400 text-sm">Ingen profil hittades.</p>
       )}
 
       <button

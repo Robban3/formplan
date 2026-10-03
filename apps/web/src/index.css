@@ -7,8 +7,10 @@
   --brand-dark: #10c4a8;
   --brand-dim: rgba(34, 230, 198, 0.15);
   --brand-glow: rgba(34, 230, 198, 0.2);
-  /* App-bakgrund (Mintbris). Flippar till stone-900 i mörkt läge. */
-  --canvas: #edf6f1;
+  /* App-bakgrund. Flippar till stone-900 i mörkt läge.
+     Något djupare och mindre mintstinn än förut: med #edf6f1 låg bakgrunden
+     så nära de vita korten i ljushet att korten knappt syntes. */
+  --canvas: #e3ece7;
   /* Spåret i förloppsringarna (SVG, nås inte av Tailwind-klasser). */
   --ring-track: #e7e5e4; /* stone-200 */
 }

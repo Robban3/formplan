@@ -86,16 +86,16 @@ export function ShoppingListPage() {
   return (
     <div className="pb-10">
       {/* Header */}
-      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
-        <button onClick={() => navigate('/kost')} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-3">
-          <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
+      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
+        <button onClick={() => navigate('/kost')} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-3">
+          <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
           Kost
         </button>
         <div className="flex items-center gap-2">
           <ShoppingCartIcon className="w-6 h-6 stroke-forest-600" />
           <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Inköpslista</h1>
         </div>
-        <p className="text-sm text-stone-400 dark:text-stone-500 mt-0.5">
+        <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
           {fromPlan ? 'Veckans varor utifrån din sparade veckoplan' : 'Veckans varor utifrån ditt kostschema'}
         </p>
       </div>
@@ -103,7 +103,7 @@ export function ShoppingListPage() {
       <div className="px-5 mt-5 space-y-5">
         {/* Kostfokus — bara relevant när listan genereras (ingen sparad veckoplan) */}
         {!fromPlan && (
-        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 space-y-3">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 space-y-3">
           <p className="font-semibold text-stone-800 dark:text-stone-200 text-sm">Kostfokus</p>
           <div className="grid grid-cols-2 gap-2">
             {FOCUS_OPTIONS.map((opt) => (
@@ -113,7 +113,7 @@ export function ShoppingListPage() {
                 className={`py-2.5 rounded-xl text-sm font-medium border-2 transition-colors ${
                   focus === opt.key
                     ? 'border-forest-600 bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300'
-                    : 'border-stone-100 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-300'
+                    : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-300'
                 }`}
               >
                 {opt.label}
@@ -142,7 +142,7 @@ export function ShoppingListPage() {
             {checkedCount}/{totalItems} varor i kundvagnen
           </p>
           {checkedCount > 0 && (
-            <button onClick={clearChecked} className="text-xs text-stone-400 dark:text-stone-500 underline">
+            <button onClick={clearChecked} className="text-xs text-stone-500 dark:text-stone-400 underline">
               Återställ
             </button>
           )}
@@ -150,8 +150,8 @@ export function ShoppingListPage() {
 
         {/* Categories */}
         {categories.map((cat) => (
-          <div key={cat.category} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
-            <div className="px-4 py-2.5 bg-stone-50 dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
+          <div key={cat.category} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
+            <div className="px-4 py-2.5 bg-stone-50 dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
               <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">{cat.category}</p>
             </div>
             {cat.items.map((item, i) => {
@@ -171,10 +171,10 @@ export function ShoppingListPage() {
                   >
                     {isChecked && <CheckIcon className="w-3.5 h-3.5 stroke-white" />}
                   </span>
-                  <span className={`flex-1 text-sm ${isChecked ? 'text-stone-400 dark:text-stone-500 line-through' : 'text-stone-800 dark:text-stone-200'}`}>
+                  <span className={`flex-1 text-sm ${isChecked ? 'text-stone-500 dark:text-stone-400 line-through' : 'text-stone-800 dark:text-stone-200'}`}>
                     {item.name}
                   </span>
-                  <span className="text-xs text-stone-400 dark:text-stone-500 flex-shrink-0">{formatAmount(item.amount_g)}</span>
+                  <span className="text-xs text-stone-500 dark:text-stone-400 flex-shrink-0">{formatAmount(item.amount_g)}</span>
                 </button>
               )
             })}

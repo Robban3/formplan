@@ -91,7 +91,7 @@ function MiniRing({ value, goal, size = 52 }: { value: number; goal: number; siz
       <circle
         cx={cx} cy={cx} r={r}
         fill="none"
-        stroke="#1e6e42"
+        stroke="#0d9480"
         strokeWidth="3.5"
         strokeDasharray={circ}
         strokeDashoffset={circ * (1 - pct)}
@@ -118,15 +118,15 @@ function StatCard({
   return (
     <button
       onClick={onClick}
-      className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-3 flex flex-col items-center text-center active:scale-[0.97] transition-transform"
+      className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-3 flex flex-col items-center text-center active:scale-[0.97] transition-transform"
     >
       <MiniRing value={value} goal={goal} />
-      <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-2">{label}</p>
+      <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-2">{label}</p>
       <p className="text-sm font-bold text-stone-900 dark:text-stone-100 mt-0.5">
         {value.toLocaleString('sv-SE')}
-        <span className="text-stone-400 dark:text-stone-500 font-normal">/{goal.toLocaleString('sv-SE')}</span>
+        <span className="text-stone-500 dark:text-stone-400 font-normal">/{goal.toLocaleString('sv-SE')}</span>
       </p>
-      <p className="text-[10px] text-stone-400 dark:text-stone-500">{unit}</p>
+      <p className="text-[10px] text-stone-500 dark:text-stone-400">{unit}</p>
     </button>
   )
 }
@@ -142,7 +142,7 @@ function WeeklyRing({ done, total, size = 56 }: { done: number; total: number; s
       <circle
         cx={cx} cy={cx} r={r}
         fill="none"
-        stroke="#1e6e42"
+        stroke="#0d9480"
         strokeWidth="4"
         strokeDasharray={circ}
         strokeDashoffset={circ * (1 - pct)}
@@ -172,10 +172,10 @@ function WeeklyReport({ weeklyDone, weeklyTotal }: { weeklyDone: number; weeklyT
   const pct = weeklyTotal > 0 ? Math.round((weeklyDone / weeklyTotal) * 100) : 0
 
   return (
-    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <p className="text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">Veckans rapport</p>
+          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Veckans rapport</p>
           <p className="text-[10px] text-stone-300 dark:text-stone-600">v. från {weekLabel}</p>
         </div>
         {onTrack && <span className="text-xs bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 font-semibold px-2 py-0.5 rounded-full border border-forest-100 dark:border-forest-800">Mål uppnått!</span>}
@@ -183,16 +183,16 @@ function WeeklyReport({ weeklyDone, weeklyTotal }: { weeklyDone: number; weeklyT
       <div className="grid grid-cols-3 gap-3 text-center">
         <div>
           <p className="text-xl font-bold text-stone-900 dark:text-stone-100">{weeklyDone}</p>
-          <p className="text-[10px] text-stone-400 dark:text-stone-500">pass{weeklyTotal > 0 ? ` av ${weeklyTotal}` : ''}</p>
-          {weeklyTotal > 0 && <p className="text-[9px] text-forest-600 font-medium">{pct}%</p>}
+          <p className="text-[10px] text-stone-500 dark:text-stone-400">pass{weeklyTotal > 0 ? ` av ${weeklyTotal}` : ''}</p>
+          {weeklyTotal > 0 && <p className="text-[9px] text-forest-800 dark:text-forest-400 font-medium">{pct}%</p>}
         </div>
         <div>
           <p className="text-xl font-bold text-stone-900 dark:text-stone-100">{Math.round(totalVolume).toLocaleString('sv-SE')}</p>
-          <p className="text-[10px] text-stone-400 dark:text-stone-500">kg lyft</p>
+          <p className="text-[10px] text-stone-500 dark:text-stone-400">kg lyft</p>
         </div>
         <div>
           <p className="text-xl font-bold text-stone-900 dark:text-stone-100">{avgTime}</p>
-          <p className="text-[10px] text-stone-400 dark:text-stone-500">min/pass</p>
+          <p className="text-[10px] text-stone-500 dark:text-stone-400">min/pass</p>
         </div>
       </div>
     </div>
@@ -285,14 +285,14 @@ export function HomePage() {
           <div className="w-7 h-7 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
         </div>
         <div className="px-5">
-          <p className="text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide px-1 mb-2">
+          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide px-1 mb-2">
             Denna vecka
           </p>
-          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 flex items-center gap-3">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 flex items-center gap-3">
             <WeeklyRing done={weeklyDone} total={Math.max(weeklyTotal, 1)} />
             <div>
               <p className="font-bold text-stone-900 dark:text-stone-100">{weeklyDone}</p>
-              <p className="text-xs text-stone-400 dark:text-stone-500">
+              <p className="text-xs text-stone-500 dark:text-stone-400">
                 av {weeklyTotal > 0 ? weeklyTotal : '—'} pass
               </p>
             </div>
@@ -333,7 +333,7 @@ export function HomePage() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{greeting}</h1>
-            <p className="text-stone-400 dark:text-stone-500 text-sm capitalize mt-0.5">{todayLabel()}</p>
+            <p className="text-stone-500 dark:text-stone-400 text-sm capitalize mt-0.5">{todayLabel()}</p>
           </div>
           {/* Streak badge */}
           {streak > 0 && (
@@ -348,7 +348,7 @@ export function HomePage() {
       <div className="px-5 space-y-5">
         {/* Dagens översikt */}
         <div>
-          <p className="text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide px-1 mb-2">
+          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide px-1 mb-2">
             Dagens översikt
           </p>
           <div className="grid grid-cols-3 gap-2">
@@ -394,11 +394,11 @@ export function HomePage() {
 
         {/* Dagens pass */}
         <div>
-          <p className="text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide px-1 mb-2">
+          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide px-1 mb-2">
             Dagens pass
           </p>
           {todayWorkout ? (
-            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
               <WorkoutHero
                 size="sm"
                 title={todayWorkout.content.name}
@@ -417,7 +417,7 @@ export function HomePage() {
                     </span>
                   ))}
                   {todayWorkout.content.exercises.length > 3 && (
-                    <span className="text-xs bg-stone-100 dark:bg-stone-700 text-stone-400 dark:text-stone-500 px-2 py-1 rounded-lg">
+                    <span className="text-xs bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 px-2 py-1 rounded-lg">
                       +{todayWorkout.content.exercises.length - 3}
                     </span>
                   )}
@@ -432,23 +432,23 @@ export function HomePage() {
               </button>
             </div>
           ) : !planLoaded ? (
-            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
               <p className="font-semibold text-stone-800 dark:text-stone-200">Inget schema</p>
-              <p className="text-sm text-stone-400 dark:text-stone-500 mt-0.5">Välj ett träningsschema för att se dagens pass.</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Välj ett träningsschema för att se dagens pass.</p>
               <button
                 onClick={() => navigate('/traning')}
-                className="mt-3 text-sm text-forest-600 font-medium"
+                className="mt-3 text-sm text-forest-800 dark:text-forest-400 font-medium"
               >
                 Gå till Träning →
               </button>
             </div>
           ) : (
-            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
               <p className="font-semibold text-stone-800 dark:text-stone-200">Vilodag</p>
-              <p className="text-sm text-stone-400 dark:text-stone-500 mt-0.5">Inget pass schemalagt idag.</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Inget pass schemalagt idag.</p>
               <button
                 onClick={() => navigate('/traning')}
-                className="mt-3 text-sm text-forest-600 font-medium"
+                className="mt-3 text-sm text-forest-800 dark:text-forest-400 font-medium"
               >
                 Se veckoschema →
               </button>
@@ -458,29 +458,29 @@ export function HomePage() {
 
         {/* Träning & vatten */}
         <div>
-          <p className="text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide px-1 mb-2">
+          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide px-1 mb-2">
             Denna vecka
           </p>
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => navigate('/traning')}
-              className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 text-left active:scale-[0.98] transition-transform"
+              className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 text-left active:scale-[0.98] transition-transform"
             >
-              <p className="text-xs text-stone-400 dark:text-stone-500 mb-2">Träning</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mb-2">Träning</p>
               <div className="flex items-center gap-3">
                 <WeeklyRing done={weeklyDone} total={Math.max(weeklyTotal, 1)} />
                 <div>
                   <p className="font-bold text-stone-900 dark:text-stone-100">{weeklyDone}</p>
-                  <p className="text-xs text-stone-400 dark:text-stone-500">
+                  <p className="text-xs text-stone-500 dark:text-stone-400">
                     av {weeklyTotal > 0 ? weeklyTotal : '—'} pass
                   </p>
                 </div>
               </div>
             </button>
 
-            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 text-left">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 text-left">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs text-stone-400 dark:text-stone-500 flex items-center gap-1">
+                <p className="text-xs text-stone-500 dark:text-stone-400 flex items-center gap-1">
                   <DropletIcon className="w-3.5 h-3.5 stroke-sky-500" />
                   Vatten
                 </p>
@@ -494,7 +494,7 @@ export function HomePage() {
               <p className="text-lg font-bold text-stone-900 dark:text-stone-100">
                 {formatLiters(waterTotal)} L
               </p>
-              <p className="text-xs text-stone-400 dark:text-stone-500">av {formatLiters(settings.water_goal_ml)} L</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400">av {formatLiters(settings.water_goal_ml)} L</p>
               <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-1.5 mt-2">
                 <div
                   className="bg-sky-500 h-1.5 rounded-full transition-all"
@@ -512,12 +512,12 @@ export function HomePage() {
         {topGoals.length > 0 && (
           <div>
             <div className="flex items-center justify-between px-1 mb-2">
-              <p className="text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">Mina mål</p>
-              <button onClick={() => navigate('/mer/mina-mal')} className="text-xs text-forest-600 font-medium">
+              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Mina mål</p>
+              <button onClick={() => navigate('/mer/mina-mal')} className="text-xs text-forest-800 dark:text-forest-400 font-medium">
                 Se alla →
               </button>
             </div>
-            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden divide-y divide-stone-50">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden divide-y divide-stone-50">
               {topGoals.map((goal) => {
                 const pct = effectiveProgress(goal)
                 return (
@@ -528,7 +528,7 @@ export function HomePage() {
                   >
                     <div className="flex items-center justify-between mb-1.5">
                       <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate pr-2">{goal.text}</p>
-                      <span className="text-xs font-bold text-forest-600 flex-shrink-0">{pct}%</span>
+                      <span className="text-xs font-bold text-forest-800 dark:text-forest-400 flex-shrink-0">{pct}%</span>
                     </div>
                     <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-1.5">
                       <div
@@ -546,12 +546,12 @@ export function HomePage() {
         {/* Dagens måltider */}
         <div>
           <div className="flex items-center justify-between px-1 mb-2">
-            <p className="text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">
+            <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">
               Dagens måltider
             </p>
             <button
               onClick={() => navigate('/kost')}
-              className="text-xs text-forest-600 font-medium"
+              className="text-xs text-forest-800 dark:text-forest-400 font-medium"
             >
               Logga mat →
             </button>
@@ -560,13 +560,13 @@ export function HomePage() {
           {loggedMeals.length === 0 ? (
             <button
               onClick={() => navigate('/kost')}
-              className="w-full bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 text-left active:scale-[0.98] transition-transform"
+              className="w-full bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 text-left active:scale-[0.98] transition-transform"
             >
               <p className="text-sm text-stone-500 dark:text-stone-400">Inga måltider loggade ännu.</p>
-              <p className="text-xs text-forest-600 font-medium mt-1">Lägg till din första måltid →</p>
+              <p className="text-xs text-forest-800 dark:text-forest-400 font-medium mt-1">Lägg till din första måltid →</p>
             </button>
           ) : (
-            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden divide-y divide-stone-50">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden divide-y divide-stone-50">
               {loggedMeals.map((slot) => {
                 const slotEntries = entries.filter((e) => e.meal_slot === slot)
                 const kcal = slotEntries.reduce((s, e) => s + e.kcal, 0)
@@ -578,7 +578,7 @@ export function HomePage() {
                   >
                     <span className="text-sm font-medium text-stone-800 dark:text-stone-200">{MEAL_LABELS[slot]}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-stone-400 dark:text-stone-500">{kcal} kcal</span>
+                      <span className="text-sm text-stone-500 dark:text-stone-400">{kcal} kcal</span>
                       <ChevronRightIcon className="w-4 h-4 stroke-stone-300 dark:stroke-stone-600" />
                     </div>
                   </button>
@@ -590,10 +590,10 @@ export function HomePage() {
 
         {/* Snabbåtkomst */}
         <div>
-          <p className="text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide px-1 mb-2">
+          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide px-1 mb-2">
             Snabbåtkomst
           </p>
-          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden divide-y divide-stone-100">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden divide-y divide-stone-100">
             {QUICK_LINKS.map(({ Icon, label, sub, path, iconBg, iconStroke }) => (
               <button
                 key={path}
@@ -605,7 +605,7 @@ export function HomePage() {
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">{label}</p>
-                  <p className="text-xs text-stone-400 dark:text-stone-500">{sub}</p>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">{sub}</p>
                 </div>
                 <ChevronRightIcon className="w-4 h-4 stroke-stone-300 dark:stroke-stone-600" />
               </button>

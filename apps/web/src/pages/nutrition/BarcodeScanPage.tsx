@@ -160,13 +160,13 @@ export function BarcodeScanPage() {
   return (
     <div className="flex flex-col min-h-full bg-canvas pb-6">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 pt-header pb-3 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
+      <div className="flex items-center gap-3 px-4 pt-header pb-3 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
         <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700">
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
         </button>
         <div>
           <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">Skanna streckkod</h1>
-          <p className="text-xs text-stone-400 dark:text-stone-500">Lägger till i {SLOT_LABELS[slot].toLowerCase()}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Lägger till i {SLOT_LABELS[slot].toLowerCase()}</p>
         </div>
       </div>
 
@@ -197,9 +197,9 @@ export function BarcodeScanPage() {
             varan igen nästa gång. Open Food Facts saknar stora delar av det
             svenska sortimentet, särskilt butikernas egna märken. */}
         {unknownCode && (
-          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
             <p className="font-semibold text-stone-900 dark:text-stone-100">Varan finns inte i databasen</p>
-            <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
               Streckkod {unknownCode}. Skriv av näringsvärdena från paketet så sparas varan
               på den här enheten och fylls i automatiskt nästa gång du skannar den.
             </p>
@@ -249,10 +249,10 @@ export function BarcodeScanPage() {
 
         {/* Product result */}
         {product && (
-          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
             <p className="font-semibold text-stone-900 dark:text-stone-100">{product.name}</p>
-            {product.brand && <p className="text-xs text-stone-400 dark:text-stone-500">{product.brand}</p>}
-            <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
+            {product.brand && <p className="text-xs text-stone-500 dark:text-stone-400">{product.brand}</p>}
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
               Per 100 g: {product.kcal_per_100g} kcal · P {product.protein_per_100g}g · F {product.fat_per_100g}g · K{' '}
               {product.carbs_per_100g}g
             </p>
@@ -267,7 +267,7 @@ export function BarcodeScanPage() {
                   max="2000"
                   className="w-16 bg-transparent text-sm font-medium text-stone-800 dark:text-stone-200 text-right outline-none"
                 />
-                <span className="text-sm text-stone-400 dark:text-stone-500">g</span>
+                <span className="text-sm text-stone-500 dark:text-stone-400">g</span>
               </div>
               <p className="text-sm text-stone-500 dark:text-stone-400">
                 {amount ? Math.round((product.kcal_per_100g * parseFloat(amount)) / 100) : 0} kcal
@@ -296,7 +296,7 @@ export function BarcodeScanPage() {
         )}
 
         {/* Manual entry */}
-        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
           <p className="text-sm font-semibold text-stone-800 dark:text-stone-200 mb-2">Ange streckkod manuellt</p>
           <div className="flex gap-2">
             <input

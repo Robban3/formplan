@@ -168,7 +168,7 @@ export function FoodSearch() {
 
       <div className="px-4 pb-3">
         <div className="flex items-center gap-3 bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-3">
-          <svg className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" strokeWidth={2} strokeLinecap="round">
+          <svg className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" strokeWidth={2} strokeLinecap="round">
             <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
           </svg>
           <input
@@ -180,11 +180,11 @@ export function FoodSearch() {
           />
           {query && (
             <button onClick={() => { setQuery(''); setResults([]); setSelected(null) }}>
-              <XIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
+              <XIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
             </button>
           )}
         </div>
-        <p className="text-xs text-stone-400 dark:text-stone-500 mt-2">Lägger till i {SLOT_LABELS[slot].toLowerCase()}</p>
+        <p className="text-xs text-stone-500 dark:text-stone-400 mt-2">Lägger till i {SLOT_LABELS[slot].toLowerCase()}</p>
 
         {/* Quick add: scan barcode or photo */}
         <div className="flex gap-2 mt-3">
@@ -205,7 +205,7 @@ export function FoodSearch() {
         </div>
       </div>
 
-      <div className="px-4 flex gap-4 border-b border-stone-100 dark:border-stone-700">
+      <div className="px-4 flex gap-4 border-b border-stone-200 dark:border-stone-700">
         {([
           { key: 'alla' as const, label: 'Alla' },
           { key: 'maltider' as const, label: 'Måltider' },
@@ -214,7 +214,7 @@ export function FoodSearch() {
             key={key}
             onClick={() => setTab(key)}
             className={`pb-3 text-sm font-medium transition-colors ${
-              tab === key ? 'text-forest-600 border-b-2 border-forest-600' : 'text-stone-400 dark:text-stone-500'
+              tab === key ? 'text-forest-800 dark:text-forest-400 border-b-2 border-forest-600' : 'text-stone-500 dark:text-stone-400'
             }`}
           >
             {label}
@@ -233,20 +233,20 @@ export function FoodSearch() {
           <div className="px-4 py-3 space-y-3">
             <button
               onClick={() => navigate('/kost/skapa-maltid')}
-              className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-600 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-800 dark:text-forest-400 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
             >
               <PlusIcon className="w-4 h-4 stroke-forest-600" />
               Skapa egen måltid
             </button>
             {customMeals.length === 0 ? (
-              <p className="text-center text-stone-400 dark:text-stone-500 text-sm pt-6">Inga sparade måltider ännu.</p>
+              <p className="text-center text-stone-500 dark:text-stone-400 text-sm pt-6">Inga sparade måltider ännu.</p>
             ) : (
               customMeals.map((meal) => {
                 const t = mealTotals(meal.ingredients)
                 return (
                   <div
                     key={meal.id}
-                    className="flex items-center gap-2 p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700"
+                    className="flex items-center gap-2 p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700"
                   >
                     <button
                       onClick={() => handleAddMeal(meal)}
@@ -258,14 +258,14 @@ export function FoodSearch() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-stone-800 dark:text-stone-200 truncate">{meal.name}</p>
-                        <p className="text-xs text-stone-400 dark:text-stone-500">
+                        <p className="text-xs text-stone-500 dark:text-stone-400">
                           {meal.ingredients.length} livsmedel · {t.kcal} kcal
                         </p>
                       </div>
                     </button>
                     <button
                       onClick={() => navigate(`/kost/skapa-maltid?id=${meal.id}`)}
-                      className="text-xs font-medium text-forest-600 px-2 py-1.5 rounded-lg hover:bg-forest-50 dark:hover:bg-forest-900/30 flex-shrink-0"
+                      className="text-xs font-medium text-forest-800 dark:text-forest-400 px-2 py-1.5 rounded-lg hover:bg-forest-50 dark:hover:bg-forest-900/30 flex-shrink-0"
                     >
                       Ändra
                     </button>
@@ -305,7 +305,7 @@ export function FoodSearch() {
                 <FoodInitial name={item.name} />
                 <div className="flex-1 text-left min-w-0">
                   <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate">{item.name}</p>
-                  <p className="text-xs text-stone-400 dark:text-stone-500">
+                  <p className="text-xs text-stone-500 dark:text-stone-400">
                     Per 100 g: {item.kcal_per_100g} kcal · P {item.protein_per_100g}g · F {item.fat_per_100g}g · K {item.carbs_per_100g}g
                   </p>
                 </div>
@@ -318,13 +318,13 @@ export function FoodSearch() {
         )}
 
         {tab === 'alla' && !searching && query.length >= 2 && results.length === 0 && (
-          <div className="text-center pt-12 text-stone-400 dark:text-stone-500 text-sm">
+          <div className="text-center pt-12 text-stone-500 dark:text-stone-400 text-sm">
             Inga livsmedel hittades för &quot;{query}&quot;
           </div>
         )}
 
         {tab === 'alla' && !query && (
-          <div className="text-center pt-12 text-stone-400 dark:text-stone-500 text-sm">
+          <div className="text-center pt-12 text-stone-500 dark:text-stone-400 text-sm">
             Börja skriva för att söka livsmedel
           </div>
         )}
@@ -332,7 +332,7 @@ export function FoodSearch() {
 
       {/* Amount + Add panel */}
       {selected && tab === 'alla' && (
-        <div className="sticky bottom-0 border-t border-stone-100 dark:border-stone-700 px-4 py-4 bg-white dark:bg-stone-800">
+        <div className="sticky bottom-0 border-t border-stone-200 dark:border-stone-700 px-4 py-4 bg-white dark:bg-stone-800">
           <div className="flex items-center gap-3 mb-3">
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate">{selected.name}</p>
@@ -340,7 +340,7 @@ export function FoodSearch() {
                 const f = (parseFloat(amount) || 0) / 100
                 const kcal = Math.round(selected.kcal_per_100g * f)
                 return (
-                  <p className="text-xs text-stone-400 dark:text-stone-500">
+                  <p className="text-xs text-stone-500 dark:text-stone-400">
                     {kcal} kcal · {Math.round(kcal * 4.184)} kJ · P {Math.round(selected.protein_per_100g * f * 10) / 10}g · F{' '}
                     {Math.round(selected.fat_per_100g * f * 10) / 10}g · K {Math.round(selected.carbs_per_100g * f * 10) / 10}g
                   </p>
@@ -356,7 +356,7 @@ export function FoodSearch() {
                 min="1"
                 max="2000"
               />
-              <span className="text-sm text-stone-400 dark:text-stone-500">g</span>
+              <span className="text-sm text-stone-500 dark:text-stone-400">g</span>
             </div>
           </div>
           <button

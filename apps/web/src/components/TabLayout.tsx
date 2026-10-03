@@ -84,13 +84,13 @@ export function TabLayout() {
               to={to}
               className={({ isActive }) =>
                 `flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors ${
-                  isActive ? 'text-forest-600' : 'text-stone-400 dark:text-stone-500'
+                  isActive ? 'text-forest-800 dark:text-forest-400' : 'text-stone-500 dark:text-stone-400'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <Icon className={`w-6 h-6 ${isActive ? 'stroke-forest-600' : 'stroke-stone-400 dark:stroke-stone-500'}`} />
+                  <Icon className={`w-6 h-6 ${isActive ? 'stroke-forest-600' : 'stroke-stone-500 dark:stroke-stone-400'}`} />
                   {label}
                 </>
               )}

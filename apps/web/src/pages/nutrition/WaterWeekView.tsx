@@ -119,18 +119,18 @@ export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
           { label: 'Snitt/dag', value: formatLiters(weekAvg) },
           { label: 'Mål uppnått', value: `${daysMetGoal}/7` },
         ].map((s) => (
-          <div key={s.label} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-3 text-center">
+          <div key={s.label} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-3 text-center">
             <p className="text-base font-bold text-stone-900 dark:text-stone-100 tabular-nums">{s.value}</p>
-            <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">{s.label}</p>
+            <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">{s.label}</p>
           </div>
         ))}
       </div>
 
       {/* Stapeldiagram */}
-      <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+      <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
         <div className="flex items-center justify-between mb-4">
           <p className="font-semibold text-stone-800 dark:text-stone-200 text-sm">Intag per dag</p>
-          <p className="text-xs text-stone-400 dark:text-stone-500">Mål {goalMl / 1000} L</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">Mål {goalMl / 1000} L</p>
         </div>
         <div className="relative flex items-end justify-between gap-1.5 h-36">
           {/* Mållinje */}
@@ -152,7 +152,7 @@ export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
                     style={{ height: `${Math.max(pct * 100, day.total_ml > 0 ? 4 : 0)}%` }}
                   />
                 </div>
-                <span className={`text-[10px] font-medium ${isToday ? 'text-forest-600' : 'text-stone-400 dark:text-stone-500'}`}>
+                <span className={`text-[10px] font-medium ${isToday ? 'text-forest-800 dark:text-forest-400' : 'text-stone-500 dark:text-stone-400'}`}>
                   {WEEKDAY_SHORT[i]}
                 </span>
               </div>
@@ -164,7 +164,7 @@ export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
       {/* Daglista */}
       <div>
         <p className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">Dag för dag</p>
-        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
           {[...days].reverse().map((day, i, arr) => {
             const pct = goalMl > 0 ? Math.min((day.total_ml / goalMl) * 100, 100) : 0
             const isToday = day.date === today
@@ -189,7 +189,7 @@ export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
                   <p className="text-sm font-semibold text-stone-900 dark:text-stone-100 tabular-nums">
                     {day.total_ml > 0 ? formatLiters(day.total_ml) : '—'}
                   </p>
-                  <p className="text-xs text-stone-400 dark:text-stone-500 tabular-nums">
+                  <p className="text-xs text-stone-500 dark:text-stone-400 tabular-nums">
                     {day.total_ml > 0 ? `${Math.round(pct)}%` : '0%'}
                   </p>
                 </div>
