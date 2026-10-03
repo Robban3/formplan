@@ -34,13 +34,34 @@ workflows:
     scripts:
       - name: Installera beroenden (workspace-root)
         script: npm ci
-      - name: Bygg webben (prod) + synka Capacitor
+      - name: Bygg webben (prod) + skapa iOS-projektet
         script: |
+          set -e
           cd apps/web
           npm run build
-          npx cap add ios || true   # första bygget skapar ios/, sedan no-op
+
+          # `cap add ios` får ALDRIG tystas med "|| true". Misslyckas den finns
+          # inget Xcode-projekt, och varje följande steg felar på ett sätt som
+          # döljer orsaken — första bygget dog på "Info.plist saknas" när det
+          # verkliga felet låg här.
+          if [ ! -d ios ]; then
+            echo "--- skapar iOS-projektet ---"
+            npx cap add ios
+          else
+            echo "--- ios/ finns redan ---"
+          fi
+
           npx cap sync ios
-          # iOS-projektet genereras här, så ikonerna skapas också här — annars
+
+          # cap sync kan skriva ut ett fel och ändå avsluta med 0. Kontrollera
+          # resultatet i stället för returkoden.
+          if [ ! -f ios/App/App/Info.plist ]; then
+            echo "::error:: iOS-projektet saknas efter cap add/sync — se utskriften ovan."
+            ls -la ios 2>/dev/null || echo "(ios/ finns inte alls)"
+            exit 1
+          fi
+
+          # Ikonerna genereras här eftersom projektet skapas här — annars
           # skeppas Capacitors standardikon till App Store. Källbilderna ligger
           # i apps/web/assets/ och delas med Android.
           npx capacitor-assets generate --ios
