@@ -127,10 +127,10 @@ function phase(id: string): number {
 export function ExercisePlaceholder({ className = '' }: { className?: string }) {
   return (
     <div
-      className={`flex items-center justify-center bg-stone-100 text-stone-300 ${className}`}
+      className={`flex items-center justify-center bg-stone-100 dark:bg-stone-700 text-stone-300 dark:text-stone-600 ${className}`}
       aria-hidden="true"
     >
-      <DumbbellIcon className="w-5 h-5 stroke-stone-300" />
+      <DumbbellIcon className="w-5 h-5 stroke-stone-300 dark:stroke-stone-600" />
     </div>
   )
 }
@@ -171,7 +171,7 @@ export function ExerciseMedia({
 
   return (
     <div
-      className={`relative overflow-hidden bg-stone-100 flex-shrink-0 ${box} ${className}`}
+      className={`relative overflow-hidden bg-stone-100 dark:bg-stone-700 flex-shrink-0 ${box} ${className}`}
     >
       {exercise.images.map((src, i) => (
         <img
@@ -207,7 +207,7 @@ export function ExerciseMedia({
             <span
               key={i}
               className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                i === shown ? 'bg-white' : 'bg-white/40'
+                i === shown ? 'bg-white dark:bg-stone-800' : 'bg-white dark:bg-stone-800/40'
               }`}
             />
           ))}

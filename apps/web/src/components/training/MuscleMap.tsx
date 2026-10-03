@@ -386,7 +386,7 @@ export function MuscleMap({ primary, secondary = [], className = '', hideLegend 
           {primaryList.map((m) => (
             <span
               key={`p-${m}`}
-              className="inline-flex items-center gap-1 text-[10px] font-semibold text-forest-800 bg-forest-50 border border-forest-200 rounded-full px-2 py-0.5"
+              className="inline-flex items-center gap-1 text-[10px] font-semibold text-forest-800 dark:text-forest-200 bg-forest-50 dark:bg-forest-900/30 border border-forest-200 dark:border-forest-800 rounded-full px-2 py-0.5"
             >
               <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLOR.primary }} />
               {MUSCLE_LABELS[m]}
@@ -395,7 +395,7 @@ export function MuscleMap({ primary, secondary = [], className = '', hideLegend 
           {secondaryList.map((m) => (
             <span
               key={`s-${m}`}
-              className="inline-flex items-center gap-1 text-[10px] font-medium text-stone-500 bg-stone-100 rounded-full px-2 py-0.5"
+              className="inline-flex items-center gap-1 text-[10px] font-medium text-stone-500 dark:text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-700 rounded-full px-2 py-0.5"
             >
               <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLOR.secondary }} />
               {MUSCLE_LABELS[m]}

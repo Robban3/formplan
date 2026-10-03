@@ -20,15 +20,15 @@ function Toggle({ label, sub, settingKey }: { label: string; sub: string; settin
   return (
     <div className="flex items-center justify-between px-4 py-4">
       <div className="flex-1 mr-4">
-        <p className="text-stone-800 font-medium text-sm">{label}</p>
-        {sub && <p className="text-xs text-stone-400 mt-0.5">{sub}</p>}
+        <p className="text-stone-800 dark:text-stone-200 font-medium text-sm">{label}</p>
+        {sub && <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{sub}</p>}
       </div>
       <button
         onClick={() => settingsStore.set(settingKey, !on)}
-        className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors ${on ? 'bg-forest-700' : 'bg-stone-200'}`}
+        className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors ${on ? 'bg-forest-700' : 'bg-stone-200 dark:bg-stone-700'}`}
         aria-pressed={on}
       >
-        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${on ? 'translate-x-5' : 'translate-x-0'}`} />
+        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white dark:bg-stone-800 rounded-full shadow transition-transform ${on ? 'translate-x-5' : 'translate-x-0'}`} />
       </button>
     </div>
   )
@@ -43,8 +43,8 @@ function NumberInput({ label, sub, settingKey, unit, min, max, step = 1, onCommi
   return (
     <div className="flex items-center justify-between px-4 py-4">
       <div className="flex-1 mr-4">
-        <p className="text-stone-800 font-medium text-sm">{label}</p>
-        {sub && <p className="text-xs text-stone-400 mt-0.5">{sub}</p>}
+        <p className="text-stone-800 dark:text-stone-200 font-medium text-sm">{label}</p>
+        {sub && <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{sub}</p>}
       </div>
       <div className="flex items-center gap-1.5">
         <input
@@ -61,9 +61,9 @@ function NumberInput({ label, sub, settingKey, unit, min, max, step = 1, onCommi
               onCommit?.(n)
             }
           }}
-          className="w-20 text-right bg-stone-100 rounded-xl px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400"
+          className="w-20 text-right bg-stone-100 dark:bg-stone-700 rounded-xl px-3 py-2 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400"
         />
-        <span className="text-xs text-stone-400 w-8">{unit}</span>
+        <span className="text-xs text-stone-400 dark:text-stone-500 w-8">{unit}</span>
       </div>
     </div>
   )
@@ -77,13 +77,13 @@ function SelectInput({ label, sub, settingKey, options }: {
   return (
     <div className="flex items-center justify-between px-4 py-4">
       <div className="flex-1 mr-4">
-        <p className="text-stone-800 font-medium text-sm">{label}</p>
-        {sub && <p className="text-xs text-stone-400 mt-0.5">{sub}</p>}
+        <p className="text-stone-800 dark:text-stone-200 font-medium text-sm">{label}</p>
+        {sub && <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{sub}</p>}
       </div>
       <select
         value={value}
         onChange={(e) => settingsStore.set(settingKey, Number(e.target.value))}
-        className="bg-stone-100 rounded-xl px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400"
+        className="bg-stone-100 dark:bg-stone-700 rounded-xl px-3 py-2 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>{o.label}</option>
@@ -96,8 +96,8 @@ function SelectInput({ label, sub, settingKey, options }: {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-xs font-semibold text-stone-400 uppercase tracking-wide px-1 mb-2">{title}</p>
-      <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden divide-y divide-stone-100">
+      <p className="text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide px-1 mb-2">{title}</p>
+      <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden divide-y divide-stone-100">
         {children}
       </div>
     </div>
@@ -143,17 +143,17 @@ function NotificationToggle() {
   return (
     <div className="flex items-center justify-between px-4 py-4">
       <div className="flex-1 mr-4">
-        <p className="text-stone-800 font-medium text-sm">Aktivera notifikationer</p>
-        <p className="text-xs text-stone-400 mt-0.5">
+        <p className="text-stone-800 dark:text-stone-200 font-medium text-sm">Aktivera notifikationer</p>
+        <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
           {permissionStatus ?? 'Tillåt FormPlan att skicka påminnelser'}
         </p>
       </div>
       <button
         onClick={handleToggle}
-        className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors ${on ? 'bg-forest-700' : 'bg-stone-200'}`}
+        className={`relative flex-shrink-0 w-11 h-6 rounded-full transition-colors ${on ? 'bg-forest-700' : 'bg-stone-200 dark:bg-stone-700'}`}
         aria-pressed={on}
       >
-        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${on ? 'translate-x-5' : 'translate-x-0'}`} />
+        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white dark:bg-stone-800 rounded-full shadow transition-transform ${on ? 'translate-x-5' : 'translate-x-0'}`} />
       </button>
     </div>
   )
@@ -233,18 +233,23 @@ export function SettingsPage() {
 
   return (
     <div className="pb-10">
-      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100">
-        <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 text-sm mb-3">
-          <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
+      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
+        <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-3">
+          <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
           Mer
         </button>
-        <h1 className="text-2xl font-bold text-stone-900">Inställningar</h1>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Inställningar</h1>
       </div>
 
       <div className="px-5 mt-5 space-y-5">
 
-        {/* "Mörkt läge" är dolt tills komponenterna har dark:-varianter —
-            idag gör toggeln ingenting synbart och känns bara trasig. */}
+        <Section title="Utseende">
+          <Toggle
+            label="Mörkt läge"
+            sub="Dämpad färgskala — lättare för ögonen i gymmet och på kvällen"
+            settingKey="dark_mode"
+          />
+        </Section>
 
         <Section title="Träning">
           <Toggle
@@ -309,7 +314,7 @@ export function SettingsPage() {
 
       </div>
 
-      <p className="text-xs text-stone-300 text-center mt-6 px-5">Inställningar sparas lokalt på din enhet.</p>
+      <p className="text-xs text-stone-300 dark:text-stone-600 text-center mt-6 px-5">Inställningar sparas lokalt på din enhet.</p>
     </div>
   )
 }

@@ -34,10 +34,10 @@ export function MacroRing({ eaten, goal, size = 120 }: Props) {
       </svg>
       {/* Center text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-bold text-stone-900" style={{ fontSize: size * 0.19 }}>
+        <span className="font-bold text-stone-900 dark:text-stone-100" style={{ fontSize: size * 0.19 }}>
           {eaten.toLocaleString('sv-SE')}
         </span>
-        <span className="text-stone-400" style={{ fontSize: size * 0.1 }}>
+        <span className="text-stone-400 dark:text-stone-500" style={{ fontSize: size * 0.1 }}>
           / {goal.toLocaleString('sv-SE')} kcal
         </span>
       </div>

@@ -76,7 +76,7 @@ export function TabLayout() {
       </div>
 
       {/* Bottom tab bar */}
-      <nav className="flex-shrink-0 bg-white border-t border-stone-200 safe-bottom">
+      <nav className="flex-shrink-0 bg-white dark:bg-stone-800 border-t border-stone-200 dark:border-stone-700 safe-bottom">
         <div className="flex">
           {tabs.map(({ to, label, Icon }) => (
             <NavLink
@@ -84,13 +84,13 @@ export function TabLayout() {
               to={to}
               className={({ isActive }) =>
                 `flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors ${
-                  isActive ? 'text-forest-600' : 'text-stone-400'
+                  isActive ? 'text-forest-600' : 'text-stone-400 dark:text-stone-500'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <Icon className={`w-6 h-6 ${isActive ? 'stroke-forest-600' : 'stroke-stone-400'}`} />
+                  <Icon className={`w-6 h-6 ${isActive ? 'stroke-forest-600' : 'stroke-stone-400 dark:stroke-stone-500'}`} />
                   {label}
                 </>
               )}

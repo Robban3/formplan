@@ -42,7 +42,7 @@ function ExerciseRow({ exercise }: { exercise: Exercise }) {
   const catalog = resolveExercise(exercise)
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm border border-stone-100">
+    <div className="bg-white dark:bg-stone-800 rounded-2xl p-4 shadow-sm border border-stone-100 dark:border-stone-700">
       <div className="flex items-center gap-3">
         {catalog && <ExerciseMedia key={catalog.id} exercise={catalog} variant="thumb" />}
         <div className="flex-1 min-w-0">
@@ -52,20 +52,20 @@ function ExerciseRow({ exercise }: { exercise: Exercise }) {
               aria-expanded={open}
               className="text-left w-full flex items-center gap-1.5"
             >
-              <span className="font-semibold text-stone-900 text-sm truncate">{exercise.name}</span>
+              <span className="font-semibold text-stone-900 dark:text-stone-100 text-sm truncate">{exercise.name}</span>
               <ChevronDownIcon
-                className={`w-3.5 h-3.5 stroke-stone-300 flex-shrink-0 transition-transform ${
+                className={`w-3.5 h-3.5 stroke-stone-300 dark:stroke-stone-600 flex-shrink-0 transition-transform ${
                   open ? 'rotate-180' : ''
                 }`}
               />
             </button>
           ) : (
-            <p className="font-semibold text-stone-900 text-sm">{exercise.name}</p>
+            <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm">{exercise.name}</p>
           )}
-          <p className="text-stone-400 text-xs mt-0.5">
+          <p className="text-stone-400 dark:text-stone-500 text-xs mt-0.5">
             {exercise.sets} set × {exercise.reps} reps
           </p>
-          {exercise.notes && <p className="text-stone-300 text-xs mt-0.5">{exercise.notes}</p>}
+          {exercise.notes && <p className="text-stone-300 dark:text-stone-600 text-xs mt-0.5">{exercise.notes}</p>}
         </div>
       </div>
 
@@ -133,7 +133,7 @@ export function WorkoutDetail() {
 
   if (!day) {
     return (
-      <div className="px-5 pt-12 text-center text-stone-400">
+      <div className="px-5 pt-12 text-center text-stone-400 dark:text-stone-500">
         <p>Passet hittades inte.</p>
         <button onClick={() => navigate('/traning')} className="text-forest-600 mt-2">
           Tillbaka
@@ -154,7 +154,7 @@ export function WorkoutDetail() {
 
       {/* Description */}
       <div className="px-5 py-4">
-        <p className="text-stone-500 text-sm">
+        <p className="text-stone-500 dark:text-stone-400 dark:text-stone-500 text-sm">
           Ett balanserat pass som tränar {content.focus.toLowerCase()} med fokus på styrka och teknik.
         </p>
       </div>

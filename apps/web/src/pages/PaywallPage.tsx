@@ -48,16 +48,16 @@ export function PaywallPage({ status }: { status: BillingStatus }) {
         </div>
 
         <h1 className="text-2xl font-bold text-center">Din gratisperiod är slut</h1>
-        <p className="text-stone-400 text-center mt-2 text-sm">
+        <p className="text-stone-400 dark:text-stone-500 text-center mt-2 text-sm">
           Fortsätt med FormPlan Premium och behåll allt du byggt upp.
         </p>
 
         <div className="mt-7 bg-stone-800/80 border border-stone-700 rounded-2xl p-5">
           <div className="flex items-baseline justify-center gap-1">
             <span className="text-4xl font-extrabold">{price}</span>
-            <span className="text-stone-400 font-medium">kr/mån</span>
+            <span className="text-stone-400 dark:text-stone-500 font-medium">kr/mån</span>
           </div>
-          <p className="text-center text-xs text-stone-500 mt-1">Avsluta när du vill</p>
+          <p className="text-center text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500 mt-1">Avsluta när du vill</p>
 
           <ul className="mt-5 space-y-2.5">
             {FEATURES.map((f) => (
@@ -81,7 +81,7 @@ export function PaywallPage({ status }: { status: BillingStatus }) {
           {loading ? 'Öppnar betalning…' : `Starta prenumeration – ${price} kr/mån`}
         </button>
 
-        <button onClick={logout} className="mt-4 w-full text-stone-500 text-sm py-2">
+        <button onClick={logout} className="mt-4 w-full text-stone-500 dark:text-stone-400 dark:text-stone-500 text-sm py-2">
           Logga ut
         </button>
       </div>

@@ -52,7 +52,7 @@ function RequireProfile({ children }: { children: ReactNode }) {
 
   if (state === 'checking') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50">
+      <div className="min-h-screen flex items-center justify-center bg-stone-50 dark:bg-stone-800">
         <div className="w-8 h-8 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
       </div>
     )
@@ -97,7 +97,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50">
+      <div className="min-h-screen flex items-center justify-center bg-stone-50 dark:bg-stone-800">
         <div className="w-8 h-8 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
       </div>
     )

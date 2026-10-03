@@ -31,7 +31,10 @@ export interface AppSettings {
 const KEY = 'formplan_settings'
 
 const DEFAULTS: AppSettings = {
-  dark_mode: false,
+  // Mörkt läge är standard: appen används mest i gym och på kvällar, och
+  // inloggningen har alltid varit mörk — ljust läge gjorde att resten av appen
+  // bländade direkt efter inloggning. Växeln finns under Inställningar.
+  dark_mode: true,
   auto_rest: true,
   rest_seconds_default: 60,
   keep_screen_on: true,

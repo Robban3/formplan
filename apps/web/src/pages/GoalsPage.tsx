@@ -88,13 +88,13 @@ function GoalCard({
   const isAuto = goal.goalMeta && goal.goalMeta.type !== 'manual'
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-100 p-4">
+    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
       <div className="flex items-start gap-3">
         {/* Icon / toggle */}
         <button
           onClick={onToggle}
           className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
-            goal.done ? 'bg-forest-700' : 'bg-forest-50'
+            goal.done ? 'bg-forest-700' : 'bg-forest-50 dark:bg-forest-900/30'
           }`}
         >
           <TargetIcon className={`w-5 h-5 ${goal.done ? 'text-white' : 'text-forest-600'}`} />
@@ -103,11 +103,11 @@ function GoalCard({
         <div className="flex-1 min-w-0">
           {/* Title + auto badge */}
           <div className="flex items-start gap-2">
-            <p className={`text-sm font-semibold flex-1 ${goal.done ? 'text-stone-400 line-through' : 'text-stone-900'}`}>
+            <p className={`text-sm font-semibold flex-1 ${goal.done ? 'text-stone-400 dark:text-stone-500 line-through' : 'text-stone-900 dark:text-stone-100'}`}>
               {goal.text}
             </p>
             {isAuto && !goal.done && (
-              <span className="text-[9px] bg-forest-100 text-forest-700 px-1.5 py-0.5 rounded-full font-semibold flex-shrink-0">
+              <span className="text-[9px] bg-forest-100 dark:bg-forest-900/40 text-forest-700 dark:text-forest-300 px-1.5 py-0.5 rounded-full font-semibold flex-shrink-0">
                 Auto
               </span>
             )}
@@ -115,10 +115,10 @@ function GoalCard({
 
           {/* Live status */}
           {statusText && !goal.done && (
-            <p className="text-xs text-stone-400 mt-0.5">{statusText}</p>
+            <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{statusText}</p>
           )}
           {!statusText && !goal.done && (
-            <p className="text-xs text-stone-400 mt-0.5">Framsteg</p>
+            <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">Framsteg</p>
           )}
 
           {/* Progress bar */}
@@ -127,12 +127,12 @@ function GoalCard({
             onClick={() => !isAuto && !goal.done && setEditingProgress((v) => !v)}
           >
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-semibold text-stone-700">{pct}%</span>
+              <span className="text-xs font-semibold text-stone-700 dark:text-stone-300 dark:text-stone-600">{pct}%</span>
               {!isAuto && !goal.done && (
-                <span className="text-[10px] text-stone-400">Tryck för att justera</span>
+                <span className="text-[10px] text-stone-400 dark:text-stone-500">Tryck för att justera</span>
               )}
             </div>
-            <div className="w-full bg-stone-100 rounded-full h-2">
+            <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${goal.done ? 'bg-forest-400' : 'bg-forest-700'}`}
                 style={{ width: `${pct}%` }}
@@ -145,9 +145,9 @@ function GoalCard({
             <div className="flex items-center gap-2 mt-3">
               <button
                 onClick={() => onSetProgress(Math.max(0, goal.progress - 10))}
-                className="w-8 h-8 rounded-lg bg-stone-100 text-stone-600 font-bold text-sm flex items-center justify-center"
+                className="w-8 h-8 rounded-lg bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600 font-bold text-sm flex items-center justify-center"
               >−</button>
-              <div className="flex-1 text-center text-sm font-semibold text-stone-900">{goal.progress}%</div>
+              <div className="flex-1 text-center text-sm font-semibold text-stone-900 dark:text-stone-100">{goal.progress}%</div>
               <button
                 onClick={() => onSetProgress(Math.min(100, goal.progress + 10))}
                 className="w-8 h-8 rounded-lg bg-forest-700 text-white font-bold text-sm flex items-center justify-center"
@@ -157,7 +157,7 @@ function GoalCard({
         </div>
 
         <button onClick={onDelete} className="p-1 -mr-1 -mt-1 flex-shrink-0">
-          <XIcon className="w-4 h-4 text-stone-300" />
+          <XIcon className="w-4 h-4 text-stone-300 dark:text-stone-600" />
         </button>
       </div>
 
@@ -167,7 +167,7 @@ function GoalCard({
       {adjustment && !goal.done && (
         <button
           onClick={onApply}
-          className="mt-3 w-full py-2.5 rounded-xl border border-forest-200 bg-forest-50 text-sm font-semibold text-forest-700 hover:bg-forest-100 transition-colors"
+          className="mt-3 w-full py-2.5 rounded-xl border border-forest-200 dark:border-forest-800 bg-forest-50 dark:bg-forest-900/30 text-sm font-semibold text-forest-700 dark:text-forest-300 hover:bg-forest-100 dark:bg-forest-900/40 transition-colors"
         >
           Anpassa mitt schema efter det här målet
         </button>
@@ -260,20 +260,20 @@ export function GoalsPage() {
 
   return (
     <div className="pb-24">
-      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100">
-        <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 text-sm mb-3">
-          <ChevronLeftIcon className="w-4 h-4 text-stone-400" />
+      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
+        <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-3">
+          <ChevronLeftIcon className="w-4 h-4 text-stone-400 dark:text-stone-500" />
           Mer
         </button>
-        <h1 className="text-2xl font-bold text-stone-900">Mina mål</h1>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Mina mål</h1>
 
-        <div className="flex gap-5 mt-4 border-b border-stone-100 -mb-4">
+        <div className="flex gap-5 mt-4 border-b border-stone-100 dark:border-stone-700 -mb-4">
           {(['aktiva', 'tidigare'] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={`pb-4 text-sm font-medium capitalize transition-colors ${
-                tab === t ? 'text-forest-600 border-b-2 border-forest-600' : 'text-stone-400'
+                tab === t ? 'text-forest-600 border-b-2 border-forest-600' : 'text-stone-400 dark:text-stone-500'
               }`}
             >
               {t === 'aktiva' ? `Aktiva mål${active.length > 0 ? ` (${active.length})` : ''}` : 'Tidigare mål'}
@@ -286,7 +286,7 @@ export function GoalsPage() {
         {shown.length === 0 && (
           <div className="text-center py-12">
             <TargetIcon className="w-12 h-12 text-stone-200 mx-auto mb-3" />
-            <p className="text-stone-400 text-sm">
+            <p className="text-stone-400 dark:text-stone-500 text-sm">
               {tab === 'aktiva' ? 'Inga aktiva mål ännu.' : 'Inga avklarade mål ännu.'}
             </p>
           </div>
@@ -312,17 +312,17 @@ export function GoalsPage() {
             så det får aldrig hända av ett enda tryck. */}
         {pending && (
           <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-4 pb-6">
-            <div className="bg-white rounded-2xl p-5 w-full max-w-sm">
-              <p className="font-bold text-stone-900">Anpassa schemat?</p>
-              <p className="text-sm text-stone-600 mt-2">{pending.adjustment.description}</p>
-              <p className="text-sm text-stone-600 mt-2">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl p-5 w-full max-w-sm">
+              <p className="font-bold text-stone-900 dark:text-stone-100">Anpassa schemat?</p>
+              <p className="text-sm text-stone-600 dark:text-stone-300 dark:text-stone-600 mt-2">{pending.adjustment.description}</p>
+              <p className="text-sm text-stone-600 dark:text-stone-300 dark:text-stone-600 mt-2">
                 Ditt nuvarande schema ersätts med ett nytt.
               </p>
               <div className="flex gap-2 mt-5">
                 <button
                   onClick={() => setPending(null)}
                   disabled={applying}
-                  className="flex-1 py-2.5 rounded-xl border border-stone-200 text-sm font-semibold text-stone-600 disabled:opacity-60"
+                  className="flex-1 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-sm font-semibold text-stone-600 dark:text-stone-300 dark:text-stone-600 disabled:opacity-60"
                 >
                   Avbryt
                 </button>
@@ -340,20 +340,20 @@ export function GoalsPage() {
 
         {/* Add form */}
         {adding && tab === 'aktiva' && (
-          <div className="bg-white rounded-2xl border border-stone-100 p-4 space-y-3">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 space-y-3">
             <input
               autoFocus
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addGoal(text)}
               placeholder="Beskriv ditt mål…"
-              className="w-full bg-stone-100 rounded-xl px-4 py-3 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+              className="w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-3 text-stone-900 dark:text-stone-100 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
             />
 
             {/* Auto-detection preview */}
             {preview && (
               <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-xl ${
-                previewIsAuto ? 'bg-forest-50 text-forest-700' : 'bg-stone-50 text-stone-400'
+                previewIsAuto ? 'bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300' : 'bg-stone-50 dark:bg-stone-800 text-stone-400 dark:text-stone-500'
               }`}>
                 <span>{previewIsAuto ? '✓ Automatisk spårning detekterad' : '○ Manuell uppföljning'}</span>
               </div>
@@ -361,13 +361,13 @@ export function GoalsPage() {
 
             {/* Suggestions */}
             <div className="space-y-1">
-              <p className="text-xs text-stone-400 font-medium">Förslag med automatisk spårning:</p>
+              <p className="text-xs text-stone-400 dark:text-stone-500 font-medium">Förslag med automatisk spårning:</p>
               <div className="flex flex-wrap gap-2">
                 {SUGGESTIONS.filter((s) => s.hint.includes('Auto')).map((s) => (
                   <button
                     key={s.text}
                     onClick={() => addGoal(s.text)}
-                    className="text-xs bg-forest-50 text-forest-700 border border-forest-100 px-3 py-1.5 rounded-full hover:bg-forest-100 transition-colors"
+                    className="text-xs bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 border border-forest-100 dark:border-forest-800 px-3 py-1.5 rounded-full hover:bg-forest-100 dark:bg-forest-900/40 transition-colors"
                   >
                     {s.text}
                   </button>
@@ -376,7 +376,7 @@ export function GoalsPage() {
             </div>
 
             <div className="flex gap-3">
-              <button onClick={() => setAdding(false)} className="flex-1 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-sm font-medium">
+              <button onClick={() => setAdding(false)} className="flex-1 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600 text-sm font-medium">
                 Avbryt
               </button>
               <button onClick={() => addGoal(text)} className="flex-1 py-2.5 rounded-xl bg-forest-700 text-white text-sm font-semibold">

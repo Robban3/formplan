@@ -143,15 +143,15 @@ export function MeasurementsPage() {
 
   return (
     <div className="pb-10">
-      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-400 text-sm mb-3">
-          <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
+      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-3">
+          <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
           Mer
         </button>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-stone-900">Kroppsmätningar</h1>
-            <p className="text-sm text-stone-400 mt-0.5">Följ din kroppssammansättning</p>
+            <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Kroppsmätningar</h1>
+            <p className="text-sm text-stone-400 dark:text-stone-500 mt-0.5">Följ din kroppssammansättning</p>
           </div>
           <button
             onClick={() => setAdding(true)}
@@ -166,26 +166,26 @@ export function MeasurementsPage() {
       <div className="px-5 mt-5 space-y-4">
         {/* Add form */}
         {adding && (
-          <div className="bg-white rounded-2xl border border-stone-100 p-4 space-y-4">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 space-y-4">
             <div className="flex items-center justify-between">
-              <p className="font-semibold text-stone-800">Ny mätning</p>
+              <p className="font-semibold text-stone-800 dark:text-stone-200">Ny mätning</p>
               <button onClick={() => { setAdding(false); setForm({}) }}>
-                <XIcon className="w-4 h-4 stroke-stone-400" />
+                <XIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
               </button>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {FIELDS.map((f) => (
                 <div key={f.key} className="min-w-0">
-                  <label className="text-xs text-stone-500 font-medium">{f.label}</label>
+                  <label className="text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500 font-medium">{f.label}</label>
                   <div className="flex items-center gap-1 mt-1">
                     <input
                       type="number" inputMode="decimal"
                       placeholder={f.placeholder}
                       value={form[f.key] ?? ''}
                       onChange={(e) => setForm((prev) => ({ ...prev, [f.key]: e.target.value }))}
-                      className="flex-1 min-w-0 bg-stone-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+                      className="flex-1 min-w-0 bg-stone-100 dark:bg-stone-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
                     />
-                    <span className="text-xs text-stone-400 w-6">{f.unit}</span>
+                    <span className="text-xs text-stone-400 dark:text-stone-500 w-6">{f.unit}</span>
                   </div>
                 </div>
               ))}
@@ -208,10 +208,10 @@ export function MeasurementsPage() {
               if (vals.length === 0) return null
               const color = f.key === 'weight_kg' ? '#22e6c6' : '#6366f1'
               return (
-                <div key={f.key} className="bg-white rounded-2xl border border-stone-100 p-3">
-                  <p className="text-xs text-stone-400 font-medium">{f.label}</p>
+                <div key={f.key} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-3">
+                  <p className="text-xs text-stone-400 dark:text-stone-500 font-medium">{f.label}</p>
                   {latestVal && (
-                    <p className="text-lg font-bold text-stone-900 mt-0.5">
+                    <p className="text-lg font-bold text-stone-900 dark:text-stone-100 mt-0.5">
                       {formatKg(latestVal)} {f.unit}
                     </p>
                   )}
@@ -226,14 +226,14 @@ export function MeasurementsPage() {
 
         {/* History list */}
         {entries.length > 0 && (
-          <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
-            <p className="font-semibold text-stone-800 px-4 py-3 border-b border-stone-50">Historik</p>
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
+            <p className="font-semibold text-stone-800 dark:text-stone-200 px-4 py-3 border-b border-stone-50">Historik</p>
             {[...entries].reverse().map((e) => (
               <div key={e.id} className="px-4 py-3 border-b border-stone-50 last:border-0">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-semibold text-stone-800">{fmtDate(e.date)}</p>
+                  <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">{fmtDate(e.date)}</p>
                   <button onClick={() => handleDelete(e.date)}>
-                    <XIcon className="w-4 h-4 stroke-stone-300" />
+                    <XIcon className="w-4 h-4 stroke-stone-300 dark:stroke-stone-600" />
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-1">
@@ -241,8 +241,8 @@ export function MeasurementsPage() {
                     const val = (e as unknown as Record<string, unknown>)[f.key] as number | undefined
                     if (!val) return null
                     return (
-                      <span key={f.key} className="text-xs text-stone-500">
-                        <span className="font-medium text-stone-700">{f.label}:</span>{' '}
+                      <span key={f.key} className="text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500">
+                        <span className="font-medium text-stone-700 dark:text-stone-300 dark:text-stone-600">{f.label}:</span>{' '}
                         {formatKg(val)} {f.unit}
                       </span>
                     )
@@ -255,11 +255,11 @@ export function MeasurementsPage() {
 
         {entries.length === 0 && !adding && (
           <div className="text-center py-16">
-            <div className="w-14 h-14 rounded-2xl bg-stone-100 flex items-center justify-center mx-auto mb-3">
-              <RulerIcon className="w-7 h-7 stroke-stone-400" />
+            <div className="w-14 h-14 rounded-2xl bg-stone-100 dark:bg-stone-700 flex items-center justify-center mx-auto mb-3">
+              <RulerIcon className="w-7 h-7 stroke-stone-400 dark:stroke-stone-500" />
             </div>
-            <p className="font-semibold text-stone-800">Inga mätningar ännu</p>
-            <p className="text-sm text-stone-400 mt-1">Tryck på + för att logga din första mätning</p>
+            <p className="font-semibold text-stone-800 dark:text-stone-200">Inga mätningar ännu</p>
+            <p className="text-sm text-stone-400 dark:text-stone-500 mt-1">Tryck på + för att logga din första mätning</p>
           </div>
         )}
       </div>

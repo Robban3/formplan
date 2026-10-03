@@ -118,19 +118,19 @@ export function MealWeekPage() {
   return (
     <div className="pb-12">
       {/* Header */}
-      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-400 text-sm mb-3">
-          <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
+      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-3">
+          <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
           Kost
         </button>
-        <h1 className="text-2xl font-bold text-stone-900">Veckoplanering</h1>
-        <p className="text-sm text-stone-400 mt-0.5">Generera hela veckan eller enstaka dagar utifrån kalorier</p>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Veckoplanering</h1>
+        <p className="text-sm text-stone-400 dark:text-stone-500 mt-0.5">Generera hela veckan eller enstaka dagar utifrån kalorier</p>
       </div>
 
       <div className="px-5 mt-4 space-y-4">
         {/* Controls */}
-        <div className="bg-white rounded-2xl border border-stone-100 p-4 space-y-3">
-          <p className="font-semibold text-stone-800 text-sm">Dagligt kaloriintag</p>
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 space-y-3">
+          <p className="font-semibold text-stone-800 dark:text-stone-200 text-sm">Dagligt kaloriintag</p>
           <div className="flex items-center gap-2">
             <input
               type="number"
@@ -143,9 +143,9 @@ export function MealWeekPage() {
                 const v = Number(e.target.value)
                 update({ ...plan, kcal: Math.max(800, Math.min(6000, Number.isFinite(v) && v > 0 ? v : 800)) })
               }}
-              className="flex-1 bg-stone-100 rounded-xl px-4 py-2.5 text-stone-900 font-bold text-center focus:outline-none focus:ring-2 focus:ring-forest-400"
+              className="flex-1 bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-2.5 text-stone-900 dark:text-stone-100 font-bold text-center focus:outline-none focus:ring-2 focus:ring-forest-400"
             />
-            <span className="text-stone-400 text-sm">kcal</span>
+            <span className="text-stone-400 dark:text-stone-500 text-sm">kcal</span>
           </div>
           <div className="flex gap-2">
             {KCAL_PRESETS.map((k) => (
@@ -153,7 +153,7 @@ export function MealWeekPage() {
                 key={k}
                 onClick={() => update({ ...plan, kcal: k })}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  plan.kcal === k ? 'bg-forest-700 text-white' : 'bg-stone-100 text-stone-600'
+                  plan.kcal === k ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600'
                 }`}
               >
                 {k}
@@ -167,7 +167,7 @@ export function MealWeekPage() {
                 key={n}
                 onClick={() => update({ ...plan, mealCount: n })}
                 className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-colors ${
-                  plan.mealCount === n ? 'bg-forest-700 text-white' : 'bg-stone-100 text-stone-600'
+                  plan.mealCount === n ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600'
                 }`}
               >
                 {n} måltider
@@ -182,8 +182,8 @@ export function MealWeekPage() {
                 onClick={() => update({ ...plan, focus: opt.key })}
                 className={`py-2 rounded-xl text-xs font-semibold border-2 transition-colors ${
                   plan.focus === opt.key
-                    ? 'border-forest-600 bg-forest-50 text-forest-700'
-                    : 'border-stone-100 bg-stone-50 text-stone-600'
+                    ? 'border-forest-600 bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300'
+                    : 'border-stone-100 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-300 dark:text-stone-600'
                 }`}
               >
                 {opt.label}
@@ -210,12 +210,12 @@ export function MealWeekPage() {
                 key={d}
                 onClick={() => setSelected(d)}
                 className={`rounded-xl py-1.5 flex flex-col items-center border transition-colors ${
-                  isSel ? 'bg-forest-700 border-forest-700 text-white' : 'bg-white border-stone-100 text-stone-600'
+                  isSel ? 'bg-forest-700 border-forest-700 text-white' : 'bg-white dark:bg-stone-800 border-stone-100 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600'
                 } ${d === today && !isSel ? 'ring-1 ring-forest-300' : ''}`}
               >
                 <span className="text-[10px] font-medium">{DAY_SHORT[d - 1]}</span>
                 <span className="text-sm font-bold leading-tight">{dateForWeekday(d).getDate()}</span>
-                <span className={`text-[9px] ${isSel ? 'text-forest-100' : 'text-stone-400'}`}>
+                <span className={`text-[9px] ${isSel ? 'text-forest-100' : 'text-stone-400 dark:text-stone-500'}`}>
                   {total > 0 ? total : '–'}
                 </span>
               </button>
@@ -224,24 +224,24 @@ export function MealWeekPage() {
         </div>
 
         {/* Selected day */}
-        <div className="bg-white rounded-2xl border border-stone-100 p-4">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="font-bold text-stone-900">
+              <p className="font-bold text-stone-900 dark:text-stone-100">
                 {DAY_FULL[selected - 1]} {dateForWeekday(selected).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long' })}
               </p>
-              <p className="text-xs text-stone-400">{dayKcal} kcal totalt</p>
+              <p className="text-xs text-stone-400 dark:text-stone-500">{dayKcal} kcal totalt</p>
             </div>
             <button
               onClick={() => regenerateDay(selected)}
-              className="text-xs px-3 py-1.5 rounded-full border border-stone-200 text-stone-600 font-medium hover:border-forest-400 hover:text-forest-700 transition-colors"
+              className="text-xs px-3 py-1.5 rounded-full border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600 font-medium hover:border-forest-400 hover:text-forest-700 dark:text-forest-300 transition-colors"
             >
               Regenerera dag
             </button>
           </div>
 
           {isEmpty && (
-            <p className="text-center text-stone-400 text-sm py-6">
+            <p className="text-center text-stone-400 dark:text-stone-500 text-sm py-6">
               Inga måltider än. Generera veckan, regenerera dagen eller lägg till en egen måltid.
             </p>
           )}
@@ -250,10 +250,10 @@ export function MealWeekPage() {
           {day.generated?.meals.map((meal, i) => (
             <div key={`gen-${i}`} className="border-b border-stone-50 py-3 last:border-0">
               <div className="flex items-center justify-between mb-1">
-                <p className="text-sm font-semibold text-stone-800">{meal.label}</p>
-                <span className="text-xs font-medium text-stone-500">{meal.total.kcal} kcal</span>
+                <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">{meal.label}</p>
+                <span className="text-xs font-medium text-stone-500 dark:text-stone-400 dark:text-stone-500">{meal.total.kcal} kcal</span>
               </div>
-              <p className="text-xs text-stone-400 leading-relaxed">
+              <p className="text-xs text-stone-400 dark:text-stone-500 leading-relaxed">
                 {meal.foods.map((f) => `${f.name} (${f.amount_g} g)`).join(' · ')}
               </p>
             </div>
@@ -263,18 +263,18 @@ export function MealWeekPage() {
           {day.custom.map((m) => (
             <div key={m.id} className="flex items-center justify-between border-b border-stone-50 py-3 last:border-0">
               <div className="min-w-0">
-                <p className="text-sm font-medium text-stone-800 truncate">{m.name}</p>
-                <p className="text-xs text-stone-400">{SLOT_LABELS[m.slot]} · {m.kcal} kcal</p>
+                <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate">{m.name}</p>
+                <p className="text-xs text-stone-400 dark:text-stone-500">{SLOT_LABELS[m.slot]} · {m.kcal} kcal</p>
               </div>
               <button onClick={() => removeCustom(selected, m.id)} className="p-1 flex-shrink-0">
-                <XIcon className="w-4 h-4 stroke-stone-300" />
+                <XIcon className="w-4 h-4 stroke-stone-300 dark:stroke-stone-600" />
               </button>
             </div>
           ))}
 
           <button
             onClick={() => setAddSlot('frukost')}
-            className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 border border-dashed border-stone-200 rounded-xl text-sm text-forest-600 font-medium hover:bg-forest-50 transition-colors"
+            className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 border border-dashed border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-600 font-medium hover:bg-forest-50 dark:bg-forest-900/30 transition-colors"
           >
             <PlusIcon className="w-4 h-4 stroke-forest-600" />
             Lägg till egen måltid
@@ -285,13 +285,13 @@ export function MealWeekPage() {
       {/* Add custom meal modal */}
       {addSlot && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center">
-          <div className="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-5 space-y-4">
+          <div className="bg-white dark:bg-stone-800 w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-stone-900">
+              <h3 className="font-bold text-stone-900 dark:text-stone-100">
                 Egen måltid · {DAY_FULL[selected - 1]} {dateForWeekday(selected).getDate()}
               </h3>
               <button onClick={() => { setAddSlot(null); setAddText('') }}>
-                <XIcon className="w-5 h-5 stroke-stone-400" />
+                <XIcon className="w-5 h-5 stroke-stone-400 dark:stroke-stone-500" />
               </button>
             </div>
 
@@ -301,7 +301,7 @@ export function MealWeekPage() {
                   key={s}
                   onClick={() => setAddSlot(s)}
                   className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
-                    addSlot === s ? 'bg-forest-700 text-white border-forest-700' : 'bg-white border-stone-200 text-stone-600'
+                    addSlot === s ? 'bg-forest-700 text-white border-forest-700' : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600'
                   }`}
                 >
                   {SLOT_LABELS[s]}
@@ -315,9 +315,9 @@ export function MealWeekPage() {
               onChange={(e) => setAddText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addCustom()}
               placeholder="t.ex. kvarg med bär"
-              className="w-full bg-stone-100 rounded-xl px-4 py-3 text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400"
+              className="w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-3 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400"
             />
-            <p className="text-[11px] text-stone-400 -mt-1">AI uppskattar kalorierna för en normal portion.</p>
+            <p className="text-[11px] text-stone-400 dark:text-stone-500 -mt-1">AI uppskattar kalorierna för en normal portion.</p>
 
             <button
               onClick={addCustom}

@@ -12,7 +12,7 @@ type SearchTab = 'alla' | 'mina' | 'maltider'
 
 function FoodInitial({ name }: { name: string }) {
   return (
-    <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center font-bold text-sm text-stone-500 flex-shrink-0">
+    <div className="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-700 flex items-center justify-center font-bold text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500 flex-shrink-0">
       {name.trim()[0]?.toUpperCase() ?? '?'}
     </div>
   )
@@ -158,17 +158,17 @@ export function FoodSearch() {
   }
 
   return (
-    <div className="flex flex-col min-h-full bg-white pb-4">
+    <div className="flex flex-col min-h-full bg-white dark:bg-stone-800 pb-4">
       <div className="flex items-center gap-3 px-4 pt-header pb-3">
-        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100">
-          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600" />
+        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:bg-stone-700">
+          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300 dark:stroke-stone-600" />
         </button>
-        <h1 className="text-xl font-bold text-stone-900 flex-1">Livsmedelssökning</h1>
+        <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100 flex-1">Livsmedelssökning</h1>
       </div>
 
       <div className="px-4 pb-3">
-        <div className="flex items-center gap-3 bg-stone-100 rounded-xl px-4 py-3">
-          <svg className="w-4 h-4 stroke-stone-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" strokeWidth={2} strokeLinecap="round">
+        <div className="flex items-center gap-3 bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-3">
+          <svg className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" strokeWidth={2} strokeLinecap="round">
             <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
           </svg>
           <input
@@ -176,28 +176,28 @@ export function FoodSearch() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Sök livsmedel..."
-            className="flex-1 bg-transparent text-sm text-stone-800 placeholder:text-stone-400 outline-none"
+            className="flex-1 bg-transparent text-sm text-stone-800 dark:text-stone-200 placeholder:text-stone-400 dark:text-stone-500 outline-none"
           />
           {query && (
             <button onClick={() => { setQuery(''); setResults([]); setSelected(null) }}>
-              <XIcon className="w-4 h-4 stroke-stone-400" />
+              <XIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
             </button>
           )}
         </div>
-        <p className="text-xs text-stone-400 mt-2">Lägger till i {SLOT_LABELS[slot].toLowerCase()}</p>
+        <p className="text-xs text-stone-400 dark:text-stone-500 mt-2">Lägger till i {SLOT_LABELS[slot].toLowerCase()}</p>
 
         {/* Quick add: scan barcode or photo */}
         <div className="flex gap-2 mt-3">
           <button
             onClick={() => navigate(`/kost/skanna?slot=${slot}&date=${date}`)}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest-50 text-forest-700 text-sm font-semibold hover:bg-forest-100 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 text-sm font-semibold hover:bg-forest-100 dark:bg-forest-900/40 transition-colors"
           >
             <ScanBarcodeIcon className="w-4 h-4 stroke-forest-600" />
             Skanna streckkod
           </button>
           <button
             onClick={() => navigate(`/kost/foto?slot=${slot}&date=${date}`)}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest-50 text-forest-700 text-sm font-semibold hover:bg-forest-100 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 text-sm font-semibold hover:bg-forest-100 dark:bg-forest-900/40 transition-colors"
           >
             <CameraIcon className="w-4 h-4 stroke-forest-600" />
             Fotografera
@@ -205,7 +205,7 @@ export function FoodSearch() {
         </div>
       </div>
 
-      <div className="px-4 flex gap-4 border-b border-stone-100">
+      <div className="px-4 flex gap-4 border-b border-stone-100 dark:border-stone-700">
         {([
           { key: 'alla' as const, label: 'Alla' },
           { key: 'maltider' as const, label: 'Måltider' },
@@ -214,7 +214,7 @@ export function FoodSearch() {
             key={key}
             onClick={() => setTab(key)}
             className={`pb-3 text-sm font-medium transition-colors ${
-              tab === key ? 'text-forest-600 border-b-2 border-forest-600' : 'text-stone-400'
+              tab === key ? 'text-forest-600 border-b-2 border-forest-600' : 'text-stone-400 dark:text-stone-500'
             }`}
           >
             {label}
@@ -233,46 +233,46 @@ export function FoodSearch() {
           <div className="px-4 py-3 space-y-3">
             <button
               onClick={() => navigate('/kost/skapa-maltid')}
-              className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-stone-200 rounded-xl text-sm text-forest-600 font-medium hover:bg-forest-50 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-600 font-medium hover:bg-forest-50 dark:bg-forest-900/30 transition-colors"
             >
               <PlusIcon className="w-4 h-4 stroke-forest-600" />
               Skapa egen måltid
             </button>
             {customMeals.length === 0 ? (
-              <p className="text-center text-stone-400 text-sm pt-6">Inga sparade måltider ännu.</p>
+              <p className="text-center text-stone-400 dark:text-stone-500 text-sm pt-6">Inga sparade måltider ännu.</p>
             ) : (
               customMeals.map((meal) => {
                 const t = mealTotals(meal.ingredients)
                 return (
                   <div
                     key={meal.id}
-                    className="flex items-center gap-2 p-3 bg-white rounded-2xl border border-stone-100"
+                    className="flex items-center gap-2 p-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700"
                   >
                     <button
                       onClick={() => handleAddMeal(meal)}
                       disabled={adding}
                       className="flex items-center gap-3 flex-1 min-w-0 text-left disabled:opacity-60"
                     >
-                      <div className="w-11 h-11 rounded-xl bg-forest-50 flex items-center justify-center flex-shrink-0">
+                      <div className="w-11 h-11 rounded-xl bg-forest-50 dark:bg-forest-900/30 flex items-center justify-center flex-shrink-0">
                         <UtensilsIcon className="w-5 h-5 stroke-forest-600" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-stone-800 truncate">{meal.name}</p>
-                        <p className="text-xs text-stone-400">
+                        <p className="text-sm font-semibold text-stone-800 dark:text-stone-200 truncate">{meal.name}</p>
+                        <p className="text-xs text-stone-400 dark:text-stone-500">
                           {meal.ingredients.length} livsmedel · {t.kcal} kcal
                         </p>
                       </div>
                     </button>
                     <button
                       onClick={() => navigate(`/kost/skapa-maltid?id=${meal.id}`)}
-                      className="text-xs font-medium text-forest-600 px-2 py-1.5 rounded-lg hover:bg-forest-50 flex-shrink-0"
+                      className="text-xs font-medium text-forest-600 px-2 py-1.5 rounded-lg hover:bg-forest-50 dark:bg-forest-900/30 flex-shrink-0"
                     >
                       Ändra
                     </button>
                     <button
                       onClick={() => handleDeleteMeal(meal)}
                       aria-label={`Ta bort ${meal.name}`}
-                      className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 hover:bg-red-100"
+                      className="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/25 flex items-center justify-center flex-shrink-0 hover:bg-red-100"
                     >
                       <XIcon className="w-4 h-4 stroke-red-500" />
                     </button>
@@ -300,12 +300,12 @@ export function FoodSearch() {
                   setSelected(item)
                   setAmount(item.serving_size_g ? String(item.serving_size_g) : '100')
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 border-b border-stone-50 hover:bg-stone-50 active:bg-stone-100 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 border-b border-stone-50 hover:bg-stone-50 dark:bg-stone-800 active:bg-stone-100 dark:bg-stone-700 transition-colors"
               >
                 <FoodInitial name={item.name} />
                 <div className="flex-1 text-left min-w-0">
-                  <p className="text-sm font-medium text-stone-800 truncate">{item.name}</p>
-                  <p className="text-xs text-stone-400">
+                  <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate">{item.name}</p>
+                  <p className="text-xs text-stone-400 dark:text-stone-500">
                     Per 100 g: {item.kcal_per_100g} kcal · P {item.protein_per_100g}g · F {item.fat_per_100g}g · K {item.carbs_per_100g}g
                   </p>
                 </div>
@@ -318,13 +318,13 @@ export function FoodSearch() {
         )}
 
         {tab === 'alla' && !searching && query.length >= 2 && results.length === 0 && (
-          <div className="text-center pt-12 text-stone-400 text-sm">
+          <div className="text-center pt-12 text-stone-400 dark:text-stone-500 text-sm">
             Inga livsmedel hittades för &quot;{query}&quot;
           </div>
         )}
 
         {tab === 'alla' && !query && (
-          <div className="text-center pt-12 text-stone-400 text-sm">
+          <div className="text-center pt-12 text-stone-400 dark:text-stone-500 text-sm">
             Börja skriva för att söka livsmedel
           </div>
         )}
@@ -332,31 +332,31 @@ export function FoodSearch() {
 
       {/* Amount + Add panel */}
       {selected && tab === 'alla' && (
-        <div className="sticky bottom-0 border-t border-stone-100 px-4 py-4 bg-white">
+        <div className="sticky bottom-0 border-t border-stone-100 dark:border-stone-700 px-4 py-4 bg-white dark:bg-stone-800">
           <div className="flex items-center gap-3 mb-3">
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-stone-800 truncate">{selected.name}</p>
+              <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate">{selected.name}</p>
               {(() => {
                 const f = (parseFloat(amount) || 0) / 100
                 const kcal = Math.round(selected.kcal_per_100g * f)
                 return (
-                  <p className="text-xs text-stone-400">
+                  <p className="text-xs text-stone-400 dark:text-stone-500">
                     {kcal} kcal · {Math.round(kcal * 4.184)} kJ · P {Math.round(selected.protein_per_100g * f * 10) / 10}g · F{' '}
                     {Math.round(selected.fat_per_100g * f * 10) / 10}g · K {Math.round(selected.carbs_per_100g * f * 10) / 10}g
                   </p>
                 )
               })()}
             </div>
-            <div className="flex items-center gap-2 bg-stone-100 rounded-xl px-3 py-2">
+            <div className="flex items-center gap-2 bg-stone-100 dark:bg-stone-700 rounded-xl px-3 py-2">
               <input
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-16 bg-transparent text-sm font-medium text-stone-800 text-right outline-none"
+                className="w-16 bg-transparent text-sm font-medium text-stone-800 dark:text-stone-200 text-right outline-none"
                 min="1"
                 max="2000"
               />
-              <span className="text-sm text-stone-400">g</span>
+              <span className="text-sm text-stone-400 dark:text-stone-500">g</span>
             </div>
           </div>
           <button

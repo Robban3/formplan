@@ -10,8 +10,8 @@ const SLOT_LABELS: Record<MealSlot, string> = {
 }
 
 const SLOT_COLORS: Record<MealSlot, string> = {
-  frukost: 'bg-amber-100 text-amber-700',
-  lunch: 'bg-forest-100 text-forest-700',
+  frukost: 'bg-amber-100 dark:bg-amber-900/35 text-amber-700 dark:text-amber-300',
+  lunch: 'bg-forest-100 dark:bg-forest-900/40 text-forest-700 dark:text-forest-300',
   middag: 'bg-sky-100 text-sky-700',
   mellanmar: 'bg-purple-100 text-purple-700',
 }
@@ -38,11 +38,11 @@ export function MealSection({ slot, entries, date, onAdd, onTapEntry, onLogged }
   const totalKcal = entries.reduce((s, e) => s + e.kcal, 0)
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
+    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-stone-50">
-        <span className="font-semibold text-stone-800">{SLOT_LABELS[slot]}</span>
+        <span className="font-semibold text-stone-800 dark:text-stone-200">{SLOT_LABELS[slot]}</span>
         {totalKcal > 0 && (
-          <span className="text-sm font-medium text-stone-500">{totalKcal} kcal</span>
+          <span className="text-sm font-medium text-stone-500 dark:text-stone-400 dark:text-stone-500">{totalKcal} kcal</span>
         )}
       </div>
 
@@ -50,24 +50,24 @@ export function MealSection({ slot, entries, date, onAdd, onTapEntry, onLogged }
         <button
           key={entry.id}
           onClick={() => onTapEntry(entry)}
-          className="w-full flex items-center justify-between px-4 py-3 border-b border-stone-50 hover:bg-stone-50 active:bg-stone-100 transition-colors"
+          className="w-full flex items-center justify-between px-4 py-3 border-b border-stone-50 hover:bg-stone-50 dark:bg-stone-800 active:bg-stone-100 dark:bg-stone-700 transition-colors"
         >
           <div className="flex items-center gap-3 min-w-0">
             <FoodAvatar name={entry.food_name} slot={slot} />
             <div className="text-left min-w-0">
-              <p className="text-sm font-medium text-stone-800 truncate">{entry.food_name}</p>
-              <p className="text-xs text-stone-400">
+              <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate">{entry.food_name}</p>
+              <p className="text-xs text-stone-400 dark:text-stone-500">
                 {entry.serving_label ?? `${entry.amount_g} g`}
               </p>
             </div>
           </div>
-          <span className="text-sm font-medium text-stone-500 flex-shrink-0 ml-2">{entry.kcal} kcal</span>
+          <span className="text-sm font-medium text-stone-500 dark:text-stone-400 dark:text-stone-500 flex-shrink-0 ml-2">{entry.kcal} kcal</span>
         </button>
       ))}
 
       <button
         onClick={() => onAdd(slot)}
-        className="w-full flex items-center justify-center gap-2 py-3.5 text-sm text-forest-600 font-medium hover:bg-forest-50 transition-colors"
+        className="w-full flex items-center justify-center gap-2 py-3.5 text-sm text-forest-600 font-medium hover:bg-forest-50 dark:bg-forest-900/30 transition-colors"
       >
         <PlusIcon className="w-4 h-4 stroke-forest-600" />
         Lägg till mat

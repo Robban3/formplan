@@ -132,7 +132,7 @@ export const RECIPES: Recipe[] = [
     servings: 2,
     tags: ['Frukost'],
     illustration: 'bowl' as IllustrationKey,
-    bg: 'bg-amber-50',
+    bg: 'bg-amber-50 dark:bg-amber-900/25',
     ingredients: ['2 dl kvarg', '1 banan', '1 dl blåbär', '½ dl havregryn', '1 msk honung', '1 msk mandlar'],
     instructions: [
       'Lägg kvargen i en skål.',
@@ -192,7 +192,7 @@ export const RECIPES: Recipe[] = [
     servings: 6,
     tags: ['Mellanmål'],
     illustration: 'balls' as IllustrationKey,
-    bg: 'bg-amber-50',
+    bg: 'bg-amber-50 dark:bg-amber-900/25',
     ingredients: ['2 dl havregryn', '2 msk jordnötssmör', '1 skopa proteinpulver', '1 msk honung', '1 msk kakao'],
     instructions: [
       'Mixa havregryn, jordnötssmör, proteinpulver, honung och kakao till en jämn smet.',
@@ -293,22 +293,22 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
 
   const macros = recipe
     ? [
-        { label: 'Kalorier', value: recipe.kcal, unit: 'kcal', color: 'bg-forest-50 text-forest-700' },
-        { label: 'Protein', value: recipe.protein_g, unit: 'g', color: 'bg-blue-50 text-blue-700' },
-        { label: 'Fett', value: recipe.fat_g, unit: 'g', color: 'bg-amber-50 text-amber-700' },
+        { label: 'Kalorier', value: recipe.kcal, unit: 'kcal', color: 'bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300' },
+        { label: 'Protein', value: recipe.protein_g, unit: 'g', color: 'bg-blue-50 dark:bg-blue-900/25 text-blue-700' },
+        { label: 'Fett', value: recipe.fat_g, unit: 'g', color: 'bg-amber-50 dark:bg-amber-900/25 text-amber-700 dark:text-amber-300' },
         { label: 'Kolhyd.', value: recipe.carbs_g, unit: 'g', color: 'bg-teal-50 text-teal-700' },
       ]
     : []
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-100 p-4">
+    <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-8 h-8 rounded-xl bg-forest-50 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-xl bg-forest-50 dark:bg-forest-900/30 flex items-center justify-center">
           <ZapIcon className="w-4 h-4 stroke-forest-600" />
         </div>
         <div>
-          <p className="font-semibold text-stone-900 text-sm">Skapa recept med AI</p>
-          <p className="text-[11px] text-stone-400">
+          <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm">Skapa recept med AI</p>
+          <p className="text-[11px] text-stone-400 dark:text-stone-500">
             {mealTab !== 'Alla' ? `${mealTab} · anpassat efter dina mål` : 'Anpassat efter dina mål och allergier'}
           </p>
         </div>
@@ -319,12 +319,12 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
         onChange={(e) => setPrompt(e.target.value)}
         placeholder="Beskriv vad du är sugen på, t.ex. ”Ge mig en middag med 700 kcal och minst 50 g protein”"
         rows={3}
-        className="w-full bg-stone-100 rounded-xl px-4 py-3 text-sm text-stone-900 leading-relaxed focus:outline-none focus:ring-2 focus:ring-forest-400 resize-none"
+        className="w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-3 text-sm text-stone-900 dark:text-stone-100 leading-relaxed focus:outline-none focus:ring-2 focus:ring-forest-400 resize-none"
       />
 
       {/* Kategori — styr huvudråvara/kosthållning */}
       <div className="mt-3">
-        <p className="text-[10px] text-stone-400 font-medium mb-1.5">Kategori</p>
+        <p className="text-[10px] text-stone-400 dark:text-stone-500 font-medium mb-1.5">Kategori</p>
         <div className="flex flex-wrap gap-2">
           {RECIPE_CATEGORIES.map((c) => (
             <button
@@ -334,7 +334,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
               className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border font-medium transition-colors disabled:opacity-50 ${
                 category === c.key
                   ? 'bg-forest-700 text-white border-forest-700'
-                  : 'bg-white border-stone-200 text-stone-600 hover:border-forest-300'
+                  : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600 hover:border-forest-300'
               }`}
             >
               <c.Icon className="w-3.5 h-3.5" />
@@ -350,7 +350,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
             key={s}
             onClick={() => generate(s)}
             disabled={loading}
-            className="text-[11px] bg-stone-50 border border-stone-200 rounded-full px-3 py-1.5 text-stone-600 hover:border-forest-300 hover:text-forest-700 transition-colors disabled:opacity-50"
+            className="text-[11px] bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full px-3 py-1.5 text-stone-600 dark:text-stone-300 dark:text-stone-600 hover:border-forest-300 hover:text-forest-700 dark:text-forest-300 transition-colors disabled:opacity-50"
           >
             {s}
           </button>
@@ -359,31 +359,31 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
 
       <div className="flex gap-2 mt-3">
         <div className="flex-1">
-          <label className="text-[10px] text-stone-400 font-medium">Kcal/portion</label>
+          <label className="text-[10px] text-stone-400 dark:text-stone-500 font-medium">Kcal/portion</label>
           <input
             type="number"
             inputMode="numeric"
             value={kcal}
             onChange={(e) => setKcal(e.target.value)}
             placeholder="valfritt"
-            className="w-full bg-stone-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+            className="w-full bg-stone-100 dark:bg-stone-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
           />
         </div>
         <div className="flex-1">
-          <label className="text-[10px] text-stone-400 font-medium">Min. protein (g)</label>
+          <label className="text-[10px] text-stone-400 dark:text-stone-500 font-medium">Min. protein (g)</label>
           <input
             type="number"
             inputMode="numeric"
             value={minProtein}
             onChange={(e) => setMinProtein(e.target.value)}
             placeholder="valfritt"
-            className="w-full bg-stone-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+            className="w-full bg-stone-100 dark:bg-stone-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
           />
         </div>
       </div>
 
       {allergies.length > 0 && (
-        <p className="text-[11px] text-stone-400 mt-2">Undviker: {allergies.join(', ')}</p>
+        <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-2">Undviker: {allergies.join(', ')}</p>
       )}
 
       <button
@@ -397,17 +397,17 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
       {error && <p className="text-xs text-red-500 mt-2 text-center">{error}</p>}
 
       {recipe && (
-        <div className="mt-4 border-t border-stone-100 pt-4">
-          <h3 className="text-lg font-bold text-stone-900">{recipe.name}</h3>
-          <div className="flex items-center gap-3 text-xs text-stone-400 mt-1 mb-3">
+        <div className="mt-4 border-t border-stone-100 dark:border-stone-700 pt-4">
+          <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100">{recipe.name}</h3>
+          <div className="flex items-center gap-3 text-xs text-stone-400 dark:text-stone-500 mt-1 mb-3">
             <span className="flex items-center gap-1">
-              <ClockIcon className="w-3.5 h-3.5 stroke-stone-400" />
+              <ClockIcon className="w-3.5 h-3.5 stroke-stone-400 dark:stroke-stone-500" />
               {recipe.prep_minutes} min
             </span>
             <span>·</span>
             <span>{recipe.servings} {recipe.servings === 1 ? 'portion' : 'portioner'}</span>
             {recipe.tags?.slice(0, 2).map((t) => (
-              <span key={t} className="text-[10px] bg-forest-50 text-forest-700 px-2 py-0.5 rounded-full font-medium">
+              <span key={t} className="text-[10px] bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 px-2 py-0.5 rounded-full font-medium">
                 {t}
               </span>
             ))}
@@ -423,20 +423,20 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
             ))}
           </div>
 
-          <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Ingredienser</p>
+          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-2">Ingredienser</p>
           <ul className="space-y-1.5 mb-4">
             {recipe.ingredients.map((ing, i) => (
-              <li key={i} className="flex items-center gap-2 text-sm text-stone-700">
+              <li key={i} className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300 dark:text-stone-600">
                 <span className="w-1.5 h-1.5 rounded-full bg-forest-400 flex-shrink-0" />
                 {ing}
               </li>
             ))}
           </ul>
 
-          <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">Tillagning</p>
+          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-2">Tillagning</p>
           <ol className="space-y-2">
             {recipe.steps.map((step, i) => (
-              <li key={i} className="flex gap-3 text-sm text-stone-700">
+              <li key={i} className="flex gap-3 text-sm text-stone-700 dark:text-stone-300 dark:text-stone-600">
                 <span className="w-5 h-5 rounded-full bg-forest-700 text-white text-xs flex items-center justify-center flex-shrink-0 font-semibold">
                   {i + 1}
                 </span>
@@ -448,7 +448,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
           <button
             onClick={() => generate()}
             disabled={loading}
-            className="w-full mt-4 py-2.5 border border-stone-200 rounded-xl text-sm text-stone-500 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors disabled:opacity-50"
+            className="w-full mt-4 py-2.5 border border-stone-200 dark:border-stone-700 rounded-xl text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors disabled:opacity-50"
           >
             Generera nytt förslag
           </button>
@@ -472,23 +472,23 @@ export function RecipesPage() {
   return (
     <div className="pb-6">
       {/* Header */}
-      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100">
-        <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 text-sm mb-3">
-          <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
+      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
+        <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-3">
+          <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
           Mer
         </button>
-        <h1 className="text-2xl font-bold text-stone-900">Recept</h1>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Recept</h1>
 
         {/* Search */}
         <div className="relative mt-3">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 stroke-stone-400" viewBox="0 0 24 24" fill="none" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 stroke-stone-400 dark:stroke-stone-500" viewBox="0 0 24 24" fill="none" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
           </svg>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Sök recept…"
-            className="w-full bg-stone-100 rounded-xl pl-9 pr-4 py-2.5 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+            className="w-full bg-stone-100 dark:bg-stone-700 rounded-xl pl-9 pr-4 py-2.5 text-stone-900 dark:text-stone-100 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
           />
         </div>
 
@@ -499,7 +499,7 @@ export function RecipesPage() {
               key={t}
               onClick={() => setActiveTab(t)}
               className={`text-xs px-4 py-1.5 rounded-full font-medium transition-colors ${
-                activeTab === t ? 'bg-forest-700 text-white' : 'bg-stone-100 text-stone-600'
+                activeTab === t ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600'
               }`}
             >
               {t}
@@ -512,39 +512,39 @@ export function RecipesPage() {
         <AiRecipeGenerator mealTab={activeTab} />
 
         {filtered.length === 0 && (
-          <p className="text-center text-stone-400 text-sm py-8">Inga recept hittades.</p>
+          <p className="text-center text-stone-400 dark:text-stone-500 text-sm py-8">Inga recept hittades.</p>
         )}
 
         {filtered.map((recipe) => (
           <button
             key={recipe.id}
             onClick={() => navigate(`/mer/recept/${recipe.id}`)}
-            className="w-full flex items-center gap-4 px-4 py-4 text-left bg-white rounded-2xl border border-stone-100 hover:bg-stone-50 active:bg-stone-100 transition-colors"
+            className="w-full flex items-center gap-4 px-4 py-4 text-left bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 hover:bg-stone-50 dark:bg-stone-800 active:bg-stone-100 dark:bg-stone-700 transition-colors"
           >
             <RecipeIllustration kind={recipe.illustration} bg={recipe.bg} />
 
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-stone-900 text-sm leading-tight">{recipe.name}</p>
+              <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm leading-tight">{recipe.name}</p>
               <div className="flex items-center gap-3 mt-1.5">
-                <span className="flex items-center gap-1 text-xs text-stone-400">
-                  <ClockIcon className="w-3 h-3 stroke-stone-400" />
+                <span className="flex items-center gap-1 text-xs text-stone-400 dark:text-stone-500">
+                  <ClockIcon className="w-3 h-3 stroke-stone-400 dark:stroke-stone-500" />
                   {recipe.prepMinutes} min
                 </span>
-                <span className="flex items-center gap-1 text-xs text-stone-400">
-                  <FireIcon className="w-3 h-3 stroke-stone-400" />
+                <span className="flex items-center gap-1 text-xs text-stone-400 dark:text-stone-500">
+                  <FireIcon className="w-3 h-3 stroke-stone-400 dark:stroke-stone-500" />
                   {recipe.calories} kcal
                 </span>
               </div>
               <div className="flex gap-1 mt-1.5 flex-wrap">
                 {recipe.tags.map((tag) => (
-                  <span key={tag} className="text-[10px] bg-forest-50 text-forest-700 px-2 py-0.5 rounded-full font-medium">
+                  <span key={tag} className="text-[10px] bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 px-2 py-0.5 rounded-full font-medium">
                     {tag}
                   </span>
                 ))}
               </div>
             </div>
 
-            <ChevronRightIcon className="w-4 h-4 stroke-stone-300 flex-shrink-0" />
+            <ChevronRightIcon className="w-4 h-4 stroke-stone-300 dark:stroke-stone-600 flex-shrink-0" />
           </button>
         ))}
       </div>

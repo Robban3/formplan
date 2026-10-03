@@ -43,7 +43,7 @@ function MacroBar({ plan }: { plan: GeneratedMealPlan }) {
         {segs.map((s) => (
           <div key={s.key} className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: MACRO_COLORS[s.key] }} />
-            <span className="text-[10px] text-stone-500">{s.label} <span className="font-semibold text-stone-700">{s.g}g</span></span>
+            <span className="text-[10px] text-stone-500 dark:text-stone-400 dark:text-stone-500">{s.label} <span className="font-semibold text-stone-700 dark:text-stone-300 dark:text-stone-600">{s.g}g</span></span>
           </div>
         ))}
       </div>
@@ -89,19 +89,19 @@ export function MealPlanPage() {
   return (
     <div className="pb-10">
       {/* Header */}
-      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-400 text-sm mb-3">
-          <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
+      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-3">
+          <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
           Kost
         </button>
-        <h1 className="text-2xl font-bold text-stone-900">Kostschema</h1>
-        <p className="text-sm text-stone-400 mt-0.5">Generera ett dagsmeny anpassat efter dina mål</p>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Kostschema</h1>
+        <p className="text-sm text-stone-400 dark:text-stone-500 mt-0.5">Generera ett dagsmeny anpassat efter dina mål</p>
       </div>
 
       <div className="px-5 mt-5 space-y-5">
         {/* Kaloriintag */}
-        <div className="bg-white rounded-2xl border border-stone-100 p-4 space-y-3">
-          <p className="font-semibold text-stone-800">Dagligt kaloriintag</p>
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 space-y-3">
+          <p className="font-semibold text-stone-800 dark:text-stone-200">Dagligt kaloriintag</p>
           <div className="flex items-center gap-3">
             <input
               type="number"
@@ -117,9 +117,9 @@ export function MealPlanPage() {
                 const v = Number(e.target.value)
                 setKcal(Math.max(800, Math.min(6000, Number.isFinite(v) && v > 0 ? v : 800)))
               }}
-              className="flex-1 bg-stone-100 rounded-xl px-4 py-3 text-stone-900 text-lg font-bold text-center focus:outline-none focus:ring-2 focus:ring-forest-400"
+              className="flex-1 bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-3 text-stone-900 dark:text-stone-100 text-lg font-bold text-center focus:outline-none focus:ring-2 focus:ring-forest-400"
             />
-            <span className="text-stone-400 font-medium">kcal</span>
+            <span className="text-stone-400 dark:text-stone-500 font-medium">kcal</span>
           </div>
           <div className="flex gap-2">
             {[1500, 1800, 2000, 2500].map((k) => (
@@ -127,7 +127,7 @@ export function MealPlanPage() {
                 key={k}
                 onClick={() => { kcalTouched.current = true; setKcal(k) }}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  kcal === k ? 'bg-forest-700 text-white' : 'bg-stone-100 text-stone-600'
+                  kcal === k ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600'
                 }`}
               >
                 {k}
@@ -137,8 +137,8 @@ export function MealPlanPage() {
         </div>
 
         {/* Antal måltider */}
-        <div className="bg-white rounded-2xl border border-stone-100 p-4 space-y-3">
-          <p className="font-semibold text-stone-800">Antal måltider per dag</p>
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 space-y-3">
+          <p className="font-semibold text-stone-800 dark:text-stone-200">Antal måltider per dag</p>
           <div className="flex gap-2">
             {([3, 4, 5] as MealCount[]).map((n) => (
               <button
@@ -147,7 +147,7 @@ export function MealPlanPage() {
                 className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-colors ${
                   mealCount === n
                     ? 'bg-forest-700 text-white'
-                    : 'bg-stone-100 text-stone-600'
+                    : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600'
                 }`}
               >
                 {n} måltider
@@ -157,8 +157,8 @@ export function MealPlanPage() {
         </div>
 
         {/* Kostfokus */}
-        <div className="bg-white rounded-2xl border border-stone-100 p-4 space-y-3">
-          <p className="font-semibold text-stone-800">Kostfokus</p>
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 space-y-3">
+          <p className="font-semibold text-stone-800 dark:text-stone-200">Kostfokus</p>
           <div className="grid grid-cols-2 gap-2">
             {FOCUS_OPTIONS.map((opt) => (
               <button
@@ -166,14 +166,14 @@ export function MealPlanPage() {
                 onClick={() => setFocus(opt.key)}
                 className={`p-3 rounded-xl text-left border-2 transition-colors ${
                   focus === opt.key
-                    ? 'border-forest-600 bg-forest-50'
-                    : 'border-stone-100 bg-stone-50'
+                    ? 'border-forest-600 bg-forest-50 dark:bg-forest-900/30'
+                    : 'border-stone-100 dark:border-stone-700 bg-stone-50 dark:bg-stone-800'
                 }`}
               >
-                <p className={`text-sm font-semibold ${focus === opt.key ? 'text-forest-700' : 'text-stone-800'}`}>
+                <p className={`text-sm font-semibold ${focus === opt.key ? 'text-forest-700 dark:text-forest-300' : 'text-stone-800 dark:text-stone-200'}`}>
                   {opt.label}
                 </p>
-                <p className="text-[10px] text-stone-400 mt-0.5">{opt.desc}</p>
+                <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">{opt.desc}</p>
               </button>
             ))}
           </div>
@@ -202,25 +202,25 @@ export function MealPlanPage() {
 
             {/* Meal cards */}
             {plan.meals.map((meal, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
+              <div key={i} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
                 <button
                   onClick={() => setExpanded(expanded === i ? null : i)}
                   className="w-full flex items-center gap-3 px-4 py-4 text-left"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-forest-50 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-forest-50 dark:bg-forest-900/30 flex items-center justify-center flex-shrink-0">
                     <LeafIcon className="w-5 h-5 stroke-forest-600" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <p className="font-semibold text-stone-900">{meal.label}</p>
-                      <span className="text-xs text-stone-400">{meal.time}</span>
+                      <p className="font-semibold text-stone-900 dark:text-stone-100">{meal.label}</p>
+                      <span className="text-xs text-stone-400 dark:text-stone-500">{meal.time}</span>
                     </div>
-                    <p className="text-xs text-stone-400 mt-0.5">
+                    <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
                       {meal.total.kcal} kcal · P {Math.round(meal.total.protein_g)}g · F {Math.round(meal.total.fat_g)}g · K {Math.round(meal.total.carbs_g)}g
                     </p>
                   </div>
                   <svg
-                    className={`w-4 h-4 stroke-stone-300 flex-shrink-0 transition-transform ${expanded === i ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 stroke-stone-300 dark:stroke-stone-600 flex-shrink-0 transition-transform ${expanded === i ? 'rotate-180' : ''}`}
                     viewBox="0 0 24 24" fill="none" strokeWidth={2} strokeLinecap="round"
                   >
                     <path d="M6 9l6 6 6-6" />
@@ -232,12 +232,12 @@ export function MealPlanPage() {
                     {meal.foods.map((food, j) => (
                       <div key={j} className="flex items-center justify-between px-4 py-3">
                         <div>
-                          <p className="text-sm font-medium text-stone-800">{food.name}</p>
-                          <p className="text-xs text-stone-400">
+                          <p className="text-sm font-medium text-stone-800 dark:text-stone-200">{food.name}</p>
+                          <p className="text-xs text-stone-400 dark:text-stone-500">
                             {food.amount_g} g · P {food.protein_g}g · F {food.fat_g}g · K {food.carbs_g}g
                           </p>
                         </div>
-                        <span className="text-sm font-semibold text-stone-700 ml-3 flex-shrink-0">
+                        <span className="text-sm font-semibold text-stone-700 dark:text-stone-300 dark:text-stone-600 ml-3 flex-shrink-0">
                           {food.kcal} kcal
                         </span>
                       </div>
@@ -250,7 +250,7 @@ export function MealPlanPage() {
             {/* Regenerate */}
             <button
               onClick={regenerate}
-              className="w-full py-3 border border-stone-200 rounded-2xl text-sm text-stone-500 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
+              className="w-full py-3 border border-stone-200 dark:border-stone-700 rounded-2xl text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
             >
               Generera nytt förslag
             </button>
@@ -263,9 +263,9 @@ export function MealPlanPage() {
                   `/kost/inkopslista?kcal=${clampedKcal()}&focus=${focus}&meals=${mealCount}`
                 )
               }
-              className="w-full py-3 bg-stone-100 rounded-2xl text-sm text-stone-700 font-semibold flex items-center justify-center gap-2 hover:bg-stone-200 transition-colors"
+              className="w-full py-3 bg-stone-100 dark:bg-stone-700 rounded-2xl text-sm text-stone-700 dark:text-stone-300 dark:text-stone-600 font-semibold flex items-center justify-center gap-2 hover:bg-stone-200 dark:bg-stone-700 transition-colors"
             >
-              <ShoppingCartIcon className="w-4 h-4 stroke-stone-600" />
+              <ShoppingCartIcon className="w-4 h-4 stroke-stone-600 dark:stroke-stone-300 dark:stroke-stone-600" />
               Skapa inköpslista för veckan
             </button>
           </div>

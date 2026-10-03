@@ -20,8 +20,8 @@ const UPDATED = '2026-10-01'
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-7">
-      <h2 className="text-base font-bold text-stone-900 mb-2">{title}</h2>
-      <div className="text-sm text-stone-600 leading-relaxed space-y-2">{children}</div>
+      <h2 className="text-base font-bold text-stone-900 dark:text-stone-100 mb-2">{title}</h2>
+      <div className="text-sm text-stone-600 dark:text-stone-300 dark:text-stone-600 leading-relaxed space-y-2">{children}</div>
     </section>
   )
 }
@@ -31,21 +31,21 @@ export function PrivacyPage() {
 
   return (
     <div className="min-h-full bg-canvas">
-      <header className="sticky top-0 z-10 bg-canvas/95 backdrop-blur border-b border-stone-200">
+      <header className="sticky top-0 z-10 bg-canvas/95 backdrop-blur border-b border-stone-200 dark:border-stone-700">
         <div className="flex items-center gap-2 px-4 py-3">
           <button
             onClick={() => navigate(-1)}
             aria-label="Tillbaka"
-            className="p-1 -ml-1 rounded-lg hover:bg-stone-100"
+            className="p-1 -ml-1 rounded-lg hover:bg-stone-100 dark:bg-stone-700"
           >
-            <ChevronLeftIcon className="w-5 h-5 stroke-stone-600" />
+            <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300 dark:stroke-stone-600" />
           </button>
-          <h1 className="text-lg font-bold text-stone-900">Integritetspolicy</h1>
+          <h1 className="text-lg font-bold text-stone-900 dark:text-stone-100">Integritetspolicy</h1>
         </div>
       </header>
 
       <div className="px-5 py-6 max-w-2xl mx-auto">
-        <p className="text-xs text-stone-400 mb-6">Senast uppdaterad: {UPDATED}</p>
+        <p className="text-xs text-stone-400 dark:text-stone-500 mb-6">Senast uppdaterad: {UPDATED}</p>
 
         <Section title="Kort sammanfattning">
           <p>

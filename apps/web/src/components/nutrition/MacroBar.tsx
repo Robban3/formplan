@@ -12,12 +12,12 @@ export function MacroBar({ label, eaten, goal, unit = 'g', color }: Props) {
   return (
     <div>
       <div className="flex justify-between items-baseline mb-1">
-        <span className="text-sm font-medium text-stone-700">{label}</span>
-        <span className="text-xs text-stone-400">
+        <span className="text-sm font-medium text-stone-700 dark:text-stone-300 dark:text-stone-600">{label}</span>
+        <span className="text-xs text-stone-400 dark:text-stone-500">
           {eaten} / {goal} {unit}
         </span>
       </div>
-      <div className="w-full bg-stone-100 rounded-full h-2">
+      <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-2">
         <div
           className={`${color} h-2 rounded-full transition-all`}
           style={{ width: `${pct}%` }}

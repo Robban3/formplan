@@ -53,50 +53,50 @@ export function RemindersPage() {
 
   return (
     <div className="px-5 pt-header pb-4">
-      <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 text-sm mb-4">
-        <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
+      <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-4">
+        <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
         Mer
       </button>
-      <h1 className="text-2xl font-bold text-stone-900 mb-2">Påminnelser</h1>
-      <p className="text-stone-400 text-sm mb-6">Schemalägg påminnelser om dina träningspass.</p>
+      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">Påminnelser</h1>
+      <p className="text-stone-400 dark:text-stone-500 text-sm mb-6">Schemalägg påminnelser om dina träningspass.</p>
 
       {settings.reminders.length === 0 && !adding && (
-        <p className="text-stone-400 text-sm text-center py-8">Inga påminnelser ännu.</p>
+        <p className="text-stone-400 dark:text-stone-500 text-sm text-center py-8">Inga påminnelser ännu.</p>
       )}
 
       <div className="space-y-3 mb-4">
         {settings.reminders.map((r) => (
-          <div key={r.id} className="bg-white rounded-2xl border border-stone-100 p-4 flex items-center justify-between gap-3">
+          <div key={r.id} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 flex items-center justify-between gap-3">
             <div className="flex-1">
-              <p className="font-semibold text-stone-800">{r.label}</p>
-              <p className="text-xs text-stone-400 mt-0.5">{formatDays(r.days)} · {r.time}</p>
+              <p className="font-semibold text-stone-800 dark:text-stone-200">{r.label}</p>
+              <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{formatDays(r.days)} · {r.time}</p>
             </div>
             <button
               onClick={() => toggleReminder(r.id, !r.enabled)}
-              className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${r.enabled ? 'bg-forest-700' : 'bg-stone-200'}`}
+              className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${r.enabled ? 'bg-forest-700' : 'bg-stone-200 dark:bg-stone-700'}`}
             >
-              <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${r.enabled ? 'translate-x-5' : 'translate-x-0'}`} />
+              <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white dark:bg-stone-800 rounded-full shadow transition-transform ${r.enabled ? 'translate-x-5' : 'translate-x-0'}`} />
             </button>
             <button onClick={() => removeReminder(r.id)} className="p-1">
-              <XIcon className="w-4 h-4 stroke-stone-300" />
+              <XIcon className="w-4 h-4 stroke-stone-300 dark:stroke-stone-600" />
             </button>
           </div>
         ))}
       </div>
 
       {adding ? (
-        <div className="bg-white rounded-2xl border border-stone-100 p-5 space-y-4">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-5 space-y-4">
           <label className="block">
-            <span className="text-sm text-stone-500">Etikett</span>
+            <span className="text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500">Etikett</span>
             <input
               value={newLabel}
               onChange={(e) => setNewLabel(e.target.value)}
-              className="mt-1 w-full bg-stone-100 rounded-xl px-4 py-3 text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 text-sm"
+              className="mt-1 w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-3 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400 text-sm"
             />
           </label>
 
           <div>
-            <span className="text-sm text-stone-500">Dagar</span>
+            <span className="text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500">Dagar</span>
             <div className="flex gap-2 mt-2">
               {DAY_LABELS.map((label, i) => {
                 const day = i + 1
@@ -105,7 +105,7 @@ export function RemindersPage() {
                     key={day}
                     onClick={() => toggleDay(day)}
                     className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-colors ${
-                      newDays.includes(day) ? 'bg-forest-700 text-white' : 'bg-stone-100 text-stone-500'
+                      newDays.includes(day) ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 dark:text-stone-500'
                     }`}
                   >
                     {label}
@@ -116,19 +116,19 @@ export function RemindersPage() {
           </div>
 
           <label className="block">
-            <span className="text-sm text-stone-500">Tid</span>
+            <span className="text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500">Tid</span>
             <input
               type="time"
               value={newTime}
               onChange={(e) => setNewTime(e.target.value)}
-              className="mt-1 w-full bg-stone-100 rounded-xl px-4 py-3 text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 text-sm"
+              className="mt-1 w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-3 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400 text-sm"
             />
           </label>
 
           <div className="flex gap-3">
             <button
               onClick={() => setAdding(false)}
-              className="flex-1 py-3 rounded-xl border border-stone-200 text-stone-600 font-medium text-sm"
+              className="flex-1 py-3 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600 font-medium text-sm"
             >
               Avbryt
             </button>
@@ -143,14 +143,14 @@ export function RemindersPage() {
       ) : (
         <button
           onClick={() => setAdding(true)}
-          className="w-full flex items-center justify-center gap-2 py-3 border border-stone-200 rounded-xl text-sm text-forest-600 font-medium hover:bg-forest-50 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3 border border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-600 font-medium hover:bg-forest-50 dark:bg-forest-900/30 transition-colors"
         >
           <PlusIcon className="w-4 h-4 stroke-forest-600" />
           Ny påminnelse
         </button>
       )}
 
-      <p className="text-xs text-stone-300 text-center mt-6">
+      <p className="text-xs text-stone-300 dark:text-stone-600 text-center mt-6">
         Påminnelser kräver att notiser är aktiverade och att appen är öppen.
       </p>
     </div>

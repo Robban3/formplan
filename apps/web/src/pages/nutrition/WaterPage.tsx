@@ -145,21 +145,21 @@ export function WaterPage() {
   const cy = 88
 
   return (
-    <div className="flex flex-col min-h-full bg-white pb-24">
+    <div className="flex flex-col min-h-full bg-white dark:bg-stone-800 pb-24">
       <div className="flex items-center gap-3 px-4 pt-header pb-3">
-        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100">
-          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600" />
+        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:bg-stone-700">
+          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300 dark:stroke-stone-600" />
         </button>
-        <h1 className="text-xl font-bold text-stone-900 flex-1">Vatten</h1>
+        <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100 flex-1">Vatten</h1>
       </div>
 
-      <div className="px-4 flex gap-5 border-b border-stone-100">
+      <div className="px-4 flex gap-5 border-b border-stone-100 dark:border-stone-700">
         {(['idag', 'vecka'] as WaterTab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className={`pb-3 text-sm font-medium capitalize transition-colors ${
-              tab === t ? 'text-forest-600 border-b-2 border-forest-600' : 'text-stone-400'
+              tab === t ? 'text-forest-600 border-b-2 border-forest-600' : 'text-stone-400 dark:text-stone-500'
             }`}
           >
             {t === 'idag' ? 'Idag' : 'Vecka'}
@@ -193,10 +193,10 @@ export function WaterPage() {
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <DropletIcon className={`w-6 h-6 mb-1 ${goalReached ? 'stroke-forest-600' : 'stroke-sky-500'}`} />
-                <span className="text-2xl font-bold text-stone-900">
+                <span className="text-2xl font-bold text-stone-900 dark:text-stone-100">
                   {formatLiters(total)} L
                 </span>
-                <span className="text-sm text-stone-400">av {formatLiters(GOAL_ML)} L</span>
+                <span className="text-sm text-stone-400 dark:text-stone-500">av {formatLiters(GOAL_ML)} L</span>
                 <span className={`text-sm font-semibold mt-0.5 ${goalReached ? 'text-forest-600' : 'text-sky-500'}`}>
                   ({Math.round(pct * 100)}%)
                 </span>
@@ -205,12 +205,12 @@ export function WaterPage() {
           </div>
 
           {goalReached && (
-            <div className="flex items-center gap-3 bg-forest-50 border border-forest-200 rounded-2xl px-4 py-3.5">
+            <div className="flex items-center gap-3 bg-forest-50 dark:bg-forest-900/30 border border-forest-200 dark:border-forest-800 rounded-2xl px-4 py-3.5">
               <div className="w-10 h-10 rounded-full bg-forest-700 flex items-center justify-center shrink-0">
                 <CheckIcon className="w-5 h-5 stroke-white" />
               </div>
               <div>
-                <p className="font-semibold text-forest-800">Dagsmål uppnått!</p>
+                <p className="font-semibold text-forest-800 dark:text-forest-200">Dagsmål uppnått!</p>
                 <p className="text-sm text-forest-600">
                   Du har druckit {formatLiters(total)} L idag — bra jobbat.
                 </p>
@@ -233,7 +233,7 @@ export function WaterPage() {
 
           {/* Snabbval */}
           <div>
-            <p className="text-xs font-medium text-stone-500 mb-2">Snabbval</p>
+            <p className="text-xs font-medium text-stone-500 dark:text-stone-400 dark:text-stone-500 mb-2">Snabbval</p>
             <div className="flex gap-2">
               {QUICK_OPTIONS.map((ml) => (
                 <button
@@ -242,12 +242,12 @@ export function WaterPage() {
                   onClick={() => setSelectedMl(ml)}
                   className={`flex-1 flex flex-col items-center gap-1.5 py-2.5 rounded-xl transition-colors ${
                     selectedMl === ml
-                      ? 'bg-forest-50 ring-2 ring-forest-600'
-                      : 'bg-stone-50 hover:bg-stone-100 active:bg-stone-200'
+                      ? 'bg-forest-50 dark:bg-forest-900/30 ring-2 ring-forest-600'
+                      : 'bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:bg-stone-700 active:bg-stone-200 dark:bg-stone-700'
                   }`}
                 >
                   <GlassWaterIcon className={`w-5 h-5 ${selectedMl === ml ? 'stroke-forest-600' : 'stroke-sky-400'}`} />
-                  <span className={`text-xs font-medium ${selectedMl === ml ? 'text-forest-700' : 'text-stone-500'}`}>
+                  <span className={`text-xs font-medium ${selectedMl === ml ? 'text-forest-700 dark:text-forest-300' : 'text-stone-500 dark:text-stone-400 dark:text-stone-500'}`}>
                     {ml < 1000 ? `${ml} ml` : `${ml / 1000} L`}
                   </span>
                 </button>
@@ -257,9 +257,9 @@ export function WaterPage() {
 
           {/* Logg — volym vänster, tid höger */}
           <div>
-            <p className="text-xs font-medium text-stone-500 mb-2">Logg</p>
+            <p className="text-xs font-medium text-stone-500 dark:text-stone-400 dark:text-stone-500 mb-2">Logg</p>
             {entries.length === 0 ? (
-              <p className="text-sm text-stone-400 text-center py-6">Inget loggat ännu idag</p>
+              <p className="text-sm text-stone-400 dark:text-stone-500 text-center py-6">Inget loggat ännu idag</p>
             ) : (
               <div className="space-y-0">
                 {entries.map((entry) => (
@@ -268,11 +268,11 @@ export function WaterPage() {
                     className="flex items-center gap-3 py-3 border-b border-stone-50 last:border-0"
                   >
                     <GlassWaterIcon className="w-5 h-5 stroke-sky-400 shrink-0" />
-                    <span className="text-sm font-medium text-stone-800 tabular-nums">
+                    <span className="text-sm font-medium text-stone-800 dark:text-stone-200 tabular-nums">
                       {formatVolume(entry.amount_ml)}
                     </span>
                     <span className="flex-1" />
-                    <span className="text-sm text-stone-400 tabular-nums">
+                    <span className="text-sm text-stone-400 dark:text-stone-500 tabular-nums">
                       {formatTime(entry.logged_at)}
                     </span>
                   </div>

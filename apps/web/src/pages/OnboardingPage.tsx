@@ -39,7 +39,7 @@ const STEP_LABELS: Record<Step, string> = {
 
 const GOALS: { value: string; label: string; desc: string; Icon: IconComponent; iconBg: string; iconStroke: string }[] = [
   { value: 'lose_weight', label: 'Gå ner i vikt', desc: 'Fettförbränning & deficit', Icon: FireIcon, iconBg: 'bg-orange-50', iconStroke: 'stroke-orange-500' },
-  { value: 'build_muscle', label: 'Bygga muskler', desc: 'Styrka & hypertrofi', Icon: DumbbellIcon, iconBg: 'bg-forest-50', iconStroke: 'stroke-forest-600' },
+  { value: 'build_muscle', label: 'Bygga muskler', desc: 'Styrka & hypertrofi', Icon: DumbbellIcon, iconBg: 'bg-forest-50 dark:bg-forest-900/30', iconStroke: 'stroke-forest-600' },
   { value: 'maintain', label: 'Hålla formen', desc: 'Balans & välmående', Icon: TargetIcon, iconBg: 'bg-purple-50', iconStroke: 'stroke-purple-500' },
   { value: 'improve_endurance', label: 'Förbättra kondition', desc: 'Uthållighet & puls', Icon: HeartIcon, iconBg: 'bg-rose-50', iconStroke: 'stroke-rose-500' },
 ]
@@ -223,39 +223,39 @@ export function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-white text-stone-900 max-w-lg mx-auto flex flex-col">
+    <div className="min-h-[100dvh] bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 max-w-lg mx-auto flex flex-col">
       {/* Header */}
-      <div className="px-5 pt-header pb-4 border-b border-stone-100">
+      <div className="px-5 pt-header pb-4 border-b border-stone-100 dark:border-stone-700">
         <div className="flex items-center gap-3 mb-4">
           {stepIndex > 0 ? (
             <button
               type="button"
               onClick={back}
-              className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 active:bg-stone-200 transition-colors"
+              className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:bg-stone-700 active:bg-stone-200 dark:bg-stone-700 transition-colors"
               aria-label="Tillbaka"
             >
-              <ChevronLeftIcon className="w-5 h-5 stroke-stone-600" />
+              <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300 dark:stroke-stone-600" />
             </button>
           ) : (
             <button
               type="button"
               onClick={() => navigate('/auth')}
-              className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 active:bg-stone-200 transition-colors"
+              className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:bg-stone-700 active:bg-stone-200 dark:bg-stone-700 transition-colors"
               aria-label="Avbryt"
             >
-              <ChevronLeftIcon className="w-5 h-5 stroke-stone-400" />
+              <ChevronLeftIcon className="w-5 h-5 stroke-stone-400 dark:stroke-stone-500" />
             </button>
           )}
           <div className="flex-1 text-center">
-            <p className="text-xs font-medium text-stone-400 uppercase tracking-wide">
+            <p className="text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wide">
               Steg {stepIndex + 1} av {STEPS.length}
             </p>
-            <h1 className="text-lg font-bold text-stone-900">{STEP_LABELS[step]}</h1>
+            <h1 className="text-lg font-bold text-stone-900 dark:text-stone-100">{STEP_LABELS[step]}</h1>
           </div>
           <div className="w-8" />
         </div>
 
-        <div className="w-full bg-stone-100 rounded-full h-1.5">
+        <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-1.5">
           <div
             className="bg-forest-700 h-1.5 rounded-full transition-all duration-500"
             style={{ width: `${progress}%` }}
@@ -267,7 +267,7 @@ export function OnboardingPage() {
             <div
               key={s}
               className={`h-1.5 rounded-full transition-all ${
-                i <= stepIndex ? 'bg-forest-700 w-5' : 'bg-stone-200 w-1.5'
+                i <= stepIndex ? 'bg-forest-700 w-5' : 'bg-stone-200 dark:bg-stone-700 w-1.5'
               }`}
             />
           ))}
@@ -282,7 +282,7 @@ export function OnboardingPage() {
         ) : step === 'goal' ? (
           <div>
             <h2 className="text-2xl font-bold mb-1">Vad är ditt mål?</h2>
-            <p className="text-stone-500 text-sm mb-6">Vi anpassar schemat efter detta.</p>
+            <p className="text-stone-500 dark:text-stone-400 dark:text-stone-500 text-sm mb-6">Vi anpassar schemat efter detta.</p>
             <div className="grid grid-cols-2 gap-3">
               {GOALS.map(({ value, label, desc, Icon, iconBg, iconStroke }) => (
                 <button
@@ -291,16 +291,16 @@ export function OnboardingPage() {
                   onClick={() => { setForm((f) => ({ ...f, goal: value })); next() }}
                   className={`flex flex-col items-start gap-3 p-4 rounded-2xl border text-left transition-all active:scale-[0.98] ${
                     form.goal === value
-                      ? 'border-forest-600 bg-forest-50 ring-2 ring-forest-600'
-                      : 'border-stone-100 bg-white hover:bg-stone-50'
+                      ? 'border-forest-600 bg-forest-50 dark:bg-forest-900/30 ring-2 ring-forest-600'
+                      : 'border-stone-100 dark:border-stone-700 bg-white dark:bg-stone-800 hover:bg-stone-50 dark:bg-stone-800'
                   }`}
                 >
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${iconBg}`}>
                     <Icon className={`w-5 h-5 ${iconStroke}`} />
                   </div>
                   <div>
-                    <span className="font-semibold text-sm text-stone-900 block">{label}</span>
-                    <span className="text-xs text-stone-400 mt-0.5 block">{desc}</span>
+                    <span className="font-semibold text-sm text-stone-900 dark:text-stone-100 block">{label}</span>
+                    <span className="text-xs text-stone-400 dark:text-stone-500 mt-0.5 block">{desc}</span>
                   </div>
                 </button>
               ))}
@@ -309,7 +309,7 @@ export function OnboardingPage() {
         ) : step === 'level' ? (
           <div>
             <h2 className="text-2xl font-bold mb-1">Träningserfarenhet?</h2>
-            <p className="text-stone-500 text-sm mb-6">Välj den nivå som stämmer bäst.</p>
+            <p className="text-stone-500 dark:text-stone-400 dark:text-stone-500 text-sm mb-6">Välj den nivå som stämmer bäst.</p>
             <div className="space-y-3">
               {LEVELS.map((l) => (
                 <button
@@ -318,12 +318,12 @@ export function OnboardingPage() {
                   onClick={() => { setForm((f) => ({ ...f, level: l.value })); next() }}
                   className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all active:scale-[0.98] ${
                     form.level === l.value
-                      ? 'border-forest-600 bg-forest-50 ring-2 ring-forest-600'
-                      : 'border-stone-100 bg-white hover:bg-stone-50'
+                      ? 'border-forest-600 bg-forest-50 dark:bg-forest-900/30 ring-2 ring-forest-600'
+                      : 'border-stone-100 dark:border-stone-700 bg-white dark:bg-stone-800 hover:bg-stone-50 dark:bg-stone-800'
                   }`}
                 >
-                  <span className="font-semibold text-stone-900">{l.label}</span>
-                  <span className="text-stone-400 text-sm">{l.desc}</span>
+                  <span className="font-semibold text-stone-900 dark:text-stone-100">{l.label}</span>
+                  <span className="text-stone-400 dark:text-stone-500 text-sm">{l.desc}</span>
                 </button>
               ))}
             </div>
@@ -331,7 +331,7 @@ export function OnboardingPage() {
         ) : step === 'equipment' ? (
           <div>
             <h2 className="text-2xl font-bold mb-1">Tillgänglig utrustning?</h2>
-            <p className="text-stone-500 text-sm mb-6">Välj allt som stämmer.</p>
+            <p className="text-stone-500 dark:text-stone-400 dark:text-stone-500 text-sm mb-6">Välj allt som stämmer.</p>
             <div className="space-y-2 mb-6">
               {EQUIPMENT_OPTIONS.map((eq) => {
                 const selected = form.equipment.includes(eq)
@@ -342,16 +342,16 @@ export function OnboardingPage() {
                     onClick={() => toggle('equipment', eq)}
                     className={`w-full flex items-center gap-3 p-4 rounded-2xl border transition-all ${
                       selected
-                        ? 'border-forest-600 bg-forest-50'
-                        : 'border-stone-100 bg-white hover:bg-stone-50'
+                        ? 'border-forest-600 bg-forest-50 dark:bg-forest-900/30'
+                        : 'border-stone-100 dark:border-stone-700 bg-white dark:bg-stone-800 hover:bg-stone-50 dark:bg-stone-800'
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 ${
-                      selected ? 'bg-forest-700 border-forest-600' : 'border-stone-300 bg-white'
+                      selected ? 'bg-forest-700 border-forest-600' : 'border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800'
                     }`}>
                       {selected && <CheckIcon className="w-3 h-3 stroke-white" />}
                     </div>
-                    <span className="text-sm text-stone-800 text-left">{eq}</span>
+                    <span className="text-sm text-stone-800 dark:text-stone-200 text-left">{eq}</span>
                   </button>
                 )
               })}
@@ -363,7 +363,7 @@ export function OnboardingPage() {
         ) : step === 'schedule' ? (
           <div>
             <h2 className="text-2xl font-bold mb-1">Hur många dagar per vecka?</h2>
-            <p className="text-stone-500 text-sm mb-8">Välj hur ofta du vill träna.</p>
+            <p className="text-stone-500 dark:text-stone-400 dark:text-stone-500 text-sm mb-8">Välj hur ofta du vill träna.</p>
             <div className="grid grid-cols-7 gap-2 mb-8">
               {[1, 2, 3, 4, 5, 6, 7].map((d) => (
                 <button
@@ -373,14 +373,14 @@ export function OnboardingPage() {
                   className={`aspect-square rounded-xl font-bold text-base transition-all ${
                     form.days_per_week === d
                       ? 'bg-forest-700 text-white ring-2 ring-forest-600 ring-offset-1'
-                      : 'bg-stone-50 border border-stone-100 text-stone-600 hover:bg-stone-100'
+                      : 'bg-stone-50 dark:bg-stone-800 border border-stone-100 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600 hover:bg-stone-100 dark:bg-stone-700'
                   }`}
                 >
                   {d}
                 </button>
               ))}
             </div>
-            <p className="text-center text-sm text-stone-400 mb-6">
+            <p className="text-center text-sm text-stone-400 dark:text-stone-500 mb-6">
               {form.days_per_week} pass per vecka
             </p>
             <PrimaryButton onClick={next}>Fortsätt</PrimaryButton>
@@ -388,7 +388,7 @@ export function OnboardingPage() {
         ) : step === 'diet' ? (
           <div>
             <h2 className="text-2xl font-bold mb-1">Allergier eller kostrestriktioner?</h2>
-            <p className="text-stone-500 text-sm mb-6">Valfritt — hoppa över om inga.</p>
+            <p className="text-stone-500 dark:text-stone-400 dark:text-stone-500 text-sm mb-6">Valfritt — hoppa över om inga.</p>
             <div className="flex flex-wrap gap-2 mb-6">
               {ALLERGY_OPTIONS.map((a) => (
                 <button
@@ -398,7 +398,7 @@ export function OnboardingPage() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                     form.allergies.includes(a)
                       ? 'bg-forest-700 text-white'
-                      : 'bg-stone-50 border border-stone-100 text-stone-600 hover:bg-stone-100'
+                      : 'bg-stone-50 dark:bg-stone-800 border border-stone-100 dark:border-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600 hover:bg-stone-100 dark:bg-stone-700'
                   }`}
                 >
                   {a}
@@ -411,7 +411,7 @@ export function OnboardingPage() {
           </div>
         ) : step === 'body' ? (
           <div>
-            <p className="text-stone-500 text-sm mb-6">
+            <p className="text-stone-500 dark:text-stone-400 dark:text-stone-500 text-sm mb-6">
               Hjälper AI:n beräkna kalorier och näringsmål. Alla fält är valfria.
             </p>
 
@@ -422,7 +422,7 @@ export function OnboardingPage() {
                 { key: 'height_cm' as const, label: 'Längd', placeholder: 't.ex. 175', unit: 'cm', min: 100, max: 250, step: 1 },
               ]).map(({ key, label, placeholder, unit, min, max, step }) => (
                 <div key={key}>
-                  <label htmlFor={key} className="block text-sm font-medium text-stone-700 mb-1.5">{label}</label>
+                  <label htmlFor={key} className="block text-sm font-medium text-stone-700 dark:text-stone-300 dark:text-stone-600 mb-1.5">{label}</label>
                   <div className="flex items-center gap-2">
                     <input
                       id={key}
@@ -439,15 +439,15 @@ export function OnboardingPage() {
                         // NaN får aldrig lagras — behåll null tills värdet är giltigt.
                         setForm((f) => ({ ...f, [key]: raw === '' || !Number.isFinite(n) ? null : n }))
                       }}
-                      className="flex-1 bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-forest-400"
+                      className="flex-1 bg-stone-50 dark:bg-stone-800 border border-stone-100 dark:border-stone-700 rounded-xl px-4 py-3 text-sm text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-forest-400"
                     />
-                    <span className="text-sm text-stone-400 w-8 shrink-0">{unit}</span>
+                    <span className="text-sm text-stone-400 dark:text-stone-500 w-8 shrink-0">{unit}</span>
                   </div>
                 </div>
               ))}
 
               <div>
-                <label htmlFor="calorie_goal" className="block text-sm font-medium text-stone-700 mb-1.5">Kalorimål</label>
+                <label htmlFor="calorie_goal" className="block text-sm font-medium text-stone-700 dark:text-stone-300 dark:text-stone-600 mb-1.5">Kalorimål</label>
                 <div className="flex items-center gap-2">
                   <input
                     id="calorie_goal"
@@ -464,11 +464,11 @@ export function OnboardingPage() {
                       // NaN får aldrig lagras — behåll null tills värdet är giltigt.
                       setForm((f) => ({ ...f, calorie_goal: raw === '' || !Number.isFinite(n) ? null : n }))
                     }}
-                    className="flex-1 bg-stone-50 border border-stone-100 rounded-xl px-4 py-3 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-forest-400"
+                    className="flex-1 bg-stone-50 dark:bg-stone-800 border border-stone-100 dark:border-stone-700 rounded-xl px-4 py-3 text-sm text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-forest-400"
                   />
-                  <span className="text-sm text-stone-400 w-8 shrink-0">kcal</span>
+                  <span className="text-sm text-stone-400 dark:text-stone-500 w-8 shrink-0">kcal</span>
                 </div>
-                <p className="text-xs text-stone-400 mt-1.5">Tomt fält räknas ut automatiskt utifrån mål och kropp.</p>
+                <p className="text-xs text-stone-400 dark:text-stone-500 mt-1.5">Tomt fält räknas ut automatiskt utifrån mål och kropp.</p>
               </div>
             </div>
 
@@ -487,14 +487,14 @@ export function OnboardingPage() {
                 type="button"
                 onClick={submit}
                 disabled={saving}
-                className="w-full text-sm text-stone-500 hover:text-stone-700 py-2 disabled:opacity-50"
+                className="w-full text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:text-stone-300 dark:text-stone-600 py-2 disabled:opacity-50"
               >
                 Hoppa över och skapa schema
               </button>
 
               {import.meta.env.DEV && (
-                <div className="pt-4 mt-4 border-t border-dashed border-stone-200">
-                  <p className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-3">
+                <div className="pt-4 mt-4 border-t border-dashed border-stone-200 dark:border-stone-700">
+                  <p className="text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-3">
                     Testschema (dev)
                   </p>
                   <div className="grid grid-cols-2 gap-2">
@@ -504,14 +504,14 @@ export function OnboardingPage() {
                         type="button"
                         onClick={() => submitMock(value as MockGoal)}
                         disabled={saving}
-                        className="flex flex-col items-start gap-2 p-3 rounded-xl border border-stone-200 bg-stone-50 text-left hover:bg-stone-100 active:scale-[0.98] disabled:opacity-50 transition-all"
+                        className="flex flex-col items-start gap-2 p-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-left hover:bg-stone-100 dark:bg-stone-700 active:scale-[0.98] disabled:opacity-50 transition-all"
                       >
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconBg}`}>
                           <Icon className={`w-4 h-4 ${iconStroke}`} />
                         </div>
                         <div>
-                          <span className="font-semibold text-xs text-stone-800 block">{label}</span>
-                          <span className="text-[10px] text-stone-400 mt-0.5 block leading-tight">{desc}</span>
+                          <span className="font-semibold text-xs text-stone-800 dark:text-stone-200 block">{label}</span>
+                          <span className="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5 block leading-tight">{desc}</span>
                         </div>
                       </button>
                     ))}

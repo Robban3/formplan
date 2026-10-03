@@ -101,16 +101,16 @@ export function AiCoachPage() {
   return (
     <div className="flex flex-col h-[100dvh] bg-canvas max-w-lg mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-3 px-5 pt-header pb-4 bg-white border-b border-stone-100 flex-shrink-0">
-        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100">
-          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600" />
+      <div className="flex items-center gap-3 px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700 flex-shrink-0">
+        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:bg-stone-700">
+          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300 dark:stroke-stone-600" />
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-forest-100 rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 bg-forest-100 dark:bg-forest-900/40 rounded-full flex items-center justify-center">
             <BotIcon className="w-4 h-4 stroke-forest-600" />
           </div>
           <div>
-            <p className="font-semibold text-stone-900">AI-coach</p>
+            <p className="font-semibold text-stone-900 dark:text-stone-100">AI-coach</p>
             <p className="text-[10px] text-forest-600">Online</p>
           </div>
         </div>
@@ -121,7 +121,7 @@ export function AiCoachPage() {
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             {msg.role === 'assistant' && (
-              <div className="w-7 h-7 bg-forest-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0 mt-1">
+              <div className="w-7 h-7 bg-forest-100 dark:bg-forest-900/40 rounded-full flex items-center justify-center mr-2 flex-shrink-0 mt-1">
                 <BotIcon className="w-3.5 h-3.5 stroke-forest-600" />
               </div>
             )}
@@ -129,7 +129,7 @@ export function AiCoachPage() {
               className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                 msg.role === 'user'
                   ? 'bg-forest-700 text-white rounded-tr-sm'
-                  : 'bg-white border border-stone-100 text-stone-800 rounded-tl-sm'
+                  : 'bg-white dark:bg-stone-800 border border-stone-100 dark:border-stone-700 text-stone-800 dark:text-stone-200 rounded-tl-sm'
               }`}
             >
               {msg.content}
@@ -139,10 +139,10 @@ export function AiCoachPage() {
 
         {loading && (
           <div className="flex justify-start">
-            <div className="w-7 h-7 bg-forest-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+            <div className="w-7 h-7 bg-forest-100 dark:bg-forest-900/40 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
               <BotIcon className="w-3.5 h-3.5 stroke-forest-600" />
             </div>
-            <div className="bg-white border border-stone-100 rounded-2xl rounded-tl-sm px-4 py-3">
+            <div className="bg-white dark:bg-stone-800 border border-stone-100 dark:border-stone-700 rounded-2xl rounded-tl-sm px-4 py-3">
               <div className="flex gap-1">
                 <span className="w-2 h-2 bg-stone-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                 <span className="w-2 h-2 bg-stone-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -159,7 +159,7 @@ export function AiCoachPage() {
               <button
                 key={s}
                 onClick={() => send(s)}
-                className="text-xs bg-white border border-stone-200 rounded-full px-3 py-1.5 text-stone-600 hover:border-forest-300 hover:text-forest-700 transition-colors"
+                className="text-xs bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full px-3 py-1.5 text-stone-600 dark:text-stone-300 dark:text-stone-600 hover:border-forest-300 hover:text-forest-700 dark:text-forest-300 transition-colors"
               >
                 {s}
               </button>
@@ -171,7 +171,7 @@ export function AiCoachPage() {
       </div>
 
       {/* Input */}
-      <div className="flex-shrink-0 px-5 pb-6 pt-3 bg-white border-t border-stone-100">
+      <div className="flex-shrink-0 px-5 pb-6 pt-3 bg-white dark:bg-stone-800 border-t border-stone-100 dark:border-stone-700">
         <div className="flex gap-2">
           <input
             type="text"
@@ -179,7 +179,7 @@ export function AiCoachPage() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && send()}
             placeholder="Ställ en träningsfråga..."
-            className="flex-1 bg-stone-100 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+            className="flex-1 bg-stone-100 dark:bg-stone-700 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
           />
           <button
             onClick={() => send()}

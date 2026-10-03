@@ -17,7 +17,9 @@ html.dark {
 @layer base {
   html {
     background-color: var(--canvas);
-    @apply text-stone-900;
+    /* Grundtexten måste flippa med temat. Utan dark:-varianten ärvde allt som
+       inte sätter egen färg mörk text på mörk bakgrund. */
+    @apply text-stone-900 dark:text-stone-100;
     -webkit-tap-highlight-color: transparent;
   }
   /* Hindra att hela appen kan dras i sidled om någon sida har ett element

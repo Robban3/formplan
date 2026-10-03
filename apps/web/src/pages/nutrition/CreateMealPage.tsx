@@ -97,12 +97,12 @@ export function CreateMealPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-full bg-white pb-28">
-      <div className="flex items-center justify-between px-4 pt-header pb-4 border-b border-stone-100">
-        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100">
-          <XIcon className="w-5 h-5 stroke-stone-500" />
+    <div className="flex flex-col min-h-full bg-white dark:bg-stone-800 pb-28">
+      <div className="flex items-center justify-between px-4 pt-header pb-4 border-b border-stone-100 dark:border-stone-700">
+        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:bg-stone-700">
+          <XIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400 dark:stroke-stone-500" />
         </button>
-        <h1 className="font-bold text-stone-900">Skapa egen måltid</h1>
+        <h1 className="font-bold text-stone-900 dark:text-stone-100">Skapa egen måltid</h1>
         <button onClick={handleSave} className="text-sm font-semibold text-forest-600">
           Spara
         </button>
@@ -110,32 +110,32 @@ export function CreateMealPage() {
 
       <div className="px-5 py-5 space-y-5">
         <div className="flex flex-col items-center">
-          <div className="w-28 h-28 rounded-full bg-stone-100 flex items-center justify-center">
-            <UtensilsIcon className="w-12 h-12 stroke-stone-300" />
+          <div className="w-28 h-28 rounded-full bg-stone-100 dark:bg-stone-700 flex items-center justify-center">
+            <UtensilsIcon className="w-12 h-12 stroke-stone-300 dark:stroke-stone-600" />
           </div>
         </div>
 
         <label className="block">
-          <span className="text-sm text-stone-500">Måltidsnamn</span>
+          <span className="text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500">Måltidsnamn</span>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="t.ex. Kyckling bowl"
-            className="mt-1 w-full bg-stone-100 rounded-xl px-4 py-3 text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400"
+            className="mt-1 w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-3 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400"
           />
         </label>
 
         <div>
-          <p className="text-sm font-semibold text-stone-800 mb-2">Livsmedel</p>
+          <p className="text-sm font-semibold text-stone-800 dark:text-stone-200 mb-2">Livsmedel</p>
           {ingredients.map((ing, i) => (
             <div key={i} className="flex items-center justify-between py-2.5 border-b border-stone-50">
               <div>
-                <p className="text-sm font-medium text-stone-800">{ing.food_name}</p>
-                <p className="text-xs text-stone-400">{ing.amount_g} g · {ing.kcal} kcal</p>
+                <p className="text-sm font-medium text-stone-800 dark:text-stone-200">{ing.food_name}</p>
+                <p className="text-xs text-stone-400 dark:text-stone-500">{ing.amount_g} g · {ing.kcal} kcal</p>
               </div>
               <button
                 onClick={() => setIngredients((prev) => prev.filter((_, j) => j !== i))}
-                className="w-7 h-7 rounded-full bg-red-50 text-red-500 text-sm font-bold"
+                className="w-7 h-7 rounded-full bg-red-50 dark:bg-red-900/25 text-red-500 text-sm font-bold"
               >
                 −
               </button>
@@ -145,21 +145,21 @@ export function CreateMealPage() {
           {!pick ? (
             <button
               onClick={() => setPick({ id: '', name: '', kcal_per_100g: 0, protein_per_100g: 0, fat_per_100g: 0, carbs_per_100g: 0 })}
-              className="w-full flex items-center justify-center gap-2 py-3 mt-2 text-sm text-forest-600 font-medium border border-dashed border-stone-200 rounded-xl hover:bg-forest-50 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3 mt-2 text-sm text-forest-600 font-medium border border-dashed border-stone-200 dark:border-stone-700 rounded-xl hover:bg-forest-50 dark:bg-forest-900/30 transition-colors"
             >
               <PlusIcon className="w-4 h-4 stroke-forest-600" />
               Lägg till livsmedel
             </button>
           ) : (
-            <div className="mt-3 space-y-3 bg-stone-50 rounded-xl p-4">
+            <div className="mt-3 space-y-3 bg-stone-50 dark:bg-stone-800 rounded-xl p-4">
               <input
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Sök livsmedel…"
-                className="w-full bg-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+                className="w-full bg-white dark:bg-stone-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
               />
-              {searching && <p className="text-xs text-stone-400">Söker…</p>}
+              {searching && <p className="text-xs text-stone-400 dark:text-stone-500">Söker…</p>}
               {results.map((item) => (
                 <button
                   key={item.id}
@@ -167,27 +167,27 @@ export function CreateMealPage() {
                     setPick(item)
                     setAmount(String(item.serving_size_g ?? 100))
                   }}
-                  className="w-full text-left py-2 text-sm text-stone-700 hover:text-forest-600"
+                  className="w-full text-left py-2 text-sm text-stone-700 dark:text-stone-300 dark:text-stone-600 hover:text-forest-600"
                 >
                   {item.name} · {item.kcal_per_100g} kcal/100g
                 </button>
               ))}
               {pick.id && (
                 <>
-                  <p className="text-sm font-medium text-stone-800">{pick.name}</p>
+                  <p className="text-sm font-medium text-stone-800 dark:text-stone-200">{pick.name}</p>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
-                      className="flex-1 bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+                      className="flex-1 bg-white dark:bg-stone-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
                     />
-                    <span className="text-sm text-stone-400">g</span>
+                    <span className="text-sm text-stone-400 dark:text-stone-500">g</span>
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => { setPick(null); setQuery(''); setResults([]) }}
-                      className="flex-1 py-2 rounded-xl border border-stone-200 text-sm text-stone-600"
+                      className="flex-1 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-sm text-stone-600 dark:text-stone-300 dark:text-stone-600"
                     >
                       Avbryt
                     </button>
@@ -206,23 +206,23 @@ export function CreateMealPage() {
       </div>
 
       {ingredients.length > 0 && (
-        <div className="fixed bottom-[calc(64px+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 w-full max-w-lg px-5 py-4 bg-white border-t border-stone-100">
+        <div className="fixed bottom-[calc(64px+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 w-full max-w-lg px-5 py-4 bg-white dark:bg-stone-800 border-t border-stone-100 dark:border-stone-700">
           <div className="grid grid-cols-4 gap-2 text-center text-xs">
             <div>
-              <p className="font-bold text-stone-900">{totals.kcal}</p>
-              <p className="text-stone-400">kcal</p>
+              <p className="font-bold text-stone-900 dark:text-stone-100">{totals.kcal}</p>
+              <p className="text-stone-400 dark:text-stone-500">kcal</p>
             </div>
             <div>
-              <p className="font-bold text-stone-900">{Math.round(totals.protein_g)}g</p>
-              <p className="text-stone-400">Protein</p>
+              <p className="font-bold text-stone-900 dark:text-stone-100">{Math.round(totals.protein_g)}g</p>
+              <p className="text-stone-400 dark:text-stone-500">Protein</p>
             </div>
             <div>
-              <p className="font-bold text-stone-900">{Math.round(totals.fat_g)}g</p>
-              <p className="text-stone-400">Fett</p>
+              <p className="font-bold text-stone-900 dark:text-stone-100">{Math.round(totals.fat_g)}g</p>
+              <p className="text-stone-400 dark:text-stone-500">Fett</p>
             </div>
             <div>
-              <p className="font-bold text-stone-900">{Math.round(totals.carbs_g)}g</p>
-              <p className="text-stone-400">Kolhydrater</p>
+              <p className="font-bold text-stone-900 dark:text-stone-100">{Math.round(totals.carbs_g)}g</p>
+              <p className="text-stone-400 dark:text-stone-500">Kolhydrater</p>
             </div>
           </div>
         </div>

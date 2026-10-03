@@ -220,24 +220,24 @@ export function ActiveWorkout() {
     return (
       <div className="min-h-[100dvh] bg-canvas flex flex-col items-center justify-center px-5 gap-6">
         <div className="text-center">
-          <div className="w-16 h-16 bg-forest-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-forest-100 dark:bg-forest-900/40 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <DumbbellIcon className="w-8 h-8 stroke-forest-600" />
           </div>
-          <h2 className="text-2xl font-bold text-stone-900">Bra jobbat!</h2>
-          <p className="text-stone-500 mt-1">{pendingWorkoutName}</p>
+          <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Bra jobbat!</h2>
+          <p className="text-stone-500 dark:text-stone-400 dark:text-stone-500 mt-1">{pendingWorkoutName}</p>
         </div>
 
         {/* Dela pass */}
         <button
           onClick={() => shareWorkout(pendingWorkoutName, finalElapsed, doneSetCount, totalSetCount)}
-          className="flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-stone-200 text-sm font-medium text-stone-700 shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-stone-800 rounded-full border border-stone-200 dark:border-stone-700 text-sm font-medium text-stone-700 dark:text-stone-300 dark:text-stone-600 shadow-sm"
         >
-          <ShareIcon className="w-4 h-4 stroke-stone-500" />
+          <ShareIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400 dark:stroke-stone-500" />
           Dela passet
         </button>
 
-        <div className="w-full max-w-sm bg-white rounded-2xl border border-stone-100 p-5">
-          <p className="font-semibold text-stone-800 text-center mb-4">Hur ansträngande var passet?</p>
+        <div className="w-full max-w-sm bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-5">
+          <p className="font-semibold text-stone-800 dark:text-stone-200 text-center mb-4">Hur ansträngande var passet?</p>
           <div className="grid grid-cols-5 gap-2 mb-4">
             {[1,2,3,4,5,6,7,8,9,10].map((n) => (
               <button
@@ -249,19 +249,19 @@ export function ActiveWorkout() {
                 }}
                 className={`aspect-square rounded-xl text-sm font-bold transition-colors ${
                   n <= 3 ? 'bg-teal-100 text-teal-700 hover:bg-teal-200'
-                  : n <= 6 ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                  : 'bg-red-100 text-red-700 hover:bg-red-200'
+                  : n <= 6 ? 'bg-amber-100 dark:bg-amber-900/35 text-amber-700 dark:text-amber-300 hover:bg-amber-200'
+                  : 'bg-red-100 text-red-700 dark:text-red-300 hover:bg-red-200'
                 }`}
               >
                 {n}
               </button>
             ))}
           </div>
-          <p className="text-xs text-stone-400 text-center">1 = Extremt lätt · 10 = Maximalt</p>
+          <p className="text-xs text-stone-400 dark:text-stone-500 text-center">1 = Extremt lätt · 10 = Maximalt</p>
         </div>
         <button
           onClick={() => { setShowRpe(false); navigate('/hem', { replace: true }) }}
-          className="text-sm text-stone-400"
+          className="text-sm text-stone-400 dark:text-stone-500"
         >
           Hoppa över
         </button>
@@ -520,12 +520,12 @@ export function ActiveWorkout() {
   return (
     <div className="min-h-[100dvh] bg-canvas flex flex-col max-w-lg mx-auto overflow-x-hidden">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-5 pt-header pb-4 bg-white border-b border-stone-100">
-        <button onClick={requestFinish} className="flex items-center gap-1 text-stone-400 text-sm">
-          <XIcon className="w-4 h-4 stroke-stone-400" /> Avsluta
+      <div className="flex items-center justify-between px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
+        <button onClick={requestFinish} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm">
+          <XIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" /> Avsluta
         </button>
         <div className="text-center">
-          <p className="text-xs text-stone-400">{workout.workoutName}</p>
+          <p className="text-xs text-stone-400 dark:text-stone-500">{workout.workoutName}</p>
         </div>
         <button
           onClick={togglePause}
@@ -539,17 +539,17 @@ export function ActiveWorkout() {
       </div>
 
       {/* Timer */}
-      <div className="text-center py-6 bg-white">
-        <span className="text-5xl font-mono font-bold tracking-tight text-stone-900">
+      <div className="text-center py-6 bg-white dark:bg-stone-800">
+        <span className="text-5xl font-mono font-bold tracking-tight text-stone-900 dark:text-stone-100">
           {formatTime(elapsed)}
         </span>
-        <p className="text-stone-400 text-xs mt-1">Tid</p>
+        <p className="text-stone-400 dark:text-stone-500 text-xs mt-1">Tid</p>
       </div>
 
       {/* Rest countdown overlay */}
       {restTimer !== null && (
-        <div className="mx-5 mb-4 bg-forest-50 border border-forest-200 rounded-2xl p-4 text-center">
-          <p className="text-forest-700 font-semibold">Vila</p>
+        <div className="mx-5 mb-4 bg-forest-50 dark:bg-forest-900/30 border border-forest-200 dark:border-forest-800 rounded-2xl p-4 text-center">
+          <p className="text-forest-700 dark:text-forest-300 font-semibold">Vila</p>
           <p className="text-3xl font-bold font-mono text-forest-600">{formatTime(restTimer)}</p>
           <button
             onClick={() => {
@@ -577,10 +577,10 @@ export function ActiveWorkout() {
             disabled={workout.currentExerciseIndex === 0}
             className="p-2 disabled:opacity-30"
           >
-            <ChevronLeftIcon className="w-5 h-5 stroke-stone-400" />
+            <ChevronLeftIcon className="w-5 h-5 stroke-stone-400 dark:stroke-stone-500" />
           </button>
           <div className="text-center">
-            <p className="text-xs text-stone-400">
+            <p className="text-xs text-stone-400 dark:text-stone-500">
               Övning {workout.currentExerciseIndex + 1} av {workout.exercises.length}
             </p>
             <div className="flex items-center gap-2 justify-center">
@@ -591,15 +591,15 @@ export function ActiveWorkout() {
                   className="flex items-center gap-2 mt-0.5"
                 >
                   <ExerciseMedia key={catalogEx.id} exercise={catalogEx} variant="thumb" />
-                  <h2 className="text-xl font-bold text-stone-900">{ex.name}</h2>
+                  <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100">{ex.name}</h2>
                   <ChevronDownIcon
-                    className={`w-4 h-4 stroke-stone-300 transition-transform ${
+                    className={`w-4 h-4 stroke-stone-300 dark:stroke-stone-600 transition-transform ${
                       showDetail ? 'rotate-180' : ''
                     }`}
                   />
                 </button>
               ) : (
-                <h2 className="text-xl font-bold text-stone-900 mt-0.5">{ex.name}</h2>
+                <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100 mt-0.5">{ex.name}</h2>
               )}
               {ex.supersetGroup !== undefined && (
                 <span className="text-[10px] font-bold bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">SS</span>
@@ -612,7 +612,7 @@ export function ActiveWorkout() {
               const kg = prev[0]?.weight_kg
               const reps = prev[0]?.reps
               return (
-                <p className="text-xs text-stone-400 mt-0.5">
+                <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
                   Förra: {kg != null ? formatWeight(kg) : '—'} × {reps ?? '—'} reps
                 </p>
               )
@@ -623,13 +623,13 @@ export function ActiveWorkout() {
             disabled={workout.currentExerciseIndex === workout.exercises.length - 1}
             className="p-2 disabled:opacity-30"
           >
-            <ChevronRightIcon className="w-5 h-5 stroke-stone-400" />
+            <ChevronRightIcon className="w-5 h-5 stroke-stone-400 dark:stroke-stone-500" />
           </button>
         </div>
 
         {/* Övningsbeskrivning — bara på begäran, så set-loggningen syns direkt */}
         {showDetail && catalogEx && (
-          <div className="bg-white rounded-2xl border border-stone-100 p-4 mb-4">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 mb-4">
             <ExerciseDetail exercise={catalogEx} />
           </div>
         )}
@@ -639,10 +639,10 @@ export function ActiveWorkout() {
           const rec = recommendations[exKey]!
           const applied = ex.sets.some((s) => !s.done && s.weight_kg != null && Math.abs(s.weight_kg - rec.recommendedWeight_kg) < 0.05)
           return (
-            <div className="flex items-center gap-3 bg-forest-50 border border-forest-200 rounded-2xl px-4 py-3 mb-4">
+            <div className="flex items-center gap-3 bg-forest-50 dark:bg-forest-900/30 border border-forest-200 dark:border-forest-800 rounded-2xl px-4 py-3 mb-4">
               <ZapIcon className="w-5 h-5 stroke-forest-600 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-forest-800">
+                <p className="text-sm font-semibold text-forest-800 dark:text-forest-200">
                   Dags att öka till {formatWeight(rec.recommendedWeight_kg)}
                 </p>
                 <p className="text-[11px] text-forest-600 mt-0.5">
@@ -661,9 +661,9 @@ export function ActiveWorkout() {
         })()}
 
         {/* Set rows */}
-        <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden mb-4">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden mb-4">
           {/* Header */}
-          <div className={`grid ${setGrid} gap-2 px-4 py-2 bg-stone-50 text-xs text-stone-400 font-medium`}>
+          <div className={`grid ${setGrid} gap-2 px-4 py-2 bg-stone-50 dark:bg-stone-800 text-xs text-stone-400 dark:text-stone-500 font-medium`}>
             <span>Set</span>
             <span>{isCardio ? 'Tid (min)' : 'Reps'}</span>
             {isCardio ? <span>Distans (km)</span> : showWeight && <span>Vikt ({weightLabel})</span>}
@@ -671,11 +671,11 @@ export function ActiveWorkout() {
           </div>
 
           {isCardio ? (
-            <p className="px-4 py-2 text-xs text-stone-400 border-b border-stone-50">
+            <p className="px-4 py-2 text-xs text-stone-400 dark:text-stone-500 border-b border-stone-50">
               Kondition — fyll i tid och distans per pass.
             </p>
           ) : !showWeight && (
-            <p className="px-4 py-2 text-xs text-stone-400 border-b border-stone-50">
+            <p className="px-4 py-2 text-xs text-stone-400 dark:text-stone-500 border-b border-stone-50">
               Kroppsvikt — fyll i antal reps per set.
             </p>
           )}
@@ -688,12 +688,12 @@ export function ActiveWorkout() {
             return (
             <div
               key={si}
-              className={`grid ${setGrid} gap-2 items-center px-4 py-3 border-t border-stone-100 ${
-                set.done ? 'bg-stone-50' : ''
+              className={`grid ${setGrid} gap-2 items-center px-4 py-3 border-t border-stone-100 dark:border-stone-700 ${
+                set.done ? 'bg-stone-50 dark:bg-stone-800' : ''
               }`}
             >
               <div className="flex flex-col">
-                <span className="text-sm font-mono text-stone-500">{si + 1}</span>
+                <span className="text-sm font-mono text-stone-500 dark:text-stone-400 dark:text-stone-500">{si + 1}</span>
                 {oneRM && (
                   <span className="text-[9px] text-forest-600 font-semibold">1RM~{formatWeight(oneRM)}</span>
                 )}
@@ -707,7 +707,7 @@ export function ActiveWorkout() {
                     value={set.duration_min ?? ''}
                     onChange={(e) => updateSet(si, 'duration_min', e.target.value)}
                     disabled={set.done}
-                    className="min-w-0 w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
+                    className="min-w-0 w-full bg-stone-100 dark:bg-stone-700 rounded-lg px-3 py-2 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
                   />
                   <input
                     type="number"
@@ -716,7 +716,7 @@ export function ActiveWorkout() {
                     value={set.distance_km ?? ''}
                     onChange={(e) => updateSet(si, 'distance_km', e.target.value)}
                     disabled={set.done}
-                    className="min-w-0 w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
+                    className="min-w-0 w-full bg-stone-100 dark:bg-stone-700 rounded-lg px-3 py-2 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
                   />
                 </>
               ) : (
@@ -728,7 +728,7 @@ export function ActiveWorkout() {
                     value={set.reps || ''}
                     onChange={(e) => updateSet(si, 'reps', e.target.value)}
                     disabled={set.done}
-                    className="min-w-0 w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
+                    className="min-w-0 w-full bg-stone-100 dark:bg-stone-700 rounded-lg px-3 py-2 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
                   />
                   {showWeight && (
                     <input
@@ -740,7 +740,7 @@ export function ActiveWorkout() {
                       value={set.weight_kg != null ? toDisplay(set.weight_kg) : ''}
                       onChange={(e) => updateSet(si, 'weight_kg', e.target.value)}
                       disabled={set.done}
-                      className="min-w-0 w-full bg-stone-100 rounded-lg px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
+                      className="min-w-0 w-full bg-stone-100 dark:bg-stone-700 rounded-lg px-3 py-2 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
                     />
                   )}
                 </>
@@ -753,7 +753,7 @@ export function ActiveWorkout() {
                     ? 'bg-forest-700'
                     : si === nextSetIndex
                     ? 'bg-forest-700 active:bg-forest-700'
-                    : 'bg-stone-200'
+                    : 'bg-stone-200 dark:bg-stone-700'
                 }`}
               >
                 <CheckIcon className="w-4 h-4 stroke-white" />
@@ -764,13 +764,13 @@ export function ActiveWorkout() {
         </div>
 
         {/* Progress */}
-        <p className="text-xs text-stone-400 text-center mb-1">
+        <p className="text-xs text-stone-400 dark:text-stone-500 text-center mb-1">
           {doneSets}/{totalSets} set · {ex.name}
         </p>
-        <p className="text-xs text-stone-500 text-center mb-2">
+        <p className="text-xs text-stone-500 dark:text-stone-400 dark:text-stone-500 text-center mb-2">
           {workoutDoneSets}/{workoutTotalSets} set i hela passet
         </p>
-        <div className="w-full bg-stone-200 rounded-full h-1.5 mb-6">
+        <div className="w-full bg-stone-200 dark:bg-stone-700 rounded-full h-1.5 mb-6">
           <div
             className="bg-forest-700 h-1.5 rounded-full transition-all"
             style={{ width: `${workoutTotalSets > 0 ? (workoutDoneSets / workoutTotalSets) * 100 : 0}%` }}
@@ -778,29 +778,29 @@ export function ActiveWorkout() {
         </div>
 
         {workoutComplete && (
-          <div className="bg-forest-50 border border-forest-200 rounded-2xl p-4 mb-4 text-center">
-            <p className="font-bold text-forest-800">Alla set klara!</p>
+          <div className="bg-forest-50 dark:bg-forest-900/30 border border-forest-200 dark:border-forest-800 rounded-2xl p-4 mb-4 text-center">
+            <p className="font-bold text-forest-800 dark:text-forest-200">Alla set klara!</p>
             <p className="text-sm text-forest-600 mt-1">Tryck på knappen nedan för att spara passet.</p>
           </div>
         )}
 
         {/* Next exercise */}
         {nextIncompleteEx && !workoutComplete && (
-          <div className="flex items-center gap-3 bg-white rounded-xl border border-stone-100 p-3 mb-4">
+          <div className="flex items-center gap-3 bg-white dark:bg-stone-800 rounded-xl border border-stone-100 dark:border-stone-700 p-3 mb-4">
             {(() => {
               const nextCatalog = resolveExercise(nextIncompleteEx)
               return nextCatalog ? (
                 <ExerciseMedia key={nextCatalog.id} exercise={nextCatalog} variant="thumb" />
               ) : null
             })()}
-            <div className="text-stone-400 text-xs">Nästa övning</div>
-            <div className="font-semibold text-sm text-stone-700">{nextIncompleteEx.name}</div>
+            <div className="text-stone-400 dark:text-stone-500 text-xs">Nästa övning</div>
+            <div className="font-semibold text-sm text-stone-700 dark:text-stone-300 dark:text-stone-600">{nextIncompleteEx.name}</div>
           </div>
         )}
       </div>
 
       {/* Bottom action */}
-      <div className="px-5 pb-8 bg-white border-t border-stone-100 pt-4 space-y-3">
+      <div className="px-5 pb-8 bg-white dark:bg-stone-800 border-t border-stone-100 dark:border-stone-700 pt-4 space-y-3">
         {/* Superset toggle */}
         {workout.currentExerciseIndex < workout.exercises.length - 1 && (
           <button
@@ -825,7 +825,7 @@ export function ActiveWorkout() {
             className={`w-full py-2.5 rounded-2xl text-sm font-medium border transition-colors ${
               ex.supersetGroup !== undefined
                 ? 'bg-purple-50 border-purple-200 text-purple-700'
-                : 'bg-white border-stone-200 text-stone-500'
+                : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 dark:text-stone-500'
             }`}
           >
             <ZapIcon className="w-3.5 h-3.5 inline mr-1" />
@@ -852,7 +852,7 @@ export function ActiveWorkout() {
           <button
             onClick={finishWorkout}
             disabled={saving}
-            className="w-full bg-white text-forest-700 font-semibold py-3 rounded-2xl border border-forest-200 disabled:opacity-60"
+            className="w-full bg-white dark:bg-stone-800 text-forest-700 dark:text-forest-300 font-semibold py-3 rounded-2xl border border-forest-200 dark:border-forest-800 disabled:opacity-60"
           >
             {saving ? 'Sparar…' : `Spara & avsluta (${workoutDoneSets}/${workoutTotalSets} set)`}
           </button>

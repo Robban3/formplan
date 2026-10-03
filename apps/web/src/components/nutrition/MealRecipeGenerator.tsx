@@ -125,7 +125,7 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
     return (
       <button
         onClick={() => { setOpen(true); if (!ingredient.trim() && defaultIngredient) setIngredient(defaultIngredient) }}
-        className="w-full flex items-center justify-center gap-2 py-3 border-t border-stone-50 text-sm text-forest-600 font-medium hover:bg-forest-50 transition-colors"
+        className="w-full flex items-center justify-center gap-2 py-3 border-t border-stone-50 text-sm text-forest-600 font-medium hover:bg-forest-50 dark:bg-forest-900/30 transition-colors"
       >
         <ZapIcon className="w-4 h-4 stroke-forest-600" />
         Generera recept med AI
@@ -134,18 +134,18 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
   }
 
   return (
-    <div className="border-t border-stone-50 p-4 space-y-3 bg-stone-50/60">
+    <div className="border-t border-stone-50 p-4 space-y-3 bg-stone-50 dark:bg-stone-800/60">
       {defaultIngredient && (
-        <p className="text-[11px] text-stone-400">Utgår från måltidens livsmedel — ändra fritt</p>
+        <p className="text-[11px] text-stone-400 dark:text-stone-500">Utgår från måltidens livsmedel — ändra fritt</p>
       )}
       <div className="flex items-center gap-2">
         <input
           value={ingredient}
           onChange={(e) => setIngredient(e.target.value)}
           placeholder="Råvara, t.ex. kyckling (valfritt)"
-          className="flex-1 min-w-0 bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
+          className="flex-1 min-w-0 bg-white dark:bg-stone-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
         />
-        <div className="flex items-center gap-1 bg-white rounded-xl px-3 py-2">
+        <div className="flex items-center gap-1 bg-white dark:bg-stone-800 rounded-xl px-3 py-2">
           <input
             type="number"
             inputMode="numeric"
@@ -153,14 +153,14 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
             onChange={(e) => setKcal(e.target.value)}
             className="w-14 text-sm text-center focus:outline-none"
           />
-          <span className="text-xs text-stone-400">kcal</span>
+          <span className="text-xs text-stone-400 dark:text-stone-500">kcal</span>
         </div>
       </div>
 
       <div className="flex gap-2">
         <button
           onClick={() => { setOpen(false); setRecipe(null); setError(null) }}
-          className="px-4 py-2 rounded-xl border border-stone-200 text-sm text-stone-600"
+          className="px-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-sm text-stone-600 dark:text-stone-300 dark:text-stone-600"
         >
           Stäng
         </button>
@@ -176,11 +176,11 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
       {error && <p className="text-xs text-red-500 text-center">{error}</p>}
 
       {recipe && (
-        <div className="bg-white rounded-xl border border-stone-100 p-3">
-          <h3 className="font-bold text-stone-900 text-sm">{recipe.name}</h3>
-          <div className="flex items-center gap-2 text-[11px] text-stone-400 mt-0.5 mb-2">
+        <div className="bg-white dark:bg-stone-800 rounded-xl border border-stone-100 dark:border-stone-700 p-3">
+          <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm">{recipe.name}</h3>
+          <div className="flex items-center gap-2 text-[11px] text-stone-400 dark:text-stone-500 mt-0.5 mb-2">
             <span className="flex items-center gap-1">
-              <ClockIcon className="w-3 h-3 stroke-stone-400" />
+              <ClockIcon className="w-3 h-3 stroke-stone-400 dark:stroke-stone-500" />
               {recipe.prep_minutes} min
             </span>
             <span>·</span>
@@ -194,27 +194,27 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
               { v: `${recipe.fat_g}g`, l: 'Fett' },
               { v: `${recipe.carbs_g}g`, l: 'Kolhyd.' },
             ].map((m) => (
-              <div key={m.l} className="bg-forest-50 rounded-lg py-1.5">
-                <p className="font-bold text-forest-700 text-xs">{m.v}</p>
+              <div key={m.l} className="bg-forest-50 dark:bg-forest-900/30 rounded-lg py-1.5">
+                <p className="font-bold text-forest-700 dark:text-forest-300 text-xs">{m.v}</p>
                 <p className="text-[9px] text-forest-600/70">{m.l}</p>
               </div>
             ))}
           </div>
 
-          <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wide mb-1">Ingredienser</p>
+          <p className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-1">Ingredienser</p>
           <ul className="space-y-1 mb-3">
             {recipe.ingredients.map((ing, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-stone-700">
+              <li key={i} className="flex items-start gap-2 text-xs text-stone-700 dark:text-stone-300 dark:text-stone-600">
                 <span className="w-1 h-1 rounded-full bg-forest-400 flex-shrink-0 mt-1.5" />
                 {ing}
               </li>
             ))}
           </ul>
 
-          <p className="text-[11px] font-semibold text-stone-500 uppercase tracking-wide mb-1">Tillagning</p>
+          <p className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-1">Tillagning</p>
           <ol className="space-y-1.5">
             {recipe.steps.map((step, i) => (
-              <li key={i} className="flex gap-2 text-xs text-stone-700">
+              <li key={i} className="flex gap-2 text-xs text-stone-700 dark:text-stone-300 dark:text-stone-600">
                 <span className="w-4 h-4 rounded-full bg-forest-700 text-white text-[10px] flex items-center justify-center flex-shrink-0 font-semibold">
                   {i + 1}
                 </span>
@@ -234,7 +234,7 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
             <button
               onClick={saveToWeek}
               disabled={savedWeek}
-              className="py-2.5 rounded-xl border border-forest-200 text-forest-700 text-sm font-semibold hover:bg-forest-50 transition-colors disabled:opacity-60"
+              className="py-2.5 rounded-xl border border-forest-200 dark:border-forest-800 text-forest-700 dark:text-forest-300 text-sm font-semibold hover:bg-forest-50 dark:bg-forest-900/30 transition-colors disabled:opacity-60"
             >
               {savedWeek ? 'Sparad ✓' : 'Spara till vecka'}
             </button>

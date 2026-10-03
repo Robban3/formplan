@@ -30,7 +30,7 @@ export function RecipeDetailPage() {
 
   if (!recipe) {
     return (
-      <div className="px-5 pt-12 text-center text-stone-400">
+      <div className="px-5 pt-12 text-center text-stone-400 dark:text-stone-500">
         <p>Receptet hittades inte.</p>
         <button onClick={() => navigate(-1)} className="text-forest-600 mt-2">Tillbaka</button>
       </div>
@@ -75,7 +75,7 @@ export function RecipeDetailPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
         <button
           onClick={() => navigate(-1)}
-          className="absolute top-12 left-4 w-9 h-9 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow"
+          className="absolute top-12 left-4 w-9 h-9 bg-white dark:bg-stone-800/90 backdrop-blur rounded-full flex items-center justify-center shadow"
         >
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-700" />
         </button>
@@ -83,11 +83,11 @@ export function RecipeDetailPage() {
 
       {/* Content */}
       <div className="px-5 -mt-6 relative">
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-stone-100">
-          <h1 className="text-xl font-bold text-stone-900 mb-1">{recipe.name}</h1>
-          <div className="flex items-center gap-3 text-sm text-stone-400 mb-4">
+        <div className="bg-white dark:bg-stone-800 rounded-3xl p-5 shadow-sm border border-stone-100 dark:border-stone-700">
+          <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100 mb-1">{recipe.name}</h1>
+          <div className="flex items-center gap-3 text-sm text-stone-400 dark:text-stone-500 mb-4">
             <span className="flex items-center gap-1">
-              <ClockIcon className="w-4 h-4 stroke-stone-400" />
+              <ClockIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
               {recipe.prepMinutes} min
             </span>
             <span>·</span>
@@ -97,9 +97,9 @@ export function RecipeDetailPage() {
           {/* Macros */}
           <div className="grid grid-cols-4 gap-2 mb-2">
             {[
-              { label: 'Kalorier', value: recipe.calories, unit: 'kcal', color: 'bg-forest-50 text-forest-700' },
-              { label: 'Protein',  value: recipe.protein_g, unit: 'g', color: 'bg-blue-50 text-blue-700' },
-              { label: 'Fett',     value: recipe.fat_g,     unit: 'g', color: 'bg-amber-50 text-amber-700' },
+              { label: 'Kalorier', value: recipe.calories, unit: 'kcal', color: 'bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300' },
+              { label: 'Protein',  value: recipe.protein_g, unit: 'g', color: 'bg-blue-50 dark:bg-blue-900/25 text-blue-700' },
+              { label: 'Fett',     value: recipe.fat_g,     unit: 'g', color: 'bg-amber-50 dark:bg-amber-900/25 text-amber-700 dark:text-amber-300' },
               { label: 'Kolhyd.', value: recipe.carbs_g,   unit: 'g', color: 'bg-teal-50 text-teal-700' },
             ].map((m) => (
               <div key={m.label} className={`${m.color} rounded-xl p-2.5 text-center`}>
@@ -112,29 +112,29 @@ export function RecipeDetailPage() {
         </div>
 
         {/* Ingredients */}
-        <div className="mt-4 bg-white rounded-2xl border border-stone-100 overflow-hidden">
+        <div className="mt-4 bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
           <div className="px-4 py-3 border-b border-stone-50">
-            <h2 className="font-semibold text-stone-900">Ingredienser</h2>
+            <h2 className="font-semibold text-stone-900 dark:text-stone-100">Ingredienser</h2>
           </div>
           {recipe.ingredients.map((ing, i) => (
             <div key={i} className={`flex items-center gap-3 px-4 py-3 ${i > 0 ? 'border-t border-stone-50' : ''}`}>
               <div className="w-1.5 h-1.5 rounded-full bg-forest-500 flex-shrink-0" />
-              <span className="text-sm text-stone-700">{ing}</span>
+              <span className="text-sm text-stone-700 dark:text-stone-300 dark:text-stone-600">{ing}</span>
             </div>
           ))}
         </div>
 
         {/* Steps */}
-        <div className="mt-4 bg-white rounded-2xl border border-stone-100 overflow-hidden">
+        <div className="mt-4 bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
           <div className="px-4 py-3 border-b border-stone-50">
-            <h2 className="font-semibold text-stone-900">Gör så här</h2>
+            <h2 className="font-semibold text-stone-900 dark:text-stone-100">Gör så här</h2>
           </div>
           {recipe.instructions.map((step, i) => (
             <div key={i} className={`flex items-start gap-3 px-4 py-3 ${i > 0 ? 'border-t border-stone-50' : ''}`}>
               <div className="w-6 h-6 rounded-full bg-forest-700 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                 {i + 1}
               </div>
-              <p className="text-sm text-stone-700 leading-relaxed">{step}</p>
+              <p className="text-sm text-stone-700 dark:text-stone-300 dark:text-stone-600 leading-relaxed">{step}</p>
             </div>
           ))}
         </div>

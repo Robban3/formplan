@@ -51,24 +51,24 @@ export function NotificationsPage() {
 
   return (
     <div className="px-5 pt-header pb-4">
-      <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 text-sm mb-4">
-        <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
+      <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-4">
+        <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
         Mer
       </button>
-      <h1 className="text-2xl font-bold text-stone-900 mb-2">Notiser</h1>
-      <p className="text-stone-400 text-sm mb-6">Välj vilka notiser du vill ta emot.</p>
+      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">Notiser</h1>
+      <p className="text-stone-400 dark:text-stone-500 text-sm mb-6">Välj vilka notiser du vill ta emot.</p>
 
       {/* Permission banner */}
       {permState !== 'granted' && (
-        <div className={`rounded-2xl p-4 mb-4 ${permState === 'denied' ? 'bg-red-50 border border-red-100' : 'bg-forest-50 border border-forest-100'}`}>
+        <div className={`rounded-2xl p-4 mb-4 ${permState === 'denied' ? 'bg-red-50 dark:bg-red-900/25 border border-red-100' : 'bg-forest-50 dark:bg-forest-900/30 border border-forest-100 dark:border-forest-800'}`}>
           {permState === 'denied' ? (
             <>
-              <p className="font-semibold text-red-700 text-sm">Notiser blockerade</p>
+              <p className="font-semibold text-red-700 dark:text-red-300 text-sm">Notiser blockerade</p>
               <p className="text-red-500 text-xs mt-0.5">Tillåt notiser för FormPlan i webbläsarens inställningar.</p>
             </>
           ) : (
             <>
-              <p className="font-semibold text-forest-700 text-sm">Tillåt notiser för att fortsätta</p>
+              <p className="font-semibold text-forest-700 dark:text-forest-300 text-sm">Tillåt notiser för att fortsätta</p>
               <button
                 onClick={requestPermission}
                 className="mt-2 bg-forest-700 text-white text-sm font-medium px-4 py-2 rounded-xl"
@@ -80,25 +80,25 @@ export function NotificationsPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden mb-4">
+      <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden mb-4">
         {rows.map((row, i) => (
           <div
             key={row.key}
-            className={`flex items-center justify-between px-4 py-4 ${i > 0 ? 'border-t border-stone-100' : ''}`}
+            className={`flex items-center justify-between px-4 py-4 ${i > 0 ? 'border-t border-stone-100 dark:border-stone-700' : ''}`}
           >
             <div>
-              <p className="text-stone-800 font-medium">{row.label}</p>
-              <p className="text-xs text-stone-400 mt-0.5">{row.sub}</p>
+              <p className="text-stone-800 dark:text-stone-200 font-medium">{row.label}</p>
+              <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{row.sub}</p>
             </div>
             <button
               disabled={permState !== 'granted'}
               onClick={() => settingsStore.set(row.key, !settings[row.key])}
               className={`relative w-11 h-6 rounded-full transition-colors disabled:opacity-40 ${
-                settings[row.key] && permState === 'granted' ? 'bg-forest-700' : 'bg-stone-200'
+                settings[row.key] && permState === 'granted' ? 'bg-forest-700' : 'bg-stone-200 dark:bg-stone-700'
               }`}
             >
               <span
-                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white dark:bg-stone-800 rounded-full shadow transition-transform ${
                   settings[row.key] && permState === 'granted' ? 'translate-x-5' : 'translate-x-0'
                 }`}
               />
@@ -110,7 +110,7 @@ export function NotificationsPage() {
       {permState === 'granted' && (
         <button
           onClick={sendTestNotification}
-          className="w-full py-3 border border-stone-200 rounded-xl text-sm text-stone-600 hover:border-forest-400 hover:text-forest-600 transition-colors"
+          className="w-full py-3 border border-stone-200 dark:border-stone-700 rounded-xl text-sm text-stone-600 dark:text-stone-300 dark:text-stone-600 hover:border-forest-400 hover:text-forest-600 transition-colors"
         >
           Skicka testnotis
         </button>

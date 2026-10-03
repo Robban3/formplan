@@ -160,13 +160,13 @@ export function BarcodeScanPage() {
   return (
     <div className="flex flex-col min-h-full bg-canvas pb-6">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 pt-header pb-3 bg-white border-b border-stone-100">
-        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100">
-          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600" />
+      <div className="flex items-center gap-3 px-4 pt-header pb-3 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
+        <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:bg-stone-700">
+          <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300 dark:stroke-stone-600" />
         </button>
         <div>
-          <h1 className="text-xl font-bold text-stone-900">Skanna streckkod</h1>
-          <p className="text-xs text-stone-400">Lägger till i {SLOT_LABELS[slot].toLowerCase()}</p>
+          <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">Skanna streckkod</h1>
+          <p className="text-xs text-stone-400 dark:text-stone-500">Lägger till i {SLOT_LABELS[slot].toLowerCase()}</p>
         </div>
       </div>
 
@@ -185,7 +185,7 @@ export function BarcodeScanPage() {
         )}
 
         {looking && (
-          <div className="flex items-center justify-center gap-2 py-4 text-sm text-stone-500">
+          <div className="flex items-center justify-center gap-2 py-4 text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500">
             <div className="w-5 h-5 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
             Söker produkt…
           </div>
@@ -197,9 +197,9 @@ export function BarcodeScanPage() {
             varan igen nästa gång. Open Food Facts saknar stora delar av det
             svenska sortimentet, särskilt butikernas egna märken. */}
         {unknownCode && (
-          <div className="bg-white rounded-2xl border border-stone-100 p-4">
-            <p className="font-semibold text-stone-900">Varan finns inte i databasen</p>
-            <p className="text-xs text-stone-400 mt-1">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+            <p className="font-semibold text-stone-900 dark:text-stone-100">Varan finns inte i databasen</p>
+            <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
               Streckkod {unknownCode}. Skriv av näringsvärdena från paketet så sparas varan
               på den här enheten och fylls i automatiskt nästa gång du skannar den.
             </p>
@@ -209,15 +209,15 @@ export function BarcodeScanPage() {
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="Namn, t.ex. Köttbullar"
-                className="w-full bg-stone-100 rounded-xl px-4 py-2.5 text-sm text-stone-800 outline-none focus:ring-2 focus:ring-forest-400"
+                className="w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-800 dark:text-stone-200 outline-none focus:ring-2 focus:ring-forest-400"
               />
               <input
                 value={form.brand}
                 onChange={(e) => setForm({ ...form, brand: e.target.value })}
                 placeholder="Märke (valfritt)"
-                className="w-full bg-stone-100 rounded-xl px-4 py-2.5 text-sm text-stone-800 outline-none focus:ring-2 focus:ring-forest-400"
+                className="w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-800 dark:text-stone-200 outline-none focus:ring-2 focus:ring-forest-400"
               />
-              <p className="text-xs font-medium text-stone-500 pt-1">Per 100 g</p>
+              <p className="text-xs font-medium text-stone-500 dark:text-stone-400 dark:text-stone-500 pt-1">Per 100 g</p>
               <div className="grid grid-cols-2 gap-2">
                 {([
                   ['kcal', 'Kalorier'],
@@ -231,7 +231,7 @@ export function BarcodeScanPage() {
                     onChange={(e) => setForm({ ...form, [field]: e.target.value })}
                     inputMode="decimal"
                     placeholder={label}
-                    className="bg-stone-100 rounded-xl px-3 py-2.5 text-sm text-stone-800 outline-none focus:ring-2 focus:ring-forest-400"
+                    className="bg-stone-100 dark:bg-stone-700 rounded-xl px-3 py-2.5 text-sm text-stone-800 dark:text-stone-200 outline-none focus:ring-2 focus:ring-forest-400"
                   />
                 ))}
               </div>
@@ -249,27 +249,27 @@ export function BarcodeScanPage() {
 
         {/* Product result */}
         {product && (
-          <div className="bg-white rounded-2xl border border-stone-100 p-4">
-            <p className="font-semibold text-stone-900">{product.name}</p>
-            {product.brand && <p className="text-xs text-stone-400">{product.brand}</p>}
-            <p className="text-xs text-stone-400 mt-1">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+            <p className="font-semibold text-stone-900 dark:text-stone-100">{product.name}</p>
+            {product.brand && <p className="text-xs text-stone-400 dark:text-stone-500">{product.brand}</p>}
+            <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
               Per 100 g: {product.kcal_per_100g} kcal · P {product.protein_per_100g}g · F {product.fat_per_100g}g · K{' '}
               {product.carbs_per_100g}g
             </p>
 
             <div className="flex items-center gap-3 mt-4">
-              <div className="flex items-center gap-2 bg-stone-100 rounded-xl px-3 py-2">
+              <div className="flex items-center gap-2 bg-stone-100 dark:bg-stone-700 rounded-xl px-3 py-2">
                 <input
                   type="number"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   min="1"
                   max="2000"
-                  className="w-16 bg-transparent text-sm font-medium text-stone-800 text-right outline-none"
+                  className="w-16 bg-transparent text-sm font-medium text-stone-800 dark:text-stone-200 text-right outline-none"
                 />
-                <span className="text-sm text-stone-400">g</span>
+                <span className="text-sm text-stone-400 dark:text-stone-500">g</span>
               </div>
-              <p className="text-sm text-stone-500">
+              <p className="text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500">
                 {amount ? Math.round((product.kcal_per_100g * parseFloat(amount)) / 100) : 0} kcal
               </p>
             </div>
@@ -296,15 +296,15 @@ export function BarcodeScanPage() {
         )}
 
         {/* Manual entry */}
-        <div className="bg-white rounded-2xl border border-stone-100 p-4">
-          <p className="text-sm font-semibold text-stone-800 mb-2">Ange streckkod manuellt</p>
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
+          <p className="text-sm font-semibold text-stone-800 dark:text-stone-200 mb-2">Ange streckkod manuellt</p>
           <div className="flex gap-2">
             <input
               value={manual}
               onChange={(e) => setManual(e.target.value.replace(/\D/g, ''))}
               inputMode="numeric"
               placeholder="t.ex. 7310865004703"
-              className="flex-1 bg-stone-100 rounded-xl px-4 py-2.5 text-sm text-stone-800 outline-none focus:ring-2 focus:ring-forest-400"
+              className="flex-1 bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-800 dark:text-stone-200 outline-none focus:ring-2 focus:ring-forest-400"
             />
             <button
               onClick={() => {

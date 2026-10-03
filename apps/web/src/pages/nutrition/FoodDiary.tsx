@@ -107,24 +107,24 @@ export function FoodDiary() {
   return (
     <div className="pb-6">
       {/* Header */}
-      <div className="px-5 pt-header pb-4 bg-white border-b border-stone-100">
-        <h1 className="text-2xl font-bold text-stone-900 mb-3">Kostdagbok</h1>
+      <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-100 dark:border-stone-700">
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-3">Kostdagbok</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate('/kost/kostschema')}
-            className="flex-1 min-w-0 h-9 rounded-xl bg-forest-50 text-forest-700 text-xs font-semibold hover:bg-forest-100 transition-colors truncate px-2"
+            className="flex-1 min-w-0 h-9 rounded-xl bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 text-xs font-semibold hover:bg-forest-100 dark:bg-forest-900/40 transition-colors truncate px-2"
           >
             Kostschema
           </button>
           <button
             onClick={() => navigate('/kost/veckoplan')}
-            className="flex-1 min-w-0 h-9 rounded-xl bg-stone-100 text-stone-600 text-xs font-semibold hover:bg-stone-200 transition-colors truncate px-2"
+            className="flex-1 min-w-0 h-9 rounded-xl bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 dark:text-stone-600 text-xs font-semibold hover:bg-stone-200 dark:bg-stone-700 transition-colors truncate px-2"
           >
             Veckoplan
           </button>
           <button
             onClick={() => navigate('/kost/inkopslista')}
-            className="w-9 h-9 flex-shrink-0 rounded-xl bg-forest-50 flex items-center justify-center hover:bg-forest-100 transition-colors"
+            className="w-9 h-9 flex-shrink-0 rounded-xl bg-forest-50 dark:bg-forest-900/30 flex items-center justify-center hover:bg-forest-100 dark:bg-forest-900/40 transition-colors"
             aria-label="Inköpslista"
           >
             <ShoppingCartIcon className="w-4 h-4 stroke-forest-600" />
@@ -141,26 +141,26 @@ export function FoodDiary() {
         {/* Sök livsmedel & näringsvärden */}
         <button
           onClick={() => navigate(`/kost/sok?slot=frukost&date=${dateKey(date)}`)}
-          className="w-full mt-2 flex items-center gap-3 bg-stone-100 rounded-xl px-4 py-2.5 text-sm text-stone-500 hover:bg-stone-200 transition-colors"
+          className="w-full mt-2 flex items-center gap-3 bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-500 dark:text-stone-400 dark:text-stone-500 hover:bg-stone-200 dark:bg-stone-700 transition-colors"
         >
-          <SearchIcon className="w-4 h-4 stroke-stone-400 flex-shrink-0" />
+          <SearchIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500 flex-shrink-0" />
           Sök livsmedel & näringsvärden
         </button>
 
         {/* Date nav */}
         <div className="flex items-center justify-center gap-4 mt-3">
-          <button onClick={() => shiftDay(-1)} className="p-1.5 rounded-full hover:bg-stone-100 active:bg-stone-200 transition-colors">
-            <ChevronLeftIcon className="w-5 h-5 stroke-stone-500" />
+          <button onClick={() => shiftDay(-1)} className="p-1.5 rounded-full hover:bg-stone-100 dark:bg-stone-700 active:bg-stone-200 dark:bg-stone-700 transition-colors">
+            <ChevronLeftIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400 dark:stroke-stone-500" />
           </button>
-          <span className="text-sm font-medium text-stone-700 min-w-[140px] text-center capitalize">
+          <span className="text-sm font-medium text-stone-700 dark:text-stone-300 dark:text-stone-600 min-w-[140px] text-center capitalize">
             {formatDate(date)}
           </span>
           <button
             onClick={() => shiftDay(1)}
             disabled={isToday}
-            className="p-1.5 rounded-full hover:bg-stone-100 active:bg-stone-200 transition-colors disabled:opacity-30"
+            className="p-1.5 rounded-full hover:bg-stone-100 dark:bg-stone-700 active:bg-stone-200 dark:bg-stone-700 transition-colors disabled:opacity-30"
           >
-            <ChevronRightIcon className="w-5 h-5 stroke-stone-500" />
+            <ChevronRightIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400 dark:stroke-stone-500" />
           </button>
         </div>
       </div>
@@ -172,13 +172,13 @@ export function FoodDiary() {
       ) : (
         <div className="px-5 mt-5 space-y-4">
           {loadFailed && (
-            <div className="bg-red-50 border border-red-100 rounded-2xl p-3 text-sm text-red-600">
+            <div className="bg-red-50 dark:bg-red-900/25 border border-red-100 rounded-2xl p-3 text-sm text-red-600 dark:text-red-400">
               Kunde inte ladda dagens data. Visade värden kan vara ofullständiga — försök igen senare.
             </div>
           )}
           <button
             onClick={() => navigate('/kost/makro')}
-            className="w-full bg-white rounded-2xl border border-stone-100 p-4 text-left active:scale-[0.98] transition-transform"
+            className="w-full bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4 text-left active:scale-[0.98] transition-transform"
           >
             <MacroSummary
               eaten={{ kcal: totalKcal, protein_g: totalProtein, fat_g: totalFat, carbs_g: totalCarbs }}
@@ -189,12 +189,12 @@ export function FoodDiary() {
 
           {/* Makro per måltid */}
           {entries.length > 0 && (
-            <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
               <button
                 onClick={() => setShowMealMacros((v) => !v)}
                 className="w-full flex items-center justify-between px-4 py-3"
               >
-                <span className="text-sm font-semibold text-stone-800">Makro per måltid</span>
+                <span className="text-sm font-semibold text-stone-800 dark:text-stone-200">Makro per måltid</span>
                 <span className="text-xs text-forest-600">{showMealMacros ? 'Dölj ▲' : 'Visa ▼'}</span>
               </button>
               {showMealMacros && (
@@ -204,10 +204,10 @@ export function FoodDiary() {
                     if (m.kcal === 0) return null
                     return (
                       <div key={slot} className="flex items-center justify-between px-4 py-2.5 border-b border-stone-50 last:border-0">
-                        <span className="text-sm text-stone-700">{MEAL_LABELS[slot]}</span>
+                        <span className="text-sm text-stone-700 dark:text-stone-300 dark:text-stone-600">{MEAL_LABELS[slot]}</span>
                         <div className="text-right">
-                          <span className="text-sm font-semibold text-stone-800">{m.kcal} kcal</span>
-                          <span className="text-xs text-stone-400 ml-2">{m.protein_g.toFixed(0)}g protein</span>
+                          <span className="text-sm font-semibold text-stone-800 dark:text-stone-200">{m.kcal} kcal</span>
+                          <span className="text-xs text-stone-400 dark:text-stone-500 ml-2">{m.protein_g.toFixed(0)}g protein</span>
                         </div>
                       </div>
                     )
@@ -219,20 +219,20 @@ export function FoodDiary() {
 
           {/* Snabblogg favoriter */}
           {favorites.length > 0 && (
-            <div className="bg-white rounded-2xl border border-stone-100 p-4">
+            <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <StarIcon className="w-4 h-4 stroke-amber-400" />
-                <p className="text-sm font-semibold text-stone-800">Snabblogg</p>
+                <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">Snabblogg</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {favorites.map((fav: FoodFavorite) => (
                   <button
                     key={fav.food_id}
                     onClick={() => navigate(`/kost/sok?slot=${slotForNow()}&date=${dateKey(date)}&prefill=${encodeURIComponent(fav.food_id)}`)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-50 rounded-full border border-stone-100 text-xs text-stone-700 hover:bg-forest-50 hover:border-forest-200 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-50 dark:bg-stone-800 rounded-full border border-stone-100 dark:border-stone-700 text-xs text-stone-700 dark:text-stone-300 dark:text-stone-600 hover:bg-forest-50 dark:bg-forest-900/30 hover:border-forest-200 dark:border-forest-800 transition-colors"
                   >
                     <span>{fav.food_name}</span>
-                    <span className="text-stone-400">{Math.round(fav.kcal_per_100g * fav.default_amount_g / 100)} kcal</span>
+                    <span className="text-stone-400 dark:text-stone-500">{Math.round(fav.kcal_per_100g * fav.default_amount_g / 100)} kcal</span>
                   </button>
                 ))}
               </div>

@@ -65,31 +65,31 @@ export function ProfilePage() {
 
   return (
     <div className="px-5 pt-header pb-4">
-      <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 text-sm mb-4">
-        <ChevronLeftIcon className="w-4 h-4 stroke-stone-400" />
+      <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-400 dark:text-stone-500 text-sm mb-4">
+        <ChevronLeftIcon className="w-4 h-4 stroke-stone-400 dark:stroke-stone-500" />
         Mer
       </button>
-      <h1 className="text-2xl font-bold text-stone-900 mb-6">Profil</h1>
+      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-6">Profil</h1>
 
       {profile ? (
-        <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-100 dark:border-stone-700 overflow-hidden">
           {rows.map((row, i) => (
             <div
               key={row.label}
               className={`flex items-center justify-between px-4 py-3 ${i > 0 ? 'border-t border-stone-50' : ''}`}
             >
-              <span className="text-stone-500 text-sm">{row.label}</span>
-              <span className="text-stone-800 font-medium text-sm text-right max-w-[60%]">{row.value}</span>
+              <span className="text-stone-500 dark:text-stone-400 dark:text-stone-500 text-sm">{row.label}</span>
+              <span className="text-stone-800 dark:text-stone-200 font-medium text-sm text-right max-w-[60%]">{row.value}</span>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-stone-400 text-sm">Ingen profil hittades.</p>
+        <p className="text-stone-400 dark:text-stone-500 text-sm">Ingen profil hittades.</p>
       )}
 
       <button
         onClick={() => navigate('/onboarding')}
-        className="w-full mt-4 border border-stone-200 rounded-xl py-3 text-sm text-stone-600 hover:border-forest-400 hover:text-forest-600 transition-colors"
+        className="w-full mt-4 border border-stone-200 dark:border-stone-700 rounded-xl py-3 text-sm text-stone-600 dark:text-stone-300 dark:text-stone-600 hover:border-forest-400 hover:text-forest-600 transition-colors"
       >
         Uppdatera mina uppgifter
       </button>
