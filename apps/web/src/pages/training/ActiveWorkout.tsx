@@ -35,6 +35,13 @@ export function ActiveWorkout() {
     return s ? computeElapsedSeconds(s) : 0
   })
   const paused = state?.pausedAt != null
+  // Vilotimern hålls som en SLUTTIDPUNKT, inte som en nedräknare. En ren
+  // dekrementering per sekund fryser när iOS suspenderar JS — och att låsa
+  // telefonen mitt i en 90-sekunders vila är det normala i ett gym. Man kom
+  // tillbaka till en timer som stod stilla, och autoframflyttningen till nästa
+  // övning (som hänger på att den når noll) uteblev också. Samma
+  // väggklocksprincip som den stora passtimern använder.
+  const [restEndsAt, setRestEndsAt] = useState<number | null>(null)
   const [restTimer, setRestTimer] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
   const [showRpe, setShowRpe] = useState(false)
@@ -129,24 +136,46 @@ export function ActiveWorkout() {
     })
   }
 
-  // Rest countdown
+  // Vilonedräkning — räknas ut ur sluttiden vid varje tick OCH när appen blir
+  // synlig igen, så den är korrekt även efter att telefonen varit låst.
   useEffect(() => {
-    if (restTimer === null) return
-    if (restTimer <= 0) {
+    if (restEndsAt === null) return
+
+    function tick() {
+      const left = Math.ceil((restEndsAt! - Date.now()) / 1000)
+      if (left > 0) {
+        setRestTimer(left)
+        return
+      }
       setRestTimer(null)
+      setRestEndsAt(null)
       if (advanceToRef.current !== null) {
         const idx = advanceToRef.current
         advanceToRef.current = null
-        workoutStore.update((s) => ({
-          ...s,
-          currentExerciseIndex: idx,
-        }))
+        workoutStore.update((s) => ({ ...s, currentExerciseIndex: idx }))
       }
-      return
     }
-    restRef.current = setInterval(() => setRestTimer((t) => (t ?? 1) - 1), 1000)
-    return () => clearInterval(restRef.current ?? undefined)
-  }, [restTimer])
+
+    tick()
+    restRef.current = setInterval(tick, 500)
+    const onVisible = () => { if (document.visibilityState === 'visible') tick() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      clearInterval(restRef.current ?? undefined)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [restEndsAt])
+
+  /** Startar vilan. `seconds` räknas från nu. */
+  function startRest(seconds: number) {
+    setRestEndsAt(Date.now() + seconds * 1000)
+    setRestTimer(seconds)
+  }
+
+  function cancelRest() {
+    setRestEndsAt(null)
+    setRestTimer(null)
+  }
 
   // Keep screen awake during workout when enabled
   useEffect(() => {
@@ -335,7 +364,7 @@ export function ActiveWorkout() {
         if (auto_rest && ex) {
           const rest = ex.restSeconds > 0 ? ex.restSeconds : rest_seconds_default
           advanceToRef.current = nextIdx
-          setRestTimer(rest)
+          startRest(rest)
         } else {
           goToExerciseIndex(nextIdx)
         }
@@ -344,7 +373,7 @@ export function ActiveWorkout() {
 
     if (!exerciseDone && auto_rest && ex) {
       const rest = ex.restSeconds > 0 ? ex.restSeconds : rest_seconds_default
-      setRestTimer(rest)
+      startRest(rest)
     }
   }
 
@@ -394,7 +423,7 @@ export function ActiveWorkout() {
       currentExerciseIndex: Math.max(0, Math.min(s.exercises.length - 1, index)),
     }))
     advanceToRef.current = null
-    setRestTimer(null)
+    cancelRest()
   }
 
   function requestFinish() {
@@ -531,7 +560,7 @@ export function ActiveWorkout() {
                 advanceToRef.current = null
                 workoutStore.update((s) => ({ ...s, currentExerciseIndex: idx }))
               }
-              setRestTimer(null)
+              cancelRest()
             }}
             className="text-xs text-forest-500 mt-1 underline"
           >
