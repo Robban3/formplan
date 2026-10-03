@@ -2,6 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon, PlusIcon, XIcon, TargetIcon } from '../components/ui/Icons'
 import { parseGoal, computeAutoProgress, goalStatusText, type GoalMeta } from '../lib/goalTracker'
+import { planAdjustmentForGoal, type PlanAdjustment } from '../lib/goalPlan'
+import { getWeightEntries } from '../lib/weightStore'
+import { api } from '../lib/api'
+import { toast } from '../lib/toast'
 
 export interface Goal {
   id: string
@@ -67,11 +71,16 @@ function GoalCard({
   onToggle,
   onDelete,
   onSetProgress,
+  adjustment,
+  onApply,
 }: {
   goal: Goal
   onToggle: () => void
   onDelete: () => void
   onSetProgress: (v: number) => void
+  /** Null när målet inte kan styra schemat — då visas ingen knapp. */
+  adjustment: PlanAdjustment | null
+  onApply: () => void
 }) {
   const [editingProgress, setEditingProgress] = useState(false)
   const pct = effectiveProgress(goal)
@@ -151,6 +160,18 @@ function GoalCard({
           <XIcon className="w-4 h-4 text-stone-300" />
         </button>
       </div>
+
+      {/* Bara mål som faktiskt säger något om HUR man ska träna kan styra
+          schemat. Vattenmål, "klara 50 pass totalt" och fritext gör det inte —
+          en knapp där hade lovat något appen inte kan hålla. */}
+      {adjustment && !goal.done && (
+        <button
+          onClick={onApply}
+          className="mt-3 w-full py-2.5 rounded-xl border border-forest-200 bg-forest-50 text-sm font-semibold text-forest-700 hover:bg-forest-100 transition-colors"
+        >
+          Anpassa mitt schema efter det här målet
+        </button>
+      )}
     </div>
   )
 }
@@ -161,6 +182,12 @@ export function GoalsPage() {
   const [tab, setTab] = useState<Tab>('aktiva')
   const [adding, setAdding] = useState(false)
   const [text, setText] = useState('')
+  // Målet som väntar på bekräftelse innan schemat byggs om.
+  const [pending, setPending] = useState<{ goal: Goal; adjustment: PlanAdjustment } | null>(null)
+  const [applying, setApplying] = useState(false)
+
+  // Senaste loggade vikt — avgör åt vilket håll ett viktmål pekar.
+  const currentWeight = getWeightEntries().slice(-1)[0]?.weight_kg ?? null
 
   function persist(updated: Goal[]) { setGoals(updated); saveGoals(updated) }
 
@@ -180,6 +207,37 @@ export function GoalsPage() {
     ])
     setText('')
     setAdding(false)
+    // Målet sparas direkt, men inget sa det — användaren letade efter en
+    // spara-knapp som inte finns.
+    toast.success('Målet sparat')
+  }
+
+  /**
+   * Skriver målets ändring till profilen och genererar om schemat.
+   *
+   * POST /profile kräver hela profilen, så den hämtas och slås ihop — en
+   * delmängd hade nollställt resten. Schemat genereras först när profilen
+   * sparats; misslyckas sparandet ska inget schema byggas om.
+   */
+  async function applyAdjustment() {
+    if (!pending) return
+    setApplying(true)
+    try {
+      const { profile } = await api.getProfile()
+      if (!profile || typeof profile !== 'object') {
+        toast.error('Din profil kunde inte läsas. Fyll i den under Mer → Profil först.')
+        return
+      }
+      await api.saveProfile({ ...(profile as Record<string, unknown>), ...pending.adjustment.patch })
+      await api.generatePlan()
+      toast.success('Schemat byggs om efter ditt mål')
+      setPending(null)
+      navigate('/traning')
+    } catch (e) {
+      toast.error((e as Error).message || 'Kunde inte bygga om schemat')
+    } finally {
+      setApplying(false)
+    }
   }
 
   function toggleDone(id: string) {
@@ -234,15 +292,51 @@ export function GoalsPage() {
           </div>
         )}
 
-        {shown.map((goal) => (
-          <GoalCard
-            key={goal.id}
-            goal={goal}
-            onToggle={() => toggleDone(goal.id)}
-            onDelete={() => deleteGoal(goal.id)}
-            onSetProgress={(v) => setProgress(goal.id, v)}
-          />
-        ))}
+        {shown.map((goal) => {
+          const adjustment = planAdjustmentForGoal(goal.goalMeta, currentWeight)
+          return (
+            <GoalCard
+              key={goal.id}
+              goal={goal}
+              onToggle={() => toggleDone(goal.id)}
+              onDelete={() => deleteGoal(goal.id)}
+              onSetProgress={(v) => setProgress(goal.id, v)}
+              adjustment={adjustment}
+              onApply={() => adjustment && setPending({ goal, adjustment })}
+            />
+          )
+        })}
+
+        {/* Bekräftelse. Att generera om ersätter det nuvarande schemat och
+            förbrukar generering ur kvoten (3/h, en plan totalt på gratisnivån),
+            så det får aldrig hända av ett enda tryck. */}
+        {pending && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-4 pb-6">
+            <div className="bg-white rounded-2xl p-5 w-full max-w-sm">
+              <p className="font-bold text-stone-900">Anpassa schemat?</p>
+              <p className="text-sm text-stone-600 mt-2">{pending.adjustment.description}</p>
+              <p className="text-sm text-stone-600 mt-2">
+                Ditt nuvarande schema ersätts med ett nytt.
+              </p>
+              <div className="flex gap-2 mt-5">
+                <button
+                  onClick={() => setPending(null)}
+                  disabled={applying}
+                  className="flex-1 py-2.5 rounded-xl border border-stone-200 text-sm font-semibold text-stone-600 disabled:opacity-60"
+                >
+                  Avbryt
+                </button>
+                <button
+                  onClick={applyAdjustment}
+                  disabled={applying}
+                  className="flex-1 py-2.5 rounded-xl bg-forest-700 text-white text-sm font-semibold disabled:opacity-60"
+                >
+                  {applying ? 'Bygger om…' : 'Bygg om schemat'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Add form */}
         {adding && tab === 'aktiva' && (
