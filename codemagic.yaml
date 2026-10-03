@@ -163,5 +163,17 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
-        submit_to_testflight: true
+        # Bygget laddas upp till App Store Connect och blir omedelbart
+        # tillgängligt för INTERNA testare — ingen granskning, ingen väntetid.
+        #
+        # submit_to_testflight skickar bygget till Apples beta-granskning för
+        # EXTERNA testare, och den kräver ifylld testinformation (feedback-
+        # adress samt namn, telefon och e-post till en kontaktperson). Saknas
+        # den failar hela bygget i sista steget trots att appen redan ligger
+        # uppe och fungerar.
+        #
+        # Slå på den när du fyllt i:
+        #   App Store Connect → FormPlan → TestFlight → Test Information
+        # och lägg till beta_groups med namnet på din externa testgrupp.
+        submit_to_testflight: false
         # submit_to_app_store: false  # slå på när du är redo för skarp granskning
