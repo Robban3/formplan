@@ -17,6 +17,16 @@ export interface AccessStatus {
   inTrial: boolean
   trialEndsAt: string
   trialDaysLeft: number
+  /**
+   * Sant bara när det finns en riktig Stripe-prenumeration att öppna
+   * kundportalen för. Premium från FULL_ACCESS_EMAILS har ingen Stripe-kund, så
+   * "Hantera prenumeration" ledde till 404 och ett rött felmeddelande över en
+   * ruta som samtidigt sa "Premium aktivt". Klienten döljer knappen i stället.
+   *
+   * När in-app-köp (RevenueCat) läggs till gäller samma sak där: ett köp via
+   * App Store hanteras i iOS-inställningarna, inte i Stripes portal.
+   */
+  manageable: boolean
 }
 
 // Single source of truth for "does this user have access right now": allowlist
@@ -30,6 +40,7 @@ export async function resolveAccess(user: JwtPayload, env: Env): Promise<AccessS
       inTrial: false,
       trialEndsAt: new Date(0).toISOString(),
       trialDaysLeft: 0,
+      manageable: false,
     }
   }
 
@@ -48,5 +59,8 @@ export async function resolveAccess(user: JwtPayload, env: Env): Promise<AccessS
     inTrial: inTrial && !premium,
     trialEndsAt: trialEnd.toISOString(),
     trialDaysLeft: premium ? 0 : trialDaysLeft,
+    // Premium här kommer från subscriptions-tabellen, som bara fylls av
+    // Stripe-webhooken — alltså finns en kund att öppna portalen för.
+    manageable: premium,
   }
 }

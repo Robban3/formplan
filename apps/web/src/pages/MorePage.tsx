@@ -125,13 +125,20 @@ export function MorePage() {
             <>
               <p className="font-semibold text-stone-900">Premium aktivt ✓</p>
               <p className="text-xs text-stone-400 mt-0.5">Tack för att du stödjer FormPlan!</p>
-              <button
-                onClick={managePortal}
-                disabled={busy}
-                className="mt-3 w-full py-2.5 rounded-xl border border-stone-200 text-sm font-semibold text-stone-700 hover:border-forest-400 hover:text-forest-700 transition-colors disabled:opacity-60"
-              >
-                Hantera prenumeration
-              </button>
+              {/* Knappen visas bara när det finns en Stripe-prenumeration att
+                  öppna portalen för. Premium kan också komma från ett konto med
+                  permanent tillgång — då svarade portalen 404 och ett rött
+                  felmeddelande lade sig över rutan som just sagt "Premium
+                  aktivt". Bättre att inte lova något som inte finns. */}
+              {billing.manageable && (
+                <button
+                  onClick={managePortal}
+                  disabled={busy}
+                  className="mt-3 w-full py-2.5 rounded-xl border border-stone-200 text-sm font-semibold text-stone-700 hover:border-forest-400 hover:text-forest-700 transition-colors disabled:opacity-60"
+                >
+                  Hantera prenumeration
+                </button>
+              )}
             </>
           ) : billing.inTrial ? (
             <>
