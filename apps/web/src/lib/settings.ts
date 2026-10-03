@@ -64,9 +64,40 @@ function save(s: AppSettings): void {
   localStorage.setItem(KEY, JSON.stringify(s))
 }
 
+/**
+ * Engångsrättelse av temat.
+ *
+ * save() skriver hela inställningsobjektet, och onboarding sätter calorie_goal
+ * — alltså fick varje användare som gått igenom onboarding ett uttryckligt
+ * `dark_mode: false` sparat, från tiden då det var standardvärdet. Ett nytt
+ * standardvärde når aldrig dem: det gäller bara när ingenting är sparat.
+ *
+ * Växeln var dold fram till att mörkt läge byggdes färdigt, så ingen kan ha
+ * valt ljust medvetet före det. Den enda gången det här körs är därför säkert.
+ * Efteråt sätts flaggan och användarens eget val gäller för alltid.
+ *
+ * Flaggan får ALDRIG tas bort utan att nyckeln byts — annars skrivs valet över
+ * på nytt vid varje uppdatering, och den som valt ljust får mörkt igen.
+ */
+const THEME_MIGRATION_KEY = 'formplan_theme_default_dark'
+
+function applyThemeDefaultOnce(state: AppSettings): AppSettings {
+  try {
+    if (localStorage.getItem(THEME_MIGRATION_KEY)) return state
+    localStorage.setItem(THEME_MIGRATION_KEY, '1')
+    if (state.dark_mode) return state
+    const migrated = { ...state, dark_mode: true }
+    save(migrated)
+    return migrated
+  } catch {
+    // Lagring blockerad — temat blir standardvärdet den här sessionen.
+    return state
+  }
+}
+
 // Apply dark mode class to <html> immediately on first import so there's no
 // flash of the wrong theme on page load.
-let _state = load()
+let _state = applyThemeDefaultOnce(load())
 applyDarkMode(_state.dark_mode)
 
 function applyDarkMode(on: boolean) {
