@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronLeftIcon, ScanBarcodeIcon } from '../../components/ui/Icons'
 import { lookupBarcode, type ScannedProduct } from '../../lib/openFoodFacts'
 import { startBarcodeScanner, type ScannerHandle } from '../../lib/barcodeScanner'
+import { getCustomFood, saveCustomFood } from '../../lib/customFoods'
 import { nutritionApi, toMealSlot, type MealSlot } from '../../lib/nutritionApi'
 import { dateKey } from '../../lib/derive'
 import { toast } from '../../lib/toast'
@@ -31,6 +32,9 @@ export function BarcodeScanPage() {
   const [manual, setManual] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
+  // Streckkod som lästes men saknas i alla källor — då erbjuds egen inmatning.
+  const [unknownCode, setUnknownCode] = useState<string | null>(null)
+  const [form, setForm] = useState({ name: '', brand: '', kcal: '', protein: '', fat: '', carbs: '' })
 
   // Run the scanner whenever the camera viewport is showing. Works with the
   // native Barcode Detection API or, on iOS Safari, the ZXing fallback.
@@ -69,17 +73,54 @@ export function BarcodeScanPage() {
   async function doLookup(code: string) {
     setLooking(true)
     setError(null)
+    setUnknownCode(null)
     try {
+      // Egna varor först: har användaren redan skrivit av paketet en gång ska
+      // det inte kosta ett nätanrop — och svaret är dessutom bättre än Open
+      // Food Facts generiska poster.
+      const own = getCustomFood(code)
+      if (own) {
+        setProduct(own)
+        setAmount(own.serving_size_g ? String(own.serving_size_g) : '100')
+        return
+      }
       const p = await lookupBarcode(code)
       if (p) {
         setProduct(p)
         setAmount(p.serving_size_g ? String(p.serving_size_g) : '100')
       } else {
-        setError(`Hittade ingen produkt för streckkod ${code}.`)
+        // Ingen återvändsgränd: erbjud att skriva av näringsdeklarationen.
+        setUnknownCode(code)
+        setForm({ name: '', brand: '', kcal: '', protein: '', fat: '', carbs: '' })
       }
     } finally {
       setLooking(false)
     }
+  }
+
+  /** Sparar den egna varan och visar den som vilket uppslag som helst. */
+  function saveOwnFood() {
+    if (!unknownCode) return
+    const num = (v: string) => {
+      // Svenskt decimalkomma är det normala på ett paket.
+      const n = parseFloat(v.replace(',', '.'))
+      return Number.isFinite(n) && n >= 0 ? n : 0
+    }
+    const own = {
+      barcode: unknownCode,
+      name: form.name.trim(),
+      brand: form.brand.trim() || null,
+      kcal_per_100g: num(form.kcal),
+      protein_per_100g: num(form.protein),
+      fat_per_100g: num(form.fat),
+      carbs_per_100g: num(form.carbs),
+      serving_size_g: null,
+    }
+    if (!own.name) return
+    saveCustomFood(own)
+    setProduct(own)
+    setAmount('100')
+    setUnknownCode(null)
   }
 
   async function add() {
@@ -112,6 +153,7 @@ export function BarcodeScanPage() {
   function rescan() {
     setProduct(null)
     setError(null)
+    setUnknownCode(null)
     setScanning(true)
   }
 
@@ -150,6 +192,60 @@ export function BarcodeScanPage() {
         )}
 
         {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+
+        {/* Okänd streckkod — skriv av näringsdeklarationen en gång, så känns
+            varan igen nästa gång. Open Food Facts saknar stora delar av det
+            svenska sortimentet, särskilt butikernas egna märken. */}
+        {unknownCode && (
+          <div className="bg-white rounded-2xl border border-stone-100 p-4">
+            <p className="font-semibold text-stone-900">Varan finns inte i databasen</p>
+            <p className="text-xs text-stone-400 mt-1">
+              Streckkod {unknownCode}. Skriv av näringsvärdena från paketet så sparas varan
+              på den här enheten och fylls i automatiskt nästa gång du skannar den.
+            </p>
+
+            <div className="space-y-2 mt-4">
+              <input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Namn, t.ex. Köttbullar"
+                className="w-full bg-stone-100 rounded-xl px-4 py-2.5 text-sm text-stone-800 outline-none focus:ring-2 focus:ring-forest-400"
+              />
+              <input
+                value={form.brand}
+                onChange={(e) => setForm({ ...form, brand: e.target.value })}
+                placeholder="Märke (valfritt)"
+                className="w-full bg-stone-100 rounded-xl px-4 py-2.5 text-sm text-stone-800 outline-none focus:ring-2 focus:ring-forest-400"
+              />
+              <p className="text-xs font-medium text-stone-500 pt-1">Per 100 g</p>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  ['kcal', 'Kalorier'],
+                  ['protein', 'Protein (g)'],
+                  ['fat', 'Fett (g)'],
+                  ['carbs', 'Kolhydrater (g)'],
+                ] as const).map(([field, label]) => (
+                  <input
+                    key={field}
+                    value={form[field]}
+                    onChange={(e) => setForm({ ...form, [field]: e.target.value })}
+                    inputMode="decimal"
+                    placeholder={label}
+                    className="bg-stone-100 rounded-xl px-3 py-2.5 text-sm text-stone-800 outline-none focus:ring-2 focus:ring-forest-400"
+                  />
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={saveOwnFood}
+              disabled={!form.name.trim() || !form.kcal.trim()}
+              className="w-full mt-4 bg-forest-700 hover:bg-forest-800 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60"
+            >
+              Spara varan
+            </button>
+          </div>
+        )}
 
         {/* Product result */}
         {product && (
