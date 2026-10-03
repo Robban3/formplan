@@ -9,7 +9,14 @@
 #        VITE_API_URL           = https://api.formplan.app
 #        VITE_SUPABASE_URL      = https://rgnbcmgvzohqkmnuixps.supabase.co
 #        VITE_SUPABASE_ANON_KEY = <anon-nyckeln>
-#      (markera dem som "secure"/secret.)
+#        CERTIFICATE_PRIVATE_KEY = <RSA-nyckel i PEM-format, se nedan>
+#      (markera CERTIFICATE_PRIVATE_KEY som "secure".)
+#
+#      Certifikatnyckeln genereras EN gång och återanvänds för alltid:
+#        ssh-keygen -t rsa -b 2048 -m PEM -f cert_key -q -N ""
+#      Klistra in hela innehållet i filen `cert_key` (inklusive BEGIN/END-
+#      raderna) som värde. Byts den ut skapas ett nytt distributionscertifikat
+#      vid nästa bygge, och Apple har ett tak för hur många som får finnas.
 #
 # iOS-projektet (apps/web/ios) genereras i CI med `cap add ios` — det behöver
 # alltså inte committas och kräver ingen Mac lokalt.
@@ -110,15 +117,29 @@ workflows:
 
           $PB -c "Print" "$PLIST"
 
+      # Keychainen måste finnas INNAN certifikaten hämtas — annars har
+      # fetch-signing-files ingenstans att lägga dem.
+      - name: Initiera keychain
+        script: keychain initialize
+
+      # Teamet har redan distributionscertifikat (skapade för andra verktyg),
+      # men deras privata nycklar finns inte här — därför felet "Cannot save
+      # Signing Certificates without certificate private key". Med en egen
+      # certifikatnyckel kan verktyget skapa och återanvända ett certifikat som
+      # det faktiskt äger.
+      #
+      # CERTIFICATE_PRIVATE_KEY sätts som miljövariabel i gruppen formplan_ios
+      # (se README-kommentaren överst). Den MÅSTE vara densamma mellan byggen:
+      # genereras en ny varje gång skapas ett nytt certifikat per bygge, och
+      # Apple har ett tak för hur många distributionscertifikat ett konto får ha.
       - name: Hämta signeringsfiler
         script: |
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
             --create
       - name: Lägg till certifikat i keychain
-        script: |
-          keychain initialize
-          keychain add-certificates
+        script: keychain add-certificates
       - name: Applicera provisioning profiles på Xcode-projektet
         script: xcode-project use-profiles
       - name: Bygg IPA
