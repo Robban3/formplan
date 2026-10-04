@@ -14,9 +14,9 @@ import { api } from '../../lib/api'
 import { toast } from '../../lib/toast'
 import { MEAL_SLOT_LABELS as SLOT_LABELS } from '../../lib/texts'
 import { useT } from '../../hooks/useT'
+import { weekdayNames } from '../../lib/i18n'
 
-const DAY_SHORT = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön']
-const DAY_FULL = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag']
+
 const SLOTS: WeekSlot[] = ['frukost', 'lunch', 'middag', 'mellanmar']
 const FOCUS_OPTIONS: { key: DietFocus; label: string }[] = [
   { key: 'balanced', label: 'Balanserat' },
@@ -37,6 +37,8 @@ function dateForWeekday(weekday: number): Date {
 
 export function MealWeekPage() {
   const { t, locale } = useT()
+  const DAY_SHORT = weekdayNames(locale, 'short')
+  const DAY_FULL = weekdayNames(locale, 'long')
   const navigate = useNavigate()
   const [plan, setPlan] = useState<WeekMealPlan>(loadWeekPlan)
   const [selected, setSelected] = useState(weekdayOf(new Date()))

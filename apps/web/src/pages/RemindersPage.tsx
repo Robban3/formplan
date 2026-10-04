@@ -5,11 +5,13 @@ import { useSettings } from '../hooks/useSettings'
 import { settingsStore } from '../lib/settings'
 import { toast } from '../lib/toast'
 import { useT } from '../hooks/useT'
+import { weekdayNames } from '../lib/i18n'
 
-const DAY_LABELS = ['M', 'Ti', 'O', 'To', 'F', 'L', 'S']
+
 
 export function RemindersPage() {
-  const { t } = useT()
+  const { t, locale } = useT()
+  const DAY_LABELS = weekdayNames(locale, 'narrow')
   const navigate = useNavigate()
   const settings = useSettings()
   const [adding, setAdding] = useState(false)

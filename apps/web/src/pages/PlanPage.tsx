@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { resolveExercise } from '../lib/exerciseResolve'
 import { ExerciseMedia } from '../components/training/ExerciseMedia'
+import { useT } from '../hooks/useT'
+import { weekdayNames } from '../lib/i18n'
 
 interface Exercise {
   name: string
@@ -49,9 +51,11 @@ interface PlanRow {
   created_at: string
 }
 
-const WEEKDAYS = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön']
+
 
 export function PlanPage() {
+  const { locale } = useT()
+  const WEEKDAYS = weekdayNames(locale, 'short')
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [plan, setPlan] = useState<PlanRow | null>(null)

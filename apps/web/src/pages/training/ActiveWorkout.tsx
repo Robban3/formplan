@@ -16,6 +16,7 @@ import { ExerciseDetail } from '../../components/training/ExerciseDetail'
 import { getExerciseHistory } from '../../lib/exerciseHistoryStore'
 import { exerciseKey } from '../../lib/exerciseKey'
 import { recommendNextWeight, type ProgressionAdvice } from '../../lib/progression'
+import { useT } from '../../hooks/useT'
 
 function formatTime(seconds: number) {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
@@ -30,6 +31,7 @@ export function ActiveWorkout() {
   const state = useWorkoutStore()
   const { auto_rest, rest_seconds_default, keep_screen_on } = useSettings()
   const { weightLabel, toDisplay, toStore, formatWeight, distanceLabel, toDisplayDistance, toStoreDistance } = useUnits()
+  const { t } = useT()
   const [elapsed, setElapsed] = useState(() => {
     const s = workoutStore.get()
     return s ? computeElapsedSeconds(s) : 0
@@ -208,9 +210,9 @@ export function ActiveWorkout() {
     const mins = Math.round(durationSec / 60)
     const text = `💪 Jag klarade ${name} på FormPlan!\n⏱ ${mins} min · ${doneSet}/${totalSet} set klara\n\nLadda ner FormPlan och träna med mig!`
     if (navigator.share) {
-      navigator.share({ title: 'Mitt träningspass', text }).catch(() => {})
+      navigator.share({ title: t('workout.myWorkout'), text }).catch(() => {})
     } else {
-      navigator.clipboard?.writeText(text).then(() => toast.success('Kopierat till urklipp!')).catch(() => {})
+      navigator.clipboard?.writeText(text).then(() => toast.success(t('workout.copied'))).catch(() => {})
     }
   }
 
@@ -233,11 +235,11 @@ export function ActiveWorkout() {
           className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-stone-800 rounded-full border border-stone-200 dark:border-stone-700 text-sm font-medium text-stone-700 dark:text-stone-300 shadow-sm"
         >
           <ShareIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
-          Dela passet
+          {t('workout.share')}
         </button>
 
         <div className="w-full max-w-sm bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-5">
-          <p className="font-semibold text-stone-800 dark:text-stone-200 text-center mb-4">Hur ansträngande var passet?</p>
+          <p className="font-semibold text-stone-800 dark:text-stone-200 text-center mb-4">{t('workout.rpeQuestion')}</p>
           <div className="grid grid-cols-5 gap-2 mb-4">
             {[1,2,3,4,5,6,7,8,9,10].map((n) => (
               <button
@@ -257,13 +259,13 @@ export function ActiveWorkout() {
               </button>
             ))}
           </div>
-          <p className="text-xs text-stone-500 dark:text-stone-400 text-center">1 = Extremt lätt · 10 = Maximalt</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400 text-center">{t('workout.rpeScale')}</p>
         </div>
         <button
           onClick={() => { setShowRpe(false); navigate('/hem', { replace: true }) }}
           className="text-sm text-stone-500 dark:text-stone-400"
         >
-          Hoppa över
+          {t('workout.skip')}
         </button>
       </div>
     )
@@ -332,7 +334,7 @@ export function ActiveWorkout() {
       const reps = set.reps || fallbackReps
       const isNewPR = checkAndUpdatePR(ex, set.weight_kg, reps)
       if (isNewPR) {
-        setTimeout(() => toast.success(`🏆 Nytt personbästa på ${ex.name}!`), 100)
+        setTimeout(() => toast.success(t('workout.newPR', { exercise: ex.name })), 100)
       }
     }
 
@@ -437,7 +439,7 @@ export function ActiveWorkout() {
     )
     if (
       completed === 0 ||
-      window.confirm('Avsluta passet nu? Det du loggat hittills sparas.')
+      window.confirm(t('workout.confirmFinish'))
     ) {
       finishWorkout()
     }
@@ -447,7 +449,7 @@ export function ActiveWorkout() {
     if (saving) return
     const snapshot = workoutStore.get()
     if (!snapshot) {
-      toast.error('Inget aktivt pass att spara.')
+      toast.error(t('workout.nothingToSave'))
       return
     }
 
@@ -495,7 +497,7 @@ export function ActiveWorkout() {
       workoutApi.logSession(input).catch(() => {})
     }
 
-    toast.success(completed > 0 ? 'Pass sparat!' : 'Pass avslutat!')
+    toast.success(completed > 0 ? t('workout.saved') : t('workout.finished'))
     const name = snapshot.workoutName
     workoutStore.finish()
     setSaving(false)
@@ -529,7 +531,7 @@ export function ActiveWorkout() {
         </div>
         <button
           onClick={togglePause}
-          aria-label={paused ? 'Återuppta passet' : 'Pausa passet'}
+          aria-label={paused ? t('workout.resume') : 'Pausa passet'}
           className="text-forest-800 dark:text-forest-400"
         >
           {paused
@@ -550,7 +552,7 @@ export function ActiveWorkout() {
       {/* Rest countdown overlay */}
       {restTimer !== null && (
         <div className="mx-5 mb-4 bg-forest-50 dark:bg-forest-900/30 border border-forest-200 dark:border-forest-800 rounded-2xl p-4 text-center">
-          <p className="text-forest-800 dark:text-forest-300 font-semibold">Vila</p>
+          <p className="text-forest-800 dark:text-forest-300 font-semibold">{t('workout.rest')}</p>
           <p className="text-3xl font-bold font-mono text-forest-800 dark:text-forest-400">{formatTime(restTimer)}</p>
           <button
             onClick={() => {
@@ -565,7 +567,7 @@ export function ActiveWorkout() {
             }}
             className="text-xs text-forest-500 mt-1 underline"
           >
-            Hoppa över vila
+            {t('workout.skipRest')}
           </button>
         </div>
       )}
@@ -582,7 +584,10 @@ export function ActiveWorkout() {
           </button>
           <div className="text-center">
             <p className="text-xs text-stone-500 dark:text-stone-400">
-              Övning {workout.currentExerciseIndex + 1} av {workout.exercises.length}
+              {t('workout.exerciseOf', {
+                n: workout.currentExerciseIndex + 1,
+                total: workout.exercises.length,
+              })}
             </p>
             <div className="flex items-center gap-2 justify-center">
               {catalogEx ? (
@@ -614,7 +619,10 @@ export function ActiveWorkout() {
               const reps = prev[0]?.reps
               return (
                 <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                  Förra: {kg != null ? formatWeight(kg) : '—'} × {reps ?? '—'} reps
+                  {t('workout.lastTime', {
+                    weight: kg != null ? formatWeight(kg) : '—',
+                    reps: reps ?? '—',
+                  })}
                 </p>
               )
             })()}
@@ -644,10 +652,13 @@ export function ActiveWorkout() {
               <ZapIcon className="w-5 h-5 stroke-forest-600 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-forest-800 dark:text-forest-200">
-                  Dags att öka till {formatWeight(rec.recommendedWeight_kg)}
+                  {t('workout.timeToIncrease', { weight: formatWeight(rec.recommendedWeight_kg) })}
                 </p>
                 <p className="text-[11px] text-forest-800 dark:text-forest-400 mt-0.5">
-                  Du klarade {rec.reachedReps} reps på {formatWeight(rec.lastWeight_kg)} två pass i rad.
+                  {t('workout.increaseReason', {
+                    reps: rec.reachedReps,
+                    weight: formatWeight(rec.lastWeight_kg),
+                  })}
                 </p>
               </div>
               <button
@@ -655,7 +666,7 @@ export function ActiveWorkout() {
                 disabled={applied}
                 className="text-xs font-semibold bg-forest-700 text-white px-3 py-2 rounded-xl flex-shrink-0 disabled:opacity-50"
               >
-                {applied ? 'Tillämpad' : 'Använd'}
+                {applied ? t('workout.applied') : t('workout.apply')}
               </button>
             </div>
           )
@@ -665,19 +676,21 @@ export function ActiveWorkout() {
         <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden mb-4">
           {/* Header */}
           <div className={`grid ${setGrid} gap-2 px-4 py-2 bg-stone-50 dark:bg-stone-800 text-xs text-stone-500 dark:text-stone-400 font-medium`}>
-            <span>Set</span>
-            <span>{isCardio ? 'Tid (min)' : 'Reps'}</span>
-            {isCardio ? <span>Distans (km)</span> : showWeight && <span>Vikt ({weightLabel})</span>}
+            <span>{t('workout.set')}</span>
+            <span>{isCardio ? t('workout.timeMin') : t('workout.reps')}</span>
+            {isCardio
+              ? <span>{t('workout.distanceWithUnit', { unit: distanceLabel })}</span>
+              : showWeight && <span>{t('workout.weightWithUnit', { unit: weightLabel })}</span>}
             <span />
           </div>
 
           {isCardio ? (
             <p className="px-4 py-2 text-xs text-stone-500 dark:text-stone-400 border-b border-stone-50">
-              Kondition — fyll i tid och distans per pass.
+              {t('workout.cardioHint')}
             </p>
           ) : !showWeight && (
             <p className="px-4 py-2 text-xs text-stone-500 dark:text-stone-400 border-b border-stone-50">
-              Kroppsvikt — fyll i antal reps per set.
+              {t('workout.bodyweightHint')}
             </p>
           )}
 
@@ -769,7 +782,7 @@ export function ActiveWorkout() {
           {doneSets}/{totalSets} set · {ex.name}
         </p>
         <p className="text-xs text-stone-500 dark:text-stone-400 text-center mb-2">
-          {workoutDoneSets}/{workoutTotalSets} set i hela passet
+          {t('workout.setsInWorkout', { done: workoutDoneSets, total: workoutTotalSets })}
         </p>
         <div className="w-full bg-stone-200 dark:bg-stone-700 rounded-full h-1.5 mb-6">
           <div
@@ -780,8 +793,8 @@ export function ActiveWorkout() {
 
         {workoutComplete && (
           <div className="bg-forest-50 dark:bg-forest-900/30 border border-forest-200 dark:border-forest-800 rounded-2xl p-4 mb-4 text-center">
-            <p className="font-bold text-forest-800 dark:text-forest-200">Alla set klara!</p>
-            <p className="text-sm text-forest-800 dark:text-forest-400 mt-1">Tryck på knappen nedan för att spara passet.</p>
+            <p className="font-bold text-forest-800 dark:text-forest-200">{t('workout.allSetsDone')}</p>
+            <p className="text-sm text-forest-800 dark:text-forest-400 mt-1">{t('workout.allSetsDoneHint')}</p>
           </div>
         )}
 
@@ -794,7 +807,7 @@ export function ActiveWorkout() {
                 <ExerciseMedia key={nextCatalog.id} exercise={nextCatalog} variant="thumb" />
               ) : null
             })()}
-            <div className="text-stone-500 dark:text-stone-400 text-xs">Nästa övning</div>
+            <div className="text-stone-500 dark:text-stone-400 text-xs">{t('workout.nextExercise')}</div>
             <div className="font-semibold text-sm text-stone-700 dark:text-stone-300">{nextIncompleteEx.name}</div>
           </div>
         )}
@@ -830,7 +843,7 @@ export function ActiveWorkout() {
             }`}
           >
             <ZapIcon className="w-3.5 h-3.5 inline mr-1" />
-            {ex.supersetGroup !== undefined ? 'Superset aktivt — tryck för att ta bort' : 'Markera som superset med nästa övning'}
+            {ex.supersetGroup !== undefined ? t('workout.supersetOn') : t('workout.supersetOff')}
           </button>
         )}
         {workoutComplete ? (
@@ -839,14 +852,14 @@ export function ActiveWorkout() {
             disabled={saving}
             className="w-full bg-forest-700 text-white font-bold py-4 rounded-2xl disabled:opacity-60"
           >
-            {saving ? 'Sparar…' : 'Avsluta pass ✓'}
+            {saving ? t('workout.saving') : t('workout.finishWorkout')}
           </button>
         ) : currentExerciseComplete && nextIncompleteIndex !== null ? (
           <button
             onClick={() => goToExerciseIndex(nextIncompleteIndex)}
             className="w-full bg-forest-700 text-white font-bold py-4 rounded-2xl"
           >
-            Nästa övning →
+            {t('workout.nextExerciseArrow')}
           </button>
         ) : null}
         {workoutDoneSets > 0 && !workoutComplete && (
@@ -855,7 +868,7 @@ export function ActiveWorkout() {
             disabled={saving}
             className="w-full bg-white dark:bg-stone-800 text-forest-800 dark:text-forest-300 font-semibold py-3 rounded-2xl border border-forest-200 dark:border-forest-800 disabled:opacity-60"
           >
-            {saving ? 'Sparar…' : `Spara & avsluta (${workoutDoneSets}/${workoutTotalSets} set)`}
+            {saving ? t('workout.saving') : `Spara & avsluta (${workoutDoneSets}/${workoutTotalSets} set)`}
           </button>
         )}
       </div>

@@ -24,6 +24,9 @@ import { resolveExercise } from '../../lib/exerciseResolve'
 import { ExerciseMedia } from '../../components/training/ExerciseMedia'
 import { ExerciseDetail } from '../../components/training/ExerciseDetail'
 import { PROGRAM_TEMPLATES, type ProgramTemplate, type TemplateDay } from '../../lib/programTemplates'
+import { useT } from '../../hooks/useT'
+import { weekdayNames } from '../../lib/i18n'
+import type { TextKey } from '../../lib/i18n'
 
 type WorkoutDay = WorkoutPlanDay
 
@@ -33,7 +36,7 @@ interface Plan {
   created_at: string
 }
 
-const WEEKDAYS = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag']
+
 const SHORT = ['M', 'Ti', 'O', 'To', 'F', 'L', 'S']
 
 function todayWeekday() {
@@ -42,6 +45,8 @@ function todayWeekday() {
 }
 
 export function TrainingOverview() {
+  const { locale, t } = useT()
+  const WEEKDAYS = weekdayNames(locale, 'long')
   const navigate = useNavigate()
   const activeWorkout = useWorkoutStore()
   const [plan, setPlan] = useState<Plan | null>(null)
@@ -144,11 +149,11 @@ export function TrainingOverview() {
       }
       if (mountedRef.current) {
         if (errored) {
-          toast.error('Något gick fel när schemat skulle skapas. Försök igen.')
+          toast.error(t('training.planFailed'))
         } else if (!ready) {
           // Timed out, but the plan is still being generated server-side. Keep the
           // stored plan_id so the next mount picks it up when it's ready.
-          toast.info('Schemat tar längre tid än vanligt. Det visas här så snart det är klart.')
+          toast.info(t('training.planSlow'))
         }
       }
     } catch (e) {
@@ -189,27 +194,27 @@ export function TrainingOverview() {
     <div className="pb-4">
       <WorkoutHero
         as="h1"
-        title="Träning"
+        title={t('nav.training')}
         subtitle={
           plan
             ? `${thisWeekDone} av ${totalWeek} pass denna vecka${isMock ? ' · testdata' : ''}`
-            : 'Ditt träningsschema'
+            : t('training.yourPlan')
         }
       />
 
       <div className="px-5 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
         <div className="flex gap-5">
-          {(['pass', 'program', 'ovningar'] as const).map((t) => (
+          {(['pass', 'program', 'ovningar'] as const).map((tabKey) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={tabKey}
+              onClick={() => setTab(tabKey)}
               className={`pb-3 pt-1 text-sm font-medium capitalize transition-colors ${
-                tab === t
+                tab === tabKey
                   ? 'text-forest-800 dark:text-forest-400 border-b-2 border-forest-600'
                   : 'text-stone-500 dark:text-stone-400'
               }`}
             >
-              {t === 'pass' ? 'Pass' : t === 'program' ? 'Program' : 'Övningar'}
+              {tabKey === 'pass' ? t('training.sessions') : tabKey === 'program' ? t('training.programs') : t('training.exercises')}
             </button>
           ))}
         </div>
@@ -224,11 +229,11 @@ export function TrainingOverview() {
               className="w-full flex items-center justify-between bg-forest-700 text-white rounded-2xl px-4 py-3"
             >
               <div className="text-left">
-                <p className="text-xs text-forest-200">Pågående pass</p>
+                <p className="text-xs text-forest-200">{t('training.ongoing')}</p>
                 <p className="font-semibold">{activeWorkout.workoutName}</p>
               </div>
               <span className="text-sm font-mono bg-forest-700 px-3 py-1 rounded-lg">
-                Återgå →
+                {t('training.resume')}
               </span>
             </button>
           )}
@@ -238,13 +243,13 @@ export function TrainingOverview() {
             <div className="bg-stone-100 dark:bg-stone-700 rounded-2xl p-4 flex items-center gap-4">
               <WeeklyRing done={thisWeekDone} total={totalWeek} />
               <div className="flex-1">
-                <p className="text-xs text-stone-500 dark:text-stone-400">Denna vecka</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400">{t('home.thisWeek')}</p>
                 <p className="font-bold text-stone-900 dark:text-stone-100 text-lg">{thisWeekDone} av {totalWeek} pass</p>
               </div>
               {streak > 0 && (
                 <div className="flex flex-col items-center bg-amber-50 dark:bg-amber-900/25 rounded-xl px-3 py-2">
                   <span className="text-lg font-bold text-amber-600 dark:text-amber-400">{streak}</span>
-                  <span className="text-[9px] text-amber-700 dark:text-amber-300">dag streak</span>
+                  <span className="text-[9px] text-amber-700 dark:text-amber-300">{t('home.dayStreak')}</span>
                   {longestStreak > streak && (
                     <span className="text-[8px] text-stone-500 dark:text-stone-400">rekord: {longestStreak}</span>
                   )}
@@ -296,8 +301,8 @@ export function TrainingOverview() {
               <div className="flex justify-center mb-3">
                 <DumbbellIcon className="w-12 h-12 stroke-stone-300 dark:stroke-stone-600" />
               </div>
-              <h2 className="text-lg font-semibold mb-1">Inget schema ännu</h2>
-              <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Generera ett AI-schema eller bygg ett eget pass.</p>
+              <h2 className="text-lg font-semibold mb-1">{t('training.noPlanYet')}</h2>
+              <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">{t('training.noPlanHint')}</p>
               <div className="flex gap-3 justify-center">
                 <button
                   onClick={handleGenerate}
@@ -305,14 +310,14 @@ export function TrainingOverview() {
                   className="bg-forest-700 hover:bg-forest-800 disabled:opacity-60 text-white font-semibold px-5 py-3 rounded-xl flex items-center gap-2 transition-colors"
                 >
                   <PlusIcon className="w-4 h-4" />
-                  {generating ? 'Genererar...' : 'Generera schema'}
+                  {generating ? t('training.generating') : t('training.generatePlan')}
                 </button>
                 <button
                   onClick={() => navigate('/traning/egna')}
                   className="border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 font-semibold px-5 py-3 rounded-xl flex items-center gap-2 hover:border-forest-400 hover:text-forest-600 transition-colors"
                 >
                   <DumbbellIcon className="w-4 h-4" />
-                  Egna pass
+                  {t('page.customWorkouts')}
                 </button>
               </div>
             </div>
@@ -329,14 +334,14 @@ export function TrainingOverview() {
               className="flex-1 flex items-center justify-center gap-2 border border-stone-200 dark:border-stone-700 rounded-xl py-3 text-sm text-stone-500 dark:text-stone-400 hover:border-forest-400 hover:text-forest-600 transition-colors"
             >
               <PlusIcon className="w-4 h-4" />
-              {generating ? 'Genererar...' : 'AI-schema'}
+              {generating ? t('training.generating') : t('training.aiPlan')}
             </button>
             <button
               onClick={() => navigate('/traning/egna')}
               className="flex-1 flex items-center justify-center gap-2 border border-stone-200 dark:border-stone-700 rounded-xl py-3 text-sm text-stone-500 dark:text-stone-400 hover:border-forest-400 hover:text-forest-600 transition-colors"
             >
               <DumbbellIcon className="w-4 h-4" />
-              Egna pass
+              {t('page.customWorkouts')}
             </button>
           </div>
           )}
@@ -348,7 +353,7 @@ export function TrainingOverview() {
           {/* Ditt AI-schema (om det finns) */}
           {workoutDays.length > 0 && (
             <div className="space-y-3">
-              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Ditt schema</p>
+              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">{t('training.myPlan')}</p>
               {workoutDays.map((day) => (
                 <div key={day.id} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
                   <div className="flex items-center justify-between mb-3">
@@ -368,9 +373,9 @@ export function TrainingOverview() {
 
           {/* Färdiga program — alltid tillgängliga */}
           <div className="space-y-3">
-            <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Färdiga program</p>
-            {PROGRAM_TEMPLATES.map((t) => (
-              <ProgramTemplateCard key={t.id} template={t} onStartDay={startTemplateDay} />
+            <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">{t('training.readyPrograms')}</p>
+            {PROGRAM_TEMPLATES.map((tpl) => (
+              <ProgramTemplateCard key={tpl.id} template={tpl} onStartDay={startTemplateDay} />
             ))}
           </div>
         </div>
@@ -414,6 +419,8 @@ function WorkoutCard({
   isToday: boolean
   onClick: () => void
 }) {
+  const { locale } = useT()
+  const WEEKDAYS = weekdayNames(locale, 'long')
   const diff: Record<string, string> = {
     Lätt: 'bg-teal-100 text-teal-800 dark:text-teal-300',
     Medel: 'bg-amber-100 dark:bg-amber-900/35 text-amber-700 dark:text-amber-300',
@@ -472,7 +479,23 @@ function WorkoutCard({
 
 // Standalone, always-available exercise library driven by the curated catalog:
 // search + category filter, each row with its own images and muscle chips.
+/**
+ * Kategorivärdena är svenska och matchas mot övningskatalogen — bara
+ * etiketten går via ordlistan. Fjärde stället med samma koppling.
+ */
+const CATEGORY_KEYS: Record<'Alla' | ExerciseCategory, TextKey> = {
+  'Alla': 'tab.all',
+  'Bröst': 'exCat.chest',
+  'Rygg': 'exCat.back',
+  'Ben': 'exCat.legs',
+  'Axlar': 'exCat.shoulders',
+  'Armar': 'exCat.arms',
+  'Core': 'exCat.core',
+  'Kondition': 'exCat.cardio',
+}
+
 function ExerciseLibrary() {
+  const { t } = useT()
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<ExerciseCategory | 'Alla'>('Alla')
   const [openId, setOpenId] = useState<string | null>(null)
@@ -486,7 +509,7 @@ function ExerciseLibrary() {
     ex.primaryMuscles.some((m) => MUSCLE_LABELS[m].toLowerCase().includes(q))
 
   const visible = EXERCISE_CATALOG.filter(
-    (ex) => (category === 'Alla' || ex.category === category) && matches(ex)
+    (ex) => (category === t('tab.all') || ex.category === category) && matches(ex)
   )
   const groups = EXERCISE_CATEGORIES.map((c) => ({
     category: c,
@@ -498,7 +521,7 @@ function ExerciseLibrary() {
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Sök övning…"
+        placeholder={t('training.searchExercise')}
         className="w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-3 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400 text-sm"
       />
 
@@ -513,13 +536,13 @@ function ExerciseLibrary() {
                 : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400'
             }`}
           >
-            {c}
+            {t(CATEGORY_KEYS[c])}
           </button>
         ))}
       </div>
 
       {groups.length === 0 && (
-        <p className="text-stone-500 dark:text-stone-400 text-sm text-center py-6">Inga träffar.</p>
+        <p className="text-stone-500 dark:text-stone-400 text-sm text-center py-6">{t('training.noMatches')}</p>
       )}
 
       {groups.map((g) => (
@@ -580,6 +603,7 @@ function ProgramTemplateCard({
   template: ProgramTemplate
   onStartDay: (templateId: string, day: TemplateDay) => void
 }) {
+  const { t } = useT()
   const [open, setOpen] = useState(false)
   return (
     <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
@@ -591,7 +615,7 @@ function ProgramTemplateCard({
           </span>
         </div>
         <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{template.description}</p>
-        <p className="text-[11px] text-forest-800 dark:text-forest-400 font-medium mt-2">{open ? 'Dölj pass ▲' : 'Visa pass ▼'}</p>
+        <p className="text-[11px] text-forest-800 dark:text-forest-400 font-medium mt-2">{open ? t('training.hideSessions') : t('training.showSessions')}</p>
       </button>
 
       {open && (

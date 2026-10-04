@@ -79,6 +79,36 @@ export function localeFor(lang: Lang): string {
   return lang === 'sv' ? 'sv-SE' : 'en-GB'
 }
 
+/**
+ * Veckodagsnamn, måndag först.
+ *
+ * Hämtas ur Intl i stället för ordlistan: fjorton extra nycklar att hålla i
+ * synk för något webbläsaren redan kan, och Intl får dessutom böjning och
+ * förkortningar rätt per språk.
+ *
+ * Måndag först är avsiktligt — appens scheman numrerar weekday 1–7 från
+ * måndag, som ISO-8601 och svensk kalender. 2024-01-01 var en måndag, så den
+ * veckan ger rätt ordning.
+ */
+export function weekdayNames(locale: string, style: 'long' | 'short' | 'narrow' = 'long'): string[] {
+  const fmt = new Intl.DateTimeFormat(locale, { weekday: style })
+  return Array.from({ length: 7 }, (_, i) =>
+    capitalizeFirst(fmt.format(new Date(Date.UTC(2024, 0, 1 + i))))
+  )
+}
+
+/**
+ * Stor begynnelsebokstav.
+ *
+ * Svensk ortografi skriver veckodagar med liten bokstav, och det är vad Intl
+ * ger ("måndag"). Som fristående etikett i ett gränssnitt skrivs de ändå med
+ * versal, och så har appen alltid visat dem — bara språket ska ändras här,
+ * inte utseendet.
+ */
+export function capitalizeFirst(s: string): string {
+  return s.length === 0 ? s : s[0]!.toLocaleUpperCase() + s.slice(1)
+}
+
 /** Funktionen skärmarna använder. */
 export type TranslateFn = (key: TextKey, vars?: Record<string, string | number>) => string
 
