@@ -9,6 +9,11 @@ export const FULL_ACCESS_EMAILS = new Set([
   'oliver@dronarkompaniet.se',
   'rvdv1122@gmail.com',
   'robert@applabbet.com',
+  // Kontot Apple och Google granskar appen med. Provperioden är sju dagar, och
+  // granskningen kan ske långt senare — eller göras om vid en uppdatering. Utan
+  // undantaget möter granskaren betalväggen och avvisar appen med "kunde inte
+  // komma åt funktionerna".
+  'review@applabbet.com',
 ])
 
 export interface AccessStatus {
