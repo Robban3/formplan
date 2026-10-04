@@ -25,7 +25,7 @@ export function AppleHealthPage() {
 
       <div className="bg-forest-50 dark:bg-forest-900/30 rounded-2xl border border-forest-100 dark:border-forest-800 p-4 mt-4 space-y-2">
         <p className="font-medium text-forest-800 dark:text-forest-200 text-sm">Vad som synkroniseras (iOS-app):</p>
-        <ul className="text-forest-700 dark:text-forest-300 text-sm space-y-1">
+        <ul className="text-forest-800 dark:text-forest-300 text-sm space-y-1">
           <li>✓ Genomförda träningspass (typ, tid, kalorier)</li>
           <li>✓ Aktiva kalorier och steg</li>
           <li>✓ Vikt och BMI</li>

@@ -247,7 +247,7 @@ export function WaterPage() {
                   }`}
                 >
                   <GlassWaterIcon className={`w-5 h-5 ${selectedMl === ml ? 'stroke-forest-600' : 'stroke-sky-400'}`} />
-                  <span className={`text-xs font-medium ${selectedMl === ml ? 'text-forest-700 dark:text-forest-300' : 'text-stone-500 dark:text-stone-400'}`}>
+                  <span className={`text-xs font-medium ${selectedMl === ml ? 'text-forest-800 dark:text-forest-300' : 'text-stone-500 dark:text-stone-400'}`}>
                     {ml < 1000 ? `${ml} ml` : `${ml / 1000} L`}
                   </span>
                 </button>

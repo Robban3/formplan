@@ -223,7 +223,7 @@ export function ActiveWorkout() {
           <div className="w-16 h-16 bg-forest-100 dark:bg-forest-900/40 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <DumbbellIcon className="w-8 h-8 stroke-forest-600" />
           </div>
-          <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Bra jobbat!</h2>
+          <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Bra jobbat!</h1>
           <p className="text-stone-500 dark:text-stone-400 mt-1">{pendingWorkoutName}</p>
         </div>
 
@@ -248,7 +248,7 @@ export function ActiveWorkout() {
                   navigate('/hem', { replace: true })
                 }}
                 className={`aspect-square rounded-xl text-sm font-bold transition-colors ${
-                  n <= 3 ? 'bg-teal-100 text-teal-700 hover:bg-teal-200'
+                  n <= 3 ? 'bg-teal-100 text-teal-800 dark:text-teal-300 hover:bg-teal-200'
                   : n <= 6 ? 'bg-amber-100 dark:bg-amber-900/35 text-amber-700 dark:text-amber-300 hover:bg-amber-200'
                   : 'bg-red-100 text-red-700 dark:text-red-300 hover:bg-red-200'
                 }`}
@@ -550,7 +550,7 @@ export function ActiveWorkout() {
       {/* Rest countdown overlay */}
       {restTimer !== null && (
         <div className="mx-5 mb-4 bg-forest-50 dark:bg-forest-900/30 border border-forest-200 dark:border-forest-800 rounded-2xl p-4 text-center">
-          <p className="text-forest-700 dark:text-forest-300 font-semibold">Vila</p>
+          <p className="text-forest-800 dark:text-forest-300 font-semibold">Vila</p>
           <p className="text-3xl font-bold font-mono text-forest-800 dark:text-forest-400">{formatTime(restTimer)}</p>
           <button
             onClick={() => {
@@ -592,7 +592,7 @@ export function ActiveWorkout() {
                   className="flex items-center gap-2 mt-0.5"
                 >
                   <ExerciseMedia key={catalogEx.id} exercise={catalogEx} variant="thumb" />
-                  <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100">{ex.name}</h2>
+                  <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">{ex.name}</h1>
                   <ChevronDownIcon
                     className={`w-4 h-4 stroke-stone-300 dark:stroke-stone-600 transition-transform ${
                       showDetail ? 'rotate-180' : ''
@@ -600,7 +600,7 @@ export function ActiveWorkout() {
                   />
                 </button>
               ) : (
-                <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100 mt-0.5">{ex.name}</h2>
+                <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100 mt-0.5">{ex.name}</h1>
               )}
               {ex.supersetGroup !== undefined && (
                 <span className="text-[10px] font-bold bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">SS</span>
@@ -853,7 +853,7 @@ export function ActiveWorkout() {
           <button
             onClick={finishWorkout}
             disabled={saving}
-            className="w-full bg-white dark:bg-stone-800 text-forest-700 dark:text-forest-300 font-semibold py-3 rounded-2xl border border-forest-200 dark:border-forest-800 disabled:opacity-60"
+            className="w-full bg-white dark:bg-stone-800 text-forest-800 dark:text-forest-300 font-semibold py-3 rounded-2xl border border-forest-200 dark:border-forest-800 disabled:opacity-60"
           >
             {saving ? 'Sparar…' : `Spara & avsluta (${workoutDoneSets}/${workoutTotalSets} set)`}
           </button>

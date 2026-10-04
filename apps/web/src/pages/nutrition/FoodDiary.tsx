@@ -112,7 +112,7 @@ export function FoodDiary() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate('/kost/kostschema')}
-            className="flex-1 min-w-0 h-9 rounded-xl bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 text-xs font-semibold hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors truncate px-2"
+            className="flex-1 min-w-0 h-9 rounded-xl bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300 text-xs font-semibold hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors truncate px-2"
           >
             Kostschema
           </button>

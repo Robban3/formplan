@@ -170,7 +170,7 @@ export function MealPlanPage() {
                     : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800'
                 }`}
               >
-                <p className={`text-sm font-semibold ${focus === opt.key ? 'text-forest-700 dark:text-forest-300' : 'text-stone-800 dark:text-stone-200'}`}>
+                <p className={`text-sm font-semibold ${focus === opt.key ? 'text-forest-800 dark:text-forest-300' : 'text-stone-800 dark:text-stone-200'}`}>
                   {opt.label}
                 </p>
                 <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">{opt.desc}</p>

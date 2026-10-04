@@ -176,7 +176,7 @@ export function FoodSearch() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Sök livsmedel..."
-            className="flex-1 bg-transparent text-sm text-stone-800 dark:text-stone-200 placeholder:text-stone-400 dark:placeholder:text-stone-500 outline-none"
+            className="flex-1 bg-transparent text-sm text-stone-800 dark:text-stone-200 placeholder:text-stone-400 dark:placeholder:text-stone-500 outline-none focus-visible:ring-2 focus-visible:ring-forest-500 rounded"
           />
           {query && (
             <button onClick={() => { setQuery(''); setResults([]); setSelected(null) }}>
@@ -190,14 +190,14 @@ export function FoodSearch() {
         <div className="flex gap-2 mt-3">
           <button
             onClick={() => navigate(`/kost/skanna?slot=${slot}&date=${date}`)}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 text-sm font-semibold hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300 text-sm font-semibold hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors"
           >
             <ScanBarcodeIcon className="w-4 h-4 stroke-forest-600" />
             Skanna streckkod
           </button>
           <button
             onClick={() => navigate(`/kost/foto?slot=${slot}&date=${date}`)}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 text-sm font-semibold hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300 text-sm font-semibold hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors"
           >
             <CameraIcon className="w-4 h-4 stroke-forest-600" />
             Fotografera
@@ -352,7 +352,7 @@ export function FoodSearch() {
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-16 bg-transparent text-sm font-medium text-stone-800 dark:text-stone-200 text-right outline-none"
+                className="w-16 bg-transparent text-sm font-medium text-stone-800 dark:text-stone-200 text-right outline-none focus-visible:ring-2 focus-visible:ring-forest-500 rounded"
                 min="1"
                 max="2000"
               />

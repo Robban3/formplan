@@ -112,7 +112,7 @@ export function ShoppingListPage() {
                 onClick={() => setFocus(opt.key)}
                 className={`py-2.5 rounded-xl text-sm font-medium border-2 transition-colors ${
                   focus === opt.key
-                    ? 'border-forest-600 bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300'
+                    ? 'border-forest-600 bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300'
                     : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-300'
                 }`}
               >

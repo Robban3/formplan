@@ -39,7 +39,7 @@ export function ExerciseDetail({ exercise, className = '' }: ExerciseDetailProps
       <div>
         <h3 className="font-semibold text-stone-900 dark:text-stone-100">{exercise.name}</h3>
         <div className="flex flex-wrap gap-1.5 mt-1.5">
-          <span className="text-[11px] font-medium text-forest-700 dark:text-forest-300 bg-forest-50 dark:bg-forest-900/30 border border-forest-100 dark:border-forest-800 rounded-full px-2 py-0.5">
+          <span className="text-[11px] font-medium text-forest-800 dark:text-forest-300 bg-forest-50 dark:bg-forest-900/30 border border-forest-100 dark:border-forest-800 rounded-full px-2 py-0.5">
             {exercise.category}
           </span>
           <span className="text-[11px] font-medium text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-700 rounded-full px-2 py-0.5">

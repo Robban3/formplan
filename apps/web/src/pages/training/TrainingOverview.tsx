@@ -188,6 +188,7 @@ export function TrainingOverview() {
   return (
     <div className="pb-4">
       <WorkoutHero
+        as="h1"
         title="Träning"
         subtitle={
           plan
@@ -414,7 +415,7 @@ function WorkoutCard({
   onClick: () => void
 }) {
   const diff: Record<string, string> = {
-    Lätt: 'bg-teal-100 text-teal-700',
+    Lätt: 'bg-teal-100 text-teal-800 dark:text-teal-300',
     Medel: 'bg-amber-100 dark:bg-amber-900/35 text-amber-700 dark:text-amber-300',
     Hög: 'bg-red-100 text-red-700 dark:text-red-300',
   }
@@ -543,7 +544,7 @@ function ExerciseLibrary() {
                         {ex.primaryMuscles.map((m) => (
                           <span
                             key={m}
-                            className="text-[10px] font-medium text-forest-700 dark:text-forest-300 bg-forest-50 dark:bg-forest-900/30 rounded-full px-1.5 py-0.5"
+                            className="text-[10px] font-medium text-forest-800 dark:text-forest-300 bg-forest-50 dark:bg-forest-900/30 rounded-full px-1.5 py-0.5"
                           >
                             {MUSCLE_LABELS[m]}
                           </span>

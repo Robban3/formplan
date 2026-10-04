@@ -175,7 +175,7 @@ export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
               >
                 <GlassWaterIcon className={`w-5 h-5 shrink-0 ${isToday ? 'stroke-forest-600' : 'stroke-sky-400'}`} />
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium capitalize ${isToday ? 'text-forest-700 dark:text-forest-300' : 'text-stone-800 dark:text-stone-200'}`}>
+                  <p className={`text-sm font-medium capitalize ${isToday ? 'text-forest-800 dark:text-forest-300' : 'text-stone-800 dark:text-stone-200'}`}>
                     {formatDayLabel(day.date, isToday)}
                   </p>
                   <div className="mt-1.5 h-1.5 bg-stone-100 dark:bg-stone-700 rounded-full overflow-hidden">

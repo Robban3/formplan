@@ -293,10 +293,10 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
 
   const macros = recipe
     ? [
-        { label: 'Kalorier', value: recipe.kcal, unit: 'kcal', color: 'bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300' },
-        { label: 'Protein', value: recipe.protein_g, unit: 'g', color: 'bg-blue-50 dark:bg-blue-900/25 text-blue-700' },
+        { label: 'Kalorier', value: recipe.kcal, unit: 'kcal', color: 'bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300' },
+        { label: 'Protein', value: recipe.protein_g, unit: 'g', color: 'bg-blue-50 dark:bg-blue-900/25 text-blue-800 dark:text-blue-300' },
         { label: 'Fett', value: recipe.fat_g, unit: 'g', color: 'bg-amber-50 dark:bg-amber-900/25 text-amber-700 dark:text-amber-300' },
-        { label: 'Kolhyd.', value: recipe.carbs_g, unit: 'g', color: 'bg-teal-50 text-teal-700' },
+        { label: 'Kolhyd.', value: recipe.carbs_g, unit: 'g', color: 'bg-teal-50 dark:bg-teal-900/30 text-teal-800 dark:text-teal-300' },
       ]
     : []
 
@@ -407,7 +407,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
             <span>·</span>
             <span>{recipe.servings} {recipe.servings === 1 ? 'portion' : 'portioner'}</span>
             {recipe.tags?.slice(0, 2).map((t) => (
-              <span key={t} className="text-[10px] bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 px-2 py-0.5 rounded-full font-medium">
+              <span key={t} className="text-[10px] bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300 px-2 py-0.5 rounded-full font-medium">
                 {t}
               </span>
             ))}
@@ -537,7 +537,7 @@ export function RecipesPage() {
               </div>
               <div className="flex gap-1 mt-1.5 flex-wrap">
                 {recipe.tags.map((tag) => (
-                  <span key={tag} className="text-[10px] bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 px-2 py-0.5 rounded-full font-medium">
+                  <span key={tag} className="text-[10px] bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300 px-2 py-0.5 rounded-full font-medium">
                     {tag}
                   </span>
                 ))}

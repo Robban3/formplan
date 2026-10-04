@@ -151,7 +151,7 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
             inputMode="numeric"
             value={kcal}
             onChange={(e) => setKcal(e.target.value)}
-            className="w-14 text-sm text-center focus:outline-none"
+            className="w-14 text-sm text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-forest-500 rounded"
           />
           <span className="text-xs text-stone-500 dark:text-stone-400">kcal</span>
         </div>
@@ -195,7 +195,7 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
               { v: `${recipe.carbs_g}g`, l: 'Kolhyd.' },
             ].map((m) => (
               <div key={m.l} className="bg-forest-50 dark:bg-forest-900/30 rounded-lg py-1.5">
-                <p className="font-bold text-forest-700 dark:text-forest-300 text-xs">{m.v}</p>
+                <p className="font-bold text-forest-800 dark:text-forest-300 text-xs">{m.v}</p>
                 <p className="text-[9px] text-forest-600/70">{m.l}</p>
               </div>
             ))}
@@ -234,7 +234,7 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
             <button
               onClick={saveToWeek}
               disabled={savedWeek}
-              className="py-2.5 rounded-xl border border-forest-200 dark:border-forest-800 text-forest-700 dark:text-forest-300 text-sm font-semibold hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors disabled:opacity-60"
+              className="py-2.5 rounded-xl border border-forest-200 dark:border-forest-800 text-forest-800 dark:text-forest-300 text-sm font-semibold hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors disabled:opacity-60"
             >
               {savedWeek ? 'Sparad ✓' : 'Spara till vecka'}
             </button>

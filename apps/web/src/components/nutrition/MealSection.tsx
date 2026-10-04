@@ -11,7 +11,7 @@ const SLOT_LABELS: Record<MealSlot, string> = {
 
 const SLOT_COLORS: Record<MealSlot, string> = {
   frukost: 'bg-amber-100 dark:bg-amber-900/35 text-amber-700 dark:text-amber-300',
-  lunch: 'bg-forest-100 dark:bg-forest-900/40 text-forest-700 dark:text-forest-300',
+  lunch: 'bg-forest-100 dark:bg-forest-900/40 text-forest-800 dark:text-forest-300',
   middag: 'bg-sky-100 dark:bg-sky-900/45 text-sky-700 dark:text-sky-300',
   mellanmar: 'bg-purple-100 text-purple-700',
 }

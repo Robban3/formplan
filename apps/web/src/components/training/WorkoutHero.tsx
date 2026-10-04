@@ -3,12 +3,15 @@ import { ChevronLeftIcon } from '../ui/Icons'
 interface Props {
   title: string
   subtitle?: string
+  /** Rubriknivå. h1 när hjälten ÄR sidans rubrik, annars h2. */
+  as?: 'h1' | 'h2'
   size?: 'sm' | 'lg'
   back?: { label: string; onClick: () => void }
   badge?: React.ReactNode
 }
 
-export function WorkoutHero({ title, subtitle, size = 'lg', back, badge }: Props) {
+export function WorkoutHero({ title, subtitle, size = 'lg', back, badge, as = 'h2' }: Props) {
+  const Heading = as
   const tall = size === 'lg'
 
   return (
@@ -40,9 +43,9 @@ export function WorkoutHero({ title, subtitle, size = 'lg', back, badge }: Props
             {back.label}
           </button>
         )}
-        <h2 className={`font-bold text-white drop-shadow-sm ${tall ? 'text-2xl' : 'text-lg'}`}>
+        <Heading className={`font-bold text-white drop-shadow-sm ${tall ? 'text-2xl' : 'text-lg'}`}>
           {title}
-        </h2>
+        </Heading>
         {subtitle && (
           <p className="text-white/80 text-sm mt-0.5 drop-shadow-sm">{subtitle}</p>
         )}

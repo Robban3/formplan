@@ -265,7 +265,7 @@ export function BarcodeScanPage() {
                   onChange={(e) => setAmount(e.target.value)}
                   min="1"
                   max="2000"
-                  className="w-16 bg-transparent text-sm font-medium text-stone-800 dark:text-stone-200 text-right outline-none"
+                  className="w-16 bg-transparent text-sm font-medium text-stone-800 dark:text-stone-200 text-right outline-none focus-visible:ring-2 focus-visible:ring-forest-500 rounded"
                 />
                 <span className="text-sm text-stone-500 dark:text-stone-400">g</span>
               </div>

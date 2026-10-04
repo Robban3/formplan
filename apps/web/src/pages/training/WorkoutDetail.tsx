@@ -147,6 +147,7 @@ export function WorkoutDetail() {
   return (
     <div className="pb-28">
       <WorkoutHero
+        as="h1"
         title={content.name}
         subtitle={`${content.duration_minutes} min · ${content.focus}`}
         back={{ label: 'Träning', onClick: () => navigate(-1) }}

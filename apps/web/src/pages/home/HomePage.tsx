@@ -55,7 +55,7 @@ const QUICK_LINKS: QuickLink[] = [
 ]
 
 const DIFF_STYLES: Record<string, string> = {
-  Lätt: 'bg-teal-100 text-teal-700',
+  Lätt: 'bg-teal-100 text-teal-800 dark:text-teal-300',
   Medel: 'bg-amber-100 dark:bg-amber-900/35 text-amber-700 dark:text-amber-300',
   Hög: 'bg-red-100 text-red-700 dark:text-red-300',
 }
@@ -178,7 +178,7 @@ function WeeklyReport({ weeklyDone, weeklyTotal }: { weeklyDone: number; weeklyT
           <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Veckans rapport</p>
           <p className="text-[10px] text-stone-300 dark:text-stone-600">v. från {weekLabel}</p>
         </div>
-        {onTrack && <span className="text-xs bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 font-semibold px-2 py-0.5 rounded-full border border-forest-100 dark:border-forest-800">Mål uppnått!</span>}
+        {onTrack && <span className="text-xs bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300 font-semibold px-2 py-0.5 rounded-full border border-forest-100 dark:border-forest-800">Mål uppnått!</span>}
       </div>
       <div className="grid grid-cols-3 gap-3 text-center">
         <div>

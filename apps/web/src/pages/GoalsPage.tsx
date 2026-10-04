@@ -109,7 +109,7 @@ function GoalCard({
               {goal.text}
             </p>
             {isAuto && !goal.done && (
-              <span className="text-[9px] bg-forest-100 dark:bg-forest-900/40 text-forest-700 dark:text-forest-300 px-1.5 py-0.5 rounded-full font-semibold flex-shrink-0">
+              <span className="text-[9px] bg-forest-100 dark:bg-forest-900/40 text-forest-800 dark:text-forest-300 px-1.5 py-0.5 rounded-full font-semibold flex-shrink-0">
                 Auto
               </span>
             )}
@@ -173,7 +173,7 @@ function GoalCard({
       {adjustment && !goal.done && (
         <button
           onClick={onApply}
-          className="mt-3 w-full py-2.5 rounded-xl border border-forest-200 dark:border-forest-800 bg-forest-50 dark:bg-forest-900/30 text-sm font-semibold text-forest-700 dark:text-forest-300 hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors"
+          className="mt-3 w-full py-2.5 rounded-xl border border-forest-200 dark:border-forest-800 bg-forest-50 dark:bg-forest-900/30 text-sm font-semibold text-forest-800 dark:text-forest-300 hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors"
         >
           Anpassa mitt schema efter det här målet
         </button>
@@ -359,7 +359,7 @@ export function GoalsPage() {
             {/* Auto-detection preview */}
             {preview && (
               <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-xl ${
-                previewIsAuto ? 'bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300' : 'bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400'
+                previewIsAuto ? 'bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300' : 'bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400'
               }`}>
                 <span>{previewIsAuto ? '✓ Automatisk spårning detekterad' : '○ Manuell uppföljning'}</span>
               </div>
@@ -373,7 +373,7 @@ export function GoalsPage() {
                   <button
                     key={s.text}
                     onClick={() => addGoal(s.text)}
-                    className="text-xs bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 border border-forest-100 dark:border-forest-800 px-3 py-1.5 rounded-full hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors"
+                    className="text-xs bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300 border border-forest-100 dark:border-forest-800 px-3 py-1.5 rounded-full hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors"
                   >
                     {s.text}
                   </button>

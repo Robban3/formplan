@@ -46,7 +46,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  training: 'bg-forest-50 dark:bg-forest-900/30 text-forest-700 dark:text-forest-300 border-forest-200 dark:border-forest-800',
+  training: 'bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300 border-forest-200 dark:border-forest-800',
   nutrition: 'bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 border-sky-200',
   body: 'bg-purple-50 text-purple-700 border-purple-200',
 }

@@ -68,7 +68,7 @@ export function NotificationsPage() {
             </>
           ) : (
             <>
-              <p className="font-semibold text-forest-700 dark:text-forest-300 text-sm">Tillåt notiser för att fortsätta</p>
+              <p className="font-semibold text-forest-800 dark:text-forest-300 text-sm">Tillåt notiser för att fortsätta</p>
               <button
                 onClick={requestPermission}
                 className="mt-2 bg-forest-700 text-white text-sm font-medium px-4 py-2 rounded-xl"
