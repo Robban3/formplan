@@ -15,6 +15,8 @@ export interface Env {
   // Kommaseparerad lista med admin-mejladresser (t.ex. nyhetsbrevsutskick).
   // Osatt ⇒ inga admins ⇒ admin-endpoints svarar alltid 403.
   ADMIN_EMAILS?: string
+  /** Kommaseparerade testaradresser med permanent åtkomst. Se lib/access.ts. */
+  TESTER_EMAILS?: string
   // Valfri KV-namespace för distribuerad rate limiting. Osatt ⇒ limitern
   // faller tillbaka på in-memory per isolate (se lib/rateLimit.ts).
   RATE_LIMIT_KV?: KVNamespace

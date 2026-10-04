@@ -4,7 +4,14 @@ import type { Env, JwtPayload } from './types'
 export const TRIAL_DAYS = 7
 export const PRICE_SEK_ORE = 9900 // 99,00 kr/mån
 
-// Konton som alltid har full åtkomst (test/admin) — kringgår provperiod & paywall.
+/**
+ * Konton som alltid har full åtkomst — kringgår provperiod och betalvägg.
+ *
+ * Här ligger bara de PERMANENTA: ägarna och granskningskontot. Testare läggs
+ * i env-variabeln TESTER_EMAILS i stället (se testerEmails nedan) — de
+ * växlar över tid, och tre privatpersoners adresser ska inte ligga kvar i
+ * git-historiken efter att de slutat testa.
+ */
 export const FULL_ACCESS_EMAILS = new Set([
   'oliver@dronarkompaniet.se',
   'rvdv1122@gmail.com',
@@ -15,6 +22,32 @@ export const FULL_ACCESS_EMAILS = new Set([
   // komma åt funktionerna".
   'review@applabbet.com',
 ])
+
+/**
+ * TestFlight- och Play-testare, kommaseparerade i env.
+ *
+ * Utan undantaget får en testare sju dagar och möter sedan betalväggen — som
+ * inte går att passera, eftersom köpflödet inte fungerar i native-appen än.
+ * Testningen tar längre tid än en vecka, så de skulle låsas ut mitt i.
+ *
+ * I env och inte i koden: listan ändras när testgruppen ändras, och det ska
+ * inte kräva en commit. Tom eller osatt variabel ⇒ inga extra konton.
+ */
+function testerEmails(env: Env): Set<string> {
+  return new Set(
+    (env.TESTER_EMAILS ?? '')
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean)
+  )
+}
+
+/** Har kontot permanent åtkomst, antingen som ägare/granskare eller som testare? */
+export function hasFullAccess(email: string | undefined, env: Env): boolean {
+  if (!email) return false
+  const normalized = email.toLowerCase()
+  return FULL_ACCESS_EMAILS.has(normalized) || testerEmails(env).has(normalized)
+}
 
 export interface AccessStatus {
   access: boolean
@@ -38,7 +71,7 @@ export interface AccessStatus {
 // → active subscription → 7-day signup trial. Used by both /billing/status and
 // the requireAccess middleware so the server enforces the same rule the UI shows.
 export async function resolveAccess(user: JwtPayload, env: Env): Promise<AccessStatus> {
-  if (user.email && FULL_ACCESS_EMAILS.has(user.email.toLowerCase())) {
+  if (hasFullAccess(user.email, env)) {
     return {
       access: true,
       premium: true,

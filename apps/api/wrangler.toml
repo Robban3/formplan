@@ -25,6 +25,13 @@ AI_PROVIDER = "gemini"
 # STRIPE_WEBHOOK_SECRET
 # RESEND_API_KEY
 # WEBHOOK_SECRET
+# TESTER_EMAILS         # valfri: kommaseparerad lista med testaradresser som
+#                       # får permanent åtkomst (kringgår provperiod och
+#                       # betalvägg). Finns i env och inte i koden eftersom
+#                       # testgruppen ändras — och för att privatpersoners
+#                       # adresser inte ska ligga kvar i git-historiken.
+#                       # Sätts i Cloudflare-dashboarden under Workers &
+#                       # Pages → formplan-api → Settings → Variables.
 # ADMIN_EMAILS          # valfri: kommaseparerad lista med admin-mejladresser
 #                       # (t.ex. "anna@formplan.app,bo@formplan.app") som får
 #                       # använda admin-endpoints som /email/newsletter.
