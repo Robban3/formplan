@@ -7,37 +7,36 @@ import {
 } from '../lib/authRecovery'
 import { authRedirectUrl, isNativeApp, openExternalAuth } from '../lib/authRedirect'
 import { toast } from '../lib/toast'
-import { LINK_EXPIRED } from '../lib/texts'
+import { useT } from '../hooks/useT'
+import type { TranslateFn } from '../lib/i18n'
 
 /**
- * Samma svar oavsett om adressen har ett konto eller inte — annars går det att
- * ta reda på vilka e-postadresser som är registrerade.
+ * Översätt de vanligaste GoTrue-felen.
+ *
+ * Mönstren matchar GoTrues ENGELSKA meddelanden och ändras inte med språket —
+ * det är serverns text, inte vår. Bara svaret översätts, så `t` skickas in.
  */
-const NEUTRAL_SIGNUP_NOTICE =
-  'Om adressen inte redan är registrerad får du ett bekräftelsemejl. Har du redan ett konto — logga in.'
-
-/** Översätt de vanligaste GoTrue-felen till svenska. */
-export function translateAuthError(msg: string): string {
+export function translateAuthError(msg: string, t: TranslateFn): string {
   const m = msg.toLowerCase()
   // Fel lösenord, okänd adress och obekräftad adress måste ge EXAKT samma svar —
   // annars går det att ta reda på vilka e-postadresser som har konto. Hjälpen om
   // bekräftelsemejlet ligger därför i samma text som fel lösenord ger.
   if (m.includes('invalid login') || m.includes('email not confirmed'))
-    return 'Fel e-post eller lösenord. Har du precis skapat kontot behöver du först bekräfta det via mejlet.'
+    return t('auth.err.invalidLogin')
   // Samma neutrala besked som vid lyckad registrering (se isObfuscatedExistingUser).
   if (m.includes('already registered') || m.includes('already been registered'))
-    return NEUTRAL_SIGNUP_NOTICE
+    return t('auth.neutralSignupNotice')
   // Länken är använd/utgången, eller sessionen hann rensas innan formuläret
   // skickades. Skulle annars visas rått på engelska ("Auth session missing!").
   if (m.includes('session missing') || m.includes('session_not_found') || m.includes('session not found'))
-    return 'Länken är inte längre giltig. Begär en ny återställningslänk.'
+    return t('auth.err.linkInvalid')
   // GoTrues egen throttling ("For security purposes, you can only request this
   // after 47 seconds") — skulle annars visas rå på engelska.
   if (m.includes('for security purposes') || m.includes('only request this'))
-    return 'Vänta en liten stund innan du försöker igen.'
-  if (m.includes('rate limit') || m.includes('too many')) return 'För många försök — vänta en stund och försök igen.'
+    return t('auth.err.throttled')
+  if (m.includes('rate limit') || m.includes('too many')) return t('auth.err.tooMany')
   if (m.includes('known to be weak') || m.includes('pwned'))
-    return 'Lösenordet finns i kända dataläckor — välj ett annat.'
+    return t('auth.err.pwned')
   // Kravet på lösenordet sätts i projektets Supabase-inställningar (längd,
   // teckenklasser). Påstå därför ALDRIG en siffra här — säg att kraven inte är
   // uppfyllda och visa serverns egen beskrivning.
@@ -47,7 +46,7 @@ export function translateAuthError(msg: string): string {
     m.includes('one character of each') ||
     m.includes('weak password')
   ) {
-    return `Lösenordet uppfyller inte kraven. ${msg}`
+    return t('auth.err.weakPassword', { detail: msg })
   }
   return msg
 }
@@ -68,6 +67,7 @@ const MIN_PASSWORD_LENGTH = (() => {
 })()
 
 export function AuthPage() {
+  const { t } = useT()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [mode, setMode] = useState<'password' | 'magic'>('password')
@@ -105,8 +105,8 @@ export function AuthPage() {
     if (!code && !description) return
     setError(
       code === 'otp_expired' || /expired|invalid/i.test(description ?? '')
-        ? LINK_EXPIRED
-        : translateAuthError(description ?? 'Länken kunde inte verifieras.')
+        ? t('auth.linkExpired')
+        : translateAuthError(description ?? t('auth.err.linkUnverified'), t)
     )
     // Rensa hashen så felet inte kommer tillbaka vid navigering i appen.
     window.history.replaceState(null, '', window.location.pathname + window.location.search)
@@ -115,7 +115,7 @@ export function AuthPage() {
   if (!supabaseConfigured) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0d1117] text-white">
-        <p className="text-red-400 text-sm">Inloggning är inte konfigurerad.</p>
+        <p className="text-red-400 text-sm">{t('auth.err.notConfigured')}</p>
       </div>
     )
   }
@@ -123,8 +123,8 @@ export function AuthPage() {
   /** auth-js kastar vidare allt som inte är ett AuthError (t.ex. blockerad storage). */
   function unexpected(e: unknown): string {
     return e instanceof Error
-      ? translateAuthError(e.message)
-      : 'Något gick fel. Försök igen.'
+      ? translateAuthError(e.message, t)
+      : t('auth.err.generic')
   }
 
   async function handleMagicLink(e: React.FormEvent) {
@@ -139,7 +139,7 @@ export function AuthPage() {
         email,
         options: { emailRedirectTo: redirectTo },
       })
-      if (error) setError(translateAuthError(error.message))
+      if (error) setError(translateAuthError(error.message, t))
       else setSent(true)
     } catch (err) {
       setError(unexpected(err))
@@ -166,7 +166,7 @@ export function AuthPage() {
           options: { emailRedirectTo: authRedirectUrl() },
         })
         if (error) {
-          setError(translateAuthError(error.message))
+          setError(translateAuthError(error.message, t))
           return
         }
         // Med Supabases skydd mot e-postuppräkning svarar en redan registrerad
@@ -175,18 +175,18 @@ export function AuthPage() {
         // fått användaren att vänta på ett mejl som aldrig kommer.
         if (isObfuscatedExistingUser(data.user)) {
           setNotice(
-            'Om adressen inte redan är registrerad får du ett bekräftelsemejl. Har du redan ett konto — logga in.'
+            t('auth.neutralSignupNotice')
           )
           return
         }
         // Ingen session ⇒ Supabase kräver e-postbekräftelse. Med session är
         // användaren redan inloggad och onAuthStateChange sköter redirect.
         if (!data.session) {
-          setNotice('Konto skapat! Kolla din e-post och bekräfta för att logga in.')
+          setNotice(t('auth.accountCreatedCheckMail'))
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
-        if (error) setError(translateAuthError(error.message))
+        if (error) setError(translateAuthError(error.message, t))
         // Vid lyckad inloggning triggar onAuthStateChange navigeringen.
       }
     } catch (err) {
@@ -202,7 +202,7 @@ export function AuthPage() {
     setError(null)
     setNotice(null)
     if (!email.trim()) {
-      setError('Fyll i din e-postadress först.')
+      setError(t('auth.needEmailFirst'))
       return
     }
     setLoading(true)
@@ -210,10 +210,10 @@ export function AuthPage() {
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: authRedirectUrl(),
       })
-      if (error) setError(translateAuthError(error.message))
+      if (error) setError(translateAuthError(error.message, t))
       else
         setNotice(
-          'Finns ett konto för adressen skickar vi en återställningslänk. Kolla inkorgen (och skräpposten).'
+          t('auth.resetSent')
         )
     } catch (err) {
       setError(unexpected(err))
@@ -236,13 +236,13 @@ export function AuthPage() {
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword })
       if (error) {
-        setError(translateAuthError(error.message))
+        setError(translateAuthError(error.message, t))
         return
       }
       setNewPassword('')
       // Sessionen är redan inloggad — släpp fram appen igen. Bekräftelsen visas
       // som toast eftersom sidan byts ut i samma ögonblick.
-      toast.success('Lösenordet är uppdaterat.')
+      toast.success(t('auth.passwordUpdated'))
       endPasswordRecovery()
     } catch (err) {
       setError(unexpected(err))
@@ -275,13 +275,13 @@ export function AuthPage() {
       // direkt — sidan står kvar synlig medan navigeringen sker. Släpp därför
       // INTE knappen på success-vägen, annars går det att starta en andra resa.
       if (error) {
-        setError(translateAuthError(error.message))
+        setError(translateAuthError(error.message, t))
         setGoogleLoading(false)
         return
       }
       if (native) {
         if (!data?.url) {
-          setError('Kunde inte öppna Google-inloggningen. Försök igen.')
+          setError(t('auth.err.googleFailed'))
           setGoogleLoading(false)
           return
         }
@@ -327,7 +327,7 @@ export function AuthPage() {
           {/* Hero text */}
           <div className="mb-16">
             <h1 className="font-extrabold leading-tight mb-4" style={{ fontSize: '44px' }}>
-              <span style={{ color: 'var(--brand)' }}>AI-genererat</span>{' '}
+              <span style={{ color: 'var(--brand)' }}>{t('auth.tagline')}</span>{' '}
               <span className="text-white">tränings-<br />&amp; kostschema</span>
             </h1>
             <p className="text-slate-300 text-base leading-relaxed max-w-sm">
@@ -358,12 +358,12 @@ export function AuthPage() {
                    Visa ingenting som kan ändra lösenordet förrän den är det. */
                 <div className="text-center py-6">
                   <div className="w-8 h-8 mx-auto mb-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <p className="text-slate-300 text-sm">Verifierar återställningslänken…</p>
+                  <p className="text-slate-300 text-sm">{t('auth.verifyingReset')}</p>
                 </div>
               ) : recovering ? (
                 /* Tillbaka via återställningslänken — sätt ett nytt lösenord. */
                 <form onSubmit={handleSetNewPassword} className="space-y-3">
-                  <h2 className="text-white text-2xl font-bold text-center mb-1">Nytt lösenord</h2>
+                  <h2 className="text-white text-2xl font-bold text-center mb-1">{t('auth.newPassword')}</h2>
                   <p className="text-slate-400 text-sm text-center mb-7">
                     Välj ett nytt lösenord för ditt konto.
                   </p>
@@ -374,7 +374,7 @@ export function AuthPage() {
                       </svg>
                     </div>
                     <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder={`Nytt lösenord (minst ${MIN_PASSWORD_LENGTH} tecken)`} required
+                      placeholder={t('auth.newPasswordPlaceholder', { min: MIN_PASSWORD_LENGTH })} required
                       minLength={MIN_PASSWORD_LENGTH} autoComplete="new-password" autoFocus
                       className="w-full pl-11 pr-4 py-4 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:outline-[var(--brand)] transition-all"
                       style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
@@ -384,7 +384,7 @@ export function AuthPage() {
                   <button type="submit" disabled={busy}
                     className="w-full flex items-center justify-center px-5 py-4 rounded-xl text-sm font-semibold text-slate-900 transition-all disabled:opacity-60"
                     style={{ background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%)' }}>
-                    {loading ? 'Sparar...' : 'Spara nytt lösenord'}
+                    {loading ? t('auth.saving') : t('auth.saveNewPassword')}
                   </button>
                   <p className="text-center text-xs text-slate-400 pt-1">
                     <button type="button"
@@ -397,10 +397,10 @@ export function AuthPage() {
               ) : (
                 <>
                   <h2 className="text-white text-2xl font-bold text-center mb-1">
-                    {isSignup ? 'Skapa konto' : 'Välkommen tillbaka'}
+                    {isSignup ? t('auth.createAccount') : t('auth.welcomeBack')}
                   </h2>
                   <p className="text-slate-400 text-sm text-center mb-7">
-                    {isSignup ? 'Kom igång på under en minut' : 'Logga in för att fortsätta din resa'}
+                    {isSignup ? t('auth.createAccountSub') : t('auth.signInSub')}
                   </p>
 
                   <button onClick={handleGoogle} disabled={busy}
@@ -411,7 +411,7 @@ export function AuthPage() {
                       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
-                    {googleLoading ? 'Öppnar Google…' : 'Fortsätt med Google'}
+                    {googleLoading ? t('auth.openingGoogle') : t('auth.continueWithGoogle')}
                   </button>
 
                   <div className="relative mb-5">
@@ -419,7 +419,7 @@ export function AuthPage() {
                       <div className="w-full border-t border-white/10" />
                     </div>
                     <div className="relative flex justify-center text-xs">
-                      <span className="px-3 text-slate-500" style={{ background: 'transparent' }}>eller</span>
+                      <span className="px-3 text-slate-500" style={{ background: 'transparent' }}>{t('auth.or')}</span>
                     </div>
                   </div>
 
@@ -433,7 +433,7 @@ export function AuthPage() {
                         className="flex-1 py-2 rounded-lg text-xs font-semibold transition-colors"
                         style={mode === m ? { background: 'var(--brand)', color: '#0f172a' } : { color: '#cbd5e1' }}
                       >
-                        {m === 'password' ? 'Lösenord' : 'Magisk länk'}
+                        {t(m === 'password' ? 'auth.tabPassword' : 'auth.tabMagicLink')}
                       </button>
                     ))}
                   </div>
@@ -447,7 +447,7 @@ export function AuthPage() {
                           </svg>
                         </div>
                         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                          placeholder="din@epost.se" required autoComplete="email"
+                          placeholder={t('auth.emailPlaceholder')} required autoComplete="email"
                           className="w-full pl-11 pr-4 py-4 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:outline-[var(--brand)] transition-all"
                           style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
                         />
@@ -459,7 +459,7 @@ export function AuthPage() {
                           </svg>
                         </div>
                         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                          placeholder={`Lösenord (minst ${MIN_PASSWORD_LENGTH} tecken)`} required
+                          placeholder={t('auth.passwordWithMin', { min: MIN_PASSWORD_LENGTH })} required
                           minLength={MIN_PASSWORD_LENGTH}
                           autoComplete={isSignup ? 'new-password' : 'current-password'}
                           className="w-full pl-11 pr-4 py-4 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:outline-[var(--brand)] transition-all"
@@ -470,7 +470,7 @@ export function AuthPage() {
                         <p className="text-right">
                           <button type="button" onClick={handleForgotPassword} disabled={busy}
                             className="text-xs text-slate-400 hover:text-slate-200 disabled:opacity-60 underline">
-                            Glömt lösenord?
+                            {t('auth.forgotPassword')}
                           </button>
                         </p>
                       )}
@@ -479,14 +479,14 @@ export function AuthPage() {
                       <button type="submit" disabled={busy}
                         className="w-full flex items-center justify-center px-5 py-4 rounded-xl text-sm font-semibold text-slate-900 transition-all disabled:opacity-60"
                         style={{ background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%)' }}>
-                        {loading ? (isSignup ? 'Skapar konto...' : 'Loggar in...') : (isSignup ? 'Skapa konto' : 'Logga in')}
+                        {loading ? (isSignup ? t('auth.creatingAccount') : t('auth.signingIn')) : (isSignup ? t('auth.createAccount') : t('auth.signIn'))}
                       </button>
                       <p className="text-center text-xs text-slate-400 pt-1">
-                        {isSignup ? 'Har du redan ett konto? ' : 'Har du inget konto? '}
+                        {isSignup ? t('auth.haveAccount') : t('auth.noAccount')}{' '}
                         <button type="button"
                           onClick={() => { setIsSignup(!isSignup); resetFormState() }}
                           className="font-semibold" style={{ color: 'var(--brand)' }}>
-                          {isSignup ? 'Logga in' : 'Skapa konto'}
+                          {isSignup ? t('auth.signIn') : t('auth.createAccount')}
                         </button>
                       </p>
                     </form>
@@ -495,7 +495,7 @@ export function AuthPage() {
                        låstes hela kortet (även lägesväljaren) tills sidan
                        laddades om. */
                     <div className="text-center py-2">
-                      <p className="text-white font-semibold text-lg mb-2">Kolla din e-post!</p>
+                      <p className="text-white font-semibold text-lg mb-2">{t('auth.checkYourMail')}</p>
                       <p className="text-slate-400 text-sm">Vi skickade en inloggningslänk till {email}</p>
                       <button type="button"
                         onClick={() => { setSent(false); setEmail(''); setError(null); setNotice(null) }}
@@ -512,7 +512,7 @@ export function AuthPage() {
                           </svg>
                         </div>
                         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                          placeholder="din@epost.se" required autoComplete="email"
+                          placeholder={t('auth.emailPlaceholder')} required autoComplete="email"
                           className="w-full pl-11 pr-4 py-4 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:outline-[var(--brand)] transition-all"
                           style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
                         />
@@ -522,7 +522,7 @@ export function AuthPage() {
                       <button type="submit" disabled={busy}
                         className="w-full flex items-center justify-between px-5 py-4 rounded-xl text-sm font-semibold text-slate-900 transition-all disabled:opacity-60"
                         style={{ background: 'linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%)' }}>
-                        <span>{loading ? 'Skickar...' : 'Skicka inloggningslänk'}</span>
+                        <span>{loading ? t('auth.sending') : t('auth.sendMagicLink')}</span>
                         {!loading && (
                           <svg className="w-4 h-4 stroke-slate-900" fill="none" viewBox="0 0 24 24" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
@@ -536,7 +536,7 @@ export function AuthPage() {
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                     </svg>
-                    Säker och krypterad inloggning
+                    {t('auth.secureNotice')}
                   </div>
                 </>
               )}
@@ -550,11 +550,11 @@ export function AuthPage() {
       <div className="relative z-10 border-t px-6 py-5 hidden sm:block lg:px-10" style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.5)' }}>
         <div className="flex items-start justify-between gap-4 lg:gap-6 max-w-5xl mx-auto overflow-x-auto lg:overflow-visible">
           {[
-            { d: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z', title: 'Sparar tid', desc: 'AI skapar ditt schema på några sekunder' },
-            { d: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z', title: '100% personligt', desc: 'Anpassat efter dina mål, förutsättningar och preferenser' },
-            { d: 'M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941', title: 'Baserat på forskning', desc: 'Vetenskapliga metoder för maximala resultat' },
-            { d: 'M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z', title: 'Säkert & tryggt', desc: 'Din data är alltid skyddad' },
-            { d: 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z', title: 'Byggt för resultat', desc: 'Fokus på långsiktiga resultat' },
+            { d: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z', title: t('landing.savesTime'), desc: t('landing.savesTimeDesc') },
+            { d: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z', title: t('landing.personal'), desc: t('landing.personalDesc') },
+            { d: 'M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941', title: t('landing.research'), desc: t('landing.researchDesc') },
+            { d: 'M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z', title: t('landing.secure'), desc: t('landing.secureDesc') },
+            { d: 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z', title: t('landing.results'), desc: t('landing.resultsDesc') },
           ].map((f) => (
             <div key={f.title} className="flex items-start gap-3 flex-1">
               <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"

@@ -6,6 +6,8 @@ import { toast } from '../lib/toast'
 import { toastIfNotNetwork } from '../lib/errors'
 import { settingsStore } from '../lib/settings'
 import { useUnits } from '../hooks/useUnits'
+import { useT } from '../hooks/useT'
+import type { TextKey } from '../lib/i18n'
 import {
   clearOnboardingDraft,
   EMPTY_ONBOARDING_FORM,
@@ -34,39 +36,56 @@ type IconComponent = React.ComponentType<{ className?: string }>
 
 const STEPS: Step[] = ['goal', 'level', 'equipment', 'schedule', 'diet', 'body']
 
-const STEP_LABELS: Record<Step, string> = {
-  goal: 'Ditt mål',
-  level: 'Erfarenhet',
-  equipment: 'Utrustning',
-  schedule: 'Schema',
-  diet: 'Kost',
-  body: 'Om dig',
+const STEP_LABEL_KEYS: Record<Step, TextKey> = {
+  goal: 'onb.step.goal',
+  level: 'onb.step.level',
+  equipment: 'onb.step.equipment',
+  schedule: 'onb.step.schedule',
+  diet: 'onb.step.diet',
+  body: 'onb.step.body',
 }
 
-const GOALS: { value: string; label: string; desc: string; Icon: IconComponent; iconBg: string; iconStroke: string }[] = [
-  { value: 'lose_weight', label: 'Gå ner i vikt', desc: 'Fettförbränning & deficit', Icon: FireIcon, iconBg: 'bg-orange-50', iconStroke: 'stroke-orange-500' },
-  { value: 'build_muscle', label: 'Bygga muskler', desc: 'Styrka & hypertrofi', Icon: DumbbellIcon, iconBg: 'bg-forest-50 dark:bg-forest-900/30', iconStroke: 'stroke-forest-600' },
-  { value: 'maintain', label: 'Hålla formen', desc: 'Balans & välmående', Icon: TargetIcon, iconBg: 'bg-purple-50', iconStroke: 'stroke-purple-500' },
-  { value: 'improve_endurance', label: 'Förbättra kondition', desc: 'Uthållighet & puls', Icon: HeartIcon, iconBg: 'bg-rose-50', iconStroke: 'stroke-rose-500' },
+/** `value` lagras i profilen; etikett och underrubrik kommer ur ordlistan. */
+const GOALS: { value: string; labelKey: TextKey; descKey: TextKey; Icon: IconComponent; iconBg: string; iconStroke: string }[] = [
+  { value: 'lose_weight', labelKey: 'goal.lose_weight', descKey: 'onb.goal.lose_weight.desc', Icon: FireIcon, iconBg: 'bg-orange-50', iconStroke: 'stroke-orange-500' },
+  { value: 'build_muscle', labelKey: 'goal.build_muscle', descKey: 'onb.goal.build_muscle.desc', Icon: DumbbellIcon, iconBg: 'bg-forest-50 dark:bg-forest-900/30', iconStroke: 'stroke-forest-600' },
+  { value: 'maintain', labelKey: 'goal.maintain', descKey: 'onb.goal.maintain.desc', Icon: TargetIcon, iconBg: 'bg-purple-50', iconStroke: 'stroke-purple-500' },
+  { value: 'improve_endurance', labelKey: 'goal.improve_endurance', descKey: 'onb.goal.improve_endurance.desc', Icon: HeartIcon, iconBg: 'bg-rose-50', iconStroke: 'stroke-rose-500' },
 ]
 
-const LEVELS = [
-  { value: 'beginner', label: 'Nybörjare', desc: '0–1 år träning' },
-  { value: 'intermediate', label: 'Mellannivå', desc: '1–3 år träning' },
-  { value: 'advanced', label: 'Avancerad', desc: '3+ år träning' },
+const LEVELS: { value: string; labelKey: TextKey; descKey: TextKey }[] = [
+  { value: 'beginner', labelKey: 'level.beginner', descKey: 'onb.level.beginner.desc' },
+  { value: 'intermediate', labelKey: 'level.intermediate', descKey: 'onb.level.intermediate.desc' },
+  { value: 'advanced', labelKey: 'level.advanced', descKey: 'onb.level.advanced.desc' },
 ]
 
-const EQUIPMENT_OPTIONS = [
-  'Gym (fullutrustat)',
-  'Hantlar',
-  'Skivstång',
-  'Gummiband',
-  'Chin-up stång',
-  'Kettlebells',
-  'Inga redskap (kroppsvikt)',
+/**
+ * Utrustning och allergier LAGRAS som de här svenska strängarna i
+ * fitness_profile, och skickas vidare till AI:n när schemat genereras.
+ * Värdena får därför inte översättas — befintliga profiler skulle slutta
+ * matcha och AI:n få andra ord än den är promptad för. Bara etiketten
+ * översätts.
+ */
+const EQUIPMENT_OPTIONS: { value: string; key: TextKey }[] = [
+  { value: 'Gym (fullutrustat)', key: 'equip.gym' },
+  { value: 'Hantlar', key: 'equip.dumbbells' },
+  { value: 'Skivstång', key: 'equip.barbell' },
+  { value: 'Gummiband', key: 'equip.bands' },
+  { value: 'Chin-up stång', key: 'equip.pullupBar' },
+  { value: 'Kettlebells', key: 'equip.kettlebells' },
+  { value: 'Inga redskap (kroppsvikt)', key: 'equip.bodyweight' },
 ]
 
-const ALLERGY_OPTIONS = ['Gluten', 'Laktos', 'Nötter', 'Ägg', 'Fisk', 'Soja', 'Vegetarian', 'Vegan']
+const ALLERGY_OPTIONS: { value: string; key: TextKey }[] = [
+  { value: 'Gluten', key: 'allergy.gluten' },
+  { value: 'Laktos', key: 'allergy.lactose' },
+  { value: 'Nötter', key: 'allergy.nuts' },
+  { value: 'Ägg', key: 'allergy.eggs' },
+  { value: 'Fisk', key: 'allergy.fish' },
+  { value: 'Soja', key: 'allergy.soy' },
+  { value: 'Vegetarian', key: 'allergy.vegetarian' },
+  { value: 'Vegan', key: 'allergy.vegan' },
+]
 
 function PrimaryButton({ children, onClick, disabled }: { children: React.ReactNode; onClick: () => void; disabled?: boolean }) {
   return (
@@ -83,6 +102,7 @@ function PrimaryButton({ children, onClick, disabled }: { children: React.ReactN
 
 export function OnboardingPage() {
   const units = useUnits()
+  const { t } = useT()
   const navigate = useNavigate()
   const [step, setStep] = useState<Step>('goal')
   const [saving, setSaving] = useState(false)
@@ -177,19 +197,19 @@ export function OnboardingPage() {
       sessionStorage.setItem('formplan_plan_id', planId)
       navigate(`/plan/${planId}`)
     } catch (e) {
-      toast.error((e as Error).message || 'Kunde inte öppna testschema')
+      toast.error((e as Error).message || t('onb.err.mockPlan'))
       setSaving(false)
     }
   }
 
   async function submit() {
     if (!form.goal || !form.level) {
-      toast.error('Välj mål och träningsnivå innan du skapar schema.')
+      toast.error(t('onb.err.needGoalLevel'))
       setStep(!form.goal ? 'goal' : 'level')
       return
     }
     if (form.equipment.length === 0) {
-      toast.error('Välj minst en utrustningstyp.')
+      toast.error(t('onb.err.needEquipment'))
       setStep('equipment')
       return
     }
@@ -239,7 +259,7 @@ export function OnboardingPage() {
               type="button"
               onClick={back}
               className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700 active:bg-stone-200 dark:active:bg-stone-700 transition-colors"
-              aria-label="Tillbaka"
+              aria-label={t('onb.back')}
             >
               <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
             </button>
@@ -248,16 +268,16 @@ export function OnboardingPage() {
               type="button"
               onClick={() => navigate('/auth')}
               className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700 active:bg-stone-200 dark:active:bg-stone-700 transition-colors"
-              aria-label="Avbryt"
+              aria-label={t('onb.cancel')}
             >
               <ChevronLeftIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400" />
             </button>
           )}
           <div className="flex-1 text-center">
             <p className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide">
-              Steg {stepIndex + 1} av {STEPS.length}
+              {t('onb.stepOf', { n: stepIndex + 1, total: STEPS.length })}
             </p>
-            <h1 className="text-lg font-bold text-stone-900 dark:text-stone-100">{STEP_LABELS[step]}</h1>
+            <h1 className="text-lg font-bold text-stone-900 dark:text-stone-100">{t(STEP_LABEL_KEYS[step])}</h1>
           </div>
           <div className="w-8" />
         </div>
@@ -288,10 +308,10 @@ export function OnboardingPage() {
           </div>
         ) : step === 'goal' ? (
           <div>
-            <h2 className="text-2xl font-bold mb-1">Vad är ditt mål?</h2>
-            <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Vi anpassar schemat efter detta.</p>
+            <h2 className="text-2xl font-bold mb-1">{t('onb.q.goal')}</h2>
+            <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">{t('onb.q.goalSub')}</p>
             <div className="grid grid-cols-2 gap-3">
-              {GOALS.map(({ value, label, desc, Icon, iconBg, iconStroke }) => (
+              {GOALS.map(({ value, labelKey, descKey, Icon, iconBg, iconStroke }) => (
                 <button
                   key={value}
                   type="button"
@@ -306,8 +326,8 @@ export function OnboardingPage() {
                     <Icon className={`w-5 h-5 ${iconStroke}`} />
                   </div>
                   <div>
-                    <span className="font-semibold text-sm text-stone-900 dark:text-stone-100 block">{label}</span>
-                    <span className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 block">{desc}</span>
+                    <span className="font-semibold text-sm text-stone-900 dark:text-stone-100 block">{t(labelKey)}</span>
+                    <span className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 block">{t(descKey)}</span>
                   </div>
                 </button>
               ))}
@@ -315,8 +335,8 @@ export function OnboardingPage() {
           </div>
         ) : step === 'level' ? (
           <div>
-            <h2 className="text-2xl font-bold mb-1">Träningserfarenhet?</h2>
-            <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Välj den nivå som stämmer bäst.</p>
+            <h2 className="text-2xl font-bold mb-1">{t('onb.q.level')}</h2>
+            <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">{t('onb.q.levelSub')}</p>
             <div className="space-y-3">
               {LEVELS.map((l) => (
                 <button
@@ -329,24 +349,24 @@ export function OnboardingPage() {
                       : 'border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800'
                   }`}
                 >
-                  <span className="font-semibold text-stone-900 dark:text-stone-100">{l.label}</span>
-                  <span className="text-stone-500 dark:text-stone-400 text-sm">{l.desc}</span>
+                  <span className="font-semibold text-stone-900 dark:text-stone-100">{t(l.labelKey)}</span>
+                  <span className="text-stone-500 dark:text-stone-400 text-sm">{t(l.descKey)}</span>
                 </button>
               ))}
             </div>
           </div>
         ) : step === 'equipment' ? (
           <div>
-            <h2 className="text-2xl font-bold mb-1">Tillgänglig utrustning?</h2>
-            <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Välj allt som stämmer.</p>
+            <h2 className="text-2xl font-bold mb-1">{t('onb.q.equipment')}</h2>
+            <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">{t('onb.q.equipmentSub')}</p>
             <div className="space-y-2 mb-6">
               {EQUIPMENT_OPTIONS.map((eq) => {
-                const selected = form.equipment.includes(eq)
+                const selected = form.equipment.includes(eq.value)
                 return (
                   <button
-                    key={eq}
+                    key={eq.value}
                     type="button"
-                    onClick={() => toggle('equipment', eq)}
+                    onClick={() => toggle('equipment', eq.value)}
                     className={`w-full flex items-center gap-3 p-4 rounded-2xl border transition-all ${
                       selected
                         ? 'border-forest-600 bg-forest-50 dark:bg-forest-900/30'
@@ -358,19 +378,19 @@ export function OnboardingPage() {
                     }`}>
                       {selected && <CheckIcon className="w-3 h-3 stroke-white" />}
                     </div>
-                    <span className="text-sm text-stone-800 dark:text-stone-200 text-left">{eq}</span>
+                    <span className="text-sm text-stone-800 dark:text-stone-200 text-left">{t(eq.key)}</span>
                   </button>
                 )
               })}
             </div>
             <PrimaryButton onClick={next} disabled={form.equipment.length === 0}>
-              Fortsätt
+              {t('onb.continue')}
             </PrimaryButton>
           </div>
         ) : step === 'schedule' ? (
           <div>
-            <h2 className="text-2xl font-bold mb-1">Hur många dagar per vecka?</h2>
-            <p className="text-stone-500 dark:text-stone-400 text-sm mb-8">Välj hur ofta du vill träna.</p>
+            <h2 className="text-2xl font-bold mb-1">{t('onb.q.days')}</h2>
+            <p className="text-stone-500 dark:text-stone-400 text-sm mb-8">{t('onb.q.daysSub')}</p>
             <div className="grid grid-cols-7 gap-2 mb-8">
               {[1, 2, 3, 4, 5, 6, 7].map((d) => (
                 <button
@@ -390,30 +410,30 @@ export function OnboardingPage() {
             <p className="text-center text-sm text-stone-500 dark:text-stone-400 mb-6">
               {form.days_per_week} pass per vecka
             </p>
-            <PrimaryButton onClick={next}>Fortsätt</PrimaryButton>
+            <PrimaryButton onClick={next}>{t('onb.continue')}</PrimaryButton>
           </div>
         ) : step === 'diet' ? (
           <div>
-            <h2 className="text-2xl font-bold mb-1">Allergier eller kostrestriktioner?</h2>
-            <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Valfritt — hoppa över om inga.</p>
+            <h2 className="text-2xl font-bold mb-1">{t('onb.q.allergies')}</h2>
+            <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">{t('onb.q.allergiesSub')}</p>
             <div className="flex flex-wrap gap-2 mb-6">
               {ALLERGY_OPTIONS.map((a) => (
                 <button
-                  key={a}
+                  key={a.value}
                   type="button"
-                  onClick={() => toggle('allergies', a)}
+                  onClick={() => toggle('allergies', a.value)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    form.allergies.includes(a)
+                    form.allergies.includes(a.value)
                       ? 'bg-forest-700 text-white'
                       : 'bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700'
                   }`}
                 >
-                  {a}
+                  {t(a.key)}
                 </button>
               ))}
             </div>
             <PrimaryButton onClick={next}>
-              {form.allergies.length === 0 ? 'Hoppa över' : 'Fortsätt'}
+              {form.allergies.length === 0 ? t('onb.skip') : t('onb.continue')}
             </PrimaryButton>
           </div>
         ) : step === 'body' ? (
@@ -425,18 +445,18 @@ export function OnboardingPage() {
             <div className="space-y-4 mb-6">
               {([
                 {
-                  key: 'age' as const, label: 'Ålder', placeholder: 't.ex. 30', unit: 'år',
+                  key: 'age' as const, label: t('onb.field.age'), placeholder: 't.ex. 30', unit: 'år',
                   min: AGE_MIN_YEARS, max: AGE_MAX_YEARS, step: 1,
                   display: (v: number) => v, store: (v: number) => v,
                 },
                 {
-                  key: 'weight_kg' as const, label: 'Vikt', unit: units.weightLabel,
+                  key: 'weight_kg' as const, label: t('onb.field.weight'), unit: units.weightLabel,
                   placeholder: `t.ex. ${units.toDisplay(75)}`,
                   min: Math.floor(units.toDisplay(WEIGHT_MIN_KG)), max: Math.ceil(units.toDisplay(WEIGHT_MAX_KG)), step: WEIGHT_STEP_KG,
                   display: units.toDisplay, store: units.toStore,
                 },
                 {
-                  key: 'height_cm' as const, label: 'Längd', unit: units.lengthLabel,
+                  key: 'height_cm' as const, label: t('onb.field.height'), unit: units.lengthLabel,
                   placeholder: `t.ex. ${units.toDisplayLength(175)}`,
                   min: Math.floor(units.toDisplayLength(HEIGHT_MIN_CM)), max: Math.ceil(units.toDisplayLength(HEIGHT_MAX_CM)), step: HEIGHT_STEP_CM,
                   display: units.toDisplayLength, store: units.toStoreLength,
@@ -472,7 +492,7 @@ export function OnboardingPage() {
               ))}
 
               <div>
-                <label htmlFor="calorie_goal" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">Kalorimål</label>
+                <label htmlFor="calorie_goal" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">{t('onb.calorieGoal')}</label>
                 <div className="flex items-center gap-2">
                   <input
                     id="calorie_goal"
@@ -481,7 +501,7 @@ export function OnboardingPage() {
                     min={800}
                     max={10000}
                     step={50}
-                    placeholder="Lämna tomt = auto"
+                    placeholder={t('onb.caloriePlaceholder')}
                     value={form.calorie_goal ?? ''}
                     onChange={(e) => {
                       const raw = e.target.value
@@ -493,7 +513,7 @@ export function OnboardingPage() {
                   />
                   <span className="text-sm text-stone-500 dark:text-stone-400 w-8 shrink-0">kcal</span>
                 </div>
-                <p className="text-xs text-stone-500 dark:text-stone-400 mt-1.5">Tomt fält räknas ut automatiskt utifrån mål och kropp.</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-1.5">{t('onb.calorieHint')}</p>
               </div>
             </div>
 
@@ -505,7 +525,7 @@ export function OnboardingPage() {
                     Genererar ditt schema…
                   </span>
                 ) : (
-                  'Skapa mitt schema'
+                  t('onb.createPlan')
                 )}
               </PrimaryButton>
               <button
@@ -514,7 +534,7 @@ export function OnboardingPage() {
                 disabled={saving}
                 className="w-full text-sm text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 py-2 disabled:opacity-50"
               >
-                Hoppa över och skapa schema
+                {t('onb.skipAndCreate')}
               </button>
 
               {import.meta.env.DEV && (
@@ -523,7 +543,7 @@ export function OnboardingPage() {
                     Testschema (dev)
                   </p>
                   <div className="grid grid-cols-2 gap-2">
-                    {GOALS.map(({ value, label, desc, Icon, iconBg, iconStroke }) => (
+                    {GOALS.map(({ value, labelKey, descKey, Icon, iconBg, iconStroke }) => (
                       <button
                         key={value}
                         type="button"
@@ -535,8 +555,8 @@ export function OnboardingPage() {
                           <Icon className={`w-4 h-4 ${iconStroke}`} />
                         </div>
                         <div>
-                          <span className="font-semibold text-xs text-stone-800 dark:text-stone-200 block">{label}</span>
-                          <span className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5 block leading-tight">{desc}</span>
+                          <span className="font-semibold text-xs text-stone-800 dark:text-stone-200 block">{t(labelKey)}</span>
+                          <span className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5 block leading-tight">{t(descKey)}</span>
                         </div>
                       </button>
                     ))}
