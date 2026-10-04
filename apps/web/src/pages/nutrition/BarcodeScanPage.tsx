@@ -7,11 +7,14 @@ import { getCustomFood, saveCustomFood } from '../../lib/customFoods'
 import { nutritionApi, toMealSlot, type MealSlot } from '../../lib/nutritionApi'
 import { dateKey } from '../../lib/derive'
 import { toast } from '../../lib/toast'
-import { MEAL_SLOT_LABELS as SLOT_LABELS } from '../../lib/texts'
+import { mealSlotLabels } from '../../lib/texts'
 import { GENERIC_ERROR, BUSY_ADDING } from '../../lib/texts'
 import { NUTRITION_BASIS_G } from '../../lib/constants'
+import { useT } from '../../hooks/useT'
 
 export function BarcodeScanPage() {
+  const { t } = useT()
+  const SLOT_LABELS = mealSlotLabels(t)
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const slot = toMealSlot(params.get('slot'))
@@ -54,7 +57,7 @@ export function BarcodeScanPage() {
       })
       .catch(() => {
         if (!cancelled) {
-          setError('Kunde inte starta kameran. Tillåt kameraåtkomst eller ange streckkoden manuellt nedan.')
+          setError(t('barcode.cameraFailed'))
           setScanning(false)
         }
       })
@@ -183,7 +186,7 @@ export function BarcodeScanPage() {
         {looking && (
           <div className="flex items-center justify-center gap-2 py-4 text-sm text-stone-500 dark:text-stone-400">
             <div className="w-5 h-5 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
-            Söker produkt…
+            {t('barcode.searching')}
           </div>
         )}
 
@@ -194,7 +197,7 @@ export function BarcodeScanPage() {
             svenska sortimentet, särskilt butikernas egna märken. */}
         {unknownCode && (
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
-            <p className="font-semibold text-stone-900 dark:text-stone-100">Varan finns inte i databasen</p>
+            <p className="font-semibold text-stone-900 dark:text-stone-100">{t('barcode.notInDatabase')}</p>
             <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
               Streckkod {unknownCode}. Skriv av näringsvärdena från paketet så sparas varan
               på den här enheten och fylls i automatiskt nästa gång du skannar den.
@@ -204,16 +207,16 @@ export function BarcodeScanPage() {
               <input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="Namn, t.ex. Köttbullar"
+                placeholder={t('barcode.namePlaceholder')}
                 className="w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-800 dark:text-stone-200 outline-none focus:ring-2 focus:ring-forest-400"
               />
               <input
                 value={form.brand}
                 onChange={(e) => setForm({ ...form, brand: e.target.value })}
-                placeholder="Märke (valfritt)"
+                placeholder={t('barcode.brandPlaceholder')}
                 className="w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-800 dark:text-stone-200 outline-none focus:ring-2 focus:ring-forest-400"
               />
-              <p className="text-xs font-medium text-stone-500 dark:text-stone-400 pt-1">Per 100 g</p>
+              <p className="text-xs font-medium text-stone-500 dark:text-stone-400 pt-1">{t('food.per100gShort')}</p>
               <div className="grid grid-cols-2 gap-2">
                 {([
                   ['kcal', 'Kalorier'],
@@ -238,7 +241,7 @@ export function BarcodeScanPage() {
               disabled={!form.name.trim() || !form.kcal.trim()}
               className="w-full mt-4 bg-forest-700 hover:bg-forest-800 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60"
             >
-              Spara varan
+              {t('barcode.saveProduct')}
             </button>
           </div>
         )}

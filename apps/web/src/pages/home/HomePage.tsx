@@ -29,7 +29,7 @@ import {
 } from '../../components/ui/Icons'
 import { WorkoutHero } from '../../components/training/WorkoutHero'
 import type { ComponentType } from 'react'
-import { MEAL_SLOT_LABELS as MEAL_LABELS } from '../../lib/texts'
+import { mealSlotLabels } from '../../lib/texts'
 import { WATER_QUICK_ADD_ML } from '../../lib/constants'
 
 const STEPS_GOAL = 10_000
@@ -214,6 +214,7 @@ export function HomePage() {
   const settings = useSettings()
   const { formatVolume, toDisplay, weightLabel } = useUnits()
   const { t, locale } = useT()
+  const MEAL_LABELS = mealSlotLabels(t)
   const activeWorkout = useWorkoutStore()
   const [loading, setLoading] = useState(true)
   const [todayWorkout, setTodayWorkout] = useState<WorkoutDay | null>(null)

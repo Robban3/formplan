@@ -168,7 +168,7 @@ export function MeasurementsPage() {
       <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-3">
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
-          Mer
+          {t('nav.more')}
         </button>
         <div className="flex items-center justify-between">
           <div>

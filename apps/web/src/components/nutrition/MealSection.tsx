@@ -1,7 +1,8 @@
 import type { FoodLogEntry, MealSlot } from '../../lib/nutritionApi'
 import { PlusIcon } from '../ui/Icons'
 import { MealRecipeGenerator } from './MealRecipeGenerator'
-import { MEAL_SLOT_LABELS as SLOT_LABELS } from '../../lib/texts'
+import { mealSlotLabels } from '../../lib/texts'
+import { useT } from '../../hooks/useT'
 
 const SLOT_COLORS: Record<MealSlot, string> = {
   frukost: 'bg-amber-100 dark:bg-amber-900/35 text-amber-700 dark:text-amber-300',
@@ -29,6 +30,8 @@ interface Props {
 }
 
 export function MealSection({ slot, entries, date, onAdd, onTapEntry, onLogged }: Props) {
+  const { t } = useT()
+  const SLOT_LABELS = mealSlotLabels(t)
   const totalKcal = entries.reduce((s, e) => s + e.kcal, 0)
 
   return (

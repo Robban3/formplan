@@ -153,6 +153,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function NotificationToggle() {
+  const { t } = useT()
   const settings = useSettings()
   const on = settings.notifications_enabled
 
@@ -164,19 +165,19 @@ function NotificationToggle() {
     }
 
     if (!('Notification' in window)) {
-      toast.error('Din webbläsare stöder inte notifikationer.')
+      toast.error(t('settings.notifUnsupported'))
       return
     }
 
     if (Notification.permission === 'denied') {
-      toast.error('Notifikationer är blockerade. Ändra i webbläsarens inställningar.')
+      toast.error(t('settings.notifBlocked'))
       return
     }
 
     const result = await Notification.requestPermission()
     if (result === 'granted') {
       settingsStore.set('notifications_enabled', true)
-      new Notification('FormPlan', { body: 'Notifikationer är aktiverade!' })
+      new Notification('FormPlan', { body: t('settings.notifEnabled') })
     } else {
       toast.error('Notifikationer nekades.')
     }
@@ -208,14 +209,15 @@ function NotificationToggle() {
 }
 
 function NotificationSection() {
+  const { t } = useT()
   const settings = useSettings()
   return (
-    <Section title="Notiser">
+    <Section title={t('settings.sec.notifications')}>
       <NotificationToggle />
       {settings.notifications_enabled && (
         <Toggle
-          label="Vattenintag-påminnelse"
-          sub="Påminn om att dricka vatten under dagen"
+          label={t('settings.waterReminder')}
+          sub={t('settings.waterReminderSub')}
           settingKey="water_reminder"
         />
       )}
@@ -277,7 +279,7 @@ export function SettingsPage() {
       profileRef.current = { ...profileRef.current, ...patch }
       await api.saveProfile(profileRef.current)
     } catch {
-      toast.error('Kunde inte spara målet. Försök igen.')
+      toast.error(t('settings.goalSaveFailed'))
     }
   }
 
@@ -293,37 +295,37 @@ export function SettingsPage() {
 
       <div className="px-5 mt-5 space-y-5">
 
-        <Section title="Utseende">
+        <Section title={t('settings.sec.appearance')}>
           <Toggle
-            label="Mörkt läge"
-            sub="Dämpad färgskala — lättare för ögonen i gymmet och på kvällen"
+            label={t('settings.darkMode')}
+            sub={t('settings.darkModeSub')}
             settingKey="dark_mode"
           />
         </Section>
 
-        <Section title="Träning">
+        <Section title={t('settings.sec.training')}>
           <Toggle
-            label="Automatisk vilatimer"
-            sub="Starta vilatimer direkt efter ett klarat set"
+            label={t('settings.autoRest')}
+            sub={t('settings.autoRestSub')}
             settingKey="auto_rest"
           />
           <SelectInput
-            label="Standard vilatid"
-            sub="Används om passet inte anger vila"
+            label={t('settings.defaultRest')}
+            sub={t('settings.defaultRestSub')}
             settingKey="rest_seconds_default"
             options={REST_OPTIONS}
           />
           <Toggle
-            label="Håll skärmen aktiv"
-            sub="Förhindra att skärmen slocknar under träning"
+            label={t('settings.keepScreenOn')}
+            sub={t('settings.keepScreenOnSub')}
             settingKey="keep_screen_on"
           />
         </Section>
 
-        <Section title="Kost & hälsa">
+        <Section title={t('settings.sec.nutrition')}>
           <NumberInput
-            label="Dagligt kaloriintag"
-            sub="Ditt energimål per dag"
+            label={t('settings.calorieGoal')}
+            sub={t('settings.calorieGoalSub')}
             settingKey="calorie_goal"
             unit="kcal"
             min={500}
@@ -332,8 +334,8 @@ export function SettingsPage() {
             onCommit={(n) => saveGoalToProfile({ calorie_goal: n })}
           />
           <NumberInput
-            label="Proteinmål"
-            sub="Dagligt proteinintag"
+            label={t('settings.proteinGoal')}
+            sub={t('settings.proteinGoalSub')}
             settingKey="protein_goal_g"
             unit="g"
             min={PROTEIN_GOAL_MIN_G}
@@ -342,8 +344,8 @@ export function SettingsPage() {
             onCommit={(n) => saveGoalToProfile({ protein_goal: n })}
           />
           <NumberInput
-            label="Vattenmål"
-            sub="Dagligt vätskeintag"
+            label={t('settings.waterGoal')}
+            sub={t('settings.waterGoalSub')}
             settingKey="water_goal_ml"
             unit={units.volumeLabel}
             min={Math.floor(units.toDisplayVolume(WATER_GOAL_MIN_ML))}
@@ -360,17 +362,17 @@ export function SettingsPage() {
           <LanguageSelect />
         </Section>
 
-        <Section title="Enheter">
+        <Section title={t('settings.sec.units')}>
           <Toggle
-            label="Imperiala enheter"
-            sub="Visa lbs, fl oz, tum och miles istället för kg, ml, cm och km"
+            label={t('settings.imperial')}
+            sub={t('settings.imperialSub')}
             settingKey="imperial"
           />
         </Section>
 
       </div>
 
-      <p className="text-xs text-stone-300 dark:text-stone-600 text-center mt-6 px-5">Inställningar sparas lokalt på din enhet.</p>
+      <p className="text-xs text-stone-300 dark:text-stone-600 text-center mt-6 px-5">{t('settings.storedLocally')}</p>
     </div>
   )
 }

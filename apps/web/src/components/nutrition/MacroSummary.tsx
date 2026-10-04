@@ -89,8 +89,8 @@ export function MacroSummary({ eaten, goals, size = 110 }: Props) {
         <div className="flex-1 space-y-2">
           <StatLine label={t('macro.calories')} eaten={eaten.kcal} goal={goals.kcal} unit="kcal" />
           <StatLine label={t('macro.protein')} eaten={eaten.protein_g} goal={goals.protein_g} unit="g" />
-          <StatLine label="Fett" eaten={eaten.fat_g} goal={goals.fat_g} unit="g" />
-          <StatLine label="Kolhydrater" eaten={eaten.carbs_g} goal={goals.carbs_g} unit="g" />
+          <StatLine label={t('macro.fat')} eaten={eaten.fat_g} goal={goals.fat_g} unit="g" />
+          <StatLine label={t('macro.carbs')} eaten={eaten.carbs_g} goal={goals.carbs_g} unit="g" />
         </div>
       </div>
 

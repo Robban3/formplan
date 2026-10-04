@@ -8,7 +8,7 @@ import { ChevronLeftIcon, ChevronRightIcon, DropletIcon, StarIcon, ShoppingCartI
 import { getTopFavorites, type FoodFavorite } from '../../lib/foodFavoritesStore'
 import { toast } from '../../lib/toast'
 import { useSettings } from '../../hooks/useSettings'
-import { MEAL_SLOT_LABELS as MEAL_LABELS } from '../../lib/texts'
+import { mealSlotLabels } from '../../lib/texts'
 import { useT } from '../../hooks/useT'
 
 const MEALS: MealSlot[] = ['frukost', 'lunch', 'middag', 'mellanmar']
@@ -30,7 +30,8 @@ function mealMacros(entries: FoodLogEntry[]) {
 }
 
 export function FoodDiary() {
-  const { locale } = useT()
+  const { locale, t } = useT()
+  const MEAL_LABELS = mealSlotLabels(t)
   const navigate = useNavigate()
   const settings = useSettings()
   // Client fallback goals: same macro split as the server, preferring the user's
@@ -57,7 +58,7 @@ export function FoodDiary() {
       // them, which would look like the user's targets vanished).
       setEntries([])
       setLoadFailed(true)
-      toast.error('Kunde inte ladda kostdagboken. Kontrollera din anslutning.')
+      toast.error(t('diary.loadFailed'))
     } finally {
       setLoading(false)
     }
@@ -81,7 +82,11 @@ export function FoodDiary() {
   }
 
   function formatDate(d: Date) {
-    if (isToday) return 'Idag, ' + d.toLocaleDateString(locale, { day: 'numeric', month: 'short' })
+    if (isToday) {
+      return t('diary.todayWithDate', {
+        date: d.toLocaleDateString(locale, { day: 'numeric', month: 'short' }),
+      })
+    }
     return d.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })
   }
 
@@ -99,7 +104,7 @@ export function FoodDiary() {
       await nutritionApi.deleteLogEntry(entry.id)
       load(date)
     } catch {
-      toast.error('Kunde inte ta bort posten. Försök igen.')
+      toast.error(t('diary.deleteFailed'))
     }
   }
 
@@ -107,19 +112,19 @@ export function FoodDiary() {
     <div className="pb-6">
       {/* Header */}
       <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
-        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-3">Kostdagbok</h1>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-3">{t('diary.title')}</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate('/kost/kostschema')}
             className="flex-1 min-w-0 h-9 rounded-xl bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300 text-xs font-semibold hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors truncate px-2"
           >
-            Kostschema
+            {t('page.mealPlan')}
           </button>
           <button
             onClick={() => navigate('/kost/veckoplan')}
             className="flex-1 min-w-0 h-9 rounded-xl bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 text-xs font-semibold hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors truncate px-2"
           >
-            Veckoplan
+            {t('diary.weekPlan')}
           </button>
           <button
             onClick={() => navigate('/kost/inkopslista')}
@@ -143,7 +148,7 @@ export function FoodDiary() {
           className="w-full mt-2 flex items-center gap-3 bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-500 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
         >
           <SearchIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400 flex-shrink-0" />
-          Sök livsmedel & näringsvärden
+          {t('food.searchHint')}
         </button>
 
         {/* Date nav */}
@@ -193,7 +198,7 @@ export function FoodDiary() {
                 onClick={() => setShowMealMacros((v) => !v)}
                 className="w-full flex items-center justify-between px-4 py-3"
               >
-                <span className="text-sm font-semibold text-stone-800 dark:text-stone-200">Makro per måltid</span>
+                <span className="text-sm font-semibold text-stone-800 dark:text-stone-200">{t('diary.macrosPerMeal')}</span>
                 <span className="text-xs text-forest-800 dark:text-forest-400">{showMealMacros ? 'Dölj ▲' : 'Visa ▼'}</span>
               </button>
               {showMealMacros && (

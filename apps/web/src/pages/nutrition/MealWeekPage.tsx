@@ -12,7 +12,7 @@ import {
 } from '../../lib/weekMealStore'
 import { api } from '../../lib/api'
 import { toast } from '../../lib/toast'
-import { MEAL_SLOT_LABELS as SLOT_LABELS } from '../../lib/texts'
+import { mealSlotLabels } from '../../lib/texts'
 import { useT } from '../../hooks/useT'
 import { weekdayNames } from '../../lib/i18n'
 
@@ -37,6 +37,7 @@ function dateForWeekday(weekday: number): Date {
 
 export function MealWeekPage() {
   const { t, locale } = useT()
+  const SLOT_LABELS = mealSlotLabels(t)
   const DAY_SHORT = weekdayNames(locale, 'short')
   const DAY_FULL = weekdayNames(locale, 'long')
   const navigate = useNavigate()

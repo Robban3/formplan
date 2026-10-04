@@ -6,13 +6,14 @@ import { MacroRing } from '../../components/nutrition/MacroRing'
 import { MacroBar } from '../../components/nutrition/MacroBar'
 import { ChevronLeftIcon } from '../../components/ui/Icons'
 import { useSettings } from '../../hooks/useSettings'
-import { MEAL_SLOT_LABELS as SLOT_LABELS } from '../../lib/texts'
+import { mealSlotLabels } from '../../lib/texts'
 import { useT } from '../../hooks/useT'
 
 type Tab = 'oversikt' | 'detaljer'
 
 export function MacroPage() {
   const { t } = useT()
+  const SLOT_LABELS = mealSlotLabels(t)
   const navigate = useNavigate()
   const settings = useSettings()
   const today = dateKey()

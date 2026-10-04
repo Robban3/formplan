@@ -7,9 +7,10 @@ import { toast } from '../../lib/toast'
 import { ChevronLeftIcon, XIcon, PlusIcon, UtensilsIcon, CameraIcon, ScanBarcodeIcon } from '../../components/ui/Icons'
 import { recordFoodUsed, getTopFavorites } from '../../lib/foodFavoritesStore'
 import { isOffId } from '../../lib/openFoodFacts'
-import { MEAL_SLOT_LABELS as SLOT_LABELS } from '../../lib/texts'
+import { mealSlotLabels } from '../../lib/texts'
 import { GENERIC_ERROR } from '../../lib/texts'
 import { NUTRITION_BASIS_G } from '../../lib/constants'
+import { useT } from '../../hooks/useT'
 
 type SearchTab = 'alla' | 'mina' | 'maltider'
 
@@ -22,6 +23,8 @@ function FoodInitial({ name }: { name: string }) {
 }
 
 export function FoodSearch() {
+  const { t } = useT()
+  const SLOT_LABELS = mealSlotLabels(t)
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const slot = toMealSlot(params.get('slot'))
@@ -88,7 +91,7 @@ export function FoodSearch() {
     if (!window.confirm(`Ta bort måltiden "${meal.name}"?`)) return
     deleteCustomMeal(meal.id)
     setCustomMeals(loadCustomMeals())
-    toast.success('Måltid borttagen')
+    toast.success(t('food.mealRemoved'))
   }
 
   async function handleAddMeal(meal: CustomMeal) {
@@ -159,7 +162,7 @@ export function FoodSearch() {
         <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700">
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
         </button>
-        <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100 flex-1">Livsmedelssökning</h1>
+        <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100 flex-1">{t('food.searchTitle')}</h1>
       </div>
 
       <div className="px-4 pb-3">
@@ -171,7 +174,7 @@ export function FoodSearch() {
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Sök livsmedel..."
+            placeholder={t('food.searchPlaceholder')}
             className="flex-1 bg-transparent text-sm text-stone-800 dark:text-stone-200 placeholder:text-stone-400 dark:placeholder:text-stone-500 outline-none focus-visible:ring-2 focus-visible:ring-forest-500 rounded"
           />
           {query && (
@@ -232,13 +235,13 @@ export function FoodSearch() {
               className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-800 dark:text-forest-400 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
             >
               <PlusIcon className="w-4 h-4 stroke-forest-600" />
-              Skapa egen måltid
+              {t('food.createOwnMeal')}
             </button>
             {customMeals.length === 0 ? (
-              <p className="text-center text-stone-500 dark:text-stone-400 text-sm pt-6">Inga sparade måltider ännu.</p>
+              <p className="text-center text-stone-500 dark:text-stone-400 text-sm pt-6">{t('food.noSavedMeals')}</p>
             ) : (
               customMeals.map((meal) => {
-                const t = mealTotals(meal.ingredients)
+                const totals = mealTotals(meal.ingredients)
                 return (
                   <div
                     key={meal.id}
@@ -255,7 +258,7 @@ export function FoodSearch() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-stone-800 dark:text-stone-200 truncate">{meal.name}</p>
                         <p className="text-xs text-stone-500 dark:text-stone-400">
-                          {meal.ingredients.length} livsmedel · {t.kcal} kcal
+                          {meal.ingredients.length} livsmedel · {totals.kcal} kcal
                         </p>
                       </div>
                     </button>
@@ -263,7 +266,7 @@ export function FoodSearch() {
                       onClick={() => navigate(`/kost/skapa-maltid?id=${meal.id}`)}
                       className="text-xs font-medium text-forest-800 dark:text-forest-400 px-2 py-1.5 rounded-lg hover:bg-forest-50 dark:hover:bg-forest-900/30 flex-shrink-0"
                     >
-                      Ändra
+                      {t('food.edit')}
                     </button>
                     <button
                       onClick={() => handleDeleteMeal(meal)}
@@ -321,7 +324,7 @@ export function FoodSearch() {
 
         {tab === 'alla' && !query && (
           <div className="text-center pt-12 text-stone-500 dark:text-stone-400 text-sm">
-            Börja skriva för att söka livsmedel
+            {t('food.startTyping')}
           </div>
         )}
       </div>

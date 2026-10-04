@@ -12,8 +12,10 @@ import {
 import { toast } from '../../lib/toast'
 import { XIcon, PlusIcon, UtensilsIcon } from '../../components/ui/Icons'
 import { NUTRITION_BASIS_G } from '../../lib/constants'
+import { useT } from '../../hooks/useT'
 
 export function CreateMealPage() {
+  const { t } = useT()
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const editId = params.get('id')
@@ -79,11 +81,11 @@ export function CreateMealPage() {
 
   function handleSave() {
     if (!name.trim()) {
-      toast.error('Ange ett måltidsnamn')
+      toast.error(t('food.needMealName'))
       return
     }
     if (ingredients.length === 0) {
-      toast.error('Lägg till minst ett livsmedel')
+      toast.error(t('food.needOneFood'))
       return
     }
     const meal: CustomMeal = {
@@ -93,7 +95,7 @@ export function CreateMealPage() {
       createdAt: new Date().toISOString(),
     }
     saveCustomMeal(meal)
-    toast.success('Måltid sparad!')
+    toast.success(t('food.mealSaved'))
     navigate(-1)
   }
 
@@ -103,9 +105,9 @@ export function CreateMealPage() {
         <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700">
           <XIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400" />
         </button>
-        <h1 className="font-bold text-stone-900 dark:text-stone-100">Skapa egen måltid</h1>
+        <h1 className="font-bold text-stone-900 dark:text-stone-100">{t('food.createOwnMeal')}</h1>
         <button onClick={handleSave} className="text-sm font-semibold text-forest-800 dark:text-forest-400">
-          Spara
+          {t('food.save')}
         </button>
       </div>
 
@@ -117,7 +119,7 @@ export function CreateMealPage() {
         </div>
 
         <label className="block">
-          <span className="text-sm text-stone-500 dark:text-stone-400">Måltidsnamn</span>
+          <span className="text-sm text-stone-500 dark:text-stone-400">{t('food.mealName')}</span>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -149,7 +151,7 @@ export function CreateMealPage() {
               className="w-full flex items-center justify-center gap-2 py-3 mt-2 text-sm text-forest-800 dark:text-forest-400 font-medium border border-dashed border-stone-200 dark:border-stone-700 rounded-xl hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
             >
               <PlusIcon className="w-4 h-4 stroke-forest-600" />
-              Lägg till livsmedel
+              {t('food.addFood')}
             </button>
           ) : (
             <div className="mt-3 space-y-3 bg-stone-50 dark:bg-stone-800 rounded-xl p-4">
@@ -157,10 +159,10 @@ export function CreateMealPage() {
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Sök livsmedel…"
+                placeholder={t('food.searchPlaceholder')}
                 className="w-full bg-white dark:bg-stone-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
               />
-              {searching && <p className="text-xs text-stone-500 dark:text-stone-400">Söker…</p>}
+              {searching && <p className="text-xs text-stone-500 dark:text-stone-400">{t('food.searching')}</p>}
               {results.map((item) => (
                 <button
                   key={item.id}
@@ -190,13 +192,13 @@ export function CreateMealPage() {
                       onClick={() => { setPick(null); setQuery(''); setResults([]) }}
                       className="flex-1 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-sm text-stone-600 dark:text-stone-300"
                     >
-                      Avbryt
+                      {t('food.cancel')}
                     </button>
                     <button
                       onClick={addIngredient}
                       className="flex-1 py-2 rounded-xl bg-forest-700 text-white text-sm font-semibold"
                     >
-                      Lägg till
+                      {t('food.add')}
                     </button>
                   </div>
                 </>
@@ -215,11 +217,11 @@ export function CreateMealPage() {
             </div>
             <div>
               <p className="font-bold text-stone-900 dark:text-stone-100">{Math.round(totals.protein_g)}g</p>
-              <p className="text-stone-500 dark:text-stone-400">Protein</p>
+              <p className="text-stone-500 dark:text-stone-400">{t('macro.protein')}</p>
             </div>
             <div>
               <p className="font-bold text-stone-900 dark:text-stone-100">{Math.round(totals.fat_g)}g</p>
-              <p className="text-stone-500 dark:text-stone-400">Fett</p>
+              <p className="text-stone-500 dark:text-stone-400">{t('macro.fat')}</p>
             </div>
             <div>
               <p className="font-bold text-stone-900 dark:text-stone-100">{Math.round(totals.carbs_g)}g</p>

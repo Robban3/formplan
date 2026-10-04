@@ -6,10 +6,13 @@ import { compressImage } from '../../lib/image'
 import { nutritionApi, toMealSlot, type MealSlot } from '../../lib/nutritionApi'
 import { dateKey } from '../../lib/derive'
 import { toast } from '../../lib/toast'
-import { MEAL_SLOT_LABELS as SLOT_LABELS } from '../../lib/texts'
+import { mealSlotLabels } from '../../lib/texts'
 import { GENERIC_ERROR, BUSY_ADDING } from '../../lib/texts'
+import { useT } from '../../hooks/useT'
 
 export function FoodPhotoPage() {
+  const { t } = useT()
+  const SLOT_LABELS = mealSlotLabels(t)
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const slot = toMealSlot(params.get('slot'))

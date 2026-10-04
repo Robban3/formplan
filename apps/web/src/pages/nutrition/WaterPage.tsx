@@ -14,6 +14,7 @@ import { WaterWeekView } from './WaterWeekView'
 import { WATER_QUICK_OPTIONS_ML } from '../../lib/constants'
 import { BUSY_ADDING } from '../../lib/texts'
 import { useT } from '../../hooks/useT'
+import type { TranslateFn } from '../../lib/i18n'
 import type { TextKey } from '../../lib/i18n'
 
 const QUICK_OPTIONS = WATER_QUICK_OPTIONS_ML
@@ -39,9 +40,12 @@ type WaterTab = 'idag' | 'vecka'
 
 const GOAL_HIT_KEY = (date: string) => `formplan_water_goal_hit_${date}`
 
-function celebrateWaterGoal(totalMl: number, goalMl: number, imperial: boolean) {
+function celebrateWaterGoal(totalMl: number, goalMl: number, imperial: boolean, t: TranslateFn) {
   toast.success(
-    `Mål uppnått! Du har druckit ${formatVolumeIn(totalMl, imperial)} av ${formatVolumeIn(goalMl, imperial)} idag.`,
+    t('water.goalReachedToast', {
+      total: formatVolumeIn(totalMl, imperial),
+      goal: formatVolumeIn(goalMl, imperial),
+    }),
     6000
   )
   navigator.vibrate?.([100, 50, 100])
@@ -110,9 +114,9 @@ export function WaterPage() {
 
       if (crossedGoal && localStorage.getItem(hitKey) !== '1') {
         localStorage.setItem(hitKey, '1')
-        celebrateWaterGoal(nextTotal, GOAL_ML, imperial)
+        celebrateWaterGoal(nextTotal, GOAL_ML, imperial, t)
       } else {
-        toast.success(`+${formatVolume(entry.amount_ml)} tillagt`)
+        toast.success(t('water.addedToast', { amount: formatVolume(entry.amount_ml) }))
       }
     }
 
@@ -213,9 +217,9 @@ export function WaterPage() {
                 <CheckIcon className="w-5 h-5 stroke-white" />
               </div>
               <div>
-                <p className="font-semibold text-forest-800 dark:text-forest-200">Dagsmål uppnått!</p>
+                <p className="font-semibold text-forest-800 dark:text-forest-200">{t('water.dailyGoalReached')}</p>
                 <p className="text-sm text-forest-800 dark:text-forest-400">
-                  Du har druckit {formatVolume(total)} idag — bra jobbat.
+                  {t('water.youHaveDrunk', { total: formatVolume(total) })}
                 </p>
               </div>
             </div>
@@ -231,7 +235,7 @@ export function WaterPage() {
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round">
               <path d="M12 5v14M5 12h14" />
             </svg>
-            {adding ? BUSY_ADDING : `Lägg till ${formatVolume(selectedMl)}`}
+            {adding ? t('common.adding') : t('water.addAmount', { amount: formatVolume(selectedMl) })}
           </button>
 
           {/* Snabbval */}
@@ -262,7 +266,7 @@ export function WaterPage() {
           <div>
             <p className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">Logg</p>
             {entries.length === 0 ? (
-              <p className="text-sm text-stone-500 dark:text-stone-400 text-center py-6">Inget loggat ännu idag</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400 text-center py-6">{t('water.nothingToday')}</p>
             ) : (
               <div className="space-y-0">
                 {entries.map((entry) => (

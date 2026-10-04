@@ -92,6 +92,7 @@ function StatRing({
   /** Färdigformaterat värde, när enheten beror på användarens inställning. */
   valueLabel?: string
 }) {
+  const { t } = useT()
   const { locale } = useT()
   const pct = goal > 0 ? Math.min((value / goal) * 100, 100) : 0
   return (
@@ -114,7 +115,7 @@ function StatRing({
           {valueLabel ?? `${value.toLocaleString(locale)} ${unit}`}
         </p>
         <p className="text-[10px] text-stone-500 dark:text-stone-400">{label}</p>
-        <p className="text-[9px] text-stone-300 dark:text-stone-600">mål: {goalLabel}</p>
+        <p className="text-[9px] text-stone-300 dark:text-stone-600">{t('analytics.goalPrefix')} {goalLabel}</p>
       </div>
     </div>
   )
@@ -188,6 +189,7 @@ function LineChart({
 // ── Macro donut ───────────────────────────────────────────────────────────────
 
 function MacroDonut({ protein, carbs, fat, kcal }: { protein: number; carbs: number; fat: number; kcal: number }) {
+  const { t } = useT()
   const { locale } = useT()
   const r = 52; const cx = 64; const cy = 64; const circ = 2 * Math.PI * r
   const total = protein + carbs + fat || 1
@@ -216,7 +218,7 @@ function MacroDonut({ protein, carbs, fat, kcal }: { protein: number; carbs: num
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-xl font-bold text-stone-900 dark:text-stone-100">{kcal.toLocaleString(locale)}</span>
-          <span className="text-[10px] text-stone-500 dark:text-stone-400">kcal/dag</span>
+          <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('analytics.kcalPerDay')}</span>
         </div>
       </div>
       <div className="flex-1 space-y-3">
@@ -287,6 +289,7 @@ function rollingAvg(values: number[], window: number): number[] {
 }
 
 function WeightChart({ entries }: { entries: WeightEntry[] }) {
+  const { t } = useT()
   const { formatWeight } = useUnits()
   const { locale } = useT()
   if (entries.length < 2) return null
@@ -301,11 +304,11 @@ function WeightChart({ entries }: { entries: WeightEntry[] }) {
         <span className="text-3xl font-bold" style={{ color }}>
           {sign}{formatWeight(change)}
         </span>
-        <span className="text-sm text-stone-500 dark:text-stone-400">förändring sedan start</span>
+        <span className="text-sm text-stone-500 dark:text-stone-400">{t('analytics.changeSinceStart')}</span>
       </div>
       <div className="flex gap-4 mb-3 text-[10px] text-stone-500 dark:text-stone-400">
-        <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-forest-500 rounded" />Faktisk vikt</span>
-        <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-amber-400 rounded opacity-70" style={{ backgroundImage: 'repeating-linear-gradient(to right, #f59e0b 0, #f59e0b 4px, transparent 4px, transparent 7px)' }} />7-dagars snitt</span>
+        <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-forest-500 rounded" />{t('analytics.actualWeight')}</span>
+        <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-amber-400 rounded opacity-70" style={{ backgroundImage: 'repeating-linear-gradient(to right, #f59e0b 0, #f59e0b 4px, transparent 4px, transparent 7px)' }} />{t('analytics.sevenDayAvg')}</span>
       </div>
       <MultiLineChart
         series={[
@@ -474,21 +477,21 @@ export function AnalyticsPage() {
         <div className="px-5 space-y-4">
           {/* Ringar — Träning, Vatten, Tid */}
           <div>
-            <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Denna vecka</p>
+            <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">{t('home.thisWeek')}</p>
             <div className="grid grid-cols-3 gap-2">
               <StatRing
-                Icon={DumbbellIcon} label="Pass" unit="pass"
-                value={thisWeek} goal={weeklyGoal} goalLabel={`${weeklyGoal} pass`}
+                Icon={DumbbellIcon} label={t('analytics.sessions')} unit={t('analytics.sessionsUnit')}
+                value={thisWeek} goal={weeklyGoal} goalLabel={t('analytics.sessionsWithCount', { n: weeklyGoal })}
                 color="#22e6c6" iconStroke="stroke-forest-600"
               />
               <StatRing
-                Icon={DropletIcon} label="Vatten idag" unit="L"
+                Icon={DropletIcon} label={t('analytics.waterToday')} unit="L"
                 value={waterToday} goal={settings.water_goal_ml}
                 valueLabel={formatVolume(waterToday)} goalLabel={formatVolume(settings.water_goal_ml)}
                 color="#38bdf8" iconStroke="stroke-sky-500"
               />
               <StatRing
-                Icon={BarChartIcon} label="Träningstid" unit="min"
+                Icon={BarChartIcon} label={t('analytics.trainingTime')} unit="min"
                 value={Math.round(thisWeekTime / 60)} goal={weeklyGoal * 45} goalLabel={`${weeklyGoal * 45} min`}
                 color="#f59e0b" iconStroke="stroke-amber-500"
               />
@@ -497,17 +500,17 @@ export function AnalyticsPage() {
 
           {/* Pass per vecka — stapeldiagram */}
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
-            <p className="font-semibold text-stone-800 dark:text-stone-200 mb-4">Pass per vecka</p>
+            <p className="font-semibold text-stone-800 dark:text-stone-200 mb-4">{t('analytics.sessionsPerWeek')}</p>
             <WeeklyBars weekly={weekly} />
           </div>
 
           {/* Vatten 7 dagar — linjediagram */}
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
             <div className="flex items-baseline justify-between mb-3">
-              <p className="font-semibold text-stone-800 dark:text-stone-200">Vatten senaste 7 dagar</p>
+              <p className="font-semibold text-stone-800 dark:text-stone-200">{t('analytics.waterLast7')}</p>
               {avgWater > 0 && (
                 <span className="text-xs text-stone-500 dark:text-stone-400">
-                  snitt {formatVolume(avgWater)}/dag
+                  {t('analytics.avgPerDay', { value: formatVolume(avgWater) })}
                 </span>
               )}
             </div>
@@ -525,18 +528,18 @@ export function AnalyticsPage() {
             ) : (
               <div className="flex flex-col items-center py-6 gap-1">
                 <DropletIcon className="w-8 h-8 stroke-stone-300 dark:stroke-stone-600" />
-                <p className="text-xs text-stone-500 dark:text-stone-400">Ingen vattendata loggad ännu</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400">{t('analytics.noWaterYet')}</p>
               </div>
             )}
           </div>
 
           {/* Senaste pass */}
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
-            <p className="font-semibold text-stone-800 dark:text-stone-200 px-4 py-3 border-b border-stone-50">Senaste pass</p>
+            <p className="font-semibold text-stone-800 dark:text-stone-200 px-4 py-3 border-b border-stone-50">{t('analytics.recentSessions')}</p>
             {sessions.length === 0 ? (
               <div className="px-4 py-8 text-center">
                 <DumbbellIcon className="w-10 h-10 stroke-stone-300 dark:stroke-stone-600 mx-auto mb-2" />
-                <p className="text-sm text-stone-500 dark:text-stone-400">Genomför ditt första pass!</p>
+                <p className="text-sm text-stone-500 dark:text-stone-400">{t('analytics.doFirstSession')}</p>
               </div>
             ) : (
               sessions.slice(0, 5).map((s) => (
@@ -594,10 +597,10 @@ export function AnalyticsPage() {
             ) : weightEntries.length === 1 ? (
               <div className="text-center py-4">
                 <p className="text-2xl font-bold text-stone-900 dark:text-stone-100">{formatWeight(weightEntries[0]!.weight_kg)}</p>
-                <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">Logga igen imorgon för att se trenden</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{t('analytics.logAgainTomorrow')}</p>
               </div>
             ) : (
-              <p className="text-center text-sm text-stone-500 dark:text-stone-400 py-6">Logga din vikt för att se utvecklingen</p>
+              <p className="text-center text-sm text-stone-500 dark:text-stone-400 py-6">{t('analytics.logWeightToSeeTrend')}</p>
             )}
           </div>
 
@@ -629,7 +632,7 @@ export function AnalyticsPage() {
                 <span>Senast: {rpeEntries[rpeEntries.length-1]!.rpe}/10 · {rpeEntries[rpeEntries.length-1]!.workoutName}</span>
               </div>
               <div className="flex justify-between mt-2 text-[9px] text-stone-300 dark:text-stone-600">
-                <span>1 = Lätt</span><span>5 = Medel</span><span>10 = Maximalt</span>
+                <span>{t('analytics.rpeEasy')}</span><span>5 = Medel</span><span>10 = Maximalt</span>
               </div>
             </div>
           )}
@@ -637,9 +640,9 @@ export function AnalyticsPage() {
           {/* Vatten 7 dagar */}
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
             <div className="flex items-baseline justify-between mb-3">
-              <p className="font-semibold text-stone-800 dark:text-stone-200">Vatten senaste 7 dagar</p>
+              <p className="font-semibold text-stone-800 dark:text-stone-200">{t('analytics.waterLast7')}</p>
               {avgWater > 0 && (
-                <span className="text-xs text-stone-500 dark:text-stone-400">snitt {formatVolume(avgWater)}</span>
+                <span className="text-xs text-stone-500 dark:text-stone-400">{t('analytics.avg', { value: formatVolume(avgWater) })}</span>
               )}
             </div>
             {waterPoints.some((v) => v > 0) ? (
@@ -685,7 +688,7 @@ export function AnalyticsPage() {
             ) : (
               <div className="flex flex-col items-center py-6 gap-2">
                 <DropletIcon className="w-8 h-8 stroke-stone-300 dark:stroke-stone-600" />
-                <p className="text-xs text-stone-500 dark:text-stone-400">Logga vatten för att se trenden</p>
+                <p className="text-xs text-stone-500 dark:text-stone-400">{t('analytics.logWaterToSeeTrend')}</p>
               </div>
             )}
           </div>
@@ -702,22 +705,22 @@ export function AnalyticsPage() {
           ) : daySummaries.length === 0 ? (
             <div className="text-center py-16">
               <LeafIcon className="w-12 h-12 stroke-stone-300 dark:stroke-stone-600 mx-auto mb-3" />
-              <h2 className="text-lg font-semibold mb-1">Ingen kostdata</h2>
-              <p className="text-stone-500 dark:text-stone-400 text-sm">Logga dina måltider via Kost-fliken.</p>
+              <h2 className="text-lg font-semibold mb-1">{t('analytics.noNutritionData')}</h2>
+              <p className="text-stone-500 dark:text-stone-400 text-sm">{t('analytics.logMealsHint')}</p>
             </div>
           ) : (
             <>
               {/* Makro donut */}
               <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
-                <p className="font-semibold text-stone-800 dark:text-stone-200 mb-4">Makronutrienter (snitt per dag)</p>
+                <p className="font-semibold text-stone-800 dark:text-stone-200 mb-4">{t('analytics.macrosAvgPerDay')}</p>
                 <MacroDonut protein={avgProtein} carbs={avgCarbs} fat={avgFat} kcal={avgKcal} />
               </div>
 
               {/* Kalori-linjediagram */}
               <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
                 <div className="flex items-baseline justify-between mb-3">
-                  <p className="font-semibold text-stone-800 dark:text-stone-200">Kalorier senaste 7 dagar</p>
-                  <span className="text-xs text-stone-500 dark:text-stone-400">snitt {avgKcal} kcal</span>
+                  <p className="font-semibold text-stone-800 dark:text-stone-200">{t('analytics.caloriesLast7')}</p>
+                  <span className="text-xs text-stone-500 dark:text-stone-400">{t('analytics.avg', { value: `${avgKcal} kcal` })}</span>
                 </div>
                 <LineChart
                   points={last7.map((date) => daySummaries.find((d) => d.date === date)?.kcal ?? 0)}
@@ -734,7 +737,7 @@ export function AnalyticsPage() {
 
               {/* Stapeldiagram makron */}
               <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
-                <p className="font-semibold text-stone-800 dark:text-stone-200 mb-4">Kalorier per dag</p>
+                <p className="font-semibold text-stone-800 dark:text-stone-200 mb-4">{t('analytics.caloriesPerDay')}</p>
                 <div className="flex items-end gap-1.5 h-28">
                   {last7.map((date, i) => {
                     const d = daySummaries.find((x) => x.date === date)
@@ -763,7 +766,7 @@ export function AnalyticsPage() {
               {calorieGoal > 0 && (
                 <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
                   <p className="font-semibold text-stone-800 dark:text-stone-200 mb-1">Kaloribalans</p>
-                  <p className="text-xs text-stone-500 dark:text-stone-400 mb-4">Mål: {calorieGoal} kcal/dag · + överskott · – underskott</p>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mb-4">{t('analytics.calorieGoalLegend', { goal: calorieGoal })}</p>
                   <div className="flex items-center gap-1.5 h-28">
                     {last7.map((date, i) => {
                       const d = daySummaries.find((x) => x.date === date)
@@ -806,7 +809,7 @@ export function AnalyticsPage() {
                   </div>
                   <div className="flex justify-between text-[9px] text-stone-300 dark:text-stone-600 mt-1">
                     <span className="text-sky-400">◀ underskott</span>
-                    <span className="text-amber-700 dark:text-amber-300">överskott ▶</span>
+                    <span className="text-amber-700 dark:text-amber-300">{t('analytics.surplus')}</span>
                   </div>
                 </div>
               )}
