@@ -220,8 +220,8 @@ export function BarcodeScanPage() {
               <div className="grid grid-cols-2 gap-2">
                 {([
                   ['kcal', 'Kalorier'],
-                  ['protein', 'Protein (g)'],
-                  ['fat', 'Fett (g)'],
+                  ['protein', t('barcode.proteinG')],
+                  ['fat', t('barcode.fatG')],
                   ['carbs', 'Kolhydrater (g)'],
                 ] as const).map(([field, label]) => (
                   <input
@@ -278,7 +278,7 @@ export function BarcodeScanPage() {
               disabled={adding || !amount || parseFloat(amount) <= 0}
               className="w-full mt-4 bg-forest-700 hover:bg-forest-800 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60"
             >
-              {adding ? BUSY_ADDING : 'Lägg till i kostdagbok'}
+              {adding ? BUSY_ADDING : t('food.addToDiary')}
             </button>
           </div>
         )}

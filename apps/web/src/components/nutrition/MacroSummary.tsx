@@ -96,7 +96,7 @@ export function MacroSummary({ eaten, goals, size = 110 }: Props) {
 
       {kcalLeft > 0 && (
         <p className="text-xs text-stone-500 dark:text-stone-400 text-center mt-3">
-          Du har {Math.round(kcalLeft)} kcal kvar att äta idag.
+          {t('macro.kcalLeftToday', { kcal: Math.round(kcalLeft) })}
         </p>
       )}
     </div>

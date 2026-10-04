@@ -44,9 +44,7 @@ export function AboutPage() {
         </div>
         <h2 className="text-xl font-bold mb-2">{about.heroTitle}</h2>
         <p className="text-sm text-forest-100 leading-relaxed">
-          FormPlan är din personliga hälsoapp som kombinerar AI-genererade träningsprogram med
-          noggrann kostspårning. Oavsett om du vill bygga muskler, gå ner i vikt eller bara
-          röra på dig mer — FormPlan anpassar sig efter dig och följer med på hela resan.
+          {about.heroBody}
         </p>
       </div>
 
@@ -57,9 +55,7 @@ export function AboutPage() {
           <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">{about.missionTitle}</p>
         </div>
         <p className="text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
-          Vi tror att bra träning och hållbar kost inte ska kräva en personlig tränare eller
-          dietist. Genom att kombinera modern AI med ett enkelt gränssnitt vill vi göra det
-          lätt för alla att ta kontroll över sin hälsa — på sina egna villkor.
+          {about.missionBody}
         </p>
       </div>
 

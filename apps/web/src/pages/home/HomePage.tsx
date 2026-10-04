@@ -436,7 +436,7 @@ export function HomePage() {
             </div>
           ) : !planLoaded ? (
             <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
-              <p className="font-semibold text-stone-800 dark:text-stone-200">Inget schema</p>
+              <p className="font-semibold text-stone-800 dark:text-stone-200">{t('home.noPlan')}</p>
               <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">{t('home.pickPlanHint')}</p>
               <button
                 onClick={() => navigate('/traning')}

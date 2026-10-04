@@ -129,14 +129,14 @@ export function FoodDiary() {
           <button
             onClick={() => navigate('/kost/inkopslista')}
             className="w-9 h-9 flex-shrink-0 rounded-xl bg-forest-50 dark:bg-forest-900/30 flex items-center justify-center hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors"
-            aria-label="Inköpslista"
+            aria-label={t('diary.shoppingList')}
           >
             <ShoppingCartIcon className="w-4 h-4 stroke-forest-600" />
           </button>
           <button
             onClick={() => navigate('/kost/vatten')}
             className="w-9 h-9 flex-shrink-0 rounded-xl bg-sky-50 dark:bg-sky-900/30 flex items-center justify-center hover:bg-sky-100 dark:hover:bg-sky-900/45 transition-colors"
-            aria-label="Vatten"
+            aria-label={t('page.water')}
           >
             <DropletIcon className="w-4 h-4 stroke-sky-500" />
           </button>
@@ -177,7 +177,7 @@ export function FoodDiary() {
         <div className="px-5 mt-5 space-y-4">
           {loadFailed && (
             <div className="bg-red-50 dark:bg-red-900/25 border border-red-100 rounded-2xl p-3 text-sm text-red-600 dark:text-red-400">
-              Kunde inte ladda dagens data. Visade värden kan vara ofullständiga — försök igen senare.
+              {t('diary.partialData')}
             </div>
           )}
           <button

@@ -18,7 +18,7 @@ export function NotificationsPage() {
 
   async function requestPermission() {
     if (!('Notification' in window)) {
-      toast.error('Din webbläsare stöder inte notiser.')
+      toast.error(t('notif.unsupported'))
       return
     }
     const result = await Notification.requestPermission()
@@ -26,27 +26,27 @@ export function NotificationsPage() {
     if (result === 'granted') {
       settingsStore.set('notifications_enabled', true)
       new Notification('FormPlan', {
-        body: 'Notiser är nu aktiverade! 💪',
+        body: t('notif.enabled'),
         icon: '/logo.svg',
       })
     } else {
       settingsStore.set('notifications_enabled', false)
-      toast.info('Du kan aktivera notiser i webbläsarens inställningar.')
+      toast.info(t('notif.enableInBrowser'))
     }
   }
 
   function sendTestNotification() {
     if (Notification.permission !== 'granted') return
     new Notification('FormPlan – Testnotis', {
-      body: 'Det här är en testnotis från FormPlan.',
+      body: t('notif.testBody'),
       icon: '/logo.svg',
     })
   }
 
   const rows = [
     {
-      label: 'Påminnelser om pass',
-      sub: 'Notis när det är dags att träna',
+      label: t('notif.workoutReminders'),
+      sub: t('notif.workoutRemindersSub'),
       key: 'notifications_enabled' as const,
     },
   ]
@@ -58,7 +58,7 @@ export function NotificationsPage() {
         Mer
       </button>
       <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">{t('more.notifications')}</h1>
-      <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Välj vilka notiser du vill ta emot.</p>
+      <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">{t('notif.pickWhich')}</p>
 
       {/* Permission banner */}
       {permState !== 'granted' && (
@@ -66,11 +66,11 @@ export function NotificationsPage() {
           {permState === 'denied' ? (
             <>
               <p className="font-semibold text-red-700 dark:text-red-300 text-sm">Notiser blockerade</p>
-              <p className="text-red-500 text-xs mt-0.5">Tillåt notiser för FormPlan i webbläsarens inställningar.</p>
+              <p className="text-red-500 text-xs mt-0.5">{t('notif.allowInBrowser')}</p>
             </>
           ) : (
             <>
-              <p className="font-semibold text-forest-800 dark:text-forest-300 text-sm">Tillåt notiser för att fortsätta</p>
+              <p className="font-semibold text-forest-800 dark:text-forest-300 text-sm">{t('notif.allowToContinue')}</p>
               <button
                 onClick={requestPermission}
                 className="mt-2 bg-forest-700 text-white text-sm font-medium px-4 py-2 rounded-xl"

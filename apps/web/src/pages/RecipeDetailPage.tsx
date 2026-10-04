@@ -101,8 +101,8 @@ export function RecipeDetailPage() {
           <div className="grid grid-cols-4 gap-2 mb-2">
             {[
               { label: 'Kalorier', value: recipe.calories, unit: 'kcal', color: 'bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300' },
-              { label: 'Protein',  value: recipe.protein_g, unit: 'g', color: 'bg-blue-50 dark:bg-blue-900/25 text-blue-800 dark:text-blue-300' },
-              { label: 'Fett',     value: recipe.fat_g,     unit: 'g', color: 'bg-amber-50 dark:bg-amber-900/25 text-amber-700 dark:text-amber-300' },
+              { label: t('macro.protein'),  value: recipe.protein_g, unit: 'g', color: 'bg-blue-50 dark:bg-blue-900/25 text-blue-800 dark:text-blue-300' },
+              { label: t('macro.fat'),     value: recipe.fat_g,     unit: 'g', color: 'bg-amber-50 dark:bg-amber-900/25 text-amber-700 dark:text-amber-300' },
               { label: 'Kolhyd.', value: recipe.carbs_g,   unit: 'g', color: 'bg-teal-50 dark:bg-teal-900/30 text-teal-800 dark:text-teal-300' },
             ].map((m) => (
               <div key={m.label} className={`${m.color} rounded-xl p-2.5 text-center`}>

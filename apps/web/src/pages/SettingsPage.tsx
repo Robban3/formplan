@@ -184,9 +184,9 @@ function NotificationToggle() {
   }
 
   const permissionStatus = !('Notification' in window)
-    ? 'stöds ej'
+    ? t('settings.notifUnsupportedShort')
     : Notification.permission === 'denied'
-    ? 'blockerade i webbläsaren'
+    ? t('settings.notifBlockedShort')
     : null
 
   return (
@@ -194,7 +194,7 @@ function NotificationToggle() {
       <div className="flex-1 mr-4">
         <p className="text-stone-800 dark:text-stone-200 font-medium text-sm">Aktivera notifikationer</p>
         <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-          {permissionStatus ?? 'Tillåt FormPlan att skicka påminnelser'}
+          {permissionStatus ?? t('settings.allowReminders')}
         </p>
       </div>
       <button

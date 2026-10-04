@@ -612,6 +612,104 @@ export const en: Record<TextKey, string> = {
   'coach.unavailable': 'The AI coach is temporarily unavailable, please try again shortly',
   'coach.askPlaceholder': 'Ask a training question…',
 
+  // Error boundaries and loading
+  'gate.accountCheckFailed': 'Couldn’t check your account',
+  'gate.noServer': 'We couldn’t reach the server. Check your connection and try again.',
+  'gate.retry': 'Try again',
+  'error.reloadApp': 'Reload the app',
+
+  // Meal section and exercise detail
+  'meal.addFood': 'Add food',
+  'exercise.musclesWorked': 'Muscles worked',
+  'exercise.equip.barbell': 'Barbell',
+  'exercise.equip.ezbar': 'EZ bar',
+  'exercise.equip.other': 'Other',
+  'muscle.mapPrimary': 'Muscle map. Primary muscles: {primary}.',
+  'muscle.mapSecondary': ' Secondary muscles: {secondary}.',
+
+  // Apple Health
+  'health.webNotice': 'The Apple Health integration needs the native iOS app and isn’t available in the web version. Your workouts and weight are already logged in FormPlan and can be synced once the iOS app launches.',
+  'health.whatSyncs': 'What gets synced (iOS app):',
+  'health.comingInApp': 'Coming in the native app',
+  'health.sync1': '✓ Completed workouts (type, duration, calories)',
+  'health.sync2': '✓ Active calories and steps',
+  'health.sync3': '✓ Weight and BMI',
+  'health.sync4': '✓ Nutrition and macros',
+
+  // Challenges
+  'challenges.subtitle': 'Set extra goals and keep your motivation up',
+  'challenges.cat.body': 'Body',
+  'challenges.ongoing': 'In progress',
+  'challenges.daysLeft': '{n} days left',
+  'challenges.cancel': 'Cancel challenge',
+  'challenges.daysGoal': '{days} days · Goal: {goal}',
+  'challenges.noneYet': 'No challenges yet',
+  'challenges.noneYetHint': 'Start a challenge to keep your motivation up!',
+
+  // Account
+  'account.paymentFailed': 'Couldn’t start the payment',
+  'account.portalFailed': 'Couldn’t open your subscription',
+  'account.deleteConfirm1': 'Delete your account permanently? All your data (profile, training, nutrition, subscription) will be removed and cannot be restored.',
+  'account.deleteConfirm2': 'Are you absolutely sure? This cannot be undone.',
+  'account.deleted': 'Your account has been deleted.',
+  'account.deleteFailed': 'Couldn’t delete your account. Please try again.',
+  'account.delete': 'Delete account',
+  'account.signOut': 'Sign out',
+
+  // Notifications
+  'notif.unsupported': 'Your browser doesn’t support notifications.',
+  'notif.enabled': 'Notifications are now enabled! 💪',
+  'notif.enableInBrowser': 'You can enable notifications in your browser settings.',
+  'notif.testBody': 'This is a test notification from FormPlan.',
+  'notif.workoutReminders': 'Workout reminders',
+  'notif.workoutRemindersSub': 'A notification when it’s time to train',
+  'notif.pickWhich': 'Choose which notifications you want to receive.',
+  'notif.allowInBrowser': 'Allow notifications for FormPlan in your browser settings.',
+  'notif.allowToContinue': 'Allow notifications to continue',
+
+  // Paywall
+  'paywall.paymentFailed': 'Couldn’t start the payment. Please try again.',
+  'paywall.trialOver': 'Your free trial has ended',
+  'paywall.keepEverything': 'Continue with FormPlan Premium and keep everything you’ve built.',
+  'paywall.perMonth': 'SEK {price}/month',
+  'paywall.cancelAnytime': 'Cancel any time',
+  'paywall.opening': 'Opening payment…',
+
+  // Misc
+  'home.sessionsOfTotal': 'of {total} sessions',
+  'home.sessionsWord': 'sessions',
+  'home.noPlan': 'No plan',
+  'home.waterLogged': '+{amount} of water logged',
+  'onb.daysPerWeek': '{n} sessions per week',
+  'auth.passwordTooShort': 'Your password must be at least {min} characters.',
+  'auth.sentLinkTo': 'We sent a sign-in link to',
+  'auth.sentLinkToEmail': 'We sent a sign-in link to {email}',
+  'coach.avgPerSession': 'Average session length: {minutes} min',
+  'coach.latestWeight': 'Latest weight: {weight}',
+  'recipes.describeHint': 'Describe what you fancy, e.g. “Give me a dinner with 700 kcal and at least 50 g of protein”',
+  'recipes.tailoredSuffix': '{category} · tailored to your goals',
+  'barcode.savedOnDevice': 'on this device, and filled in automatically the next time you scan it.',
+
+  // Equipment in the exercise catalog (keys are the catalog's English values)
+  'equipLabel.barbell': 'Barbell',
+  'equipLabel.dumbbell': 'Dumbbells',
+  'equipLabel.bodyOnly': 'Bodyweight',
+  'equipLabel.machine': 'Machine',
+  'equipLabel.cable': 'Cable',
+  'equipLabel.kettlebells': 'Kettlebell',
+  'equipLabel.ezCurlBar': 'EZ curl bar',
+  'equipLabel.bands': 'Resistance bands',
+  'equipLabel.medicineBall': 'Medicine ball',
+  'equipLabel.exerciseBall': 'Exercise ball',
+  'equipLabel.foamRoll': 'Foam roller',
+  'equipLabel.other': 'Other',
+
+  // Misc interpolated
+  'macro.kcalLeftToday': 'You have {kcal} kcal left to eat today.',
+  'muscle.mapNone': 'Muscle map with no muscles highlighted.',
+  'challenges.daysLeftShort': '{n} days left',
+  'challenges.durationGoal': '{days} days · Goal: {target} {unit}',
+
   // Meals
   'meal.frukost': 'Breakfast',
   'meal.lunch': 'Lunch',

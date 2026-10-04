@@ -77,7 +77,7 @@ export function MorePage() {
       const { url } = await billingApi.startCheckout()
       window.location.href = url
     } catch {
-      toast.error('Kunde inte starta betalningen')
+      toast.error(t('account.paymentFailed'))
       setBusy(false)
     }
   }
@@ -88,7 +88,7 @@ export function MorePage() {
       const { url } = await billingApi.openPortal()
       window.location.href = url
     } catch {
-      toast.error('Kunde inte öppna prenumerationen')
+      toast.error(t('account.portalFailed'))
       setBusy(false)
     }
   }
@@ -105,16 +105,16 @@ export function MorePage() {
   }
 
   async function deleteAccount() {
-    if (!confirm('Radera ditt konto permanent? All din data (profil, träning, kost, prenumeration) tas bort och går inte att återställa.')) return
-    if (!confirm('Är du helt säker? Detta går inte att ångra.')) return
+    if (!confirm(t('account.deleteConfirm1'))) return
+    if (!confirm(t('account.deleteConfirm2'))) return
     try {
       await api.deleteAccount()
       clearLocalUserData()
       await supabase.auth.signOut()
-      toast.success('Ditt konto har raderats.')
+      toast.success(t('account.deleted'))
       window.location.href = '/auth'
     } catch {
-      toast.error('Kunde inte radera kontot. Försök igen.')
+      toast.error(t('account.deleteFailed'))
     }
   }
 
@@ -199,14 +199,14 @@ export function MorePage() {
         className="w-full flex items-center justify-center gap-2 text-red-500 font-medium py-4 mt-4"
       >
         <LogOutIcon className="w-4 h-4 stroke-red-500" />
-        Logga ut
+        {t('account.signOut')}
       </button>
 
       <button
         onClick={deleteAccount}
         className="w-full text-center text-xs text-stone-500 dark:text-stone-400 underline py-2"
       >
-        Radera konto
+        {t('account.delete')}
       </button>
     </div>
   )

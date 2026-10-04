@@ -109,6 +109,31 @@ export function capitalizeFirst(s: string): string {
   return s.length === 0 ? s : s[0]!.toLocaleUpperCase() + s.slice(1)
 }
 
+/**
+ * Översättning UTANFÖR React.
+ *
+ * Felgränsen är en klasskomponent och kan inte använda hooks — och det är
+ * avsiktligt: den måste fungera när resten av appen kraschat. Därför läses
+ * språket här direkt, defensivt: ett trasigt localStorage, en privat flik
+ * eller ett halvt initierat tillstånd får inte kasta inifrån en felhanterare.
+ */
+export function translateStandalone(
+  key: TextKey,
+  vars?: Record<string, string | number>
+): string {
+  let setting: LanguageSetting = 'auto'
+  try {
+    const raw = localStorage.getItem('formplan_settings')
+    if (raw) {
+      const parsed = JSON.parse(raw) as { language?: LanguageSetting }
+      if (parsed.language) setting = parsed.language
+    }
+  } catch {
+    // Ignoreras med flit — standardspråket duger i en felhanterare.
+  }
+  return translate(resolveLang(setting, deviceLanguages()), key, vars)
+}
+
 /** Funktionen skärmarna använder. */
 export type TranslateFn = (key: TextKey, vars?: Record<string, string | number>) => string
 

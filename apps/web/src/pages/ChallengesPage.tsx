@@ -21,6 +21,7 @@ import {
 } from '../components/ui/Icons'
 import type { ComponentType } from 'react'
 import { useT } from '../hooks/useT'
+import type { TranslateFn } from '../lib/i18n'
 
 const ICON_MAP: Record<ChallengeIconKey, ComponentType<{ className?: string }>> = {
   flame:    FireIcon,
@@ -40,10 +41,13 @@ const ICON_STYLE: Record<ChallengeIconKey, { bg: string; stroke: string }> = {
   trophy:   { bg: 'bg-amber-50 dark:bg-amber-900/25',  stroke: 'stroke-amber-500' },
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  training: 'Träning',
-  nutrition: 'Kost',
-  body: 'Kropp',
+/** Modulnivå kan inte läsa hooken — etiketterna byggs per språk. */
+function categoryLabels(t: TranslateFn): Record<string, string> {
+  return {
+    training: t('nav.training'),
+    nutrition: t('nav.nutrition'),
+    body: t('challenges.cat.body'),
+  }
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -63,6 +67,8 @@ function ChallengeIcon({ iconKey }: { iconKey: ChallengeIconKey | undefined }) {
 }
 
 function ChallengeCard({ challenge, onAbandon }: { challenge: Challenge; onAbandon: () => void }) {
+  const { t } = useT()
+  const CATEGORY_LABELS = categoryLabels(t)
   const daysLeft = challenge.startDate
     ? Math.max(0, challenge.durationDays - Math.floor(
         // Parse the YYYY-MM-DD start at local noon — a bare new Date('YYYY-MM-DD')
@@ -86,7 +92,7 @@ function ChallengeCard({ challenge, onAbandon }: { challenge: Challenge; onAband
 
       <div className="mb-1 flex justify-between text-xs text-stone-500 dark:text-stone-400">
         <span>{challenge.currentValue} / {challenge.targetValue} {challenge.unit}</span>
-        <span>{daysLeft} dagar kvar</span>
+        <span>{t('challenges.daysLeftShort', { n: daysLeft })}</span>
       </div>
       <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-2 mb-3">
         <div
@@ -99,7 +105,7 @@ function ChallengeCard({ challenge, onAbandon }: { challenge: Challenge; onAband
         onClick={onAbandon}
         className="text-xs text-stone-500 dark:text-stone-400 hover:text-red-400 transition-colors"
       >
-        Avbryt utmaning
+        {t('challenges.cancel')}
       </button>
     </div>
   )
@@ -107,6 +113,7 @@ function ChallengeCard({ challenge, onAbandon }: { challenge: Challenge; onAband
 
 export function ChallengesPage() {
   const { t } = useT()
+  const CATEGORY_LABELS = categoryLabels(t)
   const navigate = useNavigate()
   const [active, setActive] = useState(getActiveChallenges)
   const [available, setAvailable] = useState(getAvailablePresets)
@@ -153,7 +160,7 @@ export function ChallengesPage() {
         </button>
         <div>
           <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('more.challenges')}</h1>
-          <p className="text-xs text-stone-500 dark:text-stone-400">Sätt extra mål och håll motivationen uppe</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">{t('challenges.subtitle')}</p>
         </div>
       </div>
 
@@ -163,7 +170,7 @@ export function ChallengesPage() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <ZapIcon className="w-4 h-4 stroke-amber-500" />
-              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Pågående</p>
+              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">{t('challenges.ongoing')}</p>
             </div>
             <div className="space-y-3">
               {active.map((c) => (
@@ -191,7 +198,7 @@ export function ChallengesPage() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-stone-500 dark:text-stone-400">{c.durationDays} dagar · Mål: {c.targetValue} {c.unit}</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400">{t('challenges.durationGoal', { days: c.durationDays, target: c.targetValue, unit: c.unit })}</p>
                     <button
                       onClick={() => handleStart(c.id)}
                       className="px-4 py-1.5 bg-forest-700 text-white text-xs font-semibold rounded-full"
@@ -232,8 +239,8 @@ export function ChallengesPage() {
             <div className="w-14 h-14 rounded-2xl bg-stone-100 dark:bg-stone-700 flex items-center justify-center mx-auto mb-4">
               <TargetIcon className="w-7 h-7 stroke-stone-300 dark:stroke-stone-600" />
             </div>
-            <p className="font-semibold text-stone-700 dark:text-stone-300">Inga utmaningar ännu</p>
-            <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">Starta en utmaning för att hålla motivationen uppe!</p>
+            <p className="font-semibold text-stone-700 dark:text-stone-300">{t('challenges.noneYet')}</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">{t('challenges.noneYetHint')}</p>
           </div>
         )}
       </div>

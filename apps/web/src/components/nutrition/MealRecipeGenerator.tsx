@@ -192,9 +192,9 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
           <div className="grid grid-cols-4 gap-1.5 mb-3 text-center">
             {[
               { v: recipe.kcal, l: 'kcal' },
-              { v: `${recipe.protein_g}g`, l: 'Protein' },
-              { v: `${recipe.fat_g}g`, l: 'Fett' },
-              { v: `${recipe.carbs_g}g`, l: 'Kolhyd.' },
+              { v: `${recipe.protein_g}g`, l: t('macro.protein') },
+              { v: `${recipe.fat_g}g`, l: t('macro.fat') },
+              { v: `${recipe.carbs_g}g`, l: t('macro.carbsShort') },
             ].map((m) => (
               <div key={m.l} className="bg-forest-50 dark:bg-forest-900/30 rounded-lg py-1.5">
                 <p className="font-bold text-forest-800 dark:text-forest-300 text-xs">{m.v}</p>

@@ -154,7 +154,7 @@ export function AuthPage() {
     setError(null)
     setNotice(null)
     if (password.length < MIN_PASSWORD_LENGTH) {
-      setError(`Lösenordet måste vara minst ${MIN_PASSWORD_LENGTH} tecken.`)
+      setError(t('auth.passwordTooShort', { min: MIN_PASSWORD_LENGTH }))
       return
     }
     setLoading(true)
@@ -229,7 +229,7 @@ export function AuthPage() {
     setError(null)
     setNotice(null)
     if (newPassword.length < MIN_PASSWORD_LENGTH) {
-      setError(`Lösenordet måste vara minst ${MIN_PASSWORD_LENGTH} tecken.`)
+      setError(t('auth.passwordTooShort', { min: MIN_PASSWORD_LENGTH }))
       return
     }
     setLoading(true)
@@ -496,7 +496,7 @@ export function AuthPage() {
                        laddades om. */
                     <div className="text-center py-2">
                       <p className="text-white font-semibold text-lg mb-2">{t('auth.checkYourMail')}</p>
-                      <p className="text-slate-400 text-sm">Vi skickade en inloggningslänk till {email}</p>
+                      <p className="text-slate-400 text-sm">{t('auth.sentLinkToEmail', { email })}</p>
                       <button type="button"
                         onClick={() => { setSent(false); setEmail(''); setError(null); setNotice(null) }}
                         className="mt-4 text-xs font-semibold" style={{ color: 'var(--brand)' }}>

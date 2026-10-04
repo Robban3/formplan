@@ -17,21 +17,19 @@ export function AppleHealthPage() {
         <div className="w-16 h-16 rounded-2xl bg-red-50 dark:bg-red-900/25 flex items-center justify-center mx-auto">
           <HeartIcon className="w-8 h-8 stroke-red-500" />
         </div>
-        <p className="font-semibold text-stone-800 dark:text-stone-200">Kommer i native-appen</p>
+        <p className="font-semibold text-stone-800 dark:text-stone-200">{t('health.comingInApp')}</p>
         <p className="text-stone-500 dark:text-stone-400 text-sm leading-relaxed">
-          Apple Health-integrationen kräver en native iOS-app och är inte tillgänglig i
-          webbversionen. Dina pass och vikt loggas redan i FormPlan och kan synkroniseras
-          när iOS-appen lanseras.
+          {t('health.webNotice')}
         </p>
       </div>
 
       <div className="bg-forest-50 dark:bg-forest-900/30 rounded-2xl border border-forest-100 dark:border-forest-800 p-4 mt-4 space-y-2">
-        <p className="font-medium text-forest-800 dark:text-forest-200 text-sm">Vad som synkroniseras (iOS-app):</p>
+        <p className="font-medium text-forest-800 dark:text-forest-200 text-sm">{t('health.whatSyncs')}</p>
         <ul className="text-forest-800 dark:text-forest-300 text-sm space-y-1">
-          <li>✓ Genomförda träningspass (typ, tid, kalorier)</li>
-          <li>✓ Aktiva kalorier och steg</li>
-          <li>✓ Vikt och BMI</li>
-          <li>✓ Näring och makron</li>
+          <li>{t('health.sync1')}</li>
+          <li>{t('health.sync2')}</li>
+          <li>{t('health.sync3')}</li>
+          <li>{t('health.sync4')}</li>
         </ul>
       </div>
     </div>

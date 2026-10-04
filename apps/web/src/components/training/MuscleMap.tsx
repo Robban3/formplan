@@ -1,5 +1,6 @@
 import { useId } from 'react'
 import { MUSCLE_LABELS, type Muscle } from '../../lib/exerciseCatalog'
+import { useT } from '../../hooks/useT'
 
 /**
  * Muskelkarta — stiliserad anatomisk illustration i inline-SVG (inga externa
@@ -338,6 +339,7 @@ export interface MuscleMapProps {
 }
 
 export function MuscleMap({ primary, secondary = [], className = '', hideLegend }: MuscleMapProps) {
+  const { t } = useT()
   // Unikt id så flera kartor kan ligga på samma sida utan att masken krockar.
   const maskId = `mm-${useId().replace(/[^a-zA-Z0-9]/g, '')}`
 
@@ -355,9 +357,11 @@ export function MuscleMap({ primary, secondary = [], className = '', hideLegend 
 
   const ariaLabel =
     primaryLabels.length > 0
-      ? `Muskelkarta. Primära muskler: ${primaryLabels.join(', ')}.` +
-        (secondaryLabels.length > 0 ? ` Sekundära muskler: ${secondaryLabels.join(', ')}.` : '')
-      : 'Muskelkarta utan markerade muskler.'
+      ? t('muscle.mapPrimary', { primary: primaryLabels.join(', ') }) +
+        (secondaryLabels.length > 0
+          ? t('muscle.mapSecondary', { secondary: secondaryLabels.join(', ') })
+          : '')
+      : t('muscle.mapNone')
 
   return (
     <div className={className} role="img" aria-label={ariaLabel}>

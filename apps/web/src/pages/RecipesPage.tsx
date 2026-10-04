@@ -29,6 +29,7 @@ const RECIPE_CATEGORIES: { key: RecipeCategory; labelKey: TextKey; Icon: IconCom
 
 
 export function RecipeIllustration({ kind, bg }: { kind: IllustrationKey; bg: string }) {
+  const { t } = useT()
   return (
     <div className={`w-16 h-16 ${bg} rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden`}>
       <svg viewBox="0 0 64 64" width="56" height="56" aria-hidden="true">
@@ -193,8 +194,8 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
   const macros = recipe
     ? [
         { label: 'Kalorier', value: recipe.kcal, unit: 'kcal', color: 'bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300' },
-        { label: 'Protein', value: recipe.protein_g, unit: 'g', color: 'bg-blue-50 dark:bg-blue-900/25 text-blue-800 dark:text-blue-300' },
-        { label: 'Fett', value: recipe.fat_g, unit: 'g', color: 'bg-amber-50 dark:bg-amber-900/25 text-amber-700 dark:text-amber-300' },
+        { label: t('macro.protein'), value: recipe.protein_g, unit: 'g', color: 'bg-blue-50 dark:bg-blue-900/25 text-blue-800 dark:text-blue-300' },
+        { label: t('macro.fat'), value: recipe.fat_g, unit: 'g', color: 'bg-amber-50 dark:bg-amber-900/25 text-amber-700 dark:text-amber-300' },
         { label: 'Kolhyd.', value: recipe.carbs_g, unit: 'g', color: 'bg-teal-50 dark:bg-teal-900/30 text-teal-800 dark:text-teal-300' },
       ]
     : []
@@ -216,7 +217,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
       <textarea
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
-        placeholder="Beskriv vad du är sugen på, t.ex. ”Ge mig en middag med 700 kcal och minst 50 g protein”"
+        placeholder={t('recipes.describeHint')}
         rows={3}
         className="w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-3 text-sm text-stone-900 dark:text-stone-100 leading-relaxed focus:outline-none focus:ring-2 focus:ring-forest-400 resize-none"
       />
@@ -290,7 +291,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
         disabled={loading}
         className="w-full mt-3 bg-forest-700 hover:bg-forest-800 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
       >
-        {loading ? 'Skapar recept…' : 'Generera recept'}
+        {loading ? 'Skapar recept…' : t('recipes.generate')}
       </button>
 
       {error && <p className="text-xs text-red-500 mt-2 text-center">{error}</p>}
@@ -366,7 +367,7 @@ export function RecipesPage() {
 
   const filtered = RECIPES.filter((r) => {
     const matchSearch = r.name.toLowerCase().includes(search.toLowerCase())
-    const matchTab = activeTab === 'Alla' || r.tags.includes(activeTab)
+    const matchTab = activeTab === t('tab.all') || r.tags.includes(activeTab)
     return matchSearch && matchTab
   })
 

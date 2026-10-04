@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { billingApi, type BillingStatus } from '../lib/billingApi'
 import { isPasswordRecovery, subscribePasswordRecovery } from '../lib/authRecovery'
 import { PaywallPage } from '../pages/PaywallPage'
+import { useT } from '../hooks/useT'
 
 function Spinner() {
   return (
@@ -13,17 +14,18 @@ function Spinner() {
 }
 
 function RetryScreen({ onRetry }: { onRetry: () => void }) {
+  const { t } = useT()
   return (
     <div className="min-h-[100dvh] flex flex-col items-center justify-center gap-4 bg-canvas px-6 text-center">
-      <p className="font-semibold text-stone-800 dark:text-stone-200">Kunde inte kontrollera ditt konto</p>
+      <p className="font-semibold text-stone-800 dark:text-stone-200">{t('gate.accountCheckFailed')}</p>
       <p className="text-sm text-stone-500 dark:text-stone-400 max-w-xs">
-        Vi kunde inte nå servern. Kontrollera din anslutning och försök igen.
+        {t('gate.noServer')}
       </p>
       <button
         onClick={onRetry}
         className="px-5 py-2.5 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-sm font-semibold transition-colors"
       >
-        Försök igen
+        {t('gate.retry')}
       </button>
     </div>
   )
@@ -39,6 +41,7 @@ function RetryScreen({ onRetry }: { onRetry: () => void }) {
  * `formplan:entitlement-changed` (e.g. a trial expiring mid-session).
  */
 export function BillingGate({ user, children }: { user: unknown; children: ReactNode }) {
+  const { t } = useT()
   const [status, setStatus] = useState<BillingStatus | null>(null)
   const [checking, setChecking] = useState(true)
   const [failed, setFailed] = useState(false)

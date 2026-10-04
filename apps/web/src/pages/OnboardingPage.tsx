@@ -408,7 +408,7 @@ export function OnboardingPage() {
               ))}
             </div>
             <p className="text-center text-sm text-stone-500 dark:text-stone-400 mb-6">
-              {form.days_per_week} pass per vecka
+              {t('onb.daysPerWeek', { n: form.days_per_week })}
             </p>
             <PrimaryButton onClick={next}>{t('onb.continue')}</PrimaryButton>
           </div>

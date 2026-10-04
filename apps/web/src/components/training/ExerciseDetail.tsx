@@ -1,25 +1,30 @@
 import type { CatalogExercise } from '../../lib/exerciseCatalog'
 import { ExerciseMedia } from './ExerciseMedia'
 import { MuscleMap } from './MuscleMap'
+import { useT } from '../../hooks/useT'
+import type { TranslateFn } from '../../lib/i18n'
 
-/** Svenska etiketter för katalogens engelska utrustningsnycklar. */
-const EQUIPMENT_LABELS: Record<string, string> = {
-  barbell: 'Skivstång',
-  dumbbell: 'Hantlar',
-  'body only': 'Kroppsvikt',
-  machine: 'Maskin',
-  cable: 'Kabel',
-  kettlebells: 'Kettlebell',
-  'e-z curl bar': 'EZ-stång',
-  bands: 'Gummiband',
-  'medicine ball': 'Medicinboll',
-  'exercise ball': 'Pilatesboll',
-  'foam roll': 'Foamroller',
-  other: 'Övrigt',
-}
-
-export function equipmentLabel(equipment: string): string {
-  return EQUIPMENT_LABELS[equipment] ?? equipment
+/**
+ * Etiketter för katalogens utrustningsnycklar.
+ *
+ * Nycklarna är katalogens EGNA engelska värden ('body only', 'e-z curl bar')
+ * och får inte ändras — de kommer ur övningsdatan.
+ */
+function equipmentLabels(t: TranslateFn): Record<string, string> {
+  return {
+    barbell: t('equipLabel.barbell'),
+    dumbbell: t('equipLabel.dumbbell'),
+    'body only': t('equipLabel.bodyOnly'),
+    machine: t('equipLabel.machine'),
+    cable: t('equipLabel.cable'),
+    kettlebells: t('equipLabel.kettlebells'),
+    'e-z curl bar': t('equipLabel.ezCurlBar'),
+    bands: t('equipLabel.bands'),
+    'medicine ball': t('equipLabel.medicineBall'),
+    'exercise ball': t('equipLabel.exerciseBall'),
+    'foam roll': t('equipLabel.foamRoll'),
+    other: t('equipLabel.other'),
+  }
 }
 
 export interface ExerciseDetailProps {
@@ -32,6 +37,8 @@ export interface ExerciseDetailProps {
  * och muskelkarta. Används överallt där en övning visas i detalj.
  */
 export function ExerciseDetail({ exercise, className = '' }: ExerciseDetailProps) {
+  const { t } = useT()
+  const EQUIPMENT_LABELS = equipmentLabels(t)
   return (
     <div className={`space-y-3 ${className}`}>
       <ExerciseMedia key={exercise.id} exercise={exercise} variant="card" showName={false} />
@@ -43,14 +50,14 @@ export function ExerciseDetail({ exercise, className = '' }: ExerciseDetailProps
             {exercise.category}
           </span>
           <span className="text-[11px] font-medium text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-700 rounded-full px-2 py-0.5">
-            {equipmentLabel(exercise.equipment)}
+            {EQUIPMENT_LABELS[exercise.equipment] ?? exercise.equipment}
           </span>
         </div>
       </div>
 
       <div>
         <p className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-1.5">
-          Muskler som tränas
+          {t('exercise.musclesWorked')}
         </p>
         <MuscleMap
           primary={exercise.primaryMuscles}

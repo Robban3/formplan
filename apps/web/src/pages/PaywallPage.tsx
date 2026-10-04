@@ -24,7 +24,7 @@ export function PaywallPage({ status }: { status: BillingStatus }) {
       const { url } = await billingApi.startCheckout()
       window.location.href = url
     } catch {
-      setError('Kunde inte starta betalningen. Försök igen.')
+      setError(t('paywall.paymentFailed'))
       setLoading(false)
     }
   }
@@ -45,9 +45,9 @@ export function PaywallPage({ status }: { status: BillingStatus }) {
           <img src="/logo.png" alt="FormPlan" style={{ height: '120px', width: 'auto' }} />
         </div>
 
-        <h1 className="text-2xl font-bold text-center">Din gratisperiod är slut</h1>
+        <h1 className="text-2xl font-bold text-center">{t('paywall.trialOver')}</h1>
         <p className="text-stone-500 dark:text-stone-400 text-center mt-2 text-sm">
-          Fortsätt med FormPlan Premium och behåll allt du byggt upp.
+          {t('paywall.keepEverything')}
         </p>
 
         <div className="mt-7 bg-stone-800/80 border border-stone-700 rounded-2xl p-5">
@@ -55,7 +55,7 @@ export function PaywallPage({ status }: { status: BillingStatus }) {
             <span className="text-4xl font-extrabold">{price}</span>
             <span className="text-stone-500 dark:text-stone-400 font-medium">kr/mån</span>
           </div>
-          <p className="text-center text-xs text-stone-500 dark:text-stone-400 mt-1">Avsluta när du vill</p>
+          <p className="text-center text-xs text-stone-500 dark:text-stone-400 mt-1">{t('paywall.cancelAnytime')}</p>
 
           <ul className="mt-5 space-y-2.5">
             {FEATURE_KEYS.map((featureKey) => (
@@ -76,11 +76,11 @@ export function PaywallPage({ status }: { status: BillingStatus }) {
           disabled={loading}
           className="mt-6 w-full bg-forest-700 hover:bg-forest-800 text-white font-bold py-4 rounded-2xl transition-colors disabled:opacity-60"
         >
-          {loading ? 'Öppnar betalning…' : `Starta prenumeration – ${price} kr/mån`}
+          {loading ? t('paywall.opening') : `Starta prenumeration – ${price} kr/mån`}
         </button>
 
         <button onClick={logout} className="mt-4 w-full text-stone-500 dark:text-stone-400 text-sm py-2">
-          Logga ut
+          {t('account.signOut')}
         </button>
       </div>
     </div>

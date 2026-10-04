@@ -619,6 +619,104 @@ export const sv = {
   'coach.unavailable': 'AI-coachen är tillfälligt otillgänglig, försök igen om en stund',
   'coach.askPlaceholder': 'Ställ en träningsfråga…',
 
+  // Felgränser och laddning
+  'gate.accountCheckFailed': 'Kunde inte kontrollera ditt konto',
+  'gate.noServer': 'Vi kunde inte nå servern. Kontrollera din anslutning och försök igen.',
+  'gate.retry': 'Försök igen',
+  'error.reloadApp': 'Ladda om appen',
+
+  // Måltidssektion och övningsdetalj
+  'meal.addFood': 'Lägg till mat',
+  'exercise.musclesWorked': 'Muskler som tränas',
+  'exercise.equip.barbell': 'Skivstång',
+  'exercise.equip.ezbar': 'EZ-stång',
+  'exercise.equip.other': 'Övrigt',
+  'muscle.mapPrimary': 'Muskelkarta. Primära muskler: {primary}.',
+  'muscle.mapSecondary': ' Sekundära muskler: {secondary}.',
+
+  // Apple Health
+  'health.webNotice': 'Apple Health-integrationen kräver en native iOS-app och är inte tillgänglig i webbversionen. Dina pass och vikt loggas redan i FormPlan och kan synkroniseras när iOS-appen lanseras.',
+  'health.whatSyncs': 'Vad som synkroniseras (iOS-app):',
+  'health.comingInApp': 'Kommer i native-appen',
+  'health.sync1': '✓ Genomförda träningspass (typ, tid, kalorier)',
+  'health.sync2': '✓ Aktiva kalorier och steg',
+  'health.sync3': '✓ Vikt och BMI',
+  'health.sync4': '✓ Näring och makron',
+
+  // Utmaningar
+  'challenges.subtitle': 'Sätt extra mål och håll motivationen uppe',
+  'challenges.cat.body': 'Kropp',
+  'challenges.ongoing': 'Pågående',
+  'challenges.daysLeft': '{n} dagar kvar',
+  'challenges.cancel': 'Avbryt utmaning',
+  'challenges.daysGoal': '{days} dagar · Mål: {goal}',
+  'challenges.noneYet': 'Inga utmaningar ännu',
+  'challenges.noneYetHint': 'Starta en utmaning för att hålla motivationen uppe!',
+
+  // Konto
+  'account.paymentFailed': 'Kunde inte starta betalningen',
+  'account.portalFailed': 'Kunde inte öppna prenumerationen',
+  'account.deleteConfirm1': 'Radera ditt konto permanent? All din data (profil, träning, kost, prenumeration) tas bort och går inte att återställa.',
+  'account.deleteConfirm2': 'Är du helt säker? Detta går inte att ångra.',
+  'account.deleted': 'Ditt konto har raderats.',
+  'account.deleteFailed': 'Kunde inte radera kontot. Försök igen.',
+  'account.delete': 'Radera konto',
+  'account.signOut': 'Logga ut',
+
+  // Notiser
+  'notif.unsupported': 'Din webbläsare stöder inte notiser.',
+  'notif.enabled': 'Notiser är nu aktiverade! 💪',
+  'notif.enableInBrowser': 'Du kan aktivera notiser i webbläsarens inställningar.',
+  'notif.testBody': 'Det här är en testnotis från FormPlan.',
+  'notif.workoutReminders': 'Påminnelser om pass',
+  'notif.workoutRemindersSub': 'Notis när det är dags att träna',
+  'notif.pickWhich': 'Välj vilka notiser du vill ta emot.',
+  'notif.allowInBrowser': 'Tillåt notiser för FormPlan i webbläsarens inställningar.',
+  'notif.allowToContinue': 'Tillåt notiser för att fortsätta',
+
+  // Betalvägg
+  'paywall.paymentFailed': 'Kunde inte starta betalningen. Försök igen.',
+  'paywall.trialOver': 'Din gratisperiod är slut',
+  'paywall.keepEverything': 'Fortsätt med FormPlan Premium och behåll allt du byggt upp.',
+  'paywall.perMonth': '{price} kr/mån',
+  'paywall.cancelAnytime': 'Avsluta när du vill',
+  'paywall.opening': 'Öppnar betalning…',
+
+  // Diverse
+  'home.sessionsOfTotal': 'pass av {total}',
+  'home.sessionsWord': 'pass',
+  'home.noPlan': 'Inget schema',
+  'home.waterLogged': '+{amount} vatten loggat',
+  'onb.daysPerWeek': '{n} pass per vecka',
+  'auth.passwordTooShort': 'Lösenordet måste vara minst {min} tecken.',
+  'auth.sentLinkTo': 'Vi skickade en inloggningslänk till',
+  'auth.sentLinkToEmail': 'Vi skickade en inloggningslänk till {email}',
+  'coach.avgPerSession': 'Snittlängd per pass: {minutes} min',
+  'coach.latestWeight': 'Senaste vikt: {weight}',
+  'recipes.describeHint': 'Beskriv vad du är sugen på, t.ex. ”Ge mig en middag med 700 kcal och minst 50 g protein”',
+  'recipes.tailoredSuffix': '{category} · anpassat efter dina mål',
+  'barcode.savedOnDevice': 'på den här enheten och fylls i automatiskt nästa gång du skannar den.',
+
+  // Utrustning i övningskatalogen (nycklarna är katalogens engelska värden)
+  'equipLabel.barbell': 'Skivstång',
+  'equipLabel.dumbbell': 'Hantlar',
+  'equipLabel.bodyOnly': 'Kroppsvikt',
+  'equipLabel.machine': 'Maskin',
+  'equipLabel.cable': 'Kabel',
+  'equipLabel.kettlebells': 'Kettlebell',
+  'equipLabel.ezCurlBar': 'EZ-stång',
+  'equipLabel.bands': 'Gummiband',
+  'equipLabel.medicineBall': 'Medicinboll',
+  'equipLabel.exerciseBall': 'Pilatesboll',
+  'equipLabel.foamRoll': 'Foamroller',
+  'equipLabel.other': 'Övrigt',
+
+  // Diverse interpolerat
+  'macro.kcalLeftToday': 'Du har {kcal} kcal kvar att äta idag.',
+  'muscle.mapNone': 'Muskelkarta utan markerade muskler.',
+  'challenges.daysLeftShort': '{n} dagar kvar',
+  'challenges.durationGoal': '{days} dagar · Mål: {target} {unit}',
+
   // Måltider
   'meal.frukost': 'Frukost',
   'meal.lunch': 'Lunch',

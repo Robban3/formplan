@@ -67,7 +67,7 @@ export function MealSection({ slot, entries, date, onAdd, onTapEntry, onLogged }
         className="w-full flex items-center justify-center gap-2 py-3.5 text-sm text-forest-800 dark:text-forest-400 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
       >
         <PlusIcon className="w-4 h-4 stroke-forest-600" />
-        Lägg till mat
+        {t('meal.addFood')}
       </button>
 
       <MealRecipeGenerator
