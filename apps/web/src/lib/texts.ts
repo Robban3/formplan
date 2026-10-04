@@ -42,21 +42,11 @@ export function levelLabels(t: TranslateFn): Record<string, string> {
   }
 }
 
-export function dietFocusLabels(t: TranslateFn): Record<string, string> {
-  return {
-    balanced: t('diet.balanced'),
-    high_protein: t('diet.high_protein'),
-    vegetarian: t('diet.vegetarian'),
-    low_carb: t('diet.low_carb'),
-  }
-}
-
 // ---------------------------------------------------- svenska, för det som väntar
 
 export const MEAL_SLOT_LABELS = mealSlotLabels(svT)
 export const GOAL_LABELS = goalLabels(svT)
 export const LEVEL_LABELS = levelLabels(svT)
-export const DIET_FOCUS_LABELS = dietFocusLabels(svT)
 
 export const GENERIC_ERROR = svT('common.error')
 export const BUSY_ADDING = svT('common.adding')

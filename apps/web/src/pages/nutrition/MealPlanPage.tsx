@@ -8,13 +8,19 @@ import {
   type MealCount,
   type GeneratedMealPlan,
 } from '../../lib/mealPlanGenerator'
+import { useT } from '../../hooks/useT'
+import type { TranslateFn, TextKey } from '../../lib/i18n'
 
-const FOCUS_OPTIONS: { key: DietFocus; label: string; desc: string }[] = [
-  { key: 'balanced',     label: 'Balanserat',   desc: '30% protein · 30% fett · 40% kolh.' },
-  { key: 'high_protein', label: 'Hög protein',  desc: '40% protein · 25% fett · 35% kolh.' },
-  { key: 'vegetarian',   label: 'Vegetarisk',   desc: 'Helt utan kött' },
-  { key: 'low_carb',     label: 'Låg kolhydrat', desc: '35% protein · 45% fett · 20% kolh.' },
-]
+/** Nycklarna är lagrade värden; etiketterna kommer ur ordlistan. */
+const FOCUS_KEYS: DietFocus[] = ['balanced', 'high_protein', 'vegetarian', 'low_carb']
+
+function focusOptions(t: TranslateFn): { key: DietFocus; label: string; desc: string }[] {
+  return FOCUS_KEYS.map((key) => ({
+    key,
+    label: t(`diet.${key}` as TextKey),
+    desc: t(`diet.${key}.desc` as TextKey),
+  }))
+}
 
 const MACRO_COLORS: Record<string, string> = {
   protein: '#22e6c6',
@@ -54,6 +60,7 @@ function MacroBar({ plan }: { plan: GeneratedMealPlan }) {
 export function MealPlanPage() {
   const navigate = useNavigate()
   const settings = useSettings()
+  const { t } = useT()
 
   const [kcal, setKcal] = useState(settings.calorie_goal)
   const [mealCount, setMealCount] = useState<MealCount>(4)
@@ -160,7 +167,7 @@ export function MealPlanPage() {
         <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 space-y-3">
           <p className="font-semibold text-stone-800 dark:text-stone-200">Kostfokus</p>
           <div className="grid grid-cols-2 gap-2">
-            {FOCUS_OPTIONS.map((opt) => (
+            {focusOptions(t).map((opt) => (
               <button
                 key={opt.key}
                 onClick={() => setFocus(opt.key)}

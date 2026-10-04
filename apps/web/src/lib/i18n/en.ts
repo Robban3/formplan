@@ -36,6 +36,10 @@ export const en: Record<TextKey, string> = {
   'diet.high_protein': 'High protein',
   'diet.vegetarian': 'Vegetarian',
   'diet.low_carb': 'Low carb',
+  'diet.balanced.desc': '30% protein · 30% fat · 40% carbs',
+  'diet.high_protein.desc': '40% protein · 25% fat · 35% carbs',
+  'diet.vegetarian.desc': 'No meat at all',
+  'diet.low_carb.desc': '35% protein · 45% fat · 20% carbs',
 
   // Common
   'common.error': 'Something went wrong',
@@ -58,7 +62,7 @@ export const en: Record<TextKey, string> = {
   'goals.suggest.lose.imperial': 'Lose 10 lbs',
   'goals.suggest.weigh.metric': 'Weigh 75 kg',
   'goals.suggest.weigh.imperial': 'Weigh 165 lbs',
-  'goals.suggest.total50': 'Complete 50 workouts total',
+  'goals.suggest.total50': 'Complete 50 workouts',
   'goals.suggest.run.metric': 'Run 5 km without stopping',
   'goals.suggest.run.imperial': 'Run 3 miles without stopping',
   'goals.suggest.pullups': 'Do 10 pull-ups in a row',

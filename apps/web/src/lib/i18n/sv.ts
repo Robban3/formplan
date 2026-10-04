@@ -33,10 +33,16 @@ export const sv = {
   'level.advanced': 'Avancerad',
 
   // Kostinriktning
+  // "Hög protein" och "Låg kolhydrat" var inte idiomatisk svenska; nu när
+  // texten ligger på ett ställe är den lätt att rätta.
   'diet.balanced': 'Balanserat',
-  'diet.high_protein': 'Hög protein',
+  'diet.high_protein': 'Proteinrikt',
   'diet.vegetarian': 'Vegetarisk',
-  'diet.low_carb': 'Låg kolhydrat',
+  'diet.low_carb': 'Lågkolhydrat',
+  'diet.balanced.desc': '30 % protein · 30 % fett · 40 % kolh.',
+  'diet.high_protein.desc': '40 % protein · 25 % fett · 35 % kolh.',
+  'diet.vegetarian.desc': 'Helt utan kött',
+  'diet.low_carb.desc': '35 % protein · 45 % fett · 20 % kolh.',
 
   // Gemensamt
   'common.error': 'Något gick fel',
