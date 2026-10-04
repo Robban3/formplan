@@ -242,8 +242,8 @@ export function TrainingOverview() {
               </div>
               {streak > 0 && (
                 <div className="flex flex-col items-center bg-amber-50 dark:bg-amber-900/25 rounded-xl px-3 py-2">
-                  <span className="text-lg font-bold text-amber-500">{streak}</span>
-                  <span className="text-[9px] text-amber-400">dag streak</span>
+                  <span className="text-lg font-bold text-amber-600 dark:text-amber-400">{streak}</span>
+                  <span className="text-[9px] text-amber-700 dark:text-amber-300">dag streak</span>
                   {longestStreak > streak && (
                     <span className="text-[8px] text-stone-500 dark:text-stone-400">rekord: {longestStreak}</span>
                   )}

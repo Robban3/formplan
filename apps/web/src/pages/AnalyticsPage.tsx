@@ -764,7 +764,7 @@ export function AnalyticsPage() {
                       return (
                         <div key={date} className="flex-1 flex flex-col items-center gap-0.5" style={{ height: '112px' }}>
                           {balance !== null && (
-                            <span className={`text-[8px] font-medium ${isPos ? 'text-amber-500' : 'text-sky-500'}`}>
+                            <span className={`text-[8px] font-medium ${isPos ? 'text-amber-600 dark:text-amber-400' : 'text-sky-500'}`}>
                               {isPos ? '+' : ''}{balance}
                             </span>
                           )}
@@ -792,7 +792,7 @@ export function AnalyticsPage() {
                   </div>
                   <div className="flex justify-between text-[9px] text-stone-300 dark:text-stone-600 mt-1">
                     <span className="text-sky-400">◀ underskott</span>
-                    <span className="text-amber-400">överskott ▶</span>
+                    <span className="text-amber-700 dark:text-amber-300">överskott ▶</span>
                   </div>
                 </div>
               )}
