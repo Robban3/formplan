@@ -481,7 +481,8 @@ export function AnalyticsPage() {
             <div className="grid grid-cols-3 gap-2">
               <StatRing
                 Icon={DumbbellIcon} label={t('analytics.sessions')} unit={t('analytics.sessionsUnit')}
-                value={thisWeek} goal={weeklyGoal} goalLabel={t('analytics.sessionsWithCount', { n: weeklyGoal })}
+                valueLabel={t(thisWeek === 1 ? 'analytics.sessionsWithCountOne' : 'analytics.sessionsWithCount', { n: thisWeek })}
+                value={thisWeek} goal={weeklyGoal} goalLabel={t(weeklyGoal === 1 ? 'analytics.sessionsWithCountOne' : 'analytics.sessionsWithCount', { n: weeklyGoal })}
                 color="#22e6c6" iconStroke="stroke-forest-600"
               />
               <StatRing
@@ -551,7 +552,7 @@ export function AnalyticsPage() {
                     <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate">{s.workout_name}</p>
                     <p className="text-xs text-stone-500 dark:text-stone-400">
                       {fmtDate(s.completed_at, locale)}
-                      {s.completed_sets > 0 && ` · ${t('analytics.setsSuffix', { n: s.completed_sets })}`}
+                      {s.completed_sets > 0 && ` · ${t(s.completed_sets === 1 ? 'analytics.setsSuffixOne' : 'analytics.setsSuffix', { n: s.completed_sets })}`}
                       {s.duration_seconds > 0 && ` · ${fmt(s.duration_seconds)}`}
                     </p>
                   </div>

@@ -324,6 +324,9 @@ export const sv = {
   'analytics.sessions': 'Pass',
   'analytics.sessionsUnit': 'pass',
   'analytics.sessionsWithCount': '{n} pass',
+  // Svenska böjer inte 'pass' i plural, engelska gör det — därav två nycklar.
+  'analytics.sessionsWithCountOne': '{n} pass',
+  'analytics.setsSuffixOne': '{n} set',
   'analytics.waterToday': 'Vatten idag',
   'analytics.trainingTime': 'Träningstid',
   'analytics.sessionsPerWeek': 'Pass per vecka',

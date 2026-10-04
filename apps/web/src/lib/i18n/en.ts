@@ -318,6 +318,8 @@ export const en: Record<TextKey, string> = {
   'analytics.sessions': 'Sessions',
   'analytics.sessionsUnit': 'sessions',
   'analytics.sessionsWithCount': '{n} sessions',
+  'analytics.sessionsWithCountOne': '{n} session',
+  'analytics.setsSuffixOne': '{n} set',
   'analytics.waterToday': 'Water today',
   'analytics.trainingTime': 'Training time',
   'analytics.sessionsPerWeek': 'Sessions per week',
