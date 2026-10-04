@@ -209,7 +209,9 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
         <div>
           <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm">{t('recipes.createWithAi')}</p>
           <p className="text-[11px] text-stone-500 dark:text-stone-400">
-            {mealTab !== 'Alla' ? `${mealTab} · anpassat efter dina mål` : t('recipes.tailoredToGoals')}
+            {mealTab !== 'Alla'
+              ? t('recipes.tailoredSuffix', { category: t(MEAL_TAB_KEYS[mealTab]) })
+              : t('recipes.tailoredToGoals')}
           </p>
         </div>
       </div>

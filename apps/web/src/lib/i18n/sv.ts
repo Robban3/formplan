@@ -680,6 +680,8 @@ export const sv = {
   'paywall.keepEverything': 'Fortsätt med FormPlan Premium och behåll allt du byggt upp.',
   'paywall.perMonth': '{price} kr/mån',
   'paywall.cancelAnytime': 'Avsluta när du vill',
+  'paywall.currencyPerMonth': 'kr/mån',
+  'paywall.startSubscription': 'Starta prenumeration – {price} kr/mån',
   'paywall.opening': 'Öppnar betalning…',
 
   // Diverse

@@ -53,7 +53,7 @@ export function PaywallPage({ status }: { status: BillingStatus }) {
         <div className="mt-7 bg-stone-800/80 border border-stone-700 rounded-2xl p-5">
           <div className="flex items-baseline justify-center gap-1">
             <span className="text-4xl font-extrabold">{price}</span>
-            <span className="text-stone-500 dark:text-stone-400 font-medium">kr/mån</span>
+            <span className="text-stone-500 dark:text-stone-400 font-medium">{t('paywall.currencyPerMonth')}</span>
           </div>
           <p className="text-center text-xs text-stone-500 dark:text-stone-400 mt-1">{t('paywall.cancelAnytime')}</p>
 
@@ -76,7 +76,7 @@ export function PaywallPage({ status }: { status: BillingStatus }) {
           disabled={loading}
           className="mt-6 w-full bg-forest-700 hover:bg-forest-800 text-white font-bold py-4 rounded-2xl transition-colors disabled:opacity-60"
         >
-          {loading ? t('paywall.opening') : `Starta prenumeration – ${price} kr/mån`}
+          {loading ? t('paywall.opening') : t('paywall.startSubscription', { price })}
         </button>
 
         <button onClick={logout} className="mt-4 w-full text-stone-500 dark:text-stone-400 text-sm py-2">

@@ -393,7 +393,7 @@ export function GoalsPage() {
                 {t('onb.cancel')}
               </button>
               <button onClick={() => addGoal(text)} className="flex-1 py-2.5 rounded-xl bg-forest-700 text-white text-sm font-semibold">
-                Lägg till
+                {t('food.add')}
               </button>
             </div>
           </div>

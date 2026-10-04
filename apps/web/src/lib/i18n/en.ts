@@ -673,6 +673,8 @@ export const en: Record<TextKey, string> = {
   'paywall.keepEverything': 'Continue with FormPlan Premium and keep everything you’ve built.',
   'paywall.perMonth': 'SEK {price}/month',
   'paywall.cancelAnytime': 'Cancel any time',
+  'paywall.currencyPerMonth': 'SEK/month',
+  'paywall.startSubscription': 'Start subscription – SEK {price}/month',
   'paywall.opening': 'Opening payment…',
 
   // Misc
