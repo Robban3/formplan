@@ -13,6 +13,8 @@
  * delar.
  */
 
+import type { Lang } from './i18n'
+
 // Exakta definitioner, inte avrundade faktorer. Med 2.20462 i stället för
 // 1/0.45359237 hamnade 225 lbs på 102,0584 kg i stället för 102,0583 — litet,
 // men det är gratis att ha rätt.
@@ -23,6 +25,11 @@ export const KG_PER_LBS = 0.45359237
 export const ML_PER_FLOZ = 29.5735295625
 /** 1 ounce i gram (exakt: 1/16 pund). */
 export const G_PER_OZ = 28.349523125
+/** 1 US gallon i milliliter (exakt: 231 kubiktum). "En gallon om dagen" är ett
+ *  vanligt vattenmål, så tolkaren måste känna igen det. */
+export const ML_PER_GALLON = 3785.411784
+/** 1 US cup i milliliter (exakt: 1/16 gallon). */
+export const ML_PER_CUP = 236.5882365
 /** 1 tum i centimeter (exakt). */
 export const CM_PER_INCH = 2.54
 /** 1 mile i kilometer (exakt). */
@@ -37,23 +44,30 @@ const DISPLAY_DECIMALS = 1
  */
 const STORE_DECIMALS = 4
 
+/** Svenska är standard — det språk appen skrevs på. */
+const DEFAULT_LANG: Lang = 'sv'
+
 function round(value: number, decimals: number): number {
   const factor = 10 ** decimals
   return Math.round(value * factor) / factor
 }
 
 /**
- * Tal i text. Svenskt decimalkomma, som resten av gränssnittet, och ett
- * avslutande ",0" tas bort så det står "100 kg" och inte "100,0 kg".
+ * Tal i text.
+ *
+ * Decimaltecknet följer SPRÅKET, inte enheten: svenska skriver "2,5", engelska
+ * "2.5". Tidigare var kommat hårdkodat, vilket gav "84,5 fl oz today" i den
+ * engelska appen.
+ *
+ * Ett avslutande ",0" tas bort så det står "100 kg" och inte "100,0 kg".
  *
  * Numeriska toDisplay*-funktioner lämnar talet som ett tal — de matar
  * inmatningsfält, och ett <input type="number"> kräver punkt.
  */
-function sv(value: number): string {
+function num(value: number, lang: Lang): string {
   const rounded = round(value, DISPLAY_DECIMALS)
-  return Number.isInteger(rounded)
-    ? String(rounded)
-    : String(rounded).replace('.', ',')
+  if (Number.isInteger(rounded)) return String(rounded)
+  return lang === 'sv' ? String(rounded).replace('.', ',') : String(rounded)
 }
 
 // ---------------------------------------------------------------- etiketter
@@ -97,8 +111,8 @@ export function toStoreWeight(displayed: number, imperial: boolean): number {
   return imperial ? round(displayed * KG_PER_LBS, STORE_DECIMALS) : displayed
 }
 
-export function formatWeight(kg: number, imperial: boolean): string {
-  return `${sv(toDisplayWeight(kg, imperial))} ${weightLabel(imperial)}`
+export function formatWeight(kg: number, imperial: boolean, lang: Lang = DEFAULT_LANG): string {
+  return `${num(toDisplayWeight(kg, imperial), lang)} ${weightLabel(imperial)}`
 }
 
 // ------------------------------------------------------------------ volym
@@ -116,9 +130,9 @@ export function toStoreVolume(displayed: number, imperial: boolean): number {
  * "2,5 L" läser bättre än "2500 ml"; imperial stannar i fl oz, som är hur
  * dryck mäts där.
  */
-export function formatVolume(ml: number, imperial: boolean): string {
-  if (imperial) return `${sv(toDisplayVolume(ml, true))} fl oz`
-  return ml >= 1000 ? `${sv(ml / 1000)} L` : `${Math.round(ml)} ml`
+export function formatVolume(ml: number, imperial: boolean, lang: Lang = DEFAULT_LANG): string {
+  if (imperial) return `${num(toDisplayVolume(ml, true), lang)} fl oz`
+  return ml >= 1000 ? `${num(ml / 1000, lang)} L` : `${Math.round(ml)} ml`
 }
 
 // --------------------------------------------------------------- mat (massa)
@@ -131,8 +145,8 @@ export function toStoreFoodMass(displayed: number, imperial: boolean): number {
   return imperial ? round(displayed * G_PER_OZ, STORE_DECIMALS) : displayed
 }
 
-export function formatFoodMass(g: number, imperial: boolean): string {
-  return `${sv(toDisplayFoodMass(g, imperial))} ${foodMassLabel(imperial)}`
+export function formatFoodMass(g: number, imperial: boolean, lang: Lang = DEFAULT_LANG): string {
+  return `${num(toDisplayFoodMass(g, imperial), lang)} ${foodMassLabel(imperial)}`
 }
 
 // ------------------------------------------------------------------ längd
@@ -145,8 +159,8 @@ export function toStoreLength(displayed: number, imperial: boolean): number {
   return imperial ? round(displayed * CM_PER_INCH, STORE_DECIMALS) : displayed
 }
 
-export function formatLength(cm: number, imperial: boolean): string {
-  return `${sv(toDisplayLength(cm, imperial))} ${lengthLabel(imperial)}`
+export function formatLength(cm: number, imperial: boolean, lang: Lang = DEFAULT_LANG): string {
+  return `${num(toDisplayLength(cm, imperial), lang)} ${lengthLabel(imperial)}`
 }
 
 /**
@@ -154,7 +168,7 @@ export function formatLength(cm: number, imperial: boolean): string {
  * längd så. Avrundning sker på tummen, och 12 tum slår över till nästa fot så
  * resultatet aldrig blir 5'12".
  */
-export function formatHeight(cm: number, imperial: boolean): string {
+export function formatHeight(cm: number, imperial: boolean, lang: Lang = DEFAULT_LANG): string {
   if (!imperial) return `${Math.round(cm)} cm`
   const totalInches = Math.round(cm / CM_PER_INCH)
   const feet = Math.floor(totalInches / 12)
@@ -172,6 +186,6 @@ export function toStoreDistance(displayed: number, imperial: boolean): number {
   return imperial ? round(displayed * KM_PER_MILE, STORE_DECIMALS) : displayed
 }
 
-export function formatDistance(km: number, imperial: boolean): string {
-  return `${sv(toDisplayDistance(km, imperial))} ${distanceLabel(imperial)}`
+export function formatDistance(km: number, imperial: boolean, lang: Lang = DEFAULT_LANG): string {
+  return `${num(toDisplayDistance(km, imperial), lang)} ${distanceLabel(imperial)}`
 }

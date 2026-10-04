@@ -1,86 +1,76 @@
 /**
- * Delad svensk text.
+ * Övergångslager mot lib/i18n.
  *
- * Här ligger kopia som används på FLER ÄN ETT ställe, plus etikettkartorna för
- * de värden som lagras som nyckelord. Enskilda meningar som bara finns i en
- * skärm står kvar i sin JSX — att flytta dem hit gör inte appen mer korrekt,
- * bara svårare att läsa.
+ * Strängarna bor i lib/i18n/sv.ts och lib/i18n/en.ts. Den här filen plockar ut
+ * dem på svenska för de skärmar som ÄNNU INTE är kopplade till `useT()`. Den
+ * finns bara så att ingen sträng behöver existera i två exemplar under
+ * omläggningen — en skärm i taget flyttas till `useT()`, och när den sista är
+ * flyttad kan filen tas bort.
  *
- * Måltidsetiketterna fanns i ÅTTA identiska kopior (hemskärmen, matdagboken,
- * veckoplanen, makrosidan, fotoanalysen, streckkodsskannern, livsmedelssöket
- * och måltidssektionen). De var lika den här gången; nästa gång någon rättar
- * en av dem hade de inte varit det.
- *
- * Nyckelorden är de värden som ligger i databasen och får inte ändras —
- * `mellanmar` är felstavat, men lagrade rader slutar matcha om det rättas.
+ * Lägg inte till nya strängar här. De ska in i sv.ts och en.ts.
  */
 
 import type { MealSlot } from './nutritionApi'
+import { translate, type Lang, type TranslateFn } from './i18n'
 
-// ------------------------------------------------------------- etikettkartor
+const svT: TranslateFn = (key, vars) => translate('sv', key, vars)
 
-export const MEAL_SLOT_LABELS: Record<MealSlot, string> = {
-  frukost: 'Frukost',
-  lunch: 'Lunch',
-  middag: 'Middag',
-  mellanmar: 'Mellanmål',
+/** Etiketterna för ett språk. Skärmar med `useT()` använder den här. */
+export function mealSlotLabels(t: TranslateFn): Record<MealSlot, string> {
+  return {
+    frukost: t('meal.frukost'),
+    lunch: t('meal.lunch'),
+    middag: t('meal.middag'),
+    mellanmar: t('meal.mellanmar'),
+  }
 }
 
-/** Träningsmål. Nycklarna speglar `fitness_profile.goal`. */
-export const GOAL_LABELS: Record<string, string> = {
-  lose_weight: 'Gå ner i vikt',
-  build_muscle: 'Bygga muskler',
-  maintain: 'Hålla formen',
-  improve_endurance: 'Förbättra kondition',
+export function goalLabels(t: TranslateFn): Record<string, string> {
+  return {
+    lose_weight: t('goal.lose_weight'),
+    build_muscle: t('goal.build_muscle'),
+    maintain: t('goal.maintain'),
+    improve_endurance: t('goal.improve_endurance'),
+  }
 }
 
-/** Erfarenhetsnivå. Nycklarna speglar `fitness_profile.level`. */
-export const LEVEL_LABELS: Record<string, string> = {
-  beginner: 'Nybörjare',
-  intermediate: 'Mellannivå',
-  advanced: 'Avancerad',
+export function levelLabels(t: TranslateFn): Record<string, string> {
+  return {
+    beginner: t('level.beginner'),
+    intermediate: t('level.intermediate'),
+    advanced: t('level.advanced'),
+  }
 }
 
-/** Kostinriktning i måltidsplaneraren. */
-export const DIET_FOCUS_LABELS: Record<string, string> = {
-  balanced: 'Balanserat',
-  high_protein: 'Hög protein',
-  vegetarian: 'Vegetarisk',
-  low_carb: 'Låg kolhydrat',
+export function dietFocusLabels(t: TranslateFn): Record<string, string> {
+  return {
+    balanced: t('diet.balanced'),
+    high_protein: t('diet.high_protein'),
+    vegetarian: t('diet.vegetarian'),
+    low_carb: t('diet.low_carb'),
+  }
 }
 
-// ------------------------------------------------------------- gemensam kopia
+// ---------------------------------------------------- svenska, för det som väntar
 
-/** Reservtext när ett fel saknar eget meddelande. */
-export const GENERIC_ERROR = 'Något gick fel'
+export const MEAL_SLOT_LABELS = mealSlotLabels(svT)
+export const GOAL_LABELS = goalLabels(svT)
+export const LEVEL_LABELS = levelLabels(svT)
+export const DIET_FOCUS_LABELS = dietFocusLabels(svT)
 
-/** Knapptext medan något sparas. */
-export const BUSY_ADDING = 'Lägger till…'
+export const GENERIC_ERROR = svT('common.error')
+export const BUSY_ADDING = svT('common.adding')
+export const LINK_EXPIRED = svT('auth.linkExpired')
+export const TRACKING_AUTOMATIC = svT('goals.trackingAutomatic')
+export const TRACKING_MANUAL = svT('goals.trackingManual')
 
-/** Återställnings- och inbjudningslänkar är engångs och kan hinna gå ut. */
-export const LINK_EXPIRED = 'Länken har gått ut eller är redan använd. Begär en ny.'
-
-/** Mål som appen kan följa själv, kontra sådana användaren får bocka av. */
-export const TRACKING_AUTOMATIC = 'Automatisk spårning ✓'
-export const TRACKING_MANUAL = 'Manuellt'
-
-/**
- * Förslagen på målsidan.
- *
- * OBS: texten tolkas av goalTracker, som läser siffran OCH enheten ur
- * strängen ("Gå ner 5 kg", "Dricka 2,5 liter"). Förslagen är därför metriska
- * även för den som valt imperialt — skrevs de om till pund och gallon skulle
- * tolkningen sluta känna igen dem, och målet bli ospårbart. Ska imperiala mål
- * stödjas måste goalTracker lära sig enheterna först.
- */
-export const GOAL_SUGGESTIONS: { text: string; hint: string }[] = [
-  { text: 'Träna 3 gånger i veckan', hint: TRACKING_AUTOMATIC },
-  { text: 'Träna 4 gånger i veckan', hint: TRACKING_AUTOMATIC },
-  { text: 'Dricka 2,5 liter vatten per dag', hint: TRACKING_AUTOMATIC },
-  { text: 'Dricka 2 liter vatten per dag', hint: TRACKING_AUTOMATIC },
-  { text: 'Gå ner 5 kg', hint: TRACKING_AUTOMATIC },
-  { text: 'Väga 75 kg', hint: TRACKING_AUTOMATIC },
-  { text: 'Klara 50 pass totalt', hint: TRACKING_AUTOMATIC },
-  { text: 'Springa 5 km utan paus', hint: TRACKING_MANUAL },
-  { text: 'Klara 10 pull-ups i rad', hint: TRACKING_MANUAL },
-]
+/** Språken som finns, för språkväljaren i inställningarna. */
+export function languageLabel(t: TranslateFn, lang: Lang | 'auto'): string {
+  return t(
+    lang === 'auto'
+      ? 'settings.language.auto'
+      : lang === 'sv'
+        ? 'settings.language.sv'
+        : 'settings.language.en'
+  )
+}

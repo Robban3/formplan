@@ -1,5 +1,7 @@
 // Persistent app settings backed by localStorage + a React-compatible store.
 
+import type { LanguageSetting } from './i18n'
+
 export interface Reminder {
   id: string
   days: number[]  // 1=Mon … 7=Sun
@@ -24,6 +26,8 @@ export interface AppSettings {
   water_reminder: boolean
   // Enheter
   imperial: boolean
+  // Språk. 'auto' följer telefonens språk; se resolveLang i lib/i18n.
+  language: LanguageSetting
   // Reminders
   reminders: Reminder[]
 }
@@ -44,6 +48,9 @@ const DEFAULTS: AppSettings = {
   notifications_enabled: false,
   water_reminder: false,
   imperial: false,
+  // Följer telefonen som standard. Ett hårdkodat 'sv' hade mött en engelsk
+  // användare med svenska i App Store, utan att något sa varför.
+  language: 'auto',
   reminders: [],
 }
 

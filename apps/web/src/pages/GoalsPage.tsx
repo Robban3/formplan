@@ -6,7 +6,9 @@ import { planAdjustmentForGoal, type PlanAdjustment } from '../lib/goalPlan'
 import { getWeightEntries } from '../lib/weightStore'
 import { api } from '../lib/api'
 import { toast } from '../lib/toast'
-import { GOAL_SUGGESTIONS } from '../lib/texts'
+import { goalSuggestions } from '../lib/goalSuggestions'
+import { useT } from '../hooks/useT'
+import { useUnits } from '../hooks/useUnits'
 
 export interface Goal {
   id: string
@@ -53,7 +55,6 @@ export function effectiveProgress(goal: Goal): number {
   return goal.progress
 }
 
-const SUGGESTIONS = GOAL_SUGGESTIONS
 
 type Tab = 'aktiva' | 'tidigare'
 
@@ -74,8 +75,10 @@ function GoalCard({
   onApply: () => void
 }) {
   const [editingProgress, setEditingProgress] = useState(false)
+  const { t } = useT()
+  const { imperial, lang } = useUnits()
   const pct = effectiveProgress(goal)
-  const statusText = goal.goalMeta ? goalStatusText(goal.goalMeta) : null
+  const statusText = goal.goalMeta ? goalStatusText(goal.goalMeta, { t, imperial, lang }) : null
   const isAuto = goal.goalMeta && goal.goalMeta.type !== 'manual'
 
   return (
@@ -174,6 +177,9 @@ function GoalCard({
 }
 
 export function GoalsPage() {
+  const { t } = useT()
+  const { imperial } = useUnits()
+  const suggestions = goalSuggestions(t, imperial)
   const navigate = useNavigate()
   const [goals, setGoals] = useState<Goal[]>(loadGoals)
   const [tab, setTab] = useState<Tab>('aktiva')
@@ -369,7 +375,7 @@ export function GoalsPage() {
             <div className="space-y-1">
               <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">Förslag med automatisk spårning:</p>
               <div className="flex flex-wrap gap-2">
-                {SUGGESTIONS.filter((s) => s.hint.includes('Auto')).map((s) => (
+                {suggestions.filter((s) => s.auto).map((s) => (
                   <button
                     key={s.text}
                     onClick={() => addGoal(s.text)}

@@ -7,6 +7,8 @@ import { api } from '../lib/api'
 import { toast } from '../lib/toast'
 import { useUnits } from '../hooks/useUnits'
 import { PROTEIN_GOAL_MIN_G, PROTEIN_GOAL_MAX_G, PROTEIN_GOAL_STEP_G, WATER_GOAL_MIN_ML, WATER_GOAL_MAX_ML, WATER_GOAL_STEP_ML, WATER_GOAL_STEP_FLOZ } from '../lib/constants'
+import { useT } from '../hooks/useT'
+import type { LanguageSetting } from '../lib/i18n'
 
 type BoolKey = {
   [K in keyof AppSettings]: AppSettings[K] extends boolean ? K : never
@@ -94,6 +96,41 @@ function SelectInput({ label, sub, settingKey, options }: {
       <select
         value={value}
         onChange={(e) => settingsStore.set(settingKey, Number(e.target.value))}
+        className="bg-stone-100 dark:bg-stone-700 rounded-xl px-3 py-2 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
+/**
+ * Språkväljaren.
+ *
+ * Egen komponent eftersom SelectInput är typad för numeriska inställningar.
+ * 'auto' ligger först och är standard — en engelsk användare ska inte behöva
+ * leta hit för att slippa svenska.
+ */
+function LanguageSelect() {
+  const { language } = useSettings()
+  const { t } = useT()
+  const options: { value: LanguageSetting; label: string }[] = [
+    { value: 'auto', label: t('settings.language.auto') },
+    { value: 'sv', label: t('settings.language.sv') },
+    { value: 'en', label: t('settings.language.en') },
+  ]
+  return (
+    <div className="flex items-center justify-between px-4 py-4">
+      <div className="flex-1 mr-4">
+        <p className="text-stone-800 dark:text-stone-200 font-medium text-sm">{t('settings.language')}</p>
+        <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{t('settings.languageSub')}</p>
+      </div>
+      <select
+        aria-label={t('settings.language')}
+        value={language}
+        onChange={(e) => settingsStore.set('language', e.target.value as LanguageSetting)}
         className="bg-stone-100 dark:bg-stone-700 rounded-xl px-3 py-2 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400"
       >
         {options.map((o) => (
@@ -198,6 +235,7 @@ const REST_OPTIONS = [
 export function SettingsPage() {
   const navigate = useNavigate()
   const units = useUnits()
+  const { t } = useT()
   // Cache of the server profile so goal edits merge into it rather than wiping
   // the rest of the profile. Kept in a ref — it's not rendered directly.
   const profileRef = useRef<Record<string, unknown>>({})
@@ -317,6 +355,10 @@ export function SettingsPage() {
         </Section>
 
         <NotificationSection />
+
+        <Section title={t('settings.language')}>
+          <LanguageSelect />
+        </Section>
 
         <Section title="Enheter">
           <Toggle
