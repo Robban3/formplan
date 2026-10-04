@@ -16,7 +16,7 @@ import {
 import { notifyWeightLogged } from '../lib/challengeEvents'
 import { initMeasurementsSync } from '../lib/measurementsSync'
 import { dateKey } from '../lib/derive'
-import { formatKg } from '../lib/format'
+import { useUnits } from '../hooks/useUnits'
 
 /**
  * Combined view: girth fields come from measurementStore, but the weight scalar
@@ -38,13 +38,19 @@ function buildEntries(): BodyMeasurement[] {
   return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date))
 }
 
-const FIELDS: { key: keyof BodyMeasurement; label: string; unit: string; placeholder: string }[] = [
-  { key: 'weight_kg', label: 'Vikt',    unit: 'kg', placeholder: '75,0' },
-  { key: 'waist_cm',  label: 'Midja',   unit: 'cm', placeholder: '80' },
-  { key: 'chest_cm',  label: 'Bröst',   unit: 'cm', placeholder: '100' },
-  { key: 'hips_cm',   label: 'Höfter',  unit: 'cm', placeholder: '95' },
-  { key: 'arm_cm',    label: 'Arm',     unit: 'cm', placeholder: '35' },
-  { key: 'thigh_cm',  label: 'Lår',     unit: 'cm', placeholder: '55' },
+/**
+ * Måtten lagras metriskt. `kind` säger vilken omvandling som gäller när de
+ * visas och matas in — vikt i kilo, omfång i centimeter.
+ */
+const FIELDS: {
+  key: keyof BodyMeasurement; label: string; kind: 'weight' | 'length'; placeholderMetric: number
+}[] = [
+  { key: 'weight_kg', label: 'Vikt',    kind: 'weight', placeholderMetric: 75 },
+  { key: 'waist_cm',  label: 'Midja',   kind: 'length', placeholderMetric: 80 },
+  { key: 'chest_cm',  label: 'Bröst',   kind: 'length', placeholderMetric: 100 },
+  { key: 'hips_cm',   label: 'Höfter',  kind: 'length', placeholderMetric: 95 },
+  { key: 'arm_cm',    label: 'Arm',     kind: 'length', placeholderMetric: 35 },
+  { key: 'thigh_cm',  label: 'Lår',     kind: 'length', placeholderMetric: 55 },
 ]
 
 function fmtDate(iso: string) {
@@ -53,7 +59,12 @@ function fmtDate(iso: string) {
   })
 }
 
-function MiniLineChart({ values, color }: { values: number[]; color: string }) {
+function MiniLineChart({ values, color, format }: {
+  values: number[]; color: string
+  /** Formaterar förändringssiffran. Diagrammet är generiskt — vikt och omfång
+   *  delar det — så enheten kommer från anroparen. */
+  format?: (n: number) => string
+}) {
   if (values.length < 2) return null
   const W = 80; const H = 28; const pad = 4
   const min = Math.min(...values); const max = Math.max(...values)
@@ -70,7 +81,7 @@ function MiniLineChart({ values, color }: { values: number[]; color: string }) {
         {values.map((v, i) => <circle key={i} cx={fx(i)} cy={fy(v)} r="2" fill={color} />)}
       </svg>
       <span className="text-[10px] font-semibold" style={{ color }}>
-        {sign}{formatKg(change)}
+        {sign}{format ? format(change) : change.toFixed(1).replace('.', ',')}
       </span>
     </div>
   )
@@ -78,6 +89,14 @@ function MiniLineChart({ values, color }: { values: number[]; color: string }) {
 
 export function MeasurementsPage() {
   const navigate = useNavigate()
+  const { weightLabel, lengthLabel, toStore, toStoreLength, toDisplay, toDisplayLength, formatWeight, formatLength } = useUnits()
+
+  /** Etikett och formatering per fälttyp — måtten lagras alltid metriskt. */
+  const unitFor = (kind: 'weight' | 'length') => (kind === 'weight' ? weightLabel : lengthLabel)
+  const formatFor = (kind: 'weight' | 'length', v: number) =>
+    kind === 'weight' ? formatWeight(v) : formatLength(v)
+  const displayFor = (kind: 'weight' | 'length', v: number) =>
+    kind === 'weight' ? toDisplay(v) : toDisplayLength(v)
   const [entries, setEntries] = useState<BodyMeasurement[]>(() => {
     // Legacy weight (stored only on measurementStore rows) into weightStore
     // before the first read, so it shows without a server round-trip.
@@ -105,8 +124,9 @@ export function MeasurementsPage() {
     const girth: Omit<BodyMeasurement, 'id'> = { date: dateKey() }
     let weightVal: number | null = null
     for (const f of FIELDS) {
-      const v = parseFloat((form[f.key] ?? '').replace(',', '.'))
-      if (isNaN(v) || v <= 0) continue
+      const entered = parseFloat((form[f.key] ?? '').replace(',', '.'))
+      if (isNaN(entered) || entered <= 0) continue
+      const v = f.kind === 'weight' ? toStore(entered) : toStoreLength(entered)
       if (f.key === 'weight_kg') weightVal = v
       else (girth as Record<string, unknown>)[f.key] = v
     }
@@ -180,12 +200,12 @@ export function MeasurementsPage() {
                   <div className="flex items-center gap-1 mt-1">
                     <input
                       type="number" inputMode="decimal"
-                      placeholder={f.placeholder}
+                      placeholder={String(displayFor(f.kind, f.placeholderMetric))}
                       value={form[f.key] ?? ''}
                       onChange={(e) => setForm((prev) => ({ ...prev, [f.key]: e.target.value }))}
                       className="flex-1 min-w-0 bg-stone-100 dark:bg-stone-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
                     />
-                    <span className="text-xs text-stone-500 dark:text-stone-400 w-6">{f.unit}</span>
+                    <span className="text-xs text-stone-500 dark:text-stone-400 w-6">{unitFor(f.kind)}</span>
                   </div>
                 </div>
               ))}
@@ -212,11 +232,11 @@ export function MeasurementsPage() {
                   <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">{f.label}</p>
                   {latestVal && (
                     <p className="text-lg font-bold text-stone-900 dark:text-stone-100 mt-0.5">
-                      {formatKg(latestVal)} {f.unit}
+                      {formatFor(f.kind, latestVal)}
                     </p>
                   )}
                   <div className="mt-2">
-                    <MiniLineChart values={vals} color={color} />
+                    <MiniLineChart values={vals} color={color} format={(n) => formatFor(f.kind, n)} />
                   </div>
                 </div>
               )
@@ -243,7 +263,7 @@ export function MeasurementsPage() {
                     return (
                       <span key={f.key} className="text-xs text-stone-500 dark:text-stone-400">
                         <span className="font-medium text-stone-700 dark:text-stone-300">{f.label}:</span>{' '}
-                        {formatKg(val)} {f.unit}
+                        {formatFor(f.kind, val)}
                       </span>
                     )
                   })}

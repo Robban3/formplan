@@ -5,6 +5,7 @@ import { mockPlanId, type MockGoal } from '../lib/mockPlan'
 import { toast } from '../lib/toast'
 import { toastIfNotNetwork } from '../lib/errors'
 import { settingsStore } from '../lib/settings'
+import { useUnits } from '../hooks/useUnits'
 import {
   clearOnboardingDraft,
   EMPTY_ONBOARDING_FORM,
@@ -76,6 +77,7 @@ function PrimaryButton({ children, onClick, disabled }: { children: React.ReactN
 }
 
 export function OnboardingPage() {
+  const units = useUnits()
   const navigate = useNavigate()
   const [step, setStep] = useState<Step>('goal')
   const [saving, setSaving] = useState(false)
@@ -417,10 +419,24 @@ export function OnboardingPage() {
 
             <div className="space-y-4 mb-6">
               {([
-                { key: 'age' as const, label: 'Ålder', placeholder: 't.ex. 30', unit: 'år', min: 13, max: 120, step: 1 },
-                { key: 'weight_kg' as const, label: 'Vikt', placeholder: 't.ex. 75', unit: 'kg', min: 30, max: 300, step: 0.1 },
-                { key: 'height_cm' as const, label: 'Längd', placeholder: 't.ex. 175', unit: 'cm', min: 100, max: 250, step: 1 },
-              ]).map(({ key, label, placeholder, unit, min, max, step }) => (
+                {
+                  key: 'age' as const, label: 'Ålder', placeholder: 't.ex. 30', unit: 'år',
+                  min: 13, max: 120, step: 1,
+                  display: (v: number) => v, store: (v: number) => v,
+                },
+                {
+                  key: 'weight_kg' as const, label: 'Vikt', unit: units.weightLabel,
+                  placeholder: `t.ex. ${units.toDisplay(75)}`,
+                  min: Math.floor(units.toDisplay(30)), max: Math.ceil(units.toDisplay(300)), step: 0.1,
+                  display: units.toDisplay, store: units.toStore,
+                },
+                {
+                  key: 'height_cm' as const, label: 'Längd', unit: units.lengthLabel,
+                  placeholder: `t.ex. ${units.toDisplayLength(175)}`,
+                  min: Math.floor(units.toDisplayLength(100)), max: Math.ceil(units.toDisplayLength(250)), step: 1,
+                  display: units.toDisplayLength, store: units.toStoreLength,
+                },
+              ]).map(({ key, label, placeholder, unit, min, max, step, display, store }) => (
                 <div key={key}>
                   <label htmlFor={key} className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">{label}</label>
                   <div className="flex items-center gap-2">
@@ -432,12 +448,16 @@ export function OnboardingPage() {
                       max={max}
                       step={step}
                       placeholder={placeholder}
-                      value={form[key] ?? ''}
+                      value={form[key] != null ? display(form[key] as number) : ''}
                       onChange={(e) => {
                         const raw = e.target.value
                         const n = Number(raw)
                         // NaN får aldrig lagras — behåll null tills värdet är giltigt.
-                        setForm((f) => ({ ...f, [key]: raw === '' || !Number.isFinite(n) ? null : n }))
+                        // Lagringen är alltid metrisk; store() vänder tillbaka.
+                        setForm((f) => ({
+                          ...f,
+                          [key]: raw === '' || !Number.isFinite(n) ? null : store(n),
+                        }))
                       }}
                       className="flex-1 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl px-4 py-3 text-sm text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-forest-400"
                     />

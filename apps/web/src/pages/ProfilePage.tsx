@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { ChevronLeftIcon } from '../components/ui/Icons'
+import { useUnits } from '../hooks/useUnits'
 
 interface FitnessProfile {
   goal: string
@@ -30,6 +31,7 @@ const LEVEL_LABELS: Record<string, string> = {
 
 export function ProfilePage() {
   const navigate = useNavigate()
+  const { formatWeight, formatHeight } = useUnits()
   const [profile, setProfile] = useState<FitnessProfile | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -58,8 +60,8 @@ export function ProfilePage() {
         { label: 'Allergier', value: profile.allergies.join(', ') || 'Inga' },
         { label: 'Kalorimål', value: profile.calorie_goal ? `${profile.calorie_goal} kcal` : 'Auto' },
         { label: 'Ålder', value: profile.age ? `${profile.age} år` : '—' },
-        { label: 'Vikt', value: profile.weight_kg ? `${profile.weight_kg} kg` : '—' },
-        { label: 'Längd', value: profile.height_cm ? `${profile.height_cm} cm` : '—' },
+        { label: 'Vikt', value: profile.weight_kg ? formatWeight(profile.weight_kg) : '—' },
+        { label: 'Längd', value: profile.height_cm ? formatHeight(profile.height_cm) : '—' },
       ]
     : []
 

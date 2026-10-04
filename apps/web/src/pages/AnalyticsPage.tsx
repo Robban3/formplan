@@ -7,7 +7,7 @@ import { sessionsCountThisWeek, weeklyCounts, dateKey, DEFAULT_WEEKLY_GOAL } fro
 import { getLocalSessions, subscribeSessions } from '../lib/workoutSessionStore'
 import { loadActivePlan } from '../lib/planLoader'
 import { api } from '../lib/api'
-import { formatLiters, formatKg } from '../lib/format'
+import { useUnits } from '../hooks/useUnits'
 import { getLocalWater, getLocalWaterSummary } from '../lib/waterStore'
 import { getWeightEntries, addWeightEntry, deleteWeightEntry, type WeightEntry } from '../lib/weightStore'
 import { notifyWeightLogged } from '../lib/challengeEvents'
@@ -81,11 +81,13 @@ function Ring({
 }
 
 function StatRing({
-  Icon, label, value, unit, goal, goalLabel, color, iconStroke
+  Icon, label, value, unit, goal, goalLabel, color, iconStroke, valueLabel
 }: {
   Icon: React.ComponentType<{className?: string}>; label: string
   value: number; unit: string; goal: number; goalLabel: string
   color: string; iconStroke: string
+  /** Färdigformaterat värde, när enheten beror på användarens inställning. */
+  valueLabel?: string
 }) {
   const pct = goal > 0 ? Math.min((value / goal) * 100, 100) : 0
   return (
@@ -105,9 +107,7 @@ function StatRing({
       </div>
       <div className="text-center">
         <p className="text-xs font-bold text-stone-900 dark:text-stone-100">
-          {unit === 'L'
-            ? `${formatLiters(value)} ${unit}`
-            : `${value.toLocaleString('sv-SE')} ${unit}`}
+          {valueLabel ?? `${value.toLocaleString('sv-SE')} ${unit}`}
         </p>
         <p className="text-[10px] text-stone-500 dark:text-stone-400">{label}</p>
         <p className="text-[9px] text-stone-300 dark:text-stone-600">mål: {goalLabel}</p>
@@ -282,6 +282,7 @@ function rollingAvg(values: number[], window: number): number[] {
 }
 
 function WeightChart({ entries }: { entries: WeightEntry[] }) {
+  const { formatWeight } = useUnits()
   if (entries.length < 2) return null
   const change = entries[entries.length - 1]!.weight_kg - entries[0]!.weight_kg
   const sign = change > 0 ? '+' : ''
@@ -292,7 +293,7 @@ function WeightChart({ entries }: { entries: WeightEntry[] }) {
     <div>
       <div className="flex items-baseline gap-2 mb-1">
         <span className="text-3xl font-bold" style={{ color }}>
-          {sign}{formatKg(change)} kg
+          {sign}{formatWeight(change)}
         </span>
         <span className="text-sm text-stone-500 dark:text-stone-400">förändring sedan start</span>
       </div>
@@ -309,7 +310,7 @@ function WeightChart({ entries }: { entries: WeightEntry[] }) {
       />
       <div className="flex justify-between mt-1 text-[9px] text-stone-500 dark:text-stone-400">
         <span>{fmtDate(entries[0]!.date)}</span>
-        <span>{formatKg(entries[entries.length - 1]!.weight_kg)} kg · {fmtDate(entries[entries.length - 1]!.date)}</span>
+        <span>{formatWeight(entries[entries.length - 1]!.weight_kg)} · {fmtDate(entries[entries.length - 1]!.date)}</span>
       </div>
     </div>
   )
@@ -319,6 +320,7 @@ function WeightChart({ entries }: { entries: WeightEntry[] }) {
 
 export function AnalyticsPage() {
   const settings = useSettings()
+  const { formatVolume, formatWeight, toStore, toDisplay, weightLabel } = useUnits()
   const [tab, setTab] = useState<Tab>('oversikt')
   const [sessions, setSessions] = useState<WorkoutSession[]>([])
   const [daySummaries, setDaySummaries] = useState<DaySummary[]>([])
@@ -403,8 +405,12 @@ export function AnalyticsPage() {
   }, [tab, nutritionLoaded])
 
   function logWeight() {
-    const kg = parseFloat(weightInput.replace(',', '.'))
-    if (!kg || kg < 20 || kg > 300) return
+    // Fältet står i användarens enhet. Utan omvandlingen lagrades 185 lbs som
+    // 185 kg, och rimlighetsgränserna nedan släppte igenom det.
+    const entered = parseFloat(weightInput.replace(',', '.'))
+    if (!entered) return
+    const kg = toStore(entered)
+    if (kg < 20 || kg > 300) return
     addWeightEntry(kg); notifyWeightLogged(); setWeightEntries(getWeightEntries()); setWeightInput(''); setShowWeightInput(false)
   }
 
@@ -470,7 +476,8 @@ export function AnalyticsPage() {
               />
               <StatRing
                 Icon={DropletIcon} label="Vatten idag" unit="L"
-                value={waterToday} goal={settings.water_goal_ml} goalLabel={`${formatLiters(settings.water_goal_ml)} L`}
+                value={waterToday} goal={settings.water_goal_ml}
+                valueLabel={formatVolume(waterToday)} goalLabel={formatVolume(settings.water_goal_ml)}
                 color="#38bdf8" iconStroke="stroke-sky-500"
               />
               <StatRing
@@ -493,7 +500,7 @@ export function AnalyticsPage() {
               <p className="font-semibold text-stone-800 dark:text-stone-200">Vatten senaste 7 dagar</p>
               {avgWater > 0 && (
                 <span className="text-xs text-stone-500 dark:text-stone-400">
-                  snitt {formatLiters(avgWater)} L/dag
+                  snitt {formatVolume(avgWater)}/dag
                 </span>
               )}
             </div>
@@ -563,12 +570,12 @@ export function AnalyticsPage() {
 
             {showWeightInput && (
               <div className="flex gap-2 mb-4">
-                <input autoFocus type="number" inputMode="decimal" placeholder="t.ex. 75,5"
+                <input autoFocus type="number" inputMode="decimal" placeholder={`t.ex. ${toDisplay(75.5)}`}
                   value={weightInput} onChange={(e) => setWeightInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && logWeight()}
                   className="flex-1 bg-stone-100 dark:bg-stone-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
                 />
-                <span className="flex items-center text-sm text-stone-500 dark:text-stone-400">kg</span>
+                <span className="flex items-center text-sm text-stone-500 dark:text-stone-400">{weightLabel}</span>
                 <button onClick={logWeight} className="px-3 py-2 bg-forest-700 text-white text-sm font-semibold rounded-xl">
                   Spara
                 </button>
@@ -579,7 +586,7 @@ export function AnalyticsPage() {
               <WeightChart entries={weightEntries} />
             ) : weightEntries.length === 1 ? (
               <div className="text-center py-4">
-                <p className="text-2xl font-bold text-stone-900 dark:text-stone-100">{formatKg(weightEntries[0]!.weight_kg)} kg</p>
+                <p className="text-2xl font-bold text-stone-900 dark:text-stone-100">{formatWeight(weightEntries[0]!.weight_kg)}</p>
                 <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">Logga igen imorgon för att se trenden</p>
               </div>
             ) : (
@@ -594,7 +601,7 @@ export function AnalyticsPage() {
               {[...weightEntries].reverse().map((e) => (
                 <div key={e.id} className="flex items-center justify-between px-4 py-3 border-b border-stone-50 last:border-0">
                   <div>
-                    <p className="text-sm font-medium text-stone-800 dark:text-stone-200">{formatKg(e.weight_kg)} kg</p>
+                    <p className="text-sm font-medium text-stone-800 dark:text-stone-200">{formatWeight(e.weight_kg)}</p>
                     <p className="text-xs text-stone-500 dark:text-stone-400">{fmtDate(e.date)}</p>
                   </div>
                   <button onClick={() => { deleteWeightEntry(e.id); setWeightEntries(getWeightEntries()) }} className="p-1">
@@ -625,7 +632,7 @@ export function AnalyticsPage() {
             <div className="flex items-baseline justify-between mb-3">
               <p className="font-semibold text-stone-800 dark:text-stone-200">Vatten senaste 7 dagar</p>
               {avgWater > 0 && (
-                <span className="text-xs text-stone-500 dark:text-stone-400">snitt {formatLiters(avgWater)} L</span>
+                <span className="text-xs text-stone-500 dark:text-stone-400">snitt {formatVolume(avgWater)}</span>
               )}
             </div>
             {waterPoints.some((v) => v > 0) ? (
@@ -652,7 +659,7 @@ export function AnalyticsPage() {
                 </div>
                 <div className="flex justify-between mt-2 text-[9px] text-stone-300 dark:text-stone-600">
                   <span>0 L</span>
-                  <span>mål: {formatLiters(settings.water_goal_ml)} L</span>
+                  <span>mål: {formatVolume(settings.water_goal_ml)}</span>
                 </div>
 
                 {/* Vattenring idag */}
@@ -660,10 +667,10 @@ export function AnalyticsPage() {
                   <Ring value={waterToday} goal={settings.water_goal_ml} color="#38bdf8" size={56} strokeWidth={6} />
                   <div>
                     <p className="text-sm font-bold text-stone-900 dark:text-stone-100">
-                      {formatLiters(waterToday)} L idag
+                      {formatVolume(waterToday)} idag
                     </p>
                     <p className="text-xs text-stone-500 dark:text-stone-400">
-                      av {formatLiters(settings.water_goal_ml)} L · {settings.water_goal_ml > 0 ? Math.round((waterToday / settings.water_goal_ml) * 100) : 0}%
+                      av {formatVolume(settings.water_goal_ml)} · {settings.water_goal_ml > 0 ? Math.round((waterToday / settings.water_goal_ml) * 100) : 0}%
                     </p>
                   </div>
                 </div>

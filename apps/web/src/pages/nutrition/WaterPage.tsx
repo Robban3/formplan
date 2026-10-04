@@ -4,11 +4,12 @@ import { nutritionApi, type WaterEntry } from '../../lib/nutritionApi'
 import { getLocalWater, addLocalWater, flushLocalWater, hydrateLocalWater } from '../../lib/waterStore'
 import { notifyWaterLogged } from '../../lib/challengeEvents'
 import { dateKey } from '../../lib/derive'
-import { formatLiters } from '../../lib/format'
 import { toast } from '../../lib/toast'
 import { toastIfNotNetwork } from '../../lib/errors'
 import { CheckIcon, ChevronLeftIcon, DropletIcon, GlassWaterIcon } from '../../components/ui/Icons'
 import { useSettings } from '../../hooks/useSettings'
+import { useUnits } from '../../hooks/useUnits'
+import { formatVolume as formatVolumeIn } from '../../lib/units'
 import { WaterWeekView } from './WaterWeekView'
 
 const QUICK_OPTIONS = [125, 250, 500, 750, 1000]
@@ -20,10 +21,6 @@ function formatTime(iso?: string) {
     return new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })
   }
   return d.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })
-}
-
-function formatVolume(ml: number) {
-  return `${ml.toLocaleString('sv-SE')} ml`
 }
 
 function normalizeEntry(entry: WaterEntry, amount_ml: number): WaterEntry {
@@ -38,9 +35,9 @@ type WaterTab = 'idag' | 'vecka'
 
 const GOAL_HIT_KEY = (date: string) => `formplan_water_goal_hit_${date}`
 
-function celebrateWaterGoal(totalMl: number, goalMl: number) {
+function celebrateWaterGoal(totalMl: number, goalMl: number, imperial: boolean) {
   toast.success(
-    `Mål uppnått! Du har druckit ${formatLiters(totalMl)} L av ${formatLiters(goalMl)} L idag.`,
+    `Mål uppnått! Du har druckit ${formatVolumeIn(totalMl, imperial)} av ${formatVolumeIn(goalMl, imperial)} idag.`,
     6000
   )
   navigator.vibrate?.([100, 50, 100])
@@ -49,6 +46,7 @@ function celebrateWaterGoal(totalMl: number, goalMl: number) {
 export function WaterPage() {
   const navigate = useNavigate()
   const { water_goal_ml: GOAL_ML } = useSettings()
+  const { imperial, formatVolume } = useUnits()
   const today = dateKey()
   const [entries, setEntries] = useState<WaterEntry[]>([])
   const [total, setTotal] = useState(0)
@@ -107,9 +105,9 @@ export function WaterPage() {
 
       if (crossedGoal && localStorage.getItem(hitKey) !== '1') {
         localStorage.setItem(hitKey, '1')
-        celebrateWaterGoal(nextTotal, GOAL_ML)
+        celebrateWaterGoal(nextTotal, GOAL_ML, imperial)
       } else {
-        toast.success(`+${entry.amount_ml} ml tillagt`)
+        toast.success(`+${formatVolume(entry.amount_ml)} tillagt`)
       }
     }
 
@@ -194,9 +192,9 @@ export function WaterPage() {
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <DropletIcon className={`w-6 h-6 mb-1 ${goalReached ? 'stroke-forest-600' : 'stroke-sky-500'}`} />
                 <span className="text-2xl font-bold text-stone-900 dark:text-stone-100">
-                  {formatLiters(total)} L
+                  {formatVolume(total)}
                 </span>
-                <span className="text-sm text-stone-500 dark:text-stone-400">av {formatLiters(GOAL_ML)} L</span>
+                <span className="text-sm text-stone-500 dark:text-stone-400">av {formatVolume(GOAL_ML)}</span>
                 <span className={`text-sm font-semibold mt-0.5 ${goalReached ? 'text-forest-800 dark:text-forest-400' : 'text-sky-500'}`}>
                   ({Math.round(pct * 100)}%)
                 </span>
@@ -212,7 +210,7 @@ export function WaterPage() {
               <div>
                 <p className="font-semibold text-forest-800 dark:text-forest-200">Dagsmål uppnått!</p>
                 <p className="text-sm text-forest-800 dark:text-forest-400">
-                  Du har druckit {formatLiters(total)} L idag — bra jobbat.
+                  Du har druckit {formatVolume(total)} idag — bra jobbat.
                 </p>
               </div>
             </div>
@@ -228,7 +226,7 @@ export function WaterPage() {
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round">
               <path d="M12 5v14M5 12h14" />
             </svg>
-            {adding ? 'Lägger till…' : `Lägg till ${selectedMl} ml`}
+            {adding ? 'Lägger till…' : `Lägg till ${formatVolume(selectedMl)}`}
           </button>
 
           {/* Snabbval */}
@@ -248,7 +246,7 @@ export function WaterPage() {
                 >
                   <GlassWaterIcon className={`w-5 h-5 ${selectedMl === ml ? 'stroke-forest-600' : 'stroke-sky-400'}`} />
                   <span className={`text-xs font-medium ${selectedMl === ml ? 'text-forest-800 dark:text-forest-300' : 'text-stone-500 dark:text-stone-400'}`}>
-                    {ml < 1000 ? `${ml} ml` : `${ml / 1000} L`}
+                    {formatVolume(ml)}
                   </span>
                 </button>
               ))}

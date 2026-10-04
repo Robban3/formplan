@@ -7,7 +7,7 @@ import { useLoadTimeout } from '../../hooks/useLoadTimeout'
 import { api } from '../../lib/api'
 import { nutritionApi, type FoodLogEntry, type MealSlot } from '../../lib/nutritionApi'
 import { dateKey, deriveDifficulty, isoWeekday } from '../../lib/derive'
-import { formatLiters } from '../../lib/format'
+import { useUnits } from '../../hooks/useUnits'
 import { loadActivePlan } from '../../lib/planLoader'
 import { useWeeklySessions } from '../../contexts/WeeklySessionsContext'
 import { getTrainingStreak } from '../../lib/streakStore'
@@ -212,6 +212,7 @@ export function HomePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const settings = useSettings()
+  const { formatVolume } = useUnits()
   const activeWorkout = useWorkoutStore()
   const [loading, setLoading] = useState(true)
   const [todayWorkout, setTodayWorkout] = useState<WorkoutDay | null>(null)
@@ -312,7 +313,7 @@ export function HomePage() {
     const day = dateKey()
     setWaterTotal((prev) => prev + 250)
     notifyWaterLogged()
-    toast.success('+250 ml vatten loggat')
+    toast.success(`+${formatVolume(250)} vatten loggat`)
     // Write-through: servern är auktoritativ källa (Hem/Kost/Analys läser den),
     // localStorage speglas för synkrona läsare som vattenmålet (goalTracker).
     // Ingen läsare summerar båda, så ingen dubbelräkning.
@@ -488,13 +489,13 @@ export function HomePage() {
                   onClick={handleQuickWater}
                   className="text-[10px] font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/30 px-2 py-0.5 rounded-full active:bg-sky-100 dark:active:bg-sky-900/45"
                 >
-                  +250 ml
+                  +{formatVolume(250)}
                 </button>
               </div>
               <p className="text-lg font-bold text-stone-900 dark:text-stone-100">
-                {formatLiters(waterTotal)} L
+                {formatVolume(waterTotal)}
               </p>
-              <p className="text-xs text-stone-500 dark:text-stone-400">av {formatLiters(settings.water_goal_ml)} L</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400">av {formatVolume(settings.water_goal_ml)}</p>
               <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-1.5 mt-2">
                 <div
                   className="bg-sky-500 h-1.5 rounded-full transition-all"

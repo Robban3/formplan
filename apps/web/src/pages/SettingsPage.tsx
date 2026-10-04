@@ -5,6 +5,7 @@ import { useSettings } from '../hooks/useSettings'
 import { settingsStore, type AppSettings } from '../lib/settings'
 import { api } from '../lib/api'
 import { toast } from '../lib/toast'
+import { useUnits } from '../hooks/useUnits'
 
 type BoolKey = {
   [K in keyof AppSettings]: AppSettings[K] extends boolean ? K : never
@@ -34,12 +35,20 @@ function Toggle({ label, sub, settingKey }: { label: string; sub: string; settin
   )
 }
 
-function NumberInput({ label, sub, settingKey, unit, min, max, step = 1, onCommit }: {
+function NumberInput({ label, sub, settingKey, unit, min, max, step = 1, onCommit, display, store }: {
   label: string; sub: string; settingKey: NumberKey; unit: string; min: number; max: number; step?: number
   onCommit?: (n: number) => void
+  /**
+   * Omvandling när fältet visas i en annan enhet än den lagrade. Vattenmålet
+   * lagras i milliliter men matas in i fl oz för den som valt imperialt, och
+   * då måste även min/max/step gälla i den visade enheten.
+   */
+  display?: (stored: number) => number
+  store?: (entered: number) => number
 }) {
   const settings = useSettings()
-  const value = settings[settingKey] as number
+  const stored = settings[settingKey] as number
+  const value = display ? display(stored) : stored
   return (
     <div className="flex items-center justify-between px-4 py-4">
       <div className="flex-1 mr-4">
@@ -57,8 +66,9 @@ function NumberInput({ label, sub, settingKey, unit, min, max, step = 1, onCommi
           onChange={(e) => {
             const n = Number(e.target.value)
             if (!isNaN(n) && n >= min && n <= max) {
-              settingsStore.set(settingKey, n)
-              onCommit?.(n)
+              const toSave = store ? store(n) : n
+              settingsStore.set(settingKey, toSave)
+              onCommit?.(toSave)
             }
           }}
           className="w-20 text-right bg-stone-100 dark:bg-stone-700 rounded-xl px-3 py-2 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400"
@@ -186,6 +196,7 @@ const REST_OPTIONS = [
 
 export function SettingsPage() {
   const navigate = useNavigate()
+  const units = useUnits()
   // Cache of the server profile so goal edits merge into it rather than wiping
   // the rest of the profile. Kept in a ref — it's not rendered directly.
   const profileRef = useRef<Record<string, unknown>>({})
@@ -295,10 +306,12 @@ export function SettingsPage() {
             label="Vattenmål"
             sub="Dagligt vätskeintag"
             settingKey="water_goal_ml"
-            unit="ml"
-            min={500}
-            max={6000}
-            step={250}
+            unit={units.volumeLabel}
+            min={Math.floor(units.toDisplayVolume(500))}
+            max={Math.ceil(units.toDisplayVolume(6000))}
+            step={units.imperial ? 8 : 250}
+            display={units.toDisplayVolume}
+            store={units.toStoreVolume}
           />
         </Section>
 
@@ -307,7 +320,7 @@ export function SettingsPage() {
         <Section title="Enheter">
           <Toggle
             label="Imperiala enheter"
-            sub="Visa lbs / miles istället för kg / km"
+            sub="Visa lbs, fl oz, tum och miles istället för kg, ml, cm och km"
             settingKey="imperial"
           />
         </Section>
