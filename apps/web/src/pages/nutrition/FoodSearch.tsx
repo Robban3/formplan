@@ -183,7 +183,7 @@ export function FoodSearch() {
             </button>
           )}
         </div>
-        <p className="text-xs text-stone-500 dark:text-stone-400 mt-2">Lägger till i {SLOT_LABELS[slot].toLowerCase()}</p>
+        <p className="text-xs text-stone-500 dark:text-stone-400 mt-2">{t('food.addingToSlot', { slot: SLOT_LABELS[slot].toLowerCase() })}</p>
 
         {/* Quick add: scan barcode or photo */}
         <div className="flex gap-2 mt-3">
@@ -206,8 +206,8 @@ export function FoodSearch() {
 
       <div className="px-4 flex gap-4 border-b border-stone-200 dark:border-stone-700">
         {([
-          { key: 'alla' as const, label: 'Alla' },
-          { key: 'maltider' as const, label: 'Måltider' },
+          { key: 'alla' as const, label: t('tab.all') },
+          { key: 'maltider' as const, label: t('food.meals') },
         ]).map(({ key, label }) => (
           <button
             key={key}
@@ -278,7 +278,7 @@ export function FoodSearch() {
                     <button
                       onClick={() => handleAddMeal(meal)}
                       disabled={adding}
-                      aria-label={`Lägg till ${meal.name}`}
+                      aria-label={t('food.addItem', { name: meal.name })}
                       className="w-8 h-8 rounded-full bg-forest-700 flex items-center justify-center flex-shrink-0 disabled:opacity-60"
                     >
                       <PlusIcon className="w-4 h-4 stroke-white" />
@@ -305,7 +305,12 @@ export function FoodSearch() {
                 <div className="flex-1 text-left min-w-0">
                   <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate">{item.name}</p>
                   <p className="text-xs text-stone-500 dark:text-stone-400">
-                    Per 100 g: {item.kcal_per_100g} kcal · P {item.protein_per_100g}g · F {item.fat_per_100g}g · K {item.carbs_per_100g}g
+                    {t('food.per100gMacros', {
+                      kcal: item.kcal_per_100g,
+                      protein: item.protein_per_100g,
+                      fat: item.fat_per_100g,
+                      carbs: item.carbs_per_100g,
+                    })}
                   </p>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-forest-700 flex items-center justify-center flex-shrink-0">
@@ -318,7 +323,7 @@ export function FoodSearch() {
 
         {tab === 'alla' && !searching && query.length >= 2 && results.length === 0 && (
           <div className="text-center pt-12 text-stone-500 dark:text-stone-400 text-sm">
-            Inga livsmedel hittades för &quot;{query}&quot;
+            {t('food.noResultsFor', { query })}
           </div>
         )}
 
@@ -363,7 +368,7 @@ export function FoodSearch() {
             disabled={adding || !amount || parseFloat(amount) <= 0}
             className="w-full bg-forest-700 hover:bg-forest-800 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors"
           >
-            {adding ? 'Lägger till...' : 'Lägg till'}
+            {adding ? t('common.adding') : t('food.add')}
           </button>
         </div>
       )}

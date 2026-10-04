@@ -382,6 +382,9 @@ export const sv = {
   'food.searchPlaceholder': 'Sök livsmedel…',
   'food.searchHint': 'Sök livsmedel & näringsvärden',
   'food.addingTo': 'Lägger till i',
+  'food.addingToSlot': 'Lägger till i {slot}',
+  'food.addItem': 'Lägg till {name}',
+  'food.per100gMacros': 'Per 100 g: {kcal} kcal · P {protein} g · F {fat} g · K {carbs} g',
   'food.meals': 'Måltider',
   'food.createOwnMeal': 'Skapa egen måltid',
   'food.noSavedMeals': 'Inga sparade måltider ännu.',
@@ -588,6 +591,27 @@ export const sv = {
   'mealgen.generateAnother': 'Generera nytt',
   'mealgen.logMeal': 'Logga måltid',
   'mealgen.saveToWeek': 'Spara till vecka',
+
+  // Betalvägg
+  'paywall.f1': 'Personligt tränings- & kostschema',
+  'paywall.f2': 'AI-coach som kan din data',
+  'paywall.f3': 'Automatisk progression',
+  'paywall.f4': 'Fotoanalys & streckkodsscanner',
+  'paywall.f5': 'AI-recept & smart inköpslista',
+  'paywall.f6': 'Veckorapporter & måluppföljning',
+
+  // AI-coachen
+  'coach.q1': 'Hur lång vila behöver jag mellan passen?',
+  'coach.q2': 'Vad ska jag äta innan träning?',
+  'coach.q3': 'Hur vet jag om jag tränar för hårt?',
+  'coach.q4': 'Tips för att bli starkare i bänkpress',
+  'coach.q5': 'Hur bryter jag en platå?',
+  'coach.greeting': 'Hej! Jag är din AI-coach på FormPlan. Jag kan hjälpa dig med träningsfrågor, kosttips och återhämtning.',
+  'coach.trainedRecently': 'Jag ser att du har tränat nyligen — bra jobbat!',
+  'coach.whatToKnow': 'Vad vill du veta?',
+  'coach.premiumOnly': 'AI-coachen är en Premium-funktion. Uppgradera under Mer → Premium för att fortsätta chatta.',
+  'coach.unavailable': 'AI-coachen är tillfälligt otillgänglig, försök igen om en stund',
+  'coach.askPlaceholder': 'Ställ en träningsfråga…',
 
   // Måltider
   'meal.frukost': 'Frukost',

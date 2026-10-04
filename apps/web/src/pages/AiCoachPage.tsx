@@ -6,18 +6,16 @@ import { getWeightEntries } from '../lib/weightStore'
 import { getTrainingStreak } from '../lib/streakStore'
 import { request, ApiError } from '../lib/api'
 import { toast } from '../lib/toast'
+import { useT } from '../hooks/useT'
+import type { TextKey } from '../lib/i18n'
 
 interface Message {
   role: 'user' | 'assistant'
   content: string
 }
 
-const SUGGESTIONS = [
-  'Hur lång vila behöver jag mellan passen?',
-  'Vad ska jag äta innan träning?',
-  'Hur vet jag om jag tränar för hårt?',
-  'Tips för att bli starkare i bänkpress',
-  'Hur bryter jag en platå?',
+const SUGGESTION_KEYS: TextKey[] = [
+  'coach.q1', 'coach.q2', 'coach.q3', 'coach.q4', 'coach.q5',
 ]
 
 function buildContext(): string {
@@ -49,11 +47,16 @@ async function askCoach(messages: Message[]): Promise<string> {
 }
 
 export function AiCoachPage() {
+  const { t } = useT()
   const navigate = useNavigate()
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: `Hej! Jag är din AI-coach på FormPlan. Jag kan hjälpa dig med träningsfrågor, kosttips och återhämtning.\n\n${buildContext() ? `Jag ser att du har tränat nyligen — bra jobbat! ` : ''}Vad vill du veta?`,
+      content: [
+        t('coach.greeting'),
+        '',
+        `${buildContext() ? `${t('coach.trainedRecently')} ` : ''}${t('coach.whatToKnow')}`,
+      ].join('\n'),
     },
   ])
   const [input, setInput] = useState('')
@@ -85,13 +88,13 @@ export function AiCoachPage() {
           {
             role: 'assistant',
             content:
-              'AI-coachen är en Premium-funktion. Uppgradera under Mer → Premium för att fortsätta chatta.',
+              t('coach.premiumOnly'),
           },
         ])
       } else {
         // Any other failure: surface a real error instead of passing off a
         // canned rule-based answer as an AI reply.
-        toast.error('AI-coachen är tillfälligt otillgänglig, försök igen om en stund')
+        toast.error(t('coach.unavailable'))
       }
     } finally {
       setLoading(false)
@@ -155,13 +158,13 @@ export function AiCoachPage() {
         {/* Suggestions (only at start) */}
         {messages.length === 1 && (
           <div className="flex flex-wrap gap-2 mt-2">
-            {SUGGESTIONS.map((s) => (
+            {SUGGESTION_KEYS.map((suggestionKey) => (
               <button
-                key={s}
-                onClick={() => send(s)}
+                key={suggestionKey}
+                onClick={() => send(t(suggestionKey))}
                 className="text-xs bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full px-3 py-1.5 text-stone-600 dark:text-stone-300 hover:border-forest-300 hover:text-forest-700 dark:hover:text-forest-300 transition-colors"
               >
-                {s}
+                {t(suggestionKey)}
               </button>
             ))}
           </div>
@@ -178,7 +181,7 @@ export function AiCoachPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && send()}
-            placeholder="Ställ en träningsfråga..."
+            placeholder={t('coach.askPlaceholder')}
             className="flex-1 bg-stone-100 dark:bg-stone-700 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
           />
           <button

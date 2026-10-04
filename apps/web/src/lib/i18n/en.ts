@@ -376,6 +376,9 @@ export const en: Record<TextKey, string> = {
   'food.searchPlaceholder': 'Search foods…',
   'food.searchHint': 'Search foods & nutrition values',
   'food.addingTo': 'Adding to',
+  'food.addingToSlot': 'Adding to {slot}',
+  'food.addItem': 'Add {name}',
+  'food.per100gMacros': 'Per 100 g: {kcal} kcal · P {protein} g · F {fat} g · C {carbs} g',
   'food.meals': 'Meals',
   'food.createOwnMeal': 'Create your own meal',
   'food.noSavedMeals': 'No saved meals yet.',
@@ -582,6 +585,27 @@ export const en: Record<TextKey, string> = {
   'mealgen.generateAnother': 'Generate another',
   'mealgen.logMeal': 'Log meal',
   'mealgen.saveToWeek': 'Save to week',
+
+  // Paywall
+  'paywall.f1': 'A personal training & nutrition plan',
+  'paywall.f2': 'An AI coach that knows your data',
+  'paywall.f3': 'Automatic progression',
+  'paywall.f4': 'Photo analysis & barcode scanner',
+  'paywall.f5': 'AI recipes & a smart shopping list',
+  'paywall.f6': 'Weekly reports & goal tracking',
+
+  // AI coach
+  'coach.q1': 'How much rest do I need between sessions?',
+  'coach.q2': 'What should I eat before training?',
+  'coach.q3': 'How do I know if I’m training too hard?',
+  'coach.q4': 'Tips for getting stronger at bench press',
+  'coach.q5': 'How do I break through a plateau?',
+  'coach.greeting': 'Hi! I’m your AI coach in FormPlan. I can help with training questions, nutrition tips and recovery.',
+  'coach.trainedRecently': 'I can see you’ve trained recently — nice work!',
+  'coach.whatToKnow': 'What would you like to know?',
+  'coach.premiumOnly': 'The AI coach is a Premium feature. Upgrade under More → Premium to keep chatting.',
+  'coach.unavailable': 'The AI coach is temporarily unavailable, please try again shortly',
+  'coach.askPlaceholder': 'Ask a training question…',
 
   // Meals
   'meal.frukost': 'Breakfast',

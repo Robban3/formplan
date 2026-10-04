@@ -4,17 +4,15 @@ import { billingApi, type BillingStatus } from '../lib/billingApi'
 import { flushLocalWater } from '../lib/waterStore'
 import { workoutApi } from '../lib/workoutApi'
 import { CheckIcon } from '../components/ui/Icons'
+import { useT } from '../hooks/useT'
+import type { TextKey } from '../lib/i18n'
 
-const FEATURES = [
-  'Personligt tränings- & kostschema',
-  'AI-coach som kan din data',
-  'Automatisk progression',
-  'Fotoanalys & streckkodsscanner',
-  'AI-recept & smart inköpslista',
-  'Veckorapporter & måluppföljning',
+const FEATURE_KEYS: TextKey[] = [
+  'paywall.f1', 'paywall.f2', 'paywall.f3', 'paywall.f4', 'paywall.f5', 'paywall.f6',
 ]
 
 export function PaywallPage({ status }: { status: BillingStatus }) {
+  const { t } = useT()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const price = status.price_sek || 99
@@ -60,12 +58,12 @@ export function PaywallPage({ status }: { status: BillingStatus }) {
           <p className="text-center text-xs text-stone-500 dark:text-stone-400 mt-1">Avsluta när du vill</p>
 
           <ul className="mt-5 space-y-2.5">
-            {FEATURES.map((f) => (
-              <li key={f} className="flex items-center gap-3 text-sm text-stone-200">
+            {FEATURE_KEYS.map((featureKey) => (
+              <li key={featureKey} className="flex items-center gap-3 text-sm text-stone-200">
                 <span className="w-5 h-5 rounded-full bg-forest-700 flex items-center justify-center flex-shrink-0">
                   <CheckIcon className="w-3 h-3 stroke-white" />
                 </span>
-                {f}
+                {t(featureKey)}
               </li>
             ))}
           </ul>
