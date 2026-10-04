@@ -130,7 +130,10 @@ export function MorePage() {
                   permanent tillgång — då svarade portalen 404 och ett rött
                   felmeddelande lade sig över rutan som just sagt "Premium
                   aktivt". Bättre att inte lova något som inte finns. */}
-              {billing.manageable && (
+              {/* Saknas fältet svarar ett API som inte hunnit deployas — fall
+                  då tillbaka på premium. Hellre en knapp som kan ge 404 än en
+                  betalande kund utan väg att säga upp i appen. */}
+              {(billing.manageable ?? billing.premium) && (
                 <button
                   onClick={managePortal}
                   disabled={busy}

@@ -228,6 +228,7 @@ export function GoalsPage() {
   async function applyAdjustment() {
     if (!pending) return
     setApplying(true)
+    let profileSaved = false
     try {
       const { profile } = await api.getProfile()
       if (!profile || typeof profile !== 'object') {
@@ -235,12 +236,20 @@ export function GoalsPage() {
         return
       }
       await api.saveProfile({ ...(profile as Record<string, unknown>), ...pending.adjustment.patch })
+      // Profilen är ändrad från och med nu. Failar genereringen får användaren
+      // INTE tro att ingenting hände: målet i profilen styr nästa schema, och
+      // på gratisnivån (tak: en plan) failar genereringen varje gång.
+      profileSaved = true
       await api.generatePlan()
       toast.success('Schemat byggs om efter ditt mål')
       setPending(null)
       navigate('/traning')
     } catch (e) {
-      toast.error((e as Error).message || 'Kunde inte bygga om schemat')
+      toast.error(
+        profileSaved
+          ? 'Målet är sparat i din profil, men schemat kunde inte byggas om just nu. Försök igen från Träning.'
+          : (e as Error).message || 'Kunde inte spara målet'
+      )
     } finally {
       setApplying(false)
     }
