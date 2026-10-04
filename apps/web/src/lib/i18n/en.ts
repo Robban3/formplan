@@ -14,6 +14,60 @@
 import type { TextKey } from './sv'
 
 export const en: Record<TextKey, string> = {
+  // Tab bar
+  'nav.home': 'Home',
+  'nav.nutrition': 'Nutrition',
+  'nav.training': 'Training',
+  'nav.analytics': 'Analytics',
+  'nav.more': 'More',
+
+  // The More menu
+  'more.goals': 'My goals',
+  'more.challenges': 'Challenges',
+  'more.aiCoach': 'AI coach',
+  'more.measurements': 'Body measurements',
+  'more.recipes': 'Recipes',
+  'more.profile': 'Profile',
+  'more.settings': 'Settings',
+  'more.notifications': 'Notifications',
+  'more.reminders': 'Reminders',
+  'more.appleHealth': 'Apple Health',
+  'more.help': 'Help & support',
+  'more.about': 'About',
+  'more.privacy': 'Privacy policy',
+
+  // In-page tab rows
+  'tab.overview': 'Overview',
+  'tab.trends': 'Trends',
+  'tab.calories': 'Calories',
+  'tab.today': 'Today',
+  'tab.week': 'Week',
+  'tab.details': 'Details',
+  'tab.all': 'All',
+  'goals.tab.active': 'Active goals',
+  'goals.tab.past': 'Past goals',
+
+  // Page headings not in the menu
+  'page.customWorkouts': 'My workouts',
+  'page.myPlan': 'My plan',
+  'page.weekPlanning': 'Weekly planning',
+  'page.macros': 'Macros',
+  'page.mealPlan': 'Meal plan',
+  'page.aboutApp': 'About FormPlan',
+  'page.water': 'Water',
+
+  // Subscription
+  'billing.premiumActive': 'Premium active ✓',
+  'billing.thanks': 'Thanks for supporting FormPlan!',
+  'billing.manage': 'Manage subscription',
+  'billing.trial': 'Free trial',
+  'billing.trialLeftOne': '{days} day left free',
+  'billing.trialLeftMany': '{days} days left free',
+  'billing.trialOver': 'Your free trial has ended',
+  'billing.becomePremiumHint': 'Go Premium to keep using FormPlan.',
+  'billing.upgradeCta': 'Upgrade to Premium – SEK {price}/month',
+  'billing.becomePremiumCta': 'Go Premium – SEK {price}/month',
+
   // Meals
   'meal.frukost': 'Breakfast',
   'meal.lunch': 'Lunch',

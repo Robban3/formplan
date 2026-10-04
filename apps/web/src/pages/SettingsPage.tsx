@@ -288,7 +288,7 @@ export function SettingsPage() {
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
           Mer
         </button>
-        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Inställningar</h1>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('more.settings')}</h1>
       </div>
 
       <div className="px-5 mt-5 space-y-5">

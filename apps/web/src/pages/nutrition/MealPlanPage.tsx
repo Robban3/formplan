@@ -101,7 +101,7 @@ export function MealPlanPage() {
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
           Kost
         </button>
-        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Kostschema</h1>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('page.mealPlan')}</h1>
         <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Generera ett dagsmeny anpassat efter dina mål</p>
       </div>
 

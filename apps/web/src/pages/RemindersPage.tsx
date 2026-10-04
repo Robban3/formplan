@@ -4,10 +4,12 @@ import { ChevronLeftIcon, PlusIcon, XIcon } from '../components/ui/Icons'
 import { useSettings } from '../hooks/useSettings'
 import { settingsStore } from '../lib/settings'
 import { toast } from '../lib/toast'
+import { useT } from '../hooks/useT'
 
 const DAY_LABELS = ['M', 'Ti', 'O', 'To', 'F', 'L', 'S']
 
 export function RemindersPage() {
+  const { t } = useT()
   const navigate = useNavigate()
   const settings = useSettings()
   const [adding, setAdding] = useState(false)
@@ -57,7 +59,7 @@ export function RemindersPage() {
         <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
         Mer
       </button>
-      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">Påminnelser</h1>
+      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">{t('more.reminders')}</h1>
       <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Schemalägg påminnelser om dina träningspass.</p>
 
       {settings.reminders.length === 0 && !adding && (

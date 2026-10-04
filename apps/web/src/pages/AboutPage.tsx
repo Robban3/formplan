@@ -9,6 +9,7 @@ import {
   TrophyIcon,
   HeartIcon,
 } from '../components/ui/Icons'
+import { useT } from '../hooks/useT'
 
 const FEATURES = [
   {
@@ -56,6 +57,7 @@ const FEATURES = [
 ]
 
 export function AboutPage() {
+  const { t } = useT()
   const navigate = useNavigate()
   return (
     <div className="pb-10">
@@ -64,7 +66,7 @@ export function AboutPage() {
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
           Mer
         </button>
-        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-1">Om FormPlan</h1>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-1">{t('page.aboutApp')}</h1>
         <p className="text-sm text-stone-500 dark:text-stone-400">Version 0.1.0</p>
       </div>
 

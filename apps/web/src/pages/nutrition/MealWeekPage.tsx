@@ -13,6 +13,7 @@ import {
 import { api } from '../../lib/api'
 import { toast } from '../../lib/toast'
 import { MEAL_SLOT_LABELS as SLOT_LABELS } from '../../lib/texts'
+import { useT } from '../../hooks/useT'
 
 const DAY_SHORT = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön']
 const DAY_FULL = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag']
@@ -35,6 +36,7 @@ function dateForWeekday(weekday: number): Date {
 }
 
 export function MealWeekPage() {
+  const { t } = useT()
   const navigate = useNavigate()
   const [plan, setPlan] = useState<WeekMealPlan>(loadWeekPlan)
   const [selected, setSelected] = useState(weekdayOf(new Date()))
@@ -121,7 +123,7 @@ export function MealWeekPage() {
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
           Kost
         </button>
-        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Veckoplanering</h1>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('page.weekPlanning')}</h1>
         <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Generera hela veckan eller enstaka dagar utifrån kalorier</p>
       </div>
 

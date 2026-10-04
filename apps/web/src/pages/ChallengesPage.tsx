@@ -20,6 +20,7 @@ import {
   TargetIcon,
 } from '../components/ui/Icons'
 import type { ComponentType } from 'react'
+import { useT } from '../hooks/useT'
 
 const ICON_MAP: Record<ChallengeIconKey, ComponentType<{ className?: string }>> = {
   flame:    FireIcon,
@@ -105,6 +106,7 @@ function ChallengeCard({ challenge, onAbandon }: { challenge: Challenge; onAband
 }
 
 export function ChallengesPage() {
+  const { t } = useT()
   const navigate = useNavigate()
   const [active, setActive] = useState(getActiveChallenges)
   const [available, setAvailable] = useState(getAvailablePresets)
@@ -150,7 +152,7 @@ export function ChallengesPage() {
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Utmaningar</h1>
+          <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('more.challenges')}</h1>
           <p className="text-xs text-stone-500 dark:text-stone-400">Sätt extra mål och håll motivationen uppe</p>
         </div>
       </div>

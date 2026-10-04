@@ -28,16 +28,21 @@ import { CustomWorkoutPage } from '../pages/training/CustomWorkoutPage'
 import { FoodDiary } from '../pages/nutrition/FoodDiary'
 import { WaterPage } from '../pages/nutrition/WaterPage'
 import { FoodSearch } from '../pages/nutrition/FoodSearch'
+import { useT } from '../hooks/useT'
+import type { TextKey } from '../lib/i18n'
 
-const tabs = [
-  { to: '/hem',      label: 'Hem',      Icon: HomeIcon },
-  { to: '/kost',     label: 'Kost',     Icon: LeafIcon },
-  { to: '/traning',  label: 'Träning',  Icon: DumbbellIcon },
-  { to: '/analys',   label: 'Analys',   Icon: BarChartIcon },
-  { to: '/mer',      label: 'Mer',      Icon: MoreHorizontalIcon },
+// Sökvägarna är svenska och ändras inte — de ligger i delade länkar och i
+// Universal Links. Bara etiketten översätts.
+const tabs: { to: string; key: TextKey; Icon: React.ComponentType<{ className?: string }> }[] = [
+  { to: '/hem',     key: 'nav.home',      Icon: HomeIcon },
+  { to: '/kost',    key: 'nav.nutrition', Icon: LeafIcon },
+  { to: '/traning', key: 'nav.training',  Icon: DumbbellIcon },
+  { to: '/analys',  key: 'nav.analytics', Icon: BarChartIcon },
+  { to: '/mer',     key: 'nav.more',      Icon: MoreHorizontalIcon },
 ]
 
 export function TabLayout() {
+  const { t } = useT()
   return (
     <div className="flex flex-col h-[100dvh] max-w-lg mx-auto">
       {/* Page content */}
@@ -78,7 +83,7 @@ export function TabLayout() {
       {/* Bottom tab bar */}
       <nav className="flex-shrink-0 bg-white dark:bg-stone-800 border-t border-stone-200 dark:border-stone-700 safe-bottom">
         <div className="flex">
-          {tabs.map(({ to, label, Icon }) => (
+          {tabs.map(({ to, key, Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -91,7 +96,7 @@ export function TabLayout() {
               {({ isActive }) => (
                 <>
                   <Icon className={`w-6 h-6 ${isActive ? 'stroke-forest-600' : 'stroke-stone-500 dark:stroke-stone-400'}`} />
-                  {label}
+                  {t(key)}
                 </>
               )}
             </NavLink>

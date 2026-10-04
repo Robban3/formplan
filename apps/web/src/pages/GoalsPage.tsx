@@ -9,6 +9,7 @@ import { toast } from '../lib/toast'
 import { goalSuggestions } from '../lib/goalSuggestions'
 import { useT } from '../hooks/useT'
 import { useUnits } from '../hooks/useUnits'
+import type { TextKey } from '../lib/i18n'
 
 export interface Goal {
   id: string
@@ -280,15 +281,15 @@ export function GoalsPage() {
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Mina mål</h1>
 
         <div className="flex gap-5 mt-4 border-b border-stone-200 dark:border-stone-700 -mb-4">
-          {(['aktiva', 'tidigare'] as Tab[]).map((t) => (
+          {(['aktiva', 'tidigare'] as Tab[]).map((tabKey) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={tabKey}
+              onClick={() => setTab(tabKey)}
               className={`pb-4 text-sm font-medium capitalize transition-colors ${
-                tab === t ? 'text-forest-800 dark:text-forest-400 border-b-2 border-forest-600' : 'text-stone-500 dark:text-stone-400'
+                tab === tabKey ? 'text-forest-800 dark:text-forest-400 border-b-2 border-forest-600' : 'text-stone-500 dark:text-stone-400'
               }`}
             >
-              {t === 'aktiva' ? `Aktiva mål${active.length > 0 ? ` (${active.length})` : ''}` : 'Tidigare mål'}
+              {tabKey === 'aktiva' ? `${t('goals.tab.active')}${active.length > 0 ? ` (${active.length})` : ''}` : t('goals.tab.past')}
             </button>
           ))}
         </div>

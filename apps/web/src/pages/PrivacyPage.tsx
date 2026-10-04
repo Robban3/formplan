@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon } from '../components/ui/Icons'
+import { useT } from '../hooks/useT'
 
 /**
  * Integritetspolicy.
@@ -27,6 +28,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export function PrivacyPage() {
+  const { t } = useT()
   const navigate = useNavigate()
 
   return (
@@ -40,7 +42,7 @@ export function PrivacyPage() {
           >
             <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
           </button>
-          <h1 className="text-lg font-bold text-stone-900 dark:text-stone-100">Integritetspolicy</h1>
+          <h1 className="text-lg font-bold text-stone-900 dark:text-stone-100">{t('more.privacy')}</h1>
         </div>
       </header>
 

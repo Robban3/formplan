@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon, ChevronDownIcon, ChevronUpIcon } from '../components/ui/Icons'
+import { useT } from '../hooks/useT'
 
 interface FAQ { q: string; a: string }
 
@@ -100,6 +101,7 @@ const SECTIONS: { label: string; faqs: FAQ[] }[] = [
 ]
 
 export function HelpPage() {
+  const { t } = useT()
   const navigate = useNavigate()
   const [open, setOpen] = useState<string | null>(null)
 
@@ -113,7 +115,7 @@ export function HelpPage() {
         <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
         Mer
       </button>
-      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-1">Hjälp & support</h1>
+      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-1">{t('more.help')}</h1>
       <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Vanliga frågor och svar.</p>
 
       <div className="space-y-5">

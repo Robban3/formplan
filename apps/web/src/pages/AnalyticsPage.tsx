@@ -15,6 +15,8 @@ import { initMeasurementsSync } from '../lib/measurementsSync'
 import { getRpeEntries } from '../lib/rpeStore'
 import { useSettings } from '../hooks/useSettings'
 import { WEIGHT_MIN_KG, WEIGHT_MAX_KG } from '../lib/constants'
+import { useT } from '../hooks/useT'
+import type { TextKey } from '../lib/i18n'
 
 type Tab = 'oversikt' | 'trender' | 'kalorier'
 
@@ -322,6 +324,7 @@ function WeightChart({ entries }: { entries: WeightEntry[] }) {
 export function AnalyticsPage() {
   const settings = useSettings()
   const { formatVolume, formatWeight, toStore, toDisplay, weightLabel } = useUnits()
+  const { t } = useT()
   const [tab, setTab] = useState<Tab>('oversikt')
   const [sessions, setSessions] = useState<WorkoutSession[]>([])
   const [daySummaries, setDaySummaries] = useState<DaySummary[]>([])
@@ -442,17 +445,17 @@ export function AnalyticsPage() {
   const waterPoints = last7.map((date) => waterDays.find((d) => d.date === date)?.total_ml ?? 0)
   const avgWater = waterDays.length > 0 ? Math.round(waterDays.reduce((s, d) => s + d.total_ml, 0) / waterDays.length) : 0
 
-  const TABS = [
-    { key: 'oversikt' as Tab, label: 'Översikt' },
-    { key: 'trender'  as Tab, label: 'Trender' },
-    { key: 'kalorier' as Tab, label: 'Kalorier' },
+  const TABS: { key: Tab; label: string }[] = [
+    { key: 'oversikt', label: t('tab.overview') },
+    { key: 'trender', label: t('tab.trends') },
+    { key: 'kalorier', label: t('tab.calories') },
   ]
 
   return (
     <div className="pt-header pb-6">
       {/* Header */}
       <div className="px-5 mb-4">
-        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Analys</h1>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('nav.analytics')}</h1>
         <div className="flex gap-5 mt-3 border-b border-stone-200 dark:border-stone-700">
           {TABS.map(({ key, label }) => (
             <button key={key} onClick={() => setTab(key)}

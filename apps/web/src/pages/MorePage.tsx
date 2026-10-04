@@ -25,11 +25,13 @@ import {
   BotIcon,
   ShieldIcon,
 } from '../components/ui/Icons'
+import { useT } from '../hooks/useT'
+import type { TextKey } from '../lib/i18n'
 
 type IconComponent = React.ComponentType<{ className?: string }>
 
 interface MoreRow {
-  label: string
+  key: TextKey
   Icon: IconComponent
   to: string
   /**
@@ -43,23 +45,24 @@ interface MoreRow {
 }
 
 const rows: MoreRow[] = [
-  { label: 'Mina mål',          Icon: TargetIcon,      to: '/mer/mina-mal' },
-  { label: 'Utmaningar',        Icon: TrophyIcon,      to: '/mer/utmaningar' },
-  { label: 'AI-coach',          Icon: BotIcon,         to: '/mer/ai-coach' },
-  { label: 'Kroppsmätningar',   Icon: BarChartIcon,    to: '/mer/matningar' },
-  { label: 'Recept',            Icon: BookOpenIcon,    to: '/mer/recept' },
-  { label: 'Profil',        Icon: UserIcon,        to: '/mer/profil' },
-  { label: 'Inställningar', Icon: SettingsIcon,    to: '/mer/installningar' },
-  { label: 'Notiser',       Icon: BellIcon,        to: '/mer/notiser' },
-  { label: 'Påminnelser',   Icon: ClockIcon,       to: '/mer/paminnelser' },
-  { label: 'Apple Health',  Icon: HeartIcon,       to: '/mer/apple-health', webOnly: true },
-  { label: 'Hjälp & support', Icon: HelpCircleIcon, to: '/mer/hjalp' },
-  { label: 'Om appen',      Icon: InfoIcon,        to: '/mer/om' },
-  { label: 'Integritetspolicy', Icon: ShieldIcon,  to: '/integritet' },
+  { key: 'more.goals',        Icon: TargetIcon,     to: '/mer/mina-mal' },
+  { key: 'more.challenges',   Icon: TrophyIcon,     to: '/mer/utmaningar' },
+  { key: 'more.aiCoach',      Icon: BotIcon,        to: '/mer/ai-coach' },
+  { key: 'more.measurements', Icon: BarChartIcon,   to: '/mer/matningar' },
+  { key: 'more.recipes',      Icon: BookOpenIcon,   to: '/mer/recept' },
+  { key: 'more.profile',      Icon: UserIcon,       to: '/mer/profil' },
+  { key: 'more.settings',     Icon: SettingsIcon,   to: '/mer/installningar' },
+  { key: 'more.notifications', Icon: BellIcon,      to: '/mer/notiser' },
+  { key: 'more.reminders',    Icon: ClockIcon,      to: '/mer/paminnelser' },
+  { key: 'more.appleHealth',  Icon: HeartIcon,      to: '/mer/apple-health', webOnly: true },
+  { key: 'more.help',         Icon: HelpCircleIcon, to: '/mer/hjalp' },
+  { key: 'more.about',        Icon: InfoIcon,       to: '/mer/om' },
+  { key: 'more.privacy',      Icon: ShieldIcon,     to: '/integritet' },
 ]
 
 export function MorePage() {
   const navigate = useNavigate()
+  const { t } = useT()
   const visibleRows = rows.filter((r) => !(r.webOnly && isNativeApp()))
   const [billing, setBilling] = useState<BillingStatus | null>(null)
   const [busy, setBusy] = useState(false)
@@ -117,14 +120,14 @@ export function MorePage() {
 
   return (
     <div className="px-5 pt-header pb-4">
-      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-6">Mer</h1>
+      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-6">{t('nav.more')}</h1>
 
       {billing && (
         <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 mb-4">
           {billing.premium ? (
             <>
-              <p className="font-semibold text-stone-900 dark:text-stone-100">Premium aktivt ✓</p>
-              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Tack för att du stödjer FormPlan!</p>
+              <p className="font-semibold text-stone-900 dark:text-stone-100">{t('billing.premiumActive')}</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{t('billing.thanks')}</p>
               {/* Knappen visas bara när det finns en Stripe-prenumeration att
                   öppna portalen för. Premium kan också komma från ett konto med
                   permanent tillgång — då svarade portalen 404 och ett rött
@@ -139,34 +142,36 @@ export function MorePage() {
                   disabled={busy}
                   className="mt-3 w-full py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-sm font-semibold text-stone-700 dark:text-stone-300 hover:border-forest-400 hover:text-forest-700 dark:hover:text-forest-300 transition-colors disabled:opacity-60"
                 >
-                  Hantera prenumeration
+                  {t('billing.manage')}
                 </button>
               )}
             </>
           ) : billing.inTrial ? (
             <>
-              <p className="font-semibold text-stone-900 dark:text-stone-100">Provperiod</p>
+              <p className="font-semibold text-stone-900 dark:text-stone-100">{t('billing.trial')}</p>
               <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                {billing.trialDaysLeft} {billing.trialDaysLeft === 1 ? 'dag' : 'dagar'} kvar gratis
+                {t(billing.trialDaysLeft === 1 ? 'billing.trialLeftOne' : 'billing.trialLeftMany', {
+                  days: billing.trialDaysLeft,
+                })}
               </p>
               <button
                 onClick={upgrade}
                 disabled={busy}
                 className="mt-3 w-full py-2.5 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-sm font-semibold transition-colors disabled:opacity-60"
               >
-                Uppgradera till Premium – {billing.price_sek || 99} kr/mån
+                {t('billing.upgradeCta', { price: billing.price_sek || 99 })}
               </button>
             </>
           ) : (
             <>
-              <p className="font-semibold text-stone-900 dark:text-stone-100">Provperioden är slut</p>
-              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Bli Premium för att fortsätta.</p>
+              <p className="font-semibold text-stone-900 dark:text-stone-100">{t('billing.trialOver')}</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{t('billing.becomePremiumHint')}</p>
               <button
                 onClick={upgrade}
                 disabled={busy}
                 className="mt-3 w-full py-2.5 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-sm font-semibold transition-colors disabled:opacity-60"
               >
-                Bli Premium – {billing.price_sek || 99} kr/mån
+                {t('billing.becomePremiumCta', { price: billing.price_sek || 99 })}
               </button>
             </>
           )}
@@ -176,14 +181,14 @@ export function MorePage() {
       <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
         {visibleRows.map((row, i) => (
           <button
-            key={row.label}
+            key={row.key}
             onClick={() => navigate(row.to)}
             className={`w-full flex items-center gap-3 px-4 py-4 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors ${
               i > 0 ? 'border-t border-stone-200 dark:border-stone-700' : ''
             }`}
           >
             <row.Icon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400 flex-shrink-0" />
-            <span className="flex-1 text-left text-stone-800 dark:text-stone-200 font-medium">{row.label}</span>
+            <span className="flex-1 text-left text-stone-800 dark:text-stone-200 font-medium">{t(row.key)}</span>
             <ChevronRightIcon className="w-4 h-4 stroke-stone-300 dark:stroke-stone-600" />
           </button>
         ))}

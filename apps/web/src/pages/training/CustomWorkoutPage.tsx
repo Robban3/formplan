@@ -9,6 +9,7 @@ import { resolveExercise } from '../../lib/exerciseResolve'
 import { normalizeExerciseName } from '../../lib/exerciseKey'
 import { useUnits } from '../../hooks/useUnits'
 import { DEFAULT_SETS, DEFAULT_REPS, DEFAULT_REST_SECONDS } from '../../lib/constants'
+import { useT } from '../../hooks/useT'
 
 interface Exercise {
   name: string
@@ -46,6 +47,7 @@ const EXERCISE_PRESETS: { id: string; name: string }[] = [...EXERCISE_CATALOG]
 
 export function CustomWorkoutPage() {
   const { weightLabel, toDisplay, toStore } = useUnits()
+  const { t } = useT()
   const navigate = useNavigate()
   const [workouts, setWorkouts] = useState<CustomWorkout[]>(loadWorkouts)
   const [creating, setCreating] = useState(false)
@@ -144,7 +146,7 @@ export function CustomWorkoutPage() {
         </button>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Egna pass</h1>
+            <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('page.customWorkouts')}</h1>
             <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Bygg dina egna träningspass</p>
           </div>
           {!creating && (

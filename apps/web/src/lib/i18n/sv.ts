@@ -15,6 +15,63 @@
  */
 
 export const sv = {
+  // Flikraden
+  'nav.home': 'Hem',
+  'nav.nutrition': 'Kost',
+  'nav.training': 'Träning',
+  'nav.analytics': 'Analys',
+  'nav.more': 'Mer',
+
+  // Menyn under Mer
+  'more.goals': 'Mina mål',
+  'more.challenges': 'Utmaningar',
+  'more.aiCoach': 'AI-coach',
+  'more.measurements': 'Kroppsmätningar',
+  'more.recipes': 'Recept',
+  'more.profile': 'Profil',
+  'more.settings': 'Inställningar',
+  'more.notifications': 'Notiser',
+  'more.reminders': 'Påminnelser',
+  'more.appleHealth': 'Apple Health',
+  'more.help': 'Hjälp & support',
+  'more.about': 'Om appen',
+  'more.privacy': 'Integritetspolicy',
+
+  // Flikrader inne i sidorna
+  'tab.overview': 'Översikt',
+  'tab.trends': 'Trender',
+  'tab.calories': 'Kalorier',
+  'tab.today': 'Idag',
+  'tab.week': 'Vecka',
+  'tab.details': 'Detaljer',
+  'tab.all': 'Alla',
+  'goals.tab.active': 'Aktiva mål',
+  'goals.tab.past': 'Tidigare mål',
+
+  // Sidrubriker som inte finns i menyn
+  'page.customWorkouts': 'Egna pass',
+  'page.myPlan': 'Mitt schema',
+  'page.weekPlanning': 'Veckoplanering',
+  'page.macros': 'Makro',
+  'page.mealPlan': 'Kostschema',
+  'page.aboutApp': 'Om FormPlan',
+  'page.water': 'Vatten',
+
+  // Prenumeration
+  'billing.premiumActive': 'Premium aktivt ✓',
+  'billing.thanks': 'Tack för att du stödjer FormPlan!',
+  'billing.manage': 'Hantera prenumeration',
+  'billing.trial': 'Provperiod',
+  // Två nycklar i stället för pluralregler: appen har två språk och ett
+  // räknebart ord. Ett pluralbibliotek vore mer maskineri än nytta.
+  'billing.trialLeftOne': '{days} dag kvar gratis',
+  'billing.trialLeftMany': '{days} dagar kvar gratis',
+  'billing.trialOver': 'Provperioden är slut',
+  'billing.becomePremiumHint': 'Bli Premium för att fortsätta.',
+  // Priset debiteras i kronor oavsett språk.
+  'billing.upgradeCta': 'Uppgradera till Premium – {price} kr/mån',
+  'billing.becomePremiumCta': 'Bli Premium – {price} kr/mån',
+
   // Måltider
   'meal.frukost': 'Frukost',
   'meal.lunch': 'Lunch',

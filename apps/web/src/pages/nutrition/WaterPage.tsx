@@ -13,6 +13,8 @@ import { formatVolume as formatVolumeIn } from '../../lib/units'
 import { WaterWeekView } from './WaterWeekView'
 import { WATER_QUICK_OPTIONS_ML } from '../../lib/constants'
 import { BUSY_ADDING } from '../../lib/texts'
+import { useT } from '../../hooks/useT'
+import type { TextKey } from '../../lib/i18n'
 
 const QUICK_OPTIONS = WATER_QUICK_OPTIONS_ML
 const DEFAULT_ML = 250
@@ -49,6 +51,7 @@ export function WaterPage() {
   const navigate = useNavigate()
   const { water_goal_ml: GOAL_ML } = useSettings()
   const { imperial, formatVolume } = useUnits()
+  const { t } = useT()
   const today = dateKey()
   const [entries, setEntries] = useState<WaterEntry[]>([])
   const [total, setTotal] = useState(0)
@@ -150,19 +153,19 @@ export function WaterPage() {
         <button onClick={() => navigate(-1)} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700">
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
         </button>
-        <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100 flex-1">Vatten</h1>
+        <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100 flex-1">{t('page.water')}</h1>
       </div>
 
       <div className="px-4 flex gap-5 border-b border-stone-200 dark:border-stone-700">
-        {(['idag', 'vecka'] as WaterTab[]).map((t) => (
+        {(['idag', 'vecka'] as WaterTab[]).map((tabKey) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={tabKey}
+            onClick={() => setTab(tabKey)}
             className={`pb-3 text-sm font-medium capitalize transition-colors ${
-              tab === t ? 'text-forest-800 dark:text-forest-400 border-b-2 border-forest-600' : 'text-stone-500 dark:text-stone-400'
+              tab === tabKey ? 'text-forest-800 dark:text-forest-400 border-b-2 border-forest-600' : 'text-stone-500 dark:text-stone-400'
             }`}
           >
-            {t === 'idag' ? 'Idag' : 'Vecka'}
+            {t(tabKey === 'idag' ? 'tab.today' : 'tab.week')}
           </button>
         ))}
       </div>

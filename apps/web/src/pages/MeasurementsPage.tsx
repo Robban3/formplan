@@ -17,6 +17,7 @@ import { notifyWeightLogged } from '../lib/challengeEvents'
 import { initMeasurementsSync } from '../lib/measurementsSync'
 import { dateKey } from '../lib/derive'
 import { useUnits } from '../hooks/useUnits'
+import { useT } from '../hooks/useT'
 
 /**
  * Combined view: girth fields come from measurementStore, but the weight scalar
@@ -90,6 +91,7 @@ function MiniLineChart({ values, color, format }: {
 export function MeasurementsPage() {
   const navigate = useNavigate()
   const { weightLabel, lengthLabel, toStore, toStoreLength, toDisplay, toDisplayLength, formatWeight, formatLength } = useUnits()
+  const { t } = useT()
 
   /** Etikett och formatering per fälttyp — måtten lagras alltid metriskt. */
   const unitFor = (kind: 'weight' | 'length') => (kind === 'weight' ? weightLabel : lengthLabel)
@@ -170,7 +172,7 @@ export function MeasurementsPage() {
         </button>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Kroppsmätningar</h1>
+            <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('more.measurements')}</h1>
             <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Följ din kroppssammansättning</p>
           </div>
           <button

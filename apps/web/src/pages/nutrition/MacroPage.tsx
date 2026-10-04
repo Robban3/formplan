@@ -7,10 +7,12 @@ import { MacroBar } from '../../components/nutrition/MacroBar'
 import { ChevronLeftIcon } from '../../components/ui/Icons'
 import { useSettings } from '../../hooks/useSettings'
 import { MEAL_SLOT_LABELS as SLOT_LABELS } from '../../lib/texts'
+import { useT } from '../../hooks/useT'
 
 type Tab = 'oversikt' | 'detaljer'
 
 export function MacroPage() {
+  const { t } = useT()
   const navigate = useNavigate()
   const settings = useSettings()
   const today = dateKey()
@@ -53,19 +55,19 @@ export function MacroPage() {
         <button onClick={() => navigate('/kost')} className="p-1.5 -ml-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700">
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
         </button>
-        <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">Makro</h1>
+        <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">{t('page.macros')}</h1>
       </div>
 
       <div className="px-4 flex gap-5 border-b border-stone-200 dark:border-stone-700">
-        {(['oversikt', 'detaljer'] as Tab[]).map((t) => (
+        {(['oversikt', 'detaljer'] as Tab[]).map((tabKey) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={tabKey}
+            onClick={() => setTab(tabKey)}
             className={`pb-3 text-sm font-medium capitalize transition-colors ${
-              tab === t ? 'text-forest-800 dark:text-forest-400 border-b-2 border-forest-600' : 'text-stone-500 dark:text-stone-400'
+              tab === tabKey ? 'text-forest-800 dark:text-forest-400 border-b-2 border-forest-600' : 'text-stone-500 dark:text-stone-400'
             }`}
           >
-            {t === 'oversikt' ? 'Översikt' : 'Detaljer'}
+            {t(tabKey === 'oversikt' ? 'tab.overview' : 'tab.details')}
           </button>
         ))}
       </div>

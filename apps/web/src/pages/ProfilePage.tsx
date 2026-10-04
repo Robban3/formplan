@@ -4,6 +4,7 @@ import { api } from '../lib/api'
 import { ChevronLeftIcon } from '../components/ui/Icons'
 import { useUnits } from '../hooks/useUnits'
 import { GOAL_LABELS, LEVEL_LABELS } from '../lib/texts'
+import { useT } from '../hooks/useT'
 
 interface FitnessProfile {
   goal: string
@@ -18,6 +19,7 @@ interface FitnessProfile {
 }
 
 export function ProfilePage() {
+  const { t } = useT()
   const navigate = useNavigate()
   const { formatWeight, formatHeight } = useUnits()
   const [profile, setProfile] = useState<FitnessProfile | null>(null)
@@ -59,7 +61,7 @@ export function ProfilePage() {
         <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
         Mer
       </button>
-      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-6">Profil</h1>
+      <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-6">{t('more.profile')}</h1>
 
       {profile ? (
         <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">

@@ -13,6 +13,8 @@ import {
   SproutIcon,
 } from '../components/ui/Icons'
 import { api, type GeneratedRecipe, type RecipeCategory } from '../lib/api'
+import { useT } from '../hooks/useT'
+import type { TextKey } from '../lib/i18n'
 
 type IconComponent = React.ComponentType<{ className?: string }>
 
@@ -223,8 +225,22 @@ export const RECIPES: Recipe[] = [
   },
 ]
 
+/**
+ * Flikvärdena är svenska med AVSIKT: de matchas mot recepttaggarna i datan
+ * (`r.tags.includes(activeTab)`). Översätts värdet slutar filtreringen
+ * fungera — bara etiketten går via ordlistan.
+ */
 const MEAL_TABS = ['Alla', 'Frukost', 'Lunch', 'Middag', 'Mellanmål'] as const
 type MealTab = typeof MEAL_TABS[number]
+
+/** Svenskt flikvärde → etikett i ordlistan. */
+const MEAL_TAB_KEYS: Record<MealTab, TextKey> = {
+  'Alla': 'tab.all',
+  'Frukost': 'meal.frukost',
+  'Lunch': 'meal.lunch',
+  'Middag': 'meal.middag',
+  'Mellanmål': 'meal.mellanmar',
+}
 
 // Vald måltidsflik → meal_type som AI:n får (styr att t.ex. frukost blir
 // frukostmat, inte lammfärsbiffar).
@@ -462,6 +478,7 @@ export function RecipesPage() {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState<MealTab>('Alla')
+  const { t } = useT()
 
   const filtered = RECIPES.filter((r) => {
     const matchSearch = r.name.toLowerCase().includes(search.toLowerCase())
@@ -477,7 +494,7 @@ export function RecipesPage() {
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
           Mer
         </button>
-        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Recept</h1>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('more.recipes')}</h1>
 
         {/* Search */}
         <div className="relative mt-3">
@@ -494,15 +511,15 @@ export function RecipesPage() {
 
         {/* Meal tabs — wrap so inget kapas (t.ex. "Mellanmål") på smala skärmar */}
         <div className="flex flex-wrap gap-2 mt-3">
-          {MEAL_TABS.map((t) => (
+          {MEAL_TABS.map((tabValue) => (
             <button
-              key={t}
-              onClick={() => setActiveTab(t)}
+              key={tabValue}
+              onClick={() => setActiveTab(tabValue)}
               className={`text-xs px-4 py-1.5 rounded-full font-medium transition-colors ${
-                activeTab === t ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
+                activeTab === tabValue ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
               }`}
             >
-              {t}
+              {t(MEAL_TAB_KEYS[tabValue])}
             </button>
           ))}
         </div>
