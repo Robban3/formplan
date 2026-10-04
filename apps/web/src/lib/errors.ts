@@ -1,4 +1,5 @@
 import { ApiError } from './api'
+import { GENERIC_ERROR } from './texts'
 
 export function isNetworkError(e: unknown): boolean {
   return e instanceof TypeError && e.message.toLowerCase().includes('fetch')
@@ -15,5 +16,5 @@ export function isPaymentRequired(e: unknown): boolean {
 
 export function toastIfNotNetwork(e: unknown, toastFn: (msg: string) => void) {
   if (isNetworkError(e) || isPaymentRequired(e)) return
-  toastFn((e as Error).message ?? 'Något gick fel')
+  toastFn((e as Error).message ?? GENERIC_ERROR)
 }

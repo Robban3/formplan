@@ -7,6 +7,9 @@ import { toast } from '../../lib/toast'
 import { ChevronLeftIcon, XIcon, PlusIcon, UtensilsIcon, CameraIcon, ScanBarcodeIcon } from '../../components/ui/Icons'
 import { recordFoodUsed, getTopFavorites } from '../../lib/foodFavoritesStore'
 import { isOffId } from '../../lib/openFoodFacts'
+import { MEAL_SLOT_LABELS as SLOT_LABELS } from '../../lib/texts'
+import { GENERIC_ERROR } from '../../lib/texts'
+import { NUTRITION_BASIS_G } from '../../lib/constants'
 
 type SearchTab = 'alla' | 'mina' | 'maltider'
 
@@ -38,13 +41,6 @@ export function FoodSearch() {
   useEffect(() => {
     if (tab === 'maltider') setCustomMeals(loadCustomMeals())
   }, [tab])
-
-  const SLOT_LABELS: Record<MealSlot, string> = {
-    frukost: 'Frukost',
-    lunch: 'Lunch',
-    middag: 'Middag',
-    mellanmar: 'Mellanmål',
-  }
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -115,7 +111,7 @@ export function FoodSearch() {
       toast.success(`${meal.name} tillagd`)
       navigate(-1)
     } catch (e) {
-      toast.error((e as Error).message ?? 'Något gick fel')
+      toast.error((e as Error).message ?? GENERIC_ERROR)
     } finally {
       setAdding(false)
     }
@@ -128,7 +124,7 @@ export function FoodSearch() {
     if (isNaN(g) || g <= 0) return
     setAdding(true)
     try {
-      const factor = g / 100
+      const factor = g / NUTRITION_BASIS_G
       await nutritionApi.addLogEntry({
         date,
         meal_slot: slot,
@@ -151,7 +147,7 @@ export function FoodSearch() {
       })
       navigate(-1)
     } catch (e) {
-      toast.error((e as Error).message ?? 'Något gick fel')
+      toast.error((e as Error).message ?? GENERIC_ERROR)
     } finally {
       setAdding(false)
     }
@@ -337,7 +333,7 @@ export function FoodSearch() {
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate">{selected.name}</p>
               {(() => {
-                const f = (parseFloat(amount) || 0) / 100
+                const f = (parseFloat(amount) || 0) / NUTRITION_BASIS_G
                 const kcal = Math.round(selected.kcal_per_100g * f)
                 return (
                   <p className="text-xs text-stone-500 dark:text-stone-400">

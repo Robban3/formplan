@@ -1,4 +1,5 @@
 import type { GoalMeta } from './goalTracker'
+import { GOAL_LABELS as GOAL_TEXT } from './texts'
 
 /**
  * Översätter ett mål till en ändring i träningsprofilen.
@@ -17,12 +18,6 @@ export interface PlanAdjustment {
   patch: { goal?: string; days_per_week?: number }
   /** Vad användaren får läsa i bekräftelsen, innan schemat ersätts. */
   description: string
-}
-
-const GOAL_TEXT: Record<string, string> = {
-  lose_weight: 'Gå ner i vikt',
-  build_muscle: 'Bygga muskler',
-  maintain: 'Hålla formen',
 }
 
 /**

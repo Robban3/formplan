@@ -27,16 +27,11 @@ import {
 } from '../../components/ui/Icons'
 import { WorkoutHero } from '../../components/training/WorkoutHero'
 import type { ComponentType } from 'react'
+import { MEAL_SLOT_LABELS as MEAL_LABELS } from '../../lib/texts'
+import { WATER_QUICK_ADD_ML } from '../../lib/constants'
 
 const STEPS_GOAL = 10_000
 const MEAL_SLOTS: MealSlot[] = ['frukost', 'lunch', 'mellanmar', 'middag']
-
-const MEAL_LABELS: Record<MealSlot, string> = {
-  frukost: 'Frukost',
-  lunch: 'Lunch',
-  middag: 'Middag',
-  mellanmar: 'Mellanmål',
-}
 
 type QuickLink = {
   Icon: ComponentType<{ className?: string }>
@@ -157,6 +152,7 @@ function WeeklyRing({ done, total, size = 56 }: { done: number; total: number; s
 }
 
 function WeeklyReport({ weeklyDone, weeklyTotal }: { weeklyDone: number; weeklyTotal: number }) {
+  const { toDisplay, weightLabel } = useUnits()
   const now = new Date()
   const monday = new Date(now)
   monday.setDate(now.getDate() - ((now.getDay() + 6) % 7))
@@ -187,8 +183,8 @@ function WeeklyReport({ weeklyDone, weeklyTotal }: { weeklyDone: number; weeklyT
           {weeklyTotal > 0 && <p className="text-[9px] text-forest-800 dark:text-forest-400 font-medium">{pct}%</p>}
         </div>
         <div>
-          <p className="text-xl font-bold text-stone-900 dark:text-stone-100">{Math.round(totalVolume).toLocaleString('sv-SE')}</p>
-          <p className="text-[10px] text-stone-500 dark:text-stone-400">kg lyft</p>
+          <p className="text-xl font-bold text-stone-900 dark:text-stone-100">{Math.round(toDisplay(totalVolume)).toLocaleString('sv-SE')}</p>
+          <p className="text-[10px] text-stone-500 dark:text-stone-400">{weightLabel} lyft</p>
         </div>
         <div>
           <p className="text-xl font-bold text-stone-900 dark:text-stone-100">{avgTime}</p>
@@ -212,7 +208,7 @@ export function HomePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const settings = useSettings()
-  const { formatVolume } = useUnits()
+  const { formatVolume, toDisplay, weightLabel } = useUnits()
   const activeWorkout = useWorkoutStore()
   const [loading, setLoading] = useState(true)
   const [todayWorkout, setTodayWorkout] = useState<WorkoutDay | null>(null)
@@ -311,20 +307,20 @@ export function HomePage() {
     // Resolve the day at click time — a dashboard left open across midnight
     // must log water against the new day, not the render-time `today`.
     const day = dateKey()
-    setWaterTotal((prev) => prev + 250)
+    setWaterTotal((prev) => prev + WATER_QUICK_ADD_ML)
     notifyWaterLogged()
-    toast.success(`+${formatVolume(250)} vatten loggat`)
+    toast.success(`+${formatVolume(WATER_QUICK_ADD_ML)} vatten loggat`)
     // Write-through: servern är auktoritativ källa (Hem/Kost/Analys läser den),
     // localStorage speglas för synkrona läsare som vattenmålet (goalTracker).
     // Ingen läsare summerar båda, så ingen dubbelräkning.
     try {
-      await nutritionApi.addWater(day, 250)
+      await nutritionApi.addWater(day, WATER_QUICK_ADD_ML)
       // Server-raden finns — spegla lokalt utan pending-flagga.
-      addLocalWater(day, 250)
+      addLocalWater(day, WATER_QUICK_ADD_ML)
     } catch {
       // Offline: markera som pending så flushLocalWater() skickar den vid
       // återanslutning (och hydreringen på Vatten-sidan inte skriver över den).
-      addLocalWater(day, 250, true)
+      addLocalWater(day, WATER_QUICK_ADD_ML, true)
     }
   }
 
@@ -489,7 +485,7 @@ export function HomePage() {
                   onClick={handleQuickWater}
                   className="text-[10px] font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/30 px-2 py-0.5 rounded-full active:bg-sky-100 dark:active:bg-sky-900/45"
                 >
-                  +{formatVolume(250)}
+                  +{formatVolume(WATER_QUICK_ADD_ML)}
                 </button>
               </div>
               <p className="text-lg font-bold text-stone-900 dark:text-stone-100">

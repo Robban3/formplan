@@ -7,6 +7,8 @@ import { isCardioExercise, exerciseUsesWeight } from '../../lib/exerciseLog'
 import { EXERCISE_CATALOG, EXERCISE_CATEGORIES } from '../../lib/exerciseCatalog'
 import { resolveExercise } from '../../lib/exerciseResolve'
 import { normalizeExerciseName } from '../../lib/exerciseKey'
+import { useUnits } from '../../hooks/useUnits'
+import { DEFAULT_SETS, DEFAULT_REPS, DEFAULT_REST_SECONDS } from '../../lib/constants'
 
 interface Exercise {
   name: string
@@ -43,6 +45,7 @@ const EXERCISE_PRESETS: { id: string; name: string }[] = [...EXERCISE_CATALOG]
   .map((ex) => ({ id: ex.id, name: ex.name }))
 
 export function CustomWorkoutPage() {
+  const { weightLabel, toDisplay, toStore } = useUnits()
   const navigate = useNavigate()
   const [workouts, setWorkouts] = useState<CustomWorkout[]>(loadWorkouts)
   const [creating, setCreating] = useState(false)
@@ -78,16 +81,16 @@ export function CustomWorkoutPage() {
       setExError('Ange ett övningsnamn med bokstäver eller siffror.')
       return
     }
-    const w = parseFloat(exWeight)
+    const w = toStore(parseFloat(exWeight))
     const name = catalog?.name ?? n
     // Katalogposten avgör hur övningen loggas när den finns.
     const ref = { name, exercise_id: catalog?.id }
     setExercises((prev) => [...prev, {
       name,
       ...(catalog ? { exercise_id: catalog.id } : {}),
-      sets: parseInt(exSets, 10) || 3,
-      reps: exReps || '10',
-      rest_seconds: parseInt(exRest, 10) || 60,
+      sets: parseInt(exSets, 10) || DEFAULT_SETS,
+      reps: exReps || DEFAULT_REPS,
+      rest_seconds: parseInt(exRest, 10) || DEFAULT_REST_SECONDS,
       weight_kg: !isCardioExercise(ref) && exerciseUsesWeight(ref) && w > 0 ? w : null,
     }])
     resetExerciseForm()
@@ -250,8 +253,8 @@ export function CustomWorkoutPage() {
                     {!isCardioExercise({ name: exName, exercise_id: exId }) &&
                       exerciseUsesWeight({ name: exName, exercise_id: exId }) && (
                       <div>
-                        <label className="text-xs text-stone-500 dark:text-stone-400">Vikt (kg, valfritt)</label>
-                        <input type="number" inputMode="decimal" value={exWeight} placeholder="t.ex. 60"
+                        <label className="text-xs text-stone-500 dark:text-stone-400">Vikt ({weightLabel}, valfritt)</label>
+                        <input type="number" inputMode="decimal" value={exWeight} placeholder={`t.ex. ${toDisplay(60)}`}
                           onChange={(e) => setExWeight(e.target.value)}
                           className="mt-1 w-full bg-white dark:bg-stone-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
                       </div>

@@ -6,6 +6,7 @@ import { planAdjustmentForGoal, type PlanAdjustment } from '../lib/goalPlan'
 import { getWeightEntries } from '../lib/weightStore'
 import { api } from '../lib/api'
 import { toast } from '../lib/toast'
+import { GOAL_SUGGESTIONS } from '../lib/texts'
 
 export interface Goal {
   id: string
@@ -52,17 +53,7 @@ export function effectiveProgress(goal: Goal): number {
   return goal.progress
 }
 
-const SUGGESTIONS = [
-  { text: 'Träna 3 gånger i veckan',       hint: 'Automatisk spårning ✓' },
-  { text: 'Träna 4 gånger i veckan',        hint: 'Automatisk spårning ✓' },
-  { text: 'Dricka 2,5 liter vatten per dag', hint: 'Automatisk spårning ✓' },
-  { text: 'Dricka 2 liter vatten per dag',   hint: 'Automatisk spårning ✓' },
-  { text: 'Gå ner 5 kg',                    hint: 'Automatisk spårning ✓' },
-  { text: 'Väga 75 kg',                     hint: 'Automatisk spårning ✓' },
-  { text: 'Klara 50 pass totalt',           hint: 'Automatisk spårning ✓' },
-  { text: 'Springa 5 km utan paus',         hint: 'Manuellt' },
-  { text: 'Klara 10 pull-ups i rad',        hint: 'Manuellt' },
-]
+const SUGGESTIONS = GOAL_SUGGESTIONS
 
 type Tab = 'aktiva' | 'tidigare'
 

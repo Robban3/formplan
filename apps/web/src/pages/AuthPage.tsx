@@ -7,6 +7,7 @@ import {
 } from '../lib/authRecovery'
 import { authRedirectUrl, isNativeApp, openExternalAuth } from '../lib/authRedirect'
 import { toast } from '../lib/toast'
+import { LINK_EXPIRED } from '../lib/texts'
 
 /**
  * Samma svar oavsett om adressen har ett konto eller inte — annars går det att
@@ -104,7 +105,7 @@ export function AuthPage() {
     if (!code && !description) return
     setError(
       code === 'otp_expired' || /expired|invalid/i.test(description ?? '')
-        ? 'Länken har gått ut eller är redan använd. Begär en ny.'
+        ? LINK_EXPIRED
         : translateAuthError(description ?? 'Länken kunde inte verifieras.')
     )
     // Rensa hashen så felet inte kommer tillbaka vid navigering i appen.

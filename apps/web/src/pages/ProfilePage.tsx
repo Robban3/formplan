@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { ChevronLeftIcon } from '../components/ui/Icons'
 import { useUnits } from '../hooks/useUnits'
+import { GOAL_LABELS, LEVEL_LABELS } from '../lib/texts'
 
 interface FitnessProfile {
   goal: string
@@ -14,19 +15,6 @@ interface FitnessProfile {
   age: number | null
   weight_kg: number | null
   height_cm: number | null
-}
-
-const GOAL_LABELS: Record<string, string> = {
-  lose_weight: 'Gå ner i vikt',
-  build_muscle: 'Bygga muskler',
-  maintain: 'Hålla formen',
-  improve_endurance: 'Förbättra kondition',
-}
-
-const LEVEL_LABELS: Record<string, string> = {
-  beginner: 'Nybörjare',
-  intermediate: 'Mellannivå',
-  advanced: 'Avancerad',
 }
 
 export function ProfilePage() {

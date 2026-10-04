@@ -13,6 +13,8 @@ import {
   toStoreLength,
   formatHeight,
   formatDistance,
+  toStoreDistance,
+  toDisplayDistance,
   weightLabel,
   volumeLabel,
   foodMassLabel,
@@ -137,5 +139,13 @@ describe('distans', () => {
   it('räknar om till miles', () => {
     expect(formatDistance(10, false)).toBe('10 km')
     expect(formatDistance(10, true)).toBe('6,2 miles')
+  })
+
+  // Distansfältet i det aktiva passet lagrar kilometer. Utan omvandlingen
+  // hamnade 3 miles som 3 km i loggen.
+  it('vänder tillbaka till kilometer', () => {
+    expect(toStoreDistance(5, false)).toBe(5)
+    expect(toStoreDistance(3, true)).toBeCloseTo(4.828, 3)
+    expect(toDisplayDistance(toStoreDistance(3, true), true)).toBe(3)
   })
 })

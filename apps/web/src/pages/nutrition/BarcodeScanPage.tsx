@@ -7,13 +7,9 @@ import { getCustomFood, saveCustomFood } from '../../lib/customFoods'
 import { nutritionApi, toMealSlot, type MealSlot } from '../../lib/nutritionApi'
 import { dateKey } from '../../lib/derive'
 import { toast } from '../../lib/toast'
-
-const SLOT_LABELS: Record<MealSlot, string> = {
-  frukost: 'Frukost',
-  lunch: 'Lunch',
-  middag: 'Middag',
-  mellanmar: 'Mellanmål',
-}
+import { MEAL_SLOT_LABELS as SLOT_LABELS } from '../../lib/texts'
+import { GENERIC_ERROR, BUSY_ADDING } from '../../lib/texts'
+import { NUTRITION_BASIS_G } from '../../lib/constants'
 
 export function BarcodeScanPage() {
   const navigate = useNavigate()
@@ -129,7 +125,7 @@ export function BarcodeScanPage() {
     if (isNaN(g) || g <= 0) return
     setAdding(true)
     try {
-      const factor = g / 100
+      const factor = g / NUTRITION_BASIS_G
       await nutritionApi.addLogEntry({
         date,
         meal_slot: slot,
@@ -144,7 +140,7 @@ export function BarcodeScanPage() {
       toast.success('Tillagt i kostdagboken')
       navigate(-1)
     } catch (e) {
-      toast.error((e as Error).message ?? 'Något gick fel')
+      toast.error((e as Error).message ?? GENERIC_ERROR)
     } finally {
       setAdding(false)
     }
@@ -270,7 +266,7 @@ export function BarcodeScanPage() {
                 <span className="text-sm text-stone-500 dark:text-stone-400">g</span>
               </div>
               <p className="text-sm text-stone-500 dark:text-stone-400">
-                {amount ? Math.round((product.kcal_per_100g * parseFloat(amount)) / 100) : 0} kcal
+                {amount ? Math.round((product.kcal_per_100g * parseFloat(amount)) / NUTRITION_BASIS_G) : 0} kcal
               </p>
             </div>
 
@@ -279,7 +275,7 @@ export function BarcodeScanPage() {
               disabled={adding || !amount || parseFloat(amount) <= 0}
               className="w-full mt-4 bg-forest-700 hover:bg-forest-800 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60"
             >
-              {adding ? 'Lägger till…' : 'Lägg till i kostdagbok'}
+              {adding ? BUSY_ADDING : 'Lägg till i kostdagbok'}
             </button>
           </div>
         )}

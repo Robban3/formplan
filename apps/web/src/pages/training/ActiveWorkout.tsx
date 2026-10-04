@@ -29,7 +29,7 @@ export function ActiveWorkout() {
   const navigate = useNavigate()
   const state = useWorkoutStore()
   const { auto_rest, rest_seconds_default, keep_screen_on } = useSettings()
-  const { weightLabel, toDisplay, toStore, formatWeight } = useUnits()
+  const { weightLabel, toDisplay, toStore, formatWeight, distanceLabel, toDisplayDistance, toStoreDistance } = useUnits()
   const [elapsed, setElapsed] = useState(() => {
     const s = workoutStore.get()
     return s ? computeElapsedSeconds(s) : 0
@@ -713,9 +713,9 @@ export function ActiveWorkout() {
                   <input
                     type="number"
                     inputMode="decimal"
-                    placeholder="km"
-                    value={set.distance_km ?? ''}
-                    onChange={(e) => updateSet(si, 'distance_km', e.target.value)}
+                    placeholder={distanceLabel}
+                    value={set.distance_km != null ? toDisplayDistance(set.distance_km) : ''}
+                    onChange={(e) => updateSet(si, 'distance_km', String(toStoreDistance(Number(e.target.value))))}
                     disabled={set.done}
                     className="min-w-0 w-full bg-stone-100 dark:bg-stone-700 rounded-lg px-3 py-2 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400 disabled:opacity-50"
                   />

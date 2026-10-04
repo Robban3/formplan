@@ -168,6 +168,10 @@ export function toDisplayDistance(km: number, imperial: boolean): number {
   return round(imperial ? km / KM_PER_MILE : km, DISPLAY_DECIMALS)
 }
 
+export function toStoreDistance(displayed: number, imperial: boolean): number {
+  return imperial ? round(displayed * KM_PER_MILE, STORE_DECIMALS) : displayed
+}
+
 export function formatDistance(km: number, imperial: boolean): string {
   return `${sv(toDisplayDistance(km, imperial))} ${distanceLabel(imperial)}`
 }

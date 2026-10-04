@@ -6,13 +6,8 @@ import { compressImage } from '../../lib/image'
 import { nutritionApi, toMealSlot, type MealSlot } from '../../lib/nutritionApi'
 import { dateKey } from '../../lib/derive'
 import { toast } from '../../lib/toast'
-
-const SLOT_LABELS: Record<MealSlot, string> = {
-  frukost: 'Frukost',
-  lunch: 'Lunch',
-  middag: 'Middag',
-  mellanmar: 'Mellanmål',
-}
+import { MEAL_SLOT_LABELS as SLOT_LABELS } from '../../lib/texts'
+import { GENERIC_ERROR, BUSY_ADDING } from '../../lib/texts'
 
 export function FoodPhotoPage() {
   const navigate = useNavigate()
@@ -73,7 +68,7 @@ export function FoodPhotoPage() {
       toast.success('Tillagt i kostdagboken')
       navigate(-1)
     } catch (e) {
-      toast.error((e as Error).message ?? 'Något gick fel')
+      toast.error((e as Error).message ?? GENERIC_ERROR)
     } finally {
       setSaving(false)
     }
@@ -185,7 +180,7 @@ export function FoodPhotoPage() {
                   disabled={saving}
                   className="w-full mt-3 bg-forest-700 hover:bg-forest-800 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-60"
                 >
-                  {saving ? 'Lägger till…' : 'Lägg till i kostdagbok'}
+                  {saving ? BUSY_ADDING : 'Lägg till i kostdagbok'}
                 </button>
               </>
             ) : (

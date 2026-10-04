@@ -12,12 +12,10 @@ import {
 } from '../../lib/weekMealStore'
 import { api } from '../../lib/api'
 import { toast } from '../../lib/toast'
+import { MEAL_SLOT_LABELS as SLOT_LABELS } from '../../lib/texts'
 
 const DAY_SHORT = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön']
 const DAY_FULL = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag']
-const SLOT_LABELS: Record<WeekSlot, string> = {
-  frukost: 'Frukost', lunch: 'Lunch', middag: 'Middag', mellanmar: 'Mellanmål',
-}
 const SLOTS: WeekSlot[] = ['frukost', 'lunch', 'middag', 'mellanmar']
 const FOCUS_OPTIONS: { key: DietFocus; label: string }[] = [
   { key: 'balanced', label: 'Balanserat' },

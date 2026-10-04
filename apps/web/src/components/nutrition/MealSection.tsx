@@ -1,13 +1,7 @@
 import type { FoodLogEntry, MealSlot } from '../../lib/nutritionApi'
 import { PlusIcon } from '../ui/Icons'
 import { MealRecipeGenerator } from './MealRecipeGenerator'
-
-const SLOT_LABELS: Record<MealSlot, string> = {
-  frukost: 'Frukost',
-  lunch: 'Lunch',
-  middag: 'Middag',
-  mellanmar: 'Mellanmål',
-}
+import { MEAL_SLOT_LABELS as SLOT_LABELS } from '../../lib/texts'
 
 const SLOT_COLORS: Record<MealSlot, string> = {
   frukost: 'bg-amber-100 dark:bg-amber-900/35 text-amber-700 dark:text-amber-300',

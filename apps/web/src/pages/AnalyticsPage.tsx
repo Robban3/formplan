@@ -14,6 +14,7 @@ import { notifyWeightLogged } from '../lib/challengeEvents'
 import { initMeasurementsSync } from '../lib/measurementsSync'
 import { getRpeEntries } from '../lib/rpeStore'
 import { useSettings } from '../hooks/useSettings'
+import { WEIGHT_MIN_KG, WEIGHT_MAX_KG } from '../lib/constants'
 
 type Tab = 'oversikt' | 'trender' | 'kalorier'
 
@@ -410,7 +411,7 @@ export function AnalyticsPage() {
     const entered = parseFloat(weightInput.replace(',', '.'))
     if (!entered) return
     const kg = toStore(entered)
-    if (kg < 20 || kg > 300) return
+    if (kg < WEIGHT_MIN_KG || kg > WEIGHT_MAX_KG) return
     addWeightEntry(kg); notifyWeightLogged(); setWeightEntries(getWeightEntries()); setWeightInput(''); setShowWeightInput(false)
   }
 

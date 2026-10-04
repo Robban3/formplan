@@ -11,6 +11,7 @@ import {
 } from '../../lib/customMeals'
 import { toast } from '../../lib/toast'
 import { XIcon, PlusIcon, UtensilsIcon } from '../../components/ui/Icons'
+import { NUTRITION_BASIS_G } from '../../lib/constants'
 
 export function CreateMealPage() {
   const navigate = useNavigate()
@@ -57,7 +58,7 @@ export function CreateMealPage() {
     // Komma-normalisering: "1,5" ska tolkas som 1.5 (som i AnalyticsPage).
     const g = parseFloat(amount.replace(',', '.'))
     if (!g || g <= 0) return
-    const f = g / 100
+    const f = g / NUTRITION_BASIS_G
     setIngredients((prev) => [
       ...prev,
       {

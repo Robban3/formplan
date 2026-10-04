@@ -6,15 +6,9 @@ import { MacroRing } from '../../components/nutrition/MacroRing'
 import { MacroBar } from '../../components/nutrition/MacroBar'
 import { ChevronLeftIcon } from '../../components/ui/Icons'
 import { useSettings } from '../../hooks/useSettings'
+import { MEAL_SLOT_LABELS as SLOT_LABELS } from '../../lib/texts'
 
 type Tab = 'oversikt' | 'detaljer'
-
-const SLOT_LABELS: Record<string, string> = {
-  frukost: 'Frukost',
-  lunch: 'Lunch',
-  middag: 'Middag',
-  mellanmar: 'Mellanmål',
-}
 
 export function MacroPage() {
   const navigate = useNavigate()

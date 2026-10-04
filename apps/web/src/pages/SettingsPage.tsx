@@ -6,6 +6,7 @@ import { settingsStore, type AppSettings } from '../lib/settings'
 import { api } from '../lib/api'
 import { toast } from '../lib/toast'
 import { useUnits } from '../hooks/useUnits'
+import { PROTEIN_GOAL_MIN_G, PROTEIN_GOAL_MAX_G, PROTEIN_GOAL_STEP_G, WATER_GOAL_MIN_ML, WATER_GOAL_MAX_ML, WATER_GOAL_STEP_ML, WATER_GOAL_STEP_FLOZ } from '../lib/constants'
 
 type BoolKey = {
   [K in keyof AppSettings]: AppSettings[K] extends boolean ? K : never
@@ -297,9 +298,9 @@ export function SettingsPage() {
             sub="Dagligt proteinintag"
             settingKey="protein_goal_g"
             unit="g"
-            min={20}
-            max={500}
-            step={5}
+            min={PROTEIN_GOAL_MIN_G}
+            max={PROTEIN_GOAL_MAX_G}
+            step={PROTEIN_GOAL_STEP_G}
             onCommit={(n) => saveGoalToProfile({ protein_goal: n })}
           />
           <NumberInput
@@ -307,9 +308,9 @@ export function SettingsPage() {
             sub="Dagligt vätskeintag"
             settingKey="water_goal_ml"
             unit={units.volumeLabel}
-            min={Math.floor(units.toDisplayVolume(500))}
-            max={Math.ceil(units.toDisplayVolume(6000))}
-            step={units.imperial ? 8 : 250}
+            min={Math.floor(units.toDisplayVolume(WATER_GOAL_MIN_ML))}
+            max={Math.ceil(units.toDisplayVolume(WATER_GOAL_MAX_ML))}
+            step={units.imperial ? WATER_GOAL_STEP_FLOZ : WATER_GOAL_STEP_ML}
             display={units.toDisplayVolume}
             store={units.toStoreVolume}
           />

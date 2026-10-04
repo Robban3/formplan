@@ -23,6 +23,11 @@ import {
   HeartIcon,
   TargetIcon,
 } from '../components/ui/Icons'
+import {
+  AGE_MIN_YEARS, AGE_MAX_YEARS,
+  WEIGHT_MIN_KG, WEIGHT_MAX_KG, WEIGHT_STEP_KG,
+  HEIGHT_MIN_CM, HEIGHT_MAX_CM, HEIGHT_STEP_CM,
+} from '../lib/constants'
 type Step = OnboardingStep
 
 type IconComponent = React.ComponentType<{ className?: string }>
@@ -421,19 +426,19 @@ export function OnboardingPage() {
               {([
                 {
                   key: 'age' as const, label: 'Ålder', placeholder: 't.ex. 30', unit: 'år',
-                  min: 13, max: 120, step: 1,
+                  min: AGE_MIN_YEARS, max: AGE_MAX_YEARS, step: 1,
                   display: (v: number) => v, store: (v: number) => v,
                 },
                 {
                   key: 'weight_kg' as const, label: 'Vikt', unit: units.weightLabel,
                   placeholder: `t.ex. ${units.toDisplay(75)}`,
-                  min: Math.floor(units.toDisplay(30)), max: Math.ceil(units.toDisplay(300)), step: 0.1,
+                  min: Math.floor(units.toDisplay(WEIGHT_MIN_KG)), max: Math.ceil(units.toDisplay(WEIGHT_MAX_KG)), step: WEIGHT_STEP_KG,
                   display: units.toDisplay, store: units.toStore,
                 },
                 {
                   key: 'height_cm' as const, label: 'Längd', unit: units.lengthLabel,
                   placeholder: `t.ex. ${units.toDisplayLength(175)}`,
-                  min: Math.floor(units.toDisplayLength(100)), max: Math.ceil(units.toDisplayLength(250)), step: 1,
+                  min: Math.floor(units.toDisplayLength(HEIGHT_MIN_CM)), max: Math.ceil(units.toDisplayLength(HEIGHT_MAX_CM)), step: HEIGHT_STEP_CM,
                   display: units.toDisplayLength, store: units.toStoreLength,
                 },
               ]).map(({ key, label, placeholder, unit, min, max, step, display, store }) => (

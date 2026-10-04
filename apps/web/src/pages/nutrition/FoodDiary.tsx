@@ -8,12 +8,9 @@ import { ChevronLeftIcon, ChevronRightIcon, DropletIcon, StarIcon, ShoppingCartI
 import { getTopFavorites, type FoodFavorite } from '../../lib/foodFavoritesStore'
 import { toast } from '../../lib/toast'
 import { useSettings } from '../../hooks/useSettings'
+import { MEAL_SLOT_LABELS as MEAL_LABELS } from '../../lib/texts'
 
 const MEALS: MealSlot[] = ['frukost', 'lunch', 'middag', 'mellanmar']
-
-const MEAL_LABELS: Record<MealSlot, string> = {
-  frukost: 'Frukost', lunch: 'Lunch', middag: 'Middag', mellanmar: 'Mellanmål',
-}
 
 /** Rimlig måltid utifrån klockslaget — snabblogg ska inte alltid bli frukost. */
 function slotForNow(): MealSlot {

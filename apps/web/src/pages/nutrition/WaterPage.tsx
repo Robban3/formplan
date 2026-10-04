@@ -11,8 +11,10 @@ import { useSettings } from '../../hooks/useSettings'
 import { useUnits } from '../../hooks/useUnits'
 import { formatVolume as formatVolumeIn } from '../../lib/units'
 import { WaterWeekView } from './WaterWeekView'
+import { WATER_QUICK_OPTIONS_ML } from '../../lib/constants'
+import { BUSY_ADDING } from '../../lib/texts'
 
-const QUICK_OPTIONS = [125, 250, 500, 750, 1000]
+const QUICK_OPTIONS = WATER_QUICK_OPTIONS_ML
 const DEFAULT_ML = 250
 
 function formatTime(iso?: string) {
@@ -226,7 +228,7 @@ export function WaterPage() {
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round">
               <path d="M12 5v14M5 12h14" />
             </svg>
-            {adding ? 'Lägger till…' : `Lägg till ${formatVolume(selectedMl)}`}
+            {adding ? BUSY_ADDING : `Lägg till ${formatVolume(selectedMl)}`}
           </button>
 
           {/* Snabbval */}

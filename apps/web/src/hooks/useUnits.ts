@@ -41,6 +41,8 @@ export function useUnits() {
     formatLength: (cm: number) => units.formatLength(cm, imperial),
     formatHeight: (cm: number) => units.formatHeight(cm, imperial),
 
+    toDisplayDistance: (km: number) => units.toDisplayDistance(km, imperial),
+    toStoreDistance: (displayed: number) => units.toStoreDistance(displayed, imperial),
     formatDistance: (km: number) => units.formatDistance(km, imperial),
   }
 }
