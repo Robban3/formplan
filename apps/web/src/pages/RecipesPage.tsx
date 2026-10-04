@@ -14,35 +14,19 @@ import {
 } from '../components/ui/Icons'
 import { api, type GeneratedRecipe, type RecipeCategory } from '../lib/api'
 import { useT } from '../hooks/useT'
+import { recipes, type Recipe, type IllustrationKey } from '../lib/content/recipes'
 import type { TextKey } from '../lib/i18n'
 
 type IconComponent = React.ComponentType<{ className?: string }>
 
-const RECIPE_CATEGORIES: { key: RecipeCategory; label: string; Icon: IconComponent }[] = [
-  { key: 'kott', label: 'Kött', Icon: BeefIcon },
-  { key: 'fisk', label: 'Fisk', Icon: FishIcon },
-  { key: 'pasta', label: 'Pasta', Icon: WheatIcon },
-  { key: 'vegetariskt', label: 'Vegetariskt', Icon: SaladIcon },
-  { key: 'veganskt', label: 'Veganskt', Icon: SproutIcon },
+const RECIPE_CATEGORIES: { key: RecipeCategory; labelKey: TextKey; Icon: IconComponent }[] = [
+  { key: 'kott', labelKey: 'recipeCat.meat', Icon: BeefIcon },
+  { key: 'fisk', labelKey: 'recipeCat.fish', Icon: FishIcon },
+  { key: 'pasta', labelKey: 'recipeCat.pasta', Icon: WheatIcon },
+  { key: 'vegetariskt', labelKey: 'recipeCat.vegetarian', Icon: SaladIcon },
+  { key: 'veganskt', labelKey: 'recipeCat.vegan', Icon: SproutIcon },
 ]
 
-type IllustrationKey = 'bowl' | 'wok' | 'salmon' | 'balls' | 'oats'
-
-export interface Recipe {
-  id: string
-  name: string
-  calories: number
-  protein_g: number
-  fat_g: number
-  carbs_g: number
-  prepMinutes: number
-  servings: number
-  tags: string[]
-  illustration: IllustrationKey
-  bg: string
-  ingredients: string[]
-  instructions: string[]
-}
 
 export function RecipeIllustration({ kind, bg }: { kind: IllustrationKey; bg: string }) {
   return (
@@ -122,109 +106,6 @@ export function RecipeIllustration({ kind, bg }: { kind: IllustrationKey; bg: st
   )
 }
 
-export const RECIPES: Recipe[] = [
-  {
-    id: '1',
-    name: 'Proteinfruktskål',
-    calories: 420,
-    protein_g: 28,
-    fat_g: 14,
-    carbs_g: 42,
-    prepMinutes: 20,
-    servings: 2,
-    tags: ['Frukost'],
-    illustration: 'bowl' as IllustrationKey,
-    bg: 'bg-amber-50 dark:bg-amber-900/25',
-    ingredients: ['2 dl kvarg', '1 banan', '1 dl blåbär', '½ dl havregryn', '1 msk honung', '1 msk mandlar'],
-    instructions: [
-      'Lägg kvargen i en skål.',
-      'Skiva bananen och strö över blåbären.',
-      'Toppa med havregryn och grovhackade mandlar.',
-      'Ringla över honung och servera direkt.',
-    ],
-  },
-  {
-    id: '2',
-    name: 'Kycklingwok med nudlar',
-    calories: 550,
-    protein_g: 45,
-    fat_g: 16,
-    carbs_g: 52,
-    prepMinutes: 30,
-    servings: 1,
-    tags: ['Lunch', 'Middag'],
-    illustration: 'wok' as IllustrationKey,
-    bg: 'bg-orange-50',
-    ingredients: ['150 g kycklingfilé', '1 dl quinoa', '1 paprika', '½ gurka', '2 msk olivolja', 'Salt, peppar, oregano'],
-    instructions: [
-      'Koka quinoa enligt förpackning.',
-      'Skär kycklingen i bitar och stek i olivolja med kryddor ca 8 min.',
-      'Hacka paprika och gurka.',
-      'Blanda quinoa, grönsaker och kyckling i en bowl.',
-    ],
-  },
-  {
-    id: '3',
-    name: 'Lax med ugnsrostade grönsaker',
-    calories: 600,
-    protein_g: 40,
-    fat_g: 30,
-    carbs_g: 40,
-    prepMinutes: 35,
-    servings: 2,
-    tags: ['Middag'],
-    illustration: 'salmon' as IllustrationKey,
-    bg: 'bg-orange-50',
-    ingredients: ['200 g laxfilé', '2 sötpotatisar', '1 broccoli', '1 paprika', '2 msk olivolja', 'Citron, dill, salt, peppar'],
-    instructions: [
-      'Sätt ugnen på 200°C.',
-      'Skär sötpotatis, broccoli och paprika i bitar, ringla över olivolja och krydda.',
-      'Rosta grönsakerna i ugnen ca 20 min.',
-      'Lägg i laxen de sista 12–15 min. Servera med citron och dill.',
-    ],
-  },
-  {
-    id: '4',
-    name: 'Proteinbollar',
-    calories: 180,
-    protein_g: 12,
-    fat_g: 8,
-    carbs_g: 16,
-    prepMinutes: 15,
-    servings: 6,
-    tags: ['Mellanmål'],
-    illustration: 'balls' as IllustrationKey,
-    bg: 'bg-amber-50 dark:bg-amber-900/25',
-    ingredients: ['2 dl havregryn', '2 msk jordnötssmör', '1 skopa proteinpulver', '1 msk honung', '1 msk kakao'],
-    instructions: [
-      'Mixa havregryn, jordnötssmör, proteinpulver, honung och kakao till en jämn smet.',
-      'Tillsätt någon tesked vatten om smeten är för torr.',
-      'Rulla smeten till ca 12 jämnstora bollar.',
-      'Låt stå i kylen minst 30 min innan servering.',
-    ],
-  },
-  {
-    id: '5',
-    name: 'Overnight oats',
-    calories: 380,
-    protein_g: 14,
-    fat_g: 9,
-    carbs_g: 58,
-    prepMinutes: 5,
-    servings: 1,
-    tags: ['Frukost'],
-    illustration: 'oats' as IllustrationKey,
-    bg: 'bg-yellow-50',
-    ingredients: ['1 dl havregryn', '1.5 dl mjölk', '1 msk chiafrön', '1 msk honung', 'Bär eller frukt till topping'],
-    instructions: [
-      'Blanda havregryn, mjölk, chiafrön och honung i en burk.',
-      'Rör om väl.',
-      'Ställ i kylskåpet overnight (minst 6 timmar).',
-      'Toppa med bär eller frukt innan servering.',
-    ],
-  },
-]
-
 /**
  * Flikvärdena är svenska med AVSIKT: de matchas mot recepttaggarna i datan
  * (`r.tags.includes(activeTab)`). Översätts värdet slutar filtreringen
@@ -251,15 +132,16 @@ const MEAL_TYPE_MAP: Record<Exclude<MealTab, 'Alla'>, string> = {
   Mellanmål: 'mellanmål',
 }
 
-const RECIPE_PROMPTS = [
-  'En middag med minst 50 g protein',
-  'Snabb frukost under 400 kcal',
-  'Vegetarisk lunch som mättar',
-  'Proteinrikt mellanmål utan nötter',
+const RECIPE_PROMPT_KEYS: TextKey[] = [
+  'recipes.prompt1',
+  'recipes.prompt2',
+  'recipes.prompt3',
+  'recipes.prompt4',
 ]
 
 // AI-generated recipe based on the user's calorie/macro goals and allergies.
 function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
+  const { t } = useT()
   const [prompt, setPrompt] = useState('')
   const [kcal, setKcal] = useState<string>('')
   const [minProtein, setMinProtein] = useState<string>('')
@@ -285,8 +167,9 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
     if (loading) return
     // Kategori och eget önskemål är båda valfria. Faller tillbaka på vald
     // kategori, annars ett helt fritt ("överraska mig")-recept.
-    const catLabel = category ? RECIPE_CATEGORIES.find((c) => c.key === category)?.label : ''
-    const p = (text ?? prompt).trim() || (catLabel ? `Ett ${catLabel.toLowerCase()} recept` : 'Ett gott och varierat recept – överraska mig')
+    const catKey = category ? RECIPE_CATEGORIES.find((c) => c.key === category)?.labelKey : undefined
+    const catLabel = catKey ? t(catKey) : ''
+    const p = (text ?? prompt).trim() || (catLabel ? t('recipes.categoryPrompt', { category: catLabel.toLowerCase() }) : t('recipes.surpriseMe'))
     if (text) setPrompt(text)
     setLoading(true)
     setError(null)
@@ -301,7 +184,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
       })
       setRecipe(recipe)
     } catch (e) {
-      setError((e as Error).message || 'Kunde inte generera recept just nu. Försök igen.')
+      setError((e as Error).message || t('recipes.generateFailed'))
     } finally {
       setLoading(false)
     }
@@ -323,9 +206,9 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
           <ZapIcon className="w-4 h-4 stroke-forest-600" />
         </div>
         <div>
-          <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm">Skapa recept med AI</p>
+          <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm">{t('recipes.createWithAi')}</p>
           <p className="text-[11px] text-stone-500 dark:text-stone-400">
-            {mealTab !== 'Alla' ? `${mealTab} · anpassat efter dina mål` : 'Anpassat efter dina mål och allergier'}
+            {mealTab !== 'Alla' ? `${mealTab} · anpassat efter dina mål` : t('recipes.tailoredToGoals')}
           </p>
         </div>
       </div>
@@ -354,28 +237,28 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
               }`}
             >
               <c.Icon className="w-3.5 h-3.5" />
-              {c.label}
+              {t(c.labelKey)}
             </button>
           ))}
         </div>
       </div>
 
       <div className="flex flex-wrap gap-2 mt-3">
-        {RECIPE_PROMPTS.map((s) => (
+        {RECIPE_PROMPT_KEYS.map((promptKey) => (
           <button
-            key={s}
-            onClick={() => generate(s)}
+            key={promptKey}
+            onClick={() => generate(t(promptKey))}
             disabled={loading}
             className="text-[11px] bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full px-3 py-1.5 text-stone-600 dark:text-stone-300 hover:border-forest-300 hover:text-forest-700 dark:hover:text-forest-300 transition-colors disabled:opacity-50"
           >
-            {s}
+            {t(promptKey)}
           </button>
         ))}
       </div>
 
       <div className="flex gap-2 mt-3">
         <div className="flex-1">
-          <label className="text-[10px] text-stone-500 dark:text-stone-400 font-medium">Kcal/portion</label>
+          <label className="text-[10px] text-stone-500 dark:text-stone-400 font-medium">{t('recipes.kcalPerServing')}</label>
           <input
             type="number"
             inputMode="numeric"
@@ -386,7 +269,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
           />
         </div>
         <div className="flex-1">
-          <label className="text-[10px] text-stone-500 dark:text-stone-400 font-medium">Min. protein (g)</label>
+          <label className="text-[10px] text-stone-500 dark:text-stone-400 font-medium">{t('recipes.minProtein')}</label>
           <input
             type="number"
             inputMode="numeric"
@@ -466,7 +349,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
             disabled={loading}
             className="w-full mt-4 py-2.5 border border-stone-200 dark:border-stone-700 rounded-xl text-sm text-stone-500 dark:text-stone-400 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors disabled:opacity-50"
           >
-            Generera nytt förslag
+            {t('recipes.generateAnother')}
           </button>
         </div>
       )}
@@ -478,7 +361,8 @@ export function RecipesPage() {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState<MealTab>('Alla')
-  const { t } = useT()
+  const { t, lang } = useT()
+  const RECIPES = recipes(lang)
 
   const filtered = RECIPES.filter((r) => {
     const matchSearch = r.name.toLowerCase().includes(search.toLowerCase())
@@ -504,7 +388,7 @@ export function RecipesPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Sök recept…"
+            placeholder={t('recipes.search')}
             className="w-full bg-stone-100 dark:bg-stone-700 rounded-xl pl-9 pr-4 py-2.5 text-stone-900 dark:text-stone-100 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
           />
         </div>
@@ -529,7 +413,7 @@ export function RecipesPage() {
         <AiRecipeGenerator mealTab={activeTab} />
 
         {filtered.length === 0 && (
-          <p className="text-center text-stone-500 dark:text-stone-400 text-sm py-8">Inga recept hittades.</p>
+          <p className="text-center text-stone-500 dark:text-stone-400 text-sm py-8">{t('recipes.noneFound')}</p>
         )}
 
         {filtered.map((recipe) => (

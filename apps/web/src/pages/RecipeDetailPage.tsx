@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronLeftIcon, ClockIcon } from '../components/ui/Icons'
-import { RECIPES, RecipeIllustration } from './RecipesPage'
+import { RecipeIllustration } from './RecipesPage'
+import { recipes } from '../lib/content/recipes'
+import { useT } from '../hooks/useT'
 import { nutritionApi, type MealSlot } from '../lib/nutritionApi'
 import { dateKey } from '../lib/derive'
 import { toast } from '../lib/toast'
@@ -25,13 +27,14 @@ function slotForRecipe(tags: string[]): MealSlot {
 export function RecipeDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const recipe = RECIPES.find((r) => r.id === id)
+  const { t, lang } = useT()
+  const recipe = recipes(lang).find((r) => r.id === id)
   const [logging, setLogging] = useState(false)
 
   if (!recipe) {
     return (
       <div className="px-5 pt-12 text-center text-stone-500 dark:text-stone-400">
-        <p>Receptet hittades inte.</p>
+        <p>{t('recipes.notFound')}</p>
         <button onClick={() => navigate(-1)} className="text-forest-800 dark:text-forest-400 mt-2">Tillbaka</button>
       </div>
     )
@@ -59,7 +62,7 @@ export function RecipeDetailPage() {
       toast.success(`${recipe.name} tillagd i kostdagboken`)
       navigate(-1)
     } catch (e) {
-      toast.error((e as Error).message || 'Kunde inte logga måltiden')
+      toast.error((e as Error).message || t('recipes.logFailed'))
     } finally {
       setLogging(false)
     }
@@ -114,7 +117,7 @@ export function RecipeDetailPage() {
         {/* Ingredients */}
         <div className="mt-4 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
           <div className="px-4 py-3 border-b border-stone-50">
-            <h2 className="font-semibold text-stone-900 dark:text-stone-100">Ingredienser</h2>
+            <h2 className="font-semibold text-stone-900 dark:text-stone-100">{t('recipes.ingredients')}</h2>
           </div>
           {recipe.ingredients.map((ing, i) => (
             <div key={i} className={`flex items-center gap-3 px-4 py-3 ${i > 0 ? 'border-t border-stone-50' : ''}`}>
@@ -127,7 +130,7 @@ export function RecipeDetailPage() {
         {/* Steps */}
         <div className="mt-4 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
           <div className="px-4 py-3 border-b border-stone-50">
-            <h2 className="font-semibold text-stone-900 dark:text-stone-100">Gör så här</h2>
+            <h2 className="font-semibold text-stone-900 dark:text-stone-100">{t('recipes.howTo')}</h2>
           </div>
           {recipe.instructions.map((step, i) => (
             <div key={i} className={`flex items-start gap-3 px-4 py-3 ${i > 0 ? 'border-t border-stone-50' : ''}`}>
@@ -145,7 +148,7 @@ export function RecipeDetailPage() {
           disabled={logging}
           className="mt-5 w-full bg-forest-700 hover:bg-forest-800 disabled:opacity-60 text-white font-semibold py-4 rounded-2xl transition-colors"
         >
-          {logging ? 'Lägger till…' : 'Lägg till i kostdagbok'}
+          {logging ? t('common.adding') : t('food.addToDiary')}
         </button>
       </div>
     </div>

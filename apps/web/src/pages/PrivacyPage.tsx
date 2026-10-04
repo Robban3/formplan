@@ -54,7 +54,7 @@ export function PrivacyPage() {
             FormPlan sparar det du själv matar in — din profil, dina pass, din mat och dina
             mätningar — för att kunna visa din utveckling och skapa scheman åt dig. Vi säljer
             aldrig dina uppgifter och använder dem inte till annonser. Du kan när som helst
-            radera ditt konto och all data i appen under <em>Mer → Profil</em>.
+            radera ditt konto och all data i appen under <em>Mer → Radera konto</em>.
           </p>
         </Section>
 
@@ -175,7 +175,7 @@ export function PrivacyPage() {
           <p>
             Du har rätt att få veta vilka uppgifter vi har om dig, att få dem rättade eller
             raderade, att invända mot behandlingen och att få ut dem i maskinläsbart format.
-            Radering gör du enklast själv under <em>Mer → Profil → Radera konto</em>. För övriga
+            Radering gör du enklast själv under <em>Mer → Radera konto</em>. För övriga
             frågor, kontakta{' '}
             <a href="mailto:support@applabbet.com" className="underline">
               support@applabbet.com
