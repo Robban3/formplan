@@ -80,7 +80,7 @@ export function CustomWorkoutPage() {
     // därmed dela historiknyckel med varje annan sådan övning.
     const catalog = resolveExercise({ name: n, exercise_id: exId })
     if (!catalog && normalizeExerciseName(n) === '') {
-      setExError('Ange ett övningsnamn med bokstäver eller siffror.')
+      setExError(t('custom.needExerciseName'))
       return
     }
     const w = toStore(parseFloat(exWeight))
@@ -142,12 +142,12 @@ export function CustomWorkoutPage() {
       <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-3">
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
-          Träning
+          {t('nav.training')}
         </button>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('page.customWorkouts')}</h1>
-            <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Bygg dina egna träningspass</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">{t('custom.subtitle')}</p>
           </div>
           {!creating && (
             <button onClick={() => setCreating(true)} className="w-10 h-10 bg-forest-700 rounded-xl flex items-center justify-center">
@@ -162,14 +162,14 @@ export function CustomWorkoutPage() {
         {creating && (
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 space-y-4">
             <div className="flex items-center justify-between">
-              <p className="font-bold text-stone-900 dark:text-stone-100">Nytt pass</p>
+              <p className="font-bold text-stone-900 dark:text-stone-100">{t('custom.newWorkout')}</p>
               <button onClick={() => { setCreating(false); setExercises([]) }}>
                 <XIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
               </button>
             </div>
 
             <input
-              placeholder="Passnamn (t.ex. Push-dag)"
+              placeholder={t('custom.namePlaceholder')}
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
@@ -183,7 +183,7 @@ export function CustomWorkoutPage() {
                     <DumbbellIcon className="w-4 h-4 stroke-forest-600 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-stone-800 dark:text-stone-200">{ex.name}</p>
-                      <p className="text-xs text-stone-500 dark:text-stone-400">{ex.sets} set × {ex.reps} reps · {ex.rest_seconds}s vila</p>
+                      <p className="text-xs text-stone-500 dark:text-stone-400">{t('custom.setsRepsRest', { sets: ex.sets, reps: ex.reps, rest: ex.rest_seconds })}</p>
                     </div>
                     <button onClick={() => setExercises((prev) => prev.filter((_, j) => j !== i))}>
                       <XIcon className="w-4 h-4 stroke-stone-300 dark:stroke-stone-600" />
@@ -198,7 +198,7 @@ export function CustomWorkoutPage() {
               <div className="bg-stone-50 dark:bg-stone-800 rounded-xl p-3 space-y-3">
                 <input
                   autoFocus
-                  placeholder="Sök eller skriv övning…"
+                  placeholder={t('custom.searchOrType')}
                   value={exName}
                   onChange={(e) => { setExName(e.target.value); setExId(null); setExError(null) }}
                   className="w-full bg-white dark:bg-stone-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
@@ -234,20 +234,20 @@ export function CustomWorkoutPage() {
                   <>
                     <div className="grid grid-cols-3 gap-2">
                       <div className="min-w-0">
-                        <label className="text-xs text-stone-500 dark:text-stone-400">Set</label>
-                        <input type="number" aria-label="Antal set" value={exSets} onChange={(e) => setExSets(e.target.value)}
+                        <label className="text-xs text-stone-500 dark:text-stone-400">{t('workout.set')}</label>
+                        <input type="number" aria-label={t('custom.setsCount')} value={exSets} onChange={(e) => setExSets(e.target.value)}
                           className="mt-1 w-full bg-white dark:bg-stone-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
                       </div>
                       <div className="min-w-0">
-                        <label className="text-xs text-stone-500 dark:text-stone-400">{isCardioExercise({ name: exName, exercise_id: exId }) ? 'Tid (min)' : 'Reps'}</label>
+                        <label className="text-xs text-stone-500 dark:text-stone-400">{isCardioExercise({ name: exName, exercise_id: exId }) ? t('workout.timeMin') : t('workout.reps')}</label>
                         <input
-                          aria-label={isCardioExercise({ name: exName, exercise_id: exId }) ? 'Tid i minuter' : 'Antal reps'}
+                          aria-label={isCardioExercise({ name: exName, exercise_id: exId }) ? t('custom.timeMinutes') : t('custom.repsCount')}
                           value={exReps} onChange={(e) => setExReps(e.target.value)}
                           className="mt-1 w-full bg-white dark:bg-stone-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
                       </div>
                       <div className="min-w-0">
-                        <label className="text-xs text-stone-500 dark:text-stone-400">Vila (sek)</label>
-                        <input type="number" aria-label="Vila i sekunder" value={exRest} onChange={(e) => setExRest(e.target.value)}
+                        <label className="text-xs text-stone-500 dark:text-stone-400">{t('custom.restSeconds')}</label>
+                        <input type="number" aria-label={t('custom.restSecondsAria')} value={exRest} onChange={(e) => setExRest(e.target.value)}
                           className="mt-1 w-full bg-white dark:bg-stone-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
                       </div>
                     </div>
@@ -255,8 +255,8 @@ export function CustomWorkoutPage() {
                     {!isCardioExercise({ name: exName, exercise_id: exId }) &&
                       exerciseUsesWeight({ name: exName, exercise_id: exId }) && (
                       <div>
-                        <label className="text-xs text-stone-500 dark:text-stone-400">Vikt ({weightLabel}, valfritt)</label>
-                        <input type="number" inputMode="decimal" value={exWeight} placeholder={`t.ex. ${toDisplay(60)}`}
+                        <label className="text-xs text-stone-500 dark:text-stone-400">{t('custom.weightOptional', { unit: weightLabel })}</label>
+                        <input type="number" inputMode="decimal" value={exWeight} placeholder={t('custom.egPlaceholder', { value: toDisplay(60) })}
                           onChange={(e) => setExWeight(e.target.value)}
                           className="mt-1 w-full bg-white dark:bg-stone-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400" />
                       </div>
@@ -267,11 +267,11 @@ export function CustomWorkoutPage() {
                 <div className="flex gap-2">
                   <button onClick={() => { setAddingEx(false); resetExerciseForm() }}
                     className="flex-1 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 text-sm">
-                    Avbryt
+                    {t('onb.cancel')}
                   </button>
                   <button onClick={addExercise} disabled={!exName.trim()}
                     className="flex-1 py-2 rounded-xl bg-forest-700 text-white text-sm font-semibold disabled:opacity-40">
-                    Lägg till
+                    {t('food.add')}
                   </button>
                 </div>
               </div>
@@ -279,7 +279,7 @@ export function CustomWorkoutPage() {
               <button onClick={() => setAddingEx(true)}
                 className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-800 dark:text-forest-400">
                 <PlusIcon className="w-4 h-4 stroke-forest-600" />
-                Lägg till övning
+                {t('custom.addExercise')}
               </button>
             )}
 
@@ -288,7 +288,7 @@ export function CustomWorkoutPage() {
               disabled={!name.trim() || exercises.length === 0}
               className="w-full py-3 bg-forest-700 text-white font-bold rounded-xl disabled:opacity-40"
             >
-              Spara pass
+              {t('custom.saveWorkout')}
             </button>
           </div>
         )}
@@ -297,8 +297,8 @@ export function CustomWorkoutPage() {
         {workouts.length === 0 && !creating && (
           <div className="text-center py-16">
             <DumbbellIcon className="w-12 h-12 stroke-stone-300 dark:stroke-stone-600 mx-auto mb-3" />
-            <p className="font-semibold text-stone-800 dark:text-stone-200">Inga egna pass ännu</p>
-            <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">Tryck på + för att bygga ditt första pass</p>
+            <p className="font-semibold text-stone-800 dark:text-stone-200">{t('custom.noneYet')}</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">{t('custom.noneYetHint')}</p>
           </div>
         )}
 
@@ -308,7 +308,7 @@ export function CustomWorkoutPage() {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <p className="font-bold text-stone-900 dark:text-stone-100">{w.name}</p>
-                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{w.exercises.length} övningar</p>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{t('custom.exerciseCount', { n: w.exercises.length })}</p>
                 </div>
                 <button onClick={() => deleteWorkout(w.id)} className="p-1">
                   <XIcon className="w-4 h-4 stroke-stone-300 dark:stroke-stone-600" />
@@ -328,7 +328,7 @@ export function CustomWorkoutPage() {
               className="w-full flex items-center justify-center gap-2 bg-forest-700 hover:bg-forest-800 text-white font-semibold py-3 transition-colors"
             >
               <PlayIcon className="w-4 h-4" />
-              Starta pass
+              {t('home.startWorkout')}
             </button>
           </div>
         ))}

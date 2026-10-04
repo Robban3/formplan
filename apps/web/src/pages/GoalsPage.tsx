@@ -88,7 +88,7 @@ function GoalCard({
         {/* Icon / toggle */}
         <button
           onClick={onToggle}
-          aria-label={goal.done ? `Markera "${goal.text}" som ej klart` : `Markera "${goal.text}" som klart`}
+          aria-label={t(goal.done ? 'goals.markNotDone' : 'goals.markDone', { goal: goal.text })}
           aria-pressed={goal.done}
           className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
             goal.done ? 'bg-forest-700' : 'bg-forest-50 dark:bg-forest-900/30'
@@ -126,7 +126,7 @@ function GoalCard({
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-semibold text-stone-700 dark:text-stone-300">{pct}%</span>
               {!isAuto && !goal.done && (
-                <span className="text-[10px] text-stone-500 dark:text-stone-400">Tryck för att justera</span>
+                <span className="text-[10px] text-stone-500 dark:text-stone-400">{t('goals.tapToAdjust')}</span>
               )}
             </div>
             <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-2">
@@ -155,7 +155,7 @@ function GoalCard({
 
         <button
           onClick={onDelete}
-          aria-label={`Ta bort målet "${goal.text}"`}
+          aria-label={t('goals.deleteGoal', { goal: goal.text })}
           className="p-1 -mr-1 -mt-1 flex-shrink-0"
         >
           <XIcon className="w-4 h-4 text-stone-300 dark:text-stone-600" />
@@ -170,7 +170,7 @@ function GoalCard({
           onClick={onApply}
           className="mt-3 w-full py-2.5 rounded-xl border border-forest-200 dark:border-forest-800 bg-forest-50 dark:bg-forest-900/30 text-sm font-semibold text-forest-800 dark:text-forest-300 hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors"
         >
-          Anpassa mitt schema efter det här målet
+          {t('goals.adjustPlan')}
         </button>
       )}
     </div>
@@ -195,14 +195,14 @@ export function GoalsPage() {
 
   function persist(updated: Goal[]) { setGoals(updated); saveGoals(updated) }
 
-  function addGoal(t: string) {
-    if (!t.trim()) return
-    const goalMeta = parseGoal(t.trim())
+  function addGoal(goalText: string) {
+    if (!goalText.trim()) return
+    const goalMeta = parseGoal(goalText.trim())
     persist([
       ...goals,
       {
         id: crypto.randomUUID(),
-        text: t.trim(),
+        text: goalText.trim(),
         done: false,
         createdAt: new Date().toISOString(),
         progress: 0,
@@ -213,7 +213,7 @@ export function GoalsPage() {
     setAdding(false)
     // Målet sparas direkt, men inget sa det — användaren letade efter en
     // spara-knapp som inte finns.
-    toast.success('Målet sparat')
+    toast.success(t('goals.saved'))
   }
 
   /**
@@ -230,7 +230,7 @@ export function GoalsPage() {
     try {
       const { profile } = await api.getProfile()
       if (!profile || typeof profile !== 'object') {
-        toast.error('Din profil kunde inte läsas. Fyll i den under Mer → Profil först.')
+        toast.error(t('goals.needProfile'))
         return
       }
       await api.saveProfile({ ...(profile as Record<string, unknown>), ...pending.adjustment.patch })
@@ -239,14 +239,14 @@ export function GoalsPage() {
       // på gratisnivån (tak: en plan) failar genereringen varje gång.
       profileSaved = true
       await api.generatePlan()
-      toast.success('Schemat byggs om efter ditt mål')
+      toast.success(t('goals.planRebuilding'))
       setPending(null)
       navigate('/traning')
     } catch (e) {
       toast.error(
         profileSaved
-          ? 'Målet är sparat i din profil, men schemat kunde inte byggas om just nu. Försök igen från Träning.'
-          : (e as Error).message || 'Kunde inte spara målet'
+          ? t('goals.savedButPlanFailed')
+          : (e as Error).message || t('goals.saveFailed')
       )
     } finally {
       setApplying(false)
@@ -278,7 +278,7 @@ export function GoalsPage() {
           <ChevronLeftIcon className="w-4 h-4 text-stone-500 dark:text-stone-400" />
           Mer
         </button>
-        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Mina mål</h1>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('more.goals')}</h1>
 
         <div className="flex gap-5 mt-4 border-b border-stone-200 dark:border-stone-700 -mb-4">
           {(['aktiva', 'tidigare'] as Tab[]).map((tabKey) => (
@@ -300,7 +300,7 @@ export function GoalsPage() {
           <div className="text-center py-12">
             <TargetIcon className="w-12 h-12 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
             <p className="text-stone-500 dark:text-stone-400 text-sm">
-              {tab === 'aktiva' ? 'Inga aktiva mål ännu.' : 'Inga avklarade mål ännu.'}
+              {tab === 'aktiva' ? t('goals.noActive') : t('goals.noDone')}
             </p>
           </div>
         )}
@@ -329,7 +329,7 @@ export function GoalsPage() {
               <p className="font-bold text-stone-900 dark:text-stone-100">Anpassa schemat?</p>
               <p className="text-sm text-stone-600 dark:text-stone-300 mt-2">{pending.adjustment.description}</p>
               <p className="text-sm text-stone-600 dark:text-stone-300 mt-2">
-                Ditt nuvarande schema ersätts med ett nytt.
+                {t('goals.planWillBeReplaced')}
               </p>
               <div className="flex gap-2 mt-5">
                 <button
@@ -337,14 +337,14 @@ export function GoalsPage() {
                   disabled={applying}
                   className="flex-1 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-sm font-semibold text-stone-600 dark:text-stone-300 disabled:opacity-60"
                 >
-                  Avbryt
+                  {t('onb.cancel')}
                 </button>
                 <button
                   onClick={applyAdjustment}
                   disabled={applying}
                   className="flex-1 py-2.5 rounded-xl bg-forest-700 text-white text-sm font-semibold disabled:opacity-60"
                 >
-                  {applying ? 'Bygger om…' : 'Bygg om schemat'}
+                  {applying ? t('goals.rebuilding') : t('goals.rebuildPlan')}
                 </button>
               </div>
             </div>
@@ -359,7 +359,7 @@ export function GoalsPage() {
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addGoal(text)}
-              placeholder="Beskriv ditt mål…"
+              placeholder={t('goals.describePlaceholder')}
               className="w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-3 text-stone-900 dark:text-stone-100 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
             />
 
@@ -368,13 +368,13 @@ export function GoalsPage() {
               <div className={`flex items-center gap-2 text-xs px-3 py-2 rounded-xl ${
                 previewIsAuto ? 'bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300' : 'bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400'
               }`}>
-                <span>{previewIsAuto ? '✓ Automatisk spårning detekterad' : '○ Manuell uppföljning'}</span>
+                <span>{previewIsAuto ? t('goals.autoDetected') : t('goals.manualFollowUp')}</span>
               </div>
             )}
 
             {/* Suggestions */}
             <div className="space-y-1">
-              <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">Förslag med automatisk spårning:</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">{t('goals.suggestionsHeading')}</p>
               <div className="flex flex-wrap gap-2">
                 {suggestions.filter((s) => s.auto).map((s) => (
                   <button
@@ -390,7 +390,7 @@ export function GoalsPage() {
 
             <div className="flex gap-3">
               <button onClick={() => setAdding(false)} className="flex-1 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 text-sm font-medium">
-                Avbryt
+                {t('onb.cancel')}
               </button>
               <button onClick={() => addGoal(text)} className="flex-1 py-2.5 rounded-xl bg-forest-700 text-white text-sm font-semibold">
                 Lägg till
@@ -407,7 +407,7 @@ export function GoalsPage() {
             className="w-full flex items-center justify-center gap-2 py-3.5 bg-forest-700 text-white rounded-2xl text-sm font-semibold shadow-lg"
           >
             <PlusIcon className="w-4 h-4" />
-            Lägg till nytt mål
+            {t('goals.addGoal')}
           </button>
         </div>
       )}

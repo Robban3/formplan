@@ -15,15 +15,12 @@ import { toast } from '../../lib/toast'
 import { mealSlotLabels } from '../../lib/texts'
 import { useT } from '../../hooks/useT'
 import { weekdayNames } from '../../lib/i18n'
+import type { TextKey } from '../../lib/i18n'
 
 
 const SLOTS: WeekSlot[] = ['frukost', 'lunch', 'middag', 'mellanmar']
-const FOCUS_OPTIONS: { key: DietFocus; label: string }[] = [
-  { key: 'balanced', label: 'Balanserat' },
-  { key: 'high_protein', label: 'Hög protein' },
-  { key: 'vegetarian', label: 'Vegetariskt' },
-  { key: 'low_carb', label: 'Låg kolhydrat' },
-]
+/** Etiketterna kommer ur ordlistan; nycklarna är lagrade värden. */
+const FOCUS_KEYS: DietFocus[] = ['balanced', 'high_protein', 'vegetarian', 'low_carb']
 const KCAL_PRESETS = [1500, 1800, 2000, 2500]
 
 // Faktiskt datum för en veckodag (1–7) i innevarande vecka.
@@ -106,9 +103,9 @@ export function MealWeekPage() {
       update({ ...plan, days })
       setAddSlot(null)
       setAddText('')
-      toast.success('Måltid tillagd!')
+      toast.success(t('mealweek.mealAdded'))
     } catch (e) {
-      toast.error((e as Error).message || 'Kunde inte uppskatta måltiden')
+      toast.error((e as Error).message || t('mealweek.estimateFailed'))
     } finally {
       setAddBusy(false)
     }
@@ -124,10 +121,10 @@ export function MealWeekPage() {
       <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-3">
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
-          Kost
+          {t('nav.nutrition')}
         </button>
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('page.weekPlanning')}</h1>
-        <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Generera hela veckan eller enstaka dagar utifrån kalorier</p>
+        <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">{t('mealweek.subtitle')}</p>
       </div>
 
       <div className="px-5 mt-4 space-y-4">
@@ -173,23 +170,23 @@ export function MealWeekPage() {
                   plan.mealCount === n ? 'bg-forest-700 text-white' : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
                 }`}
               >
-                {n} måltider
+                {t('mealweek.mealCount', { n })}
               </button>
             ))}
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            {FOCUS_OPTIONS.map((opt) => (
+            {FOCUS_KEYS.map((focusKey) => (
               <button
-                key={opt.key}
-                onClick={() => update({ ...plan, focus: opt.key })}
+                key={focusKey}
+                onClick={() => update({ ...plan, focus: focusKey })}
                 className={`py-2 rounded-xl text-xs font-semibold border-2 transition-colors ${
-                  plan.focus === opt.key
+                  plan.focus === focusKey
                     ? 'border-forest-600 bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300'
                     : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-300'
                 }`}
               >
-                {opt.label}
+                {t(`diet.${focusKey}` as TextKey)}
               </button>
             ))}
           </div>
@@ -199,7 +196,7 @@ export function MealWeekPage() {
             className="w-full bg-forest-700 hover:bg-forest-800 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors"
           >
             <LeafIcon className="w-5 h-5 stroke-white" />
-            Generera hela veckan
+            {t('mealweek.generateWeek')}
           </button>
         </div>
 
@@ -233,19 +230,19 @@ export function MealWeekPage() {
               <p className="font-bold text-stone-900 dark:text-stone-100">
                 {DAY_FULL[selected - 1]} {dateForWeekday(selected).toLocaleDateString(locale, { day: 'numeric', month: 'long' })}
               </p>
-              <p className="text-xs text-stone-500 dark:text-stone-400">{dayKcal} kcal totalt</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400">{t('mealweek.kcalTotal', { kcal: dayKcal })}</p>
             </div>
             <button
               onClick={() => regenerateDay(selected)}
               className="text-xs px-3 py-1.5 rounded-full border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 font-medium hover:border-forest-400 hover:text-forest-700 dark:hover:text-forest-300 transition-colors"
             >
-              Regenerera dag
+              {t('mealweek.regenerateDay')}
             </button>
           </div>
 
           {isEmpty && (
             <p className="text-center text-stone-500 dark:text-stone-400 text-sm py-6">
-              Inga måltider än. Generera veckan, regenerera dagen eller lägg till en egen måltid.
+              {t('mealweek.empty')}
             </p>
           )}
 
@@ -280,7 +277,7 @@ export function MealWeekPage() {
             className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 border border-dashed border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-800 dark:text-forest-400 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
           >
             <PlusIcon className="w-4 h-4 stroke-forest-600" />
-            Lägg till egen måltid
+            {t('mealweek.addOwnMeal')}
           </button>
         </div>
       </div>
@@ -291,7 +288,10 @@ export function MealWeekPage() {
           <div className="bg-white dark:bg-stone-800 w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-stone-900 dark:text-stone-100">
-                Egen måltid · {DAY_FULL[selected - 1]} {dateForWeekday(selected).getDate()}
+                {t('mealweek.ownMealOn', {
+                  day: DAY_FULL[selected - 1] ?? '',
+                  date: dateForWeekday(selected).getDate(),
+                })}
               </h3>
               <button onClick={() => { setAddSlot(null); setAddText('') }}>
                 <XIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400" />
@@ -317,10 +317,10 @@ export function MealWeekPage() {
               value={addText}
               onChange={(e) => setAddText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addCustom()}
-              placeholder="t.ex. kvarg med bär"
+              placeholder={t('mealweek.mealPlaceholder')}
               className="w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-3 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400"
             />
-            <p className="text-[11px] text-stone-500 dark:text-stone-400 -mt-1">AI uppskattar kalorierna för en normal portion.</p>
+            <p className="text-[11px] text-stone-500 dark:text-stone-400 -mt-1">{t('mealweek.aiEstimates')}</p>
 
             <button
               onClick={addCustom}
@@ -328,7 +328,7 @@ export function MealWeekPage() {
               className="w-full py-3 rounded-xl bg-forest-700 hover:bg-forest-800 text-white font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
             >
               <ZapIcon className="w-4 h-4 stroke-white" />
-              {addBusy ? 'Uppskattar…' : 'Lägg till'}
+              {addBusy ? 'Uppskattar…' : t('food.add')}
             </button>
           </div>
         </div>

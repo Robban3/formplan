@@ -17,7 +17,7 @@ export function RemindersPage() {
   const [adding, setAdding] = useState(false)
   const [newDays, setNewDays] = useState<number[]>([1, 3, 5])
   const [newTime, setNewTime] = useState('07:00')
-  const [newLabel, setNewLabel] = useState('Träningspass')
+  const [newLabel, setNewLabel] = useState(t('reminders.workout'))
 
   function toggleDay(day: number) {
     setNewDays((ds) =>
@@ -27,18 +27,18 @@ export function RemindersPage() {
 
   function addReminder() {
     if (newDays.length === 0) {
-      toast.error('Välj minst en dag.')
+      toast.error(t('reminders.needOneDay'))
       return
     }
     if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
-      toast.error('Aktivera notiser under Notiser-sidan först.')
+      toast.error(t('reminders.enableFirst'))
       return
     }
     // useNotificationScheduler (mounted i App) schemalägger om automatiskt när
     // settings-storen ändras — manuell schemaläggning här skulle dubbeltrigga.
     settingsStore.addReminder({ days: newDays, time: newTime, label: newLabel, enabled: true })
     setAdding(false)
-    toast.success('Påminnelse skapad!')
+    toast.success(t('reminders.created'))
   }
 
   function toggleReminder(id: string, enabled: boolean) {
@@ -50,7 +50,7 @@ export function RemindersPage() {
   }
 
   function formatDays(days: number[]) {
-    if (days.length === 7) return 'Varje dag'
+    if (days.length === 7) return t('reminders.everyDay')
     if (days.length === 5 && !days.includes(6) && !days.includes(7)) return 'Vardagar'
     return days.map((d) => DAY_LABELS[d - 1]).join(', ')
   }
@@ -62,10 +62,10 @@ export function RemindersPage() {
         Mer
       </button>
       <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">{t('more.reminders')}</h1>
-      <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Schemalägg påminnelser om dina träningspass.</p>
+      <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">{t('reminders.subtitle')}</p>
 
       {settings.reminders.length === 0 && !adding && (
-        <p className="text-stone-500 dark:text-stone-400 text-sm text-center py-8">Inga påminnelser ännu.</p>
+        <p className="text-stone-500 dark:text-stone-400 text-sm text-center py-8">{t('reminders.noneYet')}</p>
       )}
 
       <div className="space-y-3 mb-4">
@@ -100,7 +100,7 @@ export function RemindersPage() {
           </label>
 
           <div>
-            <span className="text-sm text-stone-500 dark:text-stone-400">Dagar</span>
+            <span className="text-sm text-stone-500 dark:text-stone-400">{t('reminders.days')}</span>
             <div className="flex gap-2 mt-2">
               {DAY_LABELS.map((label, i) => {
                 const day = i + 1
@@ -134,13 +134,13 @@ export function RemindersPage() {
               onClick={() => setAdding(false)}
               className="flex-1 py-3 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 font-medium text-sm"
             >
-              Avbryt
+              {t('onb.cancel')}
             </button>
             <button
               onClick={addReminder}
               className="flex-1 py-3 rounded-xl bg-forest-700 text-white font-semibold text-sm"
             >
-              Spara
+              {t('analytics.save')}
             </button>
           </div>
         </div>
@@ -150,12 +150,12 @@ export function RemindersPage() {
           className="w-full flex items-center justify-center gap-2 py-3 border border-stone-200 dark:border-stone-700 rounded-xl text-sm text-forest-800 dark:text-forest-400 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
         >
           <PlusIcon className="w-4 h-4 stroke-forest-600" />
-          Ny påminnelse
+          {t('reminders.newReminder')}
         </button>
       )}
 
       <p className="text-xs text-stone-300 dark:text-stone-600 text-center mt-6">
-        Påminnelser kräver att notiser är aktiverade och att appen är öppen.
+        {t('reminders.requiresNotifications')}
       </p>
     </div>
   )

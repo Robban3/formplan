@@ -29,10 +29,11 @@ const MACRO_COLORS: Record<string, string> = {
 }
 
 function MacroBar({ plan }: { plan: GeneratedMealPlan }) {
+  const { t } = useT()
   const total = plan.totalProtein + plan.totalFat + plan.totalCarbs || 1
   const segs = [
-    { key: 'protein', label: 'Protein',      g: plan.totalProtein, pct: plan.totalProtein / total },
-    { key: 'fat',     label: 'Fett',         g: plan.totalFat,     pct: plan.totalFat / total },
+    { key: 'protein', label: t('macro.protein'),      g: plan.totalProtein, pct: plan.totalProtein / total },
+    { key: 'fat',     label: t('macro.fat'),         g: plan.totalFat,     pct: plan.totalFat / total },
     { key: 'carbs',   label: 'Kolhydrater',  g: plan.totalCarbs,   pct: plan.totalCarbs / total },
   ]
   return (
@@ -99,10 +100,10 @@ export function MealPlanPage() {
       <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-3">
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
-          Kost
+          {t('nav.nutrition')}
         </button>
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('page.mealPlan')}</h1>
-        <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Generera ett dagsmeny anpassat efter dina mål</p>
+        <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">{t('mealplan.subtitle')}</p>
       </div>
 
       <div className="px-5 mt-5 space-y-5">
@@ -145,7 +146,7 @@ export function MealPlanPage() {
 
         {/* Antal måltider */}
         <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 space-y-3">
-          <p className="font-semibold text-stone-800 dark:text-stone-200">Antal måltider per dag</p>
+          <p className="font-semibold text-stone-800 dark:text-stone-200">{t('mealplan.mealsPerDay')}</p>
           <div className="flex gap-2">
             {([3, 4, 5] as MealCount[]).map((n) => (
               <button
@@ -157,7 +158,7 @@ export function MealPlanPage() {
                     : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
                 }`}
               >
-                {n} måltider
+                {t('mealweek.mealCount', { n })}
               </button>
             ))}
           </div>
@@ -192,7 +193,7 @@ export function MealPlanPage() {
           className="w-full bg-forest-700 hover:bg-forest-800 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-colors"
         >
           <LeafIcon className="w-5 h-5 stroke-white" />
-          Generera kostschema
+          {t('mealplan.generate')}
         </button>
 
         {/* Result */}
@@ -202,7 +203,7 @@ export function MealPlanPage() {
             <div className="bg-forest-700 rounded-2xl p-4 text-white">
               <div className="flex items-baseline justify-between mb-3">
                 <p className="font-bold text-lg">{plan.totalKcal.toLocaleString(locale)} kcal</p>
-                <p className="text-forest-200 text-sm">{plan.meals.length} måltider</p>
+                <p className="text-forest-200 text-sm">{t('mealweek.mealCount', { n: plan.meals.length })}</p>
               </div>
               <MacroBar plan={plan} />
             </div>
@@ -259,7 +260,7 @@ export function MealPlanPage() {
               onClick={regenerate}
               className="w-full py-3 border border-stone-200 dark:border-stone-700 rounded-2xl text-sm text-stone-500 dark:text-stone-400 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
             >
-              Generera nytt förslag
+              {t('mealplan.generateAnother')}
             </button>
 
             {/* Shopping list — carry the chosen kcal/focus/mealCount so the list
@@ -273,7 +274,7 @@ export function MealPlanPage() {
               className="w-full py-3 bg-stone-100 dark:bg-stone-700 rounded-2xl text-sm text-stone-700 dark:text-stone-300 font-semibold flex items-center justify-center gap-2 hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
             >
               <ShoppingCartIcon className="w-4 h-4 stroke-stone-600 dark:stroke-stone-300" />
-              Skapa inköpslista för veckan
+              {t('mealplan.shoppingList')}
             </button>
           </div>
         )}

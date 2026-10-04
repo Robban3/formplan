@@ -43,15 +43,15 @@ export function ProfilePage() {
 
   const rows: { label: string; value: string }[] = profile
     ? [
-        { label: 'Mål', value: GOAL_LABELS[profile.goal] ?? profile.goal },
-        { label: 'Nivå', value: LEVEL_LABELS[profile.level] ?? profile.level },
-        { label: 'Dagar / vecka', value: String(profile.days_per_week) },
-        { label: 'Utrustning', value: profile.equipment.join(', ') || '—' },
-        { label: 'Allergier', value: profile.allergies.join(', ') || 'Inga' },
-        { label: 'Kalorimål', value: profile.calorie_goal ? `${profile.calorie_goal} kcal` : 'Auto' },
-        { label: 'Ålder', value: profile.age ? `${profile.age} år` : '—' },
-        { label: 'Vikt', value: profile.weight_kg ? formatWeight(profile.weight_kg) : '—' },
-        { label: 'Längd', value: profile.height_cm ? formatHeight(profile.height_cm) : '—' },
+        { label: t('profile.goal'), value: GOAL_LABELS[profile.goal] ?? profile.goal },
+        { label: t('profile.level'), value: LEVEL_LABELS[profile.level] ?? profile.level },
+        { label: t('profile.daysPerWeek'), value: String(profile.days_per_week) },
+        { label: t('profile.equipment'), value: profile.equipment.join(', ') || '—' },
+        { label: t('profile.allergies'), value: profile.allergies.join(', ') || t('profile.none') },
+        { label: t('onb.calorieGoal'), value: profile.calorie_goal ? `${profile.calorie_goal} kcal` : t('profile.auto') },
+        { label: t('profile.age'), value: profile.age ? t('profile.years', { n: profile.age }) : '—' },
+        { label: t('onb.field.weight'), value: profile.weight_kg ? formatWeight(profile.weight_kg) : '—' },
+        { label: t('onb.field.height'), value: profile.height_cm ? formatHeight(profile.height_cm) : '—' },
       ]
     : []
 
@@ -76,7 +76,7 @@ export function ProfilePage() {
           ))}
         </div>
       ) : (
-        <p className="text-stone-500 dark:text-stone-400 text-sm">Ingen profil hittades.</p>
+        <p className="text-stone-500 dark:text-stone-400 text-sm">{t('profile.notFound')}</p>
       )}
 
       <button

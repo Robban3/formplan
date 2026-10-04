@@ -4,6 +4,7 @@ import { nutritionApi, type MealSlot } from '../../lib/nutritionApi'
 import { addCustomWeekMeal, weekdayOf } from '../../lib/weekMealStore'
 import { toast } from '../../lib/toast'
 import { ZapIcon, ClockIcon } from '../ui/Icons'
+import { useT } from '../../hooks/useT'
 
 // Slot → meal_type som AI:n förstår (slot-enumet använder 'mellanmar').
 const MEAL_TYPE: Record<MealSlot, string> = {
@@ -37,6 +38,7 @@ interface Props {
 }
 
 export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogged }: Props) {
+  const { t } = useT()
   const [open, setOpen] = useState(false)
   const [ingredient, setIngredient] = useState(defaultIngredient)
   const [kcal, setKcal] = useState(String(KCAL_DEFAULT[slot]))
@@ -54,7 +56,7 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
     setLogged(false)
     setSavedWeek(false)
     const ing = ingredient.trim()
-    const prompt = ing ? `Ett recept som utgår från: ${ing}` : 'Ett gott och varierat recept'
+    const prompt = ing ? `Ett recept som utgår från: ${ing}` : t('mealgen.defaultPrompt')
     try {
       const { recipe } = await api.generateRecipe({
         prompt,
@@ -64,9 +66,9 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
       setRecipe(recipe)
     } catch (e) {
       if (e instanceof ApiError && e.status === 402) {
-        setError('Receptgenerering är en Premium-funktion. Uppgradera under Mer → Premium.')
+        setError(t('mealgen.premiumOnly'))
       } else {
-        setError((e as Error).message || 'Kunde inte generera recept just nu. Försök igen.')
+        setError((e as Error).message || t('recipes.generateFailed'))
       }
     } finally {
       setLoading(false)
@@ -97,10 +99,10 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
         carbs_g: carbs,
       })
       setLogged(true)
-      toast.success('Måltid loggad!')
+      toast.success(t('mealgen.mealLogged'))
       onLogged?.()
     } catch (e) {
-      toast.error((e as Error).message || 'Kunde inte logga måltiden')
+      toast.error((e as Error).message || t('recipes.logFailed'))
     } finally {
       setLogging(false)
     }
@@ -118,7 +120,7 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
       carbs_g: num(recipe.carbs_g),
     })
     setSavedWeek(true)
-    toast.success('Sparat till veckoschemat!')
+    toast.success(t('mealgen.savedToWeek'))
   }
 
   if (!open) {
@@ -128,7 +130,7 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
         className="w-full flex items-center justify-center gap-2 py-3 border-t border-stone-50 text-sm text-forest-800 dark:text-forest-400 font-medium hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors"
       >
         <ZapIcon className="w-4 h-4 stroke-forest-600" />
-        Generera recept med AI
+        {t('mealgen.title')}
       </button>
     )
   }
@@ -136,13 +138,13 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
   return (
     <div className="border-t border-stone-50 p-4 space-y-3 bg-stone-50 dark:bg-stone-800/60">
       {defaultIngredient && (
-        <p className="text-[11px] text-stone-500 dark:text-stone-400">Utgår från måltidens livsmedel — ändra fritt</p>
+        <p className="text-[11px] text-stone-500 dark:text-stone-400">{t('mealgen.basedOnMeal')}</p>
       )}
       <div className="flex items-center gap-2">
         <input
           value={ingredient}
           onChange={(e) => setIngredient(e.target.value)}
-          placeholder="Råvara, t.ex. kyckling (valfritt)"
+          placeholder={t('mealgen.ingredientPlaceholder')}
           className="flex-1 min-w-0 bg-white dark:bg-stone-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
         />
         <div className="flex items-center gap-1 bg-white dark:bg-stone-800 rounded-xl px-3 py-2">
@@ -162,14 +164,14 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
           onClick={() => { setOpen(false); setRecipe(null); setError(null) }}
           className="px-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-sm text-stone-600 dark:text-stone-300"
         >
-          Stäng
+          {t('mealgen.close')}
         </button>
         <button
           onClick={generate}
           disabled={loading}
           className="flex-1 py-2 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-sm font-semibold transition-colors disabled:opacity-50"
         >
-          {loading ? 'Skapar recept…' : recipe ? 'Generera nytt' : 'Generera recept'}
+          {loading ? 'Skapar recept…' : recipe ? t('mealgen.generateAnother') : t('recipes.generate')}
         </button>
       </div>
 
@@ -229,14 +231,14 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
               disabled={logging || logged}
               className="py-2.5 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-sm font-semibold transition-colors disabled:opacity-60"
             >
-              {logged ? 'Loggad ✓' : logging ? 'Loggar…' : 'Logga måltid'}
+              {logged ? 'Loggad ✓' : logging ? 'Loggar…' : t('mealgen.logMeal')}
             </button>
             <button
               onClick={saveToWeek}
               disabled={savedWeek}
               className="py-2.5 rounded-xl border border-forest-200 dark:border-forest-800 text-forest-800 dark:text-forest-300 text-sm font-semibold hover:bg-forest-50 dark:hover:bg-forest-900/30 transition-colors disabled:opacity-60"
             >
-              {savedWeek ? 'Sparad ✓' : 'Spara till vecka'}
+              {savedWeek ? 'Sparad ✓' : t('mealgen.saveToWeek')}
             </button>
           </div>
         </div>

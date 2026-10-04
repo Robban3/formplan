@@ -18,6 +18,7 @@ import { initMeasurementsSync } from '../lib/measurementsSync'
 import { dateKey } from '../lib/derive'
 import { useUnits } from '../hooks/useUnits'
 import { useT } from '../hooks/useT'
+import type { TextKey } from '../lib/i18n'
 
 /**
  * Combined view: girth fields come from measurementStore, but the weight scalar
@@ -44,14 +45,14 @@ function buildEntries(): BodyMeasurement[] {
  * visas och matas in — vikt i kilo, omfång i centimeter.
  */
 const FIELDS: {
-  key: keyof BodyMeasurement; label: string; kind: 'weight' | 'length'; placeholderMetric: number
+  key: keyof BodyMeasurement; labelKey: TextKey; kind: 'weight' | 'length'; placeholderMetric: number
 }[] = [
-  { key: 'weight_kg', label: 'Vikt',    kind: 'weight', placeholderMetric: 75 },
-  { key: 'waist_cm',  label: 'Midja',   kind: 'length', placeholderMetric: 80 },
-  { key: 'chest_cm',  label: 'Bröst',   kind: 'length', placeholderMetric: 100 },
-  { key: 'hips_cm',   label: 'Höfter',  kind: 'length', placeholderMetric: 95 },
-  { key: 'arm_cm',    label: 'Arm',     kind: 'length', placeholderMetric: 35 },
-  { key: 'thigh_cm',  label: 'Lår',     kind: 'length', placeholderMetric: 55 },
+  { key: 'weight_kg', labelKey: 'onb.field.weight', kind: 'weight', placeholderMetric: 75 },
+  { key: 'waist_cm',  labelKey: 'measure.waist',    kind: 'length', placeholderMetric: 80 },
+  { key: 'chest_cm',  labelKey: 'measure.chest',    kind: 'length', placeholderMetric: 100 },
+  { key: 'hips_cm',   labelKey: 'measure.hips',     kind: 'length', placeholderMetric: 95 },
+  { key: 'arm_cm',    labelKey: 'measure.arm',      kind: 'length', placeholderMetric: 35 },
+  { key: 'thigh_cm',  labelKey: 'measure.thigh',    kind: 'length', placeholderMetric: 55 },
 ]
 
 function fmtDate(iso: string, locale: string) {
@@ -173,11 +174,11 @@ export function MeasurementsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('more.measurements')}</h1>
-            <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Följ din kroppssammansättning</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">{t('measure.subtitle')}</p>
           </div>
           <button
             onClick={() => setAdding(true)}
-            aria-label="Lägg till mätning"
+            aria-label={t('measure.addMeasurement')}
             className="w-10 h-10 bg-forest-700 rounded-xl flex items-center justify-center"
           >
             <PlusIcon className="w-5 h-5 stroke-white" />
@@ -190,7 +191,7 @@ export function MeasurementsPage() {
         {adding && (
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 space-y-4">
             <div className="flex items-center justify-between">
-              <p className="font-semibold text-stone-800 dark:text-stone-200">Ny mätning</p>
+              <p className="font-semibold text-stone-800 dark:text-stone-200">{t('measure.newMeasurement')}</p>
               <button onClick={() => { setAdding(false); setForm({}) }}>
                 <XIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
               </button>
@@ -198,7 +199,7 @@ export function MeasurementsPage() {
             <div className="grid grid-cols-2 gap-3">
               {FIELDS.map((f) => (
                 <div key={f.key} className="min-w-0">
-                  <label className="text-xs text-stone-500 dark:text-stone-400 font-medium">{f.label}</label>
+                  <label className="text-xs text-stone-500 dark:text-stone-400 font-medium">{t(f.labelKey)}</label>
                   <div className="flex items-center gap-1 mt-1">
                     <input
                       type="number" inputMode="decimal"
@@ -216,7 +217,7 @@ export function MeasurementsPage() {
               onClick={handleSave}
               className="w-full py-3 bg-forest-700 text-white text-sm font-semibold rounded-xl"
             >
-              Spara mätning
+              {t('measure.saveMeasurement')}
             </button>
           </div>
         )}
@@ -231,7 +232,7 @@ export function MeasurementsPage() {
               const color = f.key === 'weight_kg' ? '#22e6c6' : '#6366f1'
               return (
                 <div key={f.key} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-3">
-                  <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">{f.label}</p>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">{t(f.labelKey)}</p>
                   {latestVal && (
                     <p className="text-lg font-bold text-stone-900 dark:text-stone-100 mt-0.5">
                       {formatFor(f.kind, latestVal)}
@@ -264,7 +265,7 @@ export function MeasurementsPage() {
                     if (!val) return null
                     return (
                       <span key={f.key} className="text-xs text-stone-500 dark:text-stone-400">
-                        <span className="font-medium text-stone-700 dark:text-stone-300">{f.label}:</span>{' '}
+                        <span className="font-medium text-stone-700 dark:text-stone-300">{t(f.labelKey)}:</span>{' '}
                         {formatFor(f.kind, val)}
                       </span>
                     )
@@ -280,8 +281,8 @@ export function MeasurementsPage() {
             <div className="w-14 h-14 rounded-2xl bg-stone-100 dark:bg-stone-700 flex items-center justify-center mx-auto mb-3">
               <RulerIcon className="w-7 h-7 stroke-stone-500 dark:stroke-stone-400" />
             </div>
-            <p className="font-semibold text-stone-800 dark:text-stone-200">Inga mätningar ännu</p>
-            <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">Tryck på + för att logga din första mätning</p>
+            <p className="font-semibold text-stone-800 dark:text-stone-200">{t('measure.noneYet')}</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">{t('measure.noneYetHint')}</p>
           </div>
         )}
       </div>

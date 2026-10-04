@@ -54,7 +54,7 @@ interface PlanRow {
 
 
 export function PlanPage() {
-  const { locale } = useT()
+  const { locale, t } = useT()
   const WEEKDAYS = weekdayNames(locale, 'short')
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -129,22 +129,22 @@ export function PlanPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100 px-6 text-center">
         <p className={isError ? 'text-red-400' : 'text-slate-200'}>
-          {isError ? 'Något gick fel vid generering.' : 'Det tar längre tid än vanligt…'}
+          {isError ? t('plan.generateFailed') : t('plan.takingLonger')}
         </p>
         <p className="text-slate-500 text-sm max-w-xs">
           {isError
-            ? 'Försök skapa schemat igen från Träning.'
-            : 'Ditt schema skapas fortfarande i bakgrunden och visas här så snart det är klart.'}
+            ? t('plan.tryAgainFromTraining')
+            : t('plan.stillBuilding')}
         </p>
         <div className="flex gap-3">
           <button
             onClick={() => navigate('/traning')}
             className="text-sm font-medium bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-xl transition-colors"
           >
-            Öppna appen
+            {t('plan.openApp')}
           </button>
           <button onClick={() => navigate('/hem')} className="text-brand-400 hover:underline px-4 py-2">
-            Till startsidan
+            {t('plan.toStart')}
           </button>
         </div>
       </div>
@@ -155,15 +155,15 @@ export function PlanPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100 px-6 text-center">
         <div className="w-10 h-10 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-slate-400">AI genererar ditt personliga schema...</p>
-        <p className="text-slate-600 text-sm">Det tar ungefär 15–30 sekunder</p>
+        <p className="text-slate-400">{t('plan.generating')}</p>
+        <p className="text-slate-600 text-sm">{t('plan.generatingTime')}</p>
         {/* Escape hatch so the user is never trapped on the spinner — the plan_id
             is persisted, so Träning shows the schema when it's ready. */}
         <button
           onClick={() => navigate('/hem')}
           className="mt-2 text-brand-400 hover:underline text-sm"
         >
-          Öppna appen
+          {t('plan.openApp')}
         </button>
       </div>
     )
@@ -182,13 +182,13 @@ export function PlanPage() {
             <button onClick={() => navigate('/')} className="text-slate-400 hover:text-slate-200">
               ←
             </button>
-            <h1 className="text-xl font-bold">Mitt schema</h1>
+            <h1 className="text-xl font-bold">{t('page.myPlan')}</h1>
           </div>
           <button
             onClick={() => navigate('/traning')}
             className="text-sm font-medium bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-xl transition-colors"
           >
-            Öppna appen →
+            {t('plan.openAppArrow')}
           </button>
         </div>
 
@@ -240,7 +240,7 @@ export function PlanPage() {
                     {catalog && <ExerciseMedia key={catalog.id} exercise={catalog} variant="thumb" />}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm">{ex.name}</p>
-                      <p className="text-slate-400 text-xs">{ex.sets} set × {ex.reps} · {ex.rest_seconds}s vila</p>
+                      <p className="text-slate-400 text-xs">{t('plan.setsRest', { sets: ex.sets, reps: ex.reps, rest: ex.rest_seconds })}</p>
                       {ex.notes && <p className="text-slate-500 text-xs mt-0.5">{ex.notes}</p>}
                     </div>
                   </div>
@@ -263,9 +263,9 @@ export function PlanPage() {
             <div className="flex gap-4 mb-4 text-sm">
               {[
                 { label: 'Kalorier', value: `${(selectedNutrition.content as NutritionContent).total_calories} kcal` },
-                { label: 'Protein', value: `${(selectedNutrition.content as NutritionContent).protein_g}g` },
+                { label: t('macro.protein'), value: `${(selectedNutrition.content as NutritionContent).protein_g}g` },
                 { label: 'Kolhydrater', value: `${(selectedNutrition.content as NutritionContent).carbs_g}g` },
-                { label: 'Fett', value: `${(selectedNutrition.content as NutritionContent).fat_g}g` },
+                { label: t('macro.fat'), value: `${(selectedNutrition.content as NutritionContent).fat_g}g` },
               ].map(({ label, value }) => (
                 <div key={label}>
                   <p className="text-slate-500 text-xs">{label}</p>
