@@ -1,0 +1,75 @@
+name: Deploy API
+
+# Deployar workern till Cloudflare. Finns för att deployen annars kräver en
+# terminal med `wrangler login` — och den som äger appen har inte alltid en.
+# Här går den att starta från GitHubs webbgränssnitt (Actions → Deploy API →
+# Run workflow), och den körs automatiskt när något under apps/api ändras.
+#
+# Workerns secrets (SUPABASE_SERVICE_ROLE_KEY, GEMINI_API_KEY, STRIPE_* m.fl.)
+# sätts med `wrangler secret put` och lagras hos Cloudflare. `wrangler deploy`
+# rör dem inte, så en deploy härifrån kan inte råka tömma dem.
+#
+# Kräver två repo-secrets under Settings → Secrets and variables → Actions:
+#   CLOUDFLARE_API_TOKEN   — token med behörigheten "Edit Cloudflare Workers"
+#   CLOUDFLARE_ACCOUNT_ID  — konto-id:t för det konto workern ligger i
+# Konto-id:t måste anges eftersom token:en kan nå flera konton; utan det vet
+# wrangler inte vilket, och avbryter.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - '.github/workflows/deploy-api.yml'
+  workflow_dispatch:
+
+# En deploy i taget, och avbryt aldrig en pågående — en halvkörd deploy är
+# värre än en som får ta tid.
+concurrency:
+  group: deploy-api
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Samma version som ci.yml och codemagic.yaml.
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Tydligt fel i stället för wranglers egna, som bara säger att
+      # autentiseringen misslyckades utan att nämna vad som saknas.
+      - name: Check credentials
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          missing=""
+          [ -z "$TOKEN" ] && missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -z "$ACCOUNT" ] && missing="$missing CLOUDFLARE_ACCOUNT_ID"
+          if [ -n "$missing" ]; then
+            echo "::error::Saknade repo-secrets:$missing. Lägg till dem under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+      # Deployar inte ett API som inte går att kompilera eller vars tester
+      # fallerar. Åtkomstlogiken i apps/api/src/lib/access.ts är täckt av
+      # access.test.ts, så en trasig allowlist stoppas här.
+      - name: Typecheck
+        run: npm run typecheck --workspace=apps/api
+
+      - name: Test
+        run: npm run test --workspace=apps/api
+
+      - name: Deploy
+        run: npm run deploy --workspace=apps/api
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
