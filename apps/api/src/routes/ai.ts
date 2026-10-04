@@ -4,6 +4,7 @@ import { zValidator } from '@hono/zod-validator'
 import { requireAuth } from '../middleware/auth'
 import { requireAccess, requireVerifiedEmail } from '../middleware/access'
 import { coachReply, generateRecipe, analyzeFoodPhoto, estimateMeal, friendlyAiError } from '../lib/ai'
+import { langFromHeader, LANG_HEADER } from '../lib/lang'
 import { rateLimit } from '../lib/rateLimit'
 import { validationHook } from '../lib/validation'
 import type { AppContext } from '../lib/types'
@@ -38,7 +39,7 @@ aiRouter.post(
     const user = c.get('user')
     const b = c.req.valid('json')
     try {
-      const reply = await coachReply(user.sub, b.messages, b.context ?? '', c.env)
+      const reply = await coachReply(user.sub, b.messages, b.context ?? '', c.env, langFromHeader(c.req.header(LANG_HEADER)))
       return c.json({ reply })
     } catch (err) {
       console.error('AI coach failed:', err)
@@ -67,7 +68,7 @@ aiRouter.post(
   async (c) => {
     const b = c.req.valid('json')
     try {
-      const recipe = await generateRecipe(b, c.env)
+      const recipe = await generateRecipe(b, c.env, langFromHeader(c.req.header(LANG_HEADER)))
       return c.json({ recipe })
     } catch (err) {
       console.error('Recipe generation failed:', err)
@@ -92,7 +93,7 @@ aiRouter.post(
   async (c) => {
     const b = c.req.valid('json')
     try {
-      const analysis = await analyzeFoodPhoto(b.image, b.media_type, c.env)
+      const analysis = await analyzeFoodPhoto(b.image, b.media_type, c.env, langFromHeader(c.req.header(LANG_HEADER)))
       return c.json({ analysis })
     } catch (err) {
       console.error('Food photo analysis failed:', err)
@@ -110,7 +111,7 @@ aiRouter.post(
   async (c) => {
     const b = c.req.valid('json')
     try {
-      const estimate = await estimateMeal(b.description, c.env)
+      const estimate = await estimateMeal(b.description, c.env, langFromHeader(c.req.header(LANG_HEADER)))
       return c.json({ estimate })
     } catch (err) {
       console.error('Meal estimate failed:', err)

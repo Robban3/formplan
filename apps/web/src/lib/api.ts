@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { resolveLang, deviceLanguages, type LanguageSetting } from './i18n'
 import { toast } from './toast'
 import { getMockPlanResponse, parseMockPlanId, type MockGoal } from './mockPlan'
 
@@ -17,10 +18,35 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Språket appen är satt till, för AI-svaren.
+ *
+ * Skickas som egen header och inte via Accept-Language: i en
+ * Capacitor-WebView speglar Accept-Language telefonens språk, inte det
+ * användaren valt under Inställningar → Språk.
+ *
+ * Läses direkt ur inställningarna i stället för via hooken — det här är ingen
+ * komponent. Ett trasigt localStorage får inte stoppa ett API-anrop, därav
+ * try/catch och svenska som fallback.
+ */
+function currentLang(): string {
+  try {
+    const raw = localStorage.getItem('formplan_settings')
+    const setting = raw ? (JSON.parse(raw) as { language?: string }).language : undefined
+    return resolveLang((setting as LanguageSetting) ?? 'auto', deviceLanguages())
+  } catch {
+    return 'sv'
+  }
+}
+
 async function authHeaders(): Promise<HeadersInit> {
   const { data } = await supabase.auth.getSession()
   const token = data.session?.access_token
-  return token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }
+  const base: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'X-FormPlan-Language': currentLang(),
+  }
+  return token ? { ...base, Authorization: `Bearer ${token}` } : base
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {

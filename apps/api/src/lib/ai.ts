@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { z } from 'zod'
 import { supabaseAdmin } from './supabase'
 import { catalogForPrompt, getExerciseById, matchExercise } from './exerciseCatalog'
+import { languageInstruction, languageName, type Lang } from './lang'
 import type {
   Env,
   Exercise,
@@ -252,7 +253,7 @@ async function callGemini(req: AiRequest, env: Env): Promise<AiResult> {
   return { text, stopReason: candidate?.finishReason ?? null }
 }
 
-function buildPrompt(profile: FitnessProfile): string {
+function buildPrompt(profile: FitnessProfile, lang: Lang): string {
   const goalMap: Record<string, string> = {
     lose_weight: 'lose weight / cut fat',
     build_muscle: 'build muscle / bulk',
@@ -289,7 +290,7 @@ EXERCISE RULES (strict):
 INSTRUCTIONS:
 - Distribute ${profile.days_per_week} workout days across the week. Remaining days are rest days.
 - Every day gets a nutrition plan (macros + meals).
-- Use Swedish food and meal names where appropriate (this is a Swedish product).
+- ${languageInstruction(lang)}
 - Respond ONLY with valid JSON matching this exact schema:
 
 {
@@ -509,7 +510,8 @@ export function normalizePlanExercises<T extends GeneratedPlanDay>(days: T[]): T
 export async function generatePlan(
   planId: string,
   profile: FitnessProfile,
-  env: Env
+  env: Env,
+  lang: Lang = 'sv'
 ): Promise<void> {
   const db = supabaseAdmin(env)
 
@@ -517,7 +519,7 @@ export async function generatePlan(
     {
       system:
         'You are a certified personal trainer and nutritionist. Always respond with valid JSON only — no markdown, no explanation.',
-      messages: [{ role: 'user', content: buildPrompt(profile) }],
+      messages: [{ role: 'user', content: buildPrompt(profile, lang) }],
       maxTokens: 8192,
       json: true,
       timeoutMs: PLAN_AI_TIMEOUT_MS,
@@ -698,7 +700,8 @@ export async function coachReply(
   userId: string,
   messages: CoachMessage[],
   clientContext: string,
-  env: Env
+  env: Env,
+  lang: Lang = 'sv'
 ): Promise<string> {
   const serverContext = await buildUserContext(userId, env)
   const context = [serverContext, clientContext.trim()].filter(Boolean).join('\n')
@@ -718,7 +721,9 @@ export async function coachReply(
     if (!onTopic) return COACH_OFF_TOPIC_REPLY
   }
 
-  const system = `Du är FormPlans AI-coach — en kunnig, peppande och konkret personlig tränare och nutritionist. Du svarar alltid på svenska, kort och praktiskt (max ~150 ord), och du använder användarens faktiska data nedan för att ge personliga svar.
+  // Coachens instruktion står kvar på svenska — den styr modellen, inte
+  // användaren — men SVARSSPRÅKET följer appen.
+  const system = `Du är FormPlans AI-coach — en kunnig, peppande och konkret personlig tränare och nutritionist. Du svarar alltid på ${languageName(lang)}, kort och praktiskt (max ~150 ord), och du använder användarens faktiska data nedan för att ge personliga svar.
 
 ANVÄNDARENS DATA:
 ${context || 'Ingen data tillgänglig ännu.'}
@@ -823,7 +828,7 @@ const recipeSchema = z.object({
   tags: z.array(z.string().max(60)).max(15).catch([]),
 })
 
-export async function generateRecipe(req: RecipeRequest, env: Env): Promise<GeneratedRecipe> {
+export async function generateRecipe(req: RecipeRequest, env: Env, lang: Lang = 'sv'): Promise<GeneratedRecipe> {
   const constraints: string[] = []
   if (req.calorie_target) constraints.push(`Kalorimål: ca ${req.calorie_target} kcal per portion`)
   if (req.min_protein_g) constraints.push(`Minst ${req.min_protein_g} g protein per portion`)
@@ -848,7 +853,7 @@ export async function generateRecipe(req: RecipeRequest, env: Env): Promise<Gene
   const user = `Skapa ett recept utifrån önskemålet: "${req.prompt}".
 ${constraints.length ? `Krav:\n- ${constraints.join('\n- ')}\n` : ''}
 Var kreativ och variera — välj gärna olika proteinkällor och kök mellan gångerna (inte alltid lax eller kyckling). Slumpfrö: ${crypto.randomUUID()}.
-Svara ENDAST med giltig JSON enligt exakt detta schema (på svenska, med realistiska näringsvärden per portion):
+Svara ENDAST med giltig JSON enligt exakt detta schema (med realistiska näringsvärden per portion). ${languageInstruction(lang)}
 {
   "name": "string",
   "meal_type": "frukost|lunch|middag|mellanmål",
@@ -909,10 +914,11 @@ Svara ENDAST med giltig JSON enligt exakt detta schema (på svenska, med realist
 export async function analyzeFoodPhoto(
   imageBase64: string,
   mediaType: ImageMediaType,
-  env: Env
+  env: Env,
+  lang: Lang = 'sv'
 ): Promise<FoodPhotoAnalysis> {
-  const prompt = `Du är en svensk nutritionist. Analysera måltiden på bilden och uppskatta näringsinnehållet så gott det går utifrån synliga portioner.
-Svara ENDAST med giltig JSON enligt detta schema (svenska livsmedelsnamn, gram och realistiska värden):
+  const prompt = `Du är nutritionist. Analysera måltiden på bilden och uppskatta näringsinnehållet så gott det går utifrån synliga portioner.
+Svara ENDAST med giltig JSON enligt detta schema (gram och realistiska värden). ${languageInstruction(lang)}
 {
   "description": "kort beskrivning av måltiden",
   "items": [
@@ -1013,14 +1019,14 @@ Om bilden inte föreställer mat: returnera tomma "items", nollställd "total" o
 // ── Kaloriuppskattning av en fritextmåltid ──────────────────────────────────
 // "kvarg med bär" → { name, kcal, protein_g, fat_g, carbs_g } för en normal
 // portion. Används av veckoplaneringen för egna måltider.
-export async function estimateMeal(description: string, env: Env): Promise<MealEstimate> {
+export async function estimateMeal(description: string, env: Env, lang: Lang = 'sv'): Promise<MealEstimate> {
   const { text, stopReason } = await callAi(
     {
       system: 'Svara alltid med enbart giltig JSON — ingen markdown, ingen förklaring.',
       messages: [
         {
           role: 'user',
-          content: `Du är en svensk nutritionist. Uppskatta näringsinnehållet för måltiden "${description}". Anta en normal portion om inget annat anges. Svara ENDAST med giltig JSON enligt: {"name":"kort namn","kcal":number,"protein_g":number,"fat_g":number,"carbs_g":number}`,
+          content: `Du är nutritionist. Uppskatta näringsinnehållet för måltiden "${description}". Anta en normal portion om inget annat anges. ${languageInstruction(lang)} Svara ENDAST med giltig JSON enligt: {"name":"kort namn","kcal":number,"protein_g":number,"fat_g":number,"carbs_g":number}`,
         },
       ],
       maxTokens: 300,

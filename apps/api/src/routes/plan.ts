@@ -5,6 +5,7 @@ import { requireAuth } from '../middleware/auth'
 import { requireAccess, requireVerifiedEmail } from '../middleware/access'
 import { supabaseAdmin, isUserPremium } from '../lib/supabase'
 import { generatePlan } from '../lib/ai'
+import { langFromHeader, LANG_HEADER } from '../lib/lang'
 import { buildMockPlanDays } from '../lib/mockPlan'
 import { rateLimit } from '../lib/rateLimit'
 import { validationHook } from '../lib/validation'
@@ -56,6 +57,8 @@ planRouter.post(
     if (!profile) return c.json({ error: 'Ingen träningsprofil hittades. Skapa en först.' }, 400)
 
     // Create plan record with status=generating
+    const lang = langFromHeader(c.req.header(LANG_HEADER))
+
     const { data: planRows, error: planErr } = await db.query<{ id: string }[]>('/plan', {
       method: 'POST',
       body: JSON.stringify({ user_id: user.sub, status: 'generating' }),
@@ -68,7 +71,7 @@ planRouter.post(
 
     // Generate in background — respond immediately with plan id
     c.executionCtx.waitUntil(
-      generatePlan(planId, profile, c.env).catch(async (err) => {
+      generatePlan(planId, profile, c.env, lang).catch(async (err) => {
         console.error('Plan generation failed:', err)
         await db.query(`/plan?id=eq.${planId}`, {
           method: 'PATCH',
