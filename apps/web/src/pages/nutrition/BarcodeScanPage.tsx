@@ -199,8 +199,7 @@ export function BarcodeScanPage() {
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
             <p className="font-semibold text-stone-900 dark:text-stone-100">{t('barcode.notInDatabase')}</p>
             <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
-              Streckkod {unknownCode}. Skriv av näringsvärdena från paketet så sparas varan
-              på den här enheten och fylls i automatiskt nästa gång du skannar den.
+              {t('barcode.unknownCodeHint', { code: unknownCode })}
             </p>
 
             <div className="space-y-2 mt-4">
@@ -252,8 +251,12 @@ export function BarcodeScanPage() {
             <p className="font-semibold text-stone-900 dark:text-stone-100">{product.name}</p>
             {product.brand && <p className="text-xs text-stone-500 dark:text-stone-400">{product.brand}</p>}
             <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
-              Per 100 g: {product.kcal_per_100g} kcal · P {product.protein_per_100g}g · F {product.fat_per_100g}g · K{' '}
-              {product.carbs_per_100g}g
+              {t('food.per100gMacros', {
+                kcal: product.kcal_per_100g,
+                protein: product.protein_per_100g,
+                fat: product.fat_per_100g,
+                carbs: product.carbs_per_100g,
+              })}
             </p>
 
             <div className="flex items-center gap-3 mt-4">

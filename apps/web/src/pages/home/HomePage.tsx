@@ -183,7 +183,9 @@ function WeeklyReport({ weeklyDone, weeklyTotal }: { weeklyDone: number; weeklyT
       <div className="grid grid-cols-3 gap-3 text-center">
         <div>
           <p className="text-xl font-bold text-stone-900 dark:text-stone-100">{weeklyDone}</p>
-          <p className="text-[10px] text-stone-500 dark:text-stone-400">pass{weeklyTotal > 0 ? ` av ${weeklyTotal}` : ''}</p>
+          <p className="text-[10px] text-stone-500 dark:text-stone-400">
+            {weeklyTotal > 0 ? t('home.sessionsOf', { total: weeklyTotal }) : t('home.sessionsWord')}
+          </p>
           {weeklyTotal > 0 && <p className="text-[9px] text-forest-800 dark:text-forest-400 font-medium">{pct}%</p>}
         </div>
         <div>
@@ -315,7 +317,7 @@ export function HomePage() {
     const day = dateKey()
     setWaterTotal((prev) => prev + WATER_QUICK_ADD_ML)
     notifyWaterLogged()
-    toast.success(`+${formatVolume(WATER_QUICK_ADD_ML)} vatten loggat`)
+    toast.success(t('home.waterLogged', { amount: formatVolume(WATER_QUICK_ADD_ML) }))
     // Write-through: servern är auktoritativ källa (Hem/Kost/Analys läser den),
     // localStorage speglas för synkrona läsare som vattenmålet (goalTracker).
     // Ingen läsare summerar båda, så ingen dubbelräkning.

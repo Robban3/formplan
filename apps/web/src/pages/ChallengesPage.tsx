@@ -8,6 +8,7 @@ import {
   abandonChallenge,
   type Challenge,
   type ChallengeIconKey,
+  challengeText,
 } from '../lib/challengesStore'
 import { notifyWorkoutLogged, notifyWaterLogged, notifyWeightLogged } from '../lib/challengeEvents'
 import {
@@ -69,6 +70,7 @@ function ChallengeIcon({ iconKey }: { iconKey: ChallengeIconKey | undefined }) {
 function ChallengeCard({ challenge, onAbandon }: { challenge: Challenge; onAbandon: () => void }) {
   const { t } = useT()
   const CATEGORY_LABELS = categoryLabels(t)
+  const text = challengeText(challenge, t)
   const daysLeft = challenge.startDate
     ? Math.max(0, challenge.durationDays - Math.floor(
         // Parse the YYYY-MM-DD start at local noon — a bare new Date('YYYY-MM-DD')
@@ -82,8 +84,8 @@ function ChallengeCard({ challenge, onAbandon }: { challenge: Challenge; onAband
       <div className="flex items-start gap-3 mb-3">
         <ChallengeIcon iconKey={challenge.iconKey} />
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-stone-900 dark:text-stone-100">{challenge.title}</p>
-          <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{challenge.description}</p>
+          <p className="font-semibold text-stone-900 dark:text-stone-100">{text.title}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{text.description}</p>
         </div>
         <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[challenge.category]}`}>
           {CATEGORY_LABELS[challenge.category]}
@@ -91,7 +93,7 @@ function ChallengeCard({ challenge, onAbandon }: { challenge: Challenge; onAband
       </div>
 
       <div className="mb-1 flex justify-between text-xs text-stone-500 dark:text-stone-400">
-        <span>{challenge.currentValue} / {challenge.targetValue} {challenge.unit}</span>
+        <span>{challenge.currentValue} / {challenge.targetValue} {text.unit}</span>
         <span>{t('challenges.daysLeftShort', { n: daysLeft })}</span>
       </div>
       <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-2 mb-3">
@@ -183,27 +185,27 @@ export function ChallengesPage() {
         {/* Tillgängliga utmaningar */}
         {available.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Starta en utmaning</p>
+            <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">{t('challenges.startOne')}</p>
             <div className="space-y-3">
               {available.map((c) => (
                 <div key={c.id} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
                   <div className="flex items-start gap-3 mb-3">
                     <ChallengeIcon iconKey={c.iconKey} />
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-stone-900 dark:text-stone-100">{c.title}</p>
-                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{c.description}</p>
+                      <p className="font-semibold text-stone-900 dark:text-stone-100">{challengeText(c, t).title}</p>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{challengeText(c, t).description}</p>
                     </div>
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[c.category]}`}>
                       {CATEGORY_LABELS[c.category]}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <p className="text-xs text-stone-500 dark:text-stone-400">{t('challenges.durationGoal', { days: c.durationDays, target: c.targetValue, unit: c.unit })}</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400">{t('challenges.durationGoal', { days: c.durationDays, target: c.targetValue, unit: challengeText(c, t).unit })}</p>
                     <button
                       onClick={() => handleStart(c.id)}
                       className="px-4 py-1.5 bg-forest-700 text-white text-xs font-semibold rounded-full"
                     >
-                      Starta
+                      {t('challenges.start')}
                     </button>
                   </div>
                 </div>
@@ -224,7 +226,7 @@ export function ChallengesPage() {
                 <div key={c.id} className="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/25 rounded-2xl border border-amber-100 dark:border-amber-800 px-4 py-3">
                   <ChallengeIcon iconKey={c.iconKey} />
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">{c.title}</p>
+                    <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">{challengeText(c, t).title}</p>
                     <p className="text-xs text-stone-500 dark:text-stone-400">{c.completedDate ?? ''}</p>
                   </div>
                   <TrophyIcon className="w-5 h-5 stroke-amber-400" />

@@ -436,6 +436,9 @@ export const en: Record<TextKey, string> = {
   'water.youHaveDrunk': 'You’ve had {total} today — nice work.',
   'water.addAmount': 'Add {amount}',
   'water.nothingToday': 'Nothing logged yet today',
+  'water.ofGoal': 'of {goal}',
+  'water.quickPicks': 'Quick picks',
+  'water.log': 'Log',
   'water.addedToast': '+{amount} added',
 
   // Recipes
@@ -644,6 +647,8 @@ export const en: Record<TextKey, string> = {
   'challenges.cancel': 'Cancel challenge',
   'challenges.daysGoal': '{days} days · Goal: {goal}',
   'challenges.noneYet': 'No challenges yet',
+  'challenges.startOne': 'Start a challenge',
+  'challenges.start': 'Start',
   'challenges.noneYetHint': 'Start a challenge to keep your motivation up!',
 
   // Account
@@ -680,6 +685,7 @@ export const en: Record<TextKey, string> = {
   // Misc
   'home.sessionsOfTotal': 'of {total} sessions',
   'home.sessionsWord': 'sessions',
+  'home.sessionsOf': 'of {total} sessions',
   'home.noPlan': 'No plan',
   'home.waterLogged': '+{amount} of water logged',
   'onb.daysPerWeek': '{n} sessions per week',
@@ -691,6 +697,7 @@ export const en: Record<TextKey, string> = {
   'recipes.describeHint': 'Describe what you fancy, e.g. “Give me a dinner with 700 kcal and at least 50 g of protein”',
   'recipes.tailoredSuffix': '{category} · tailored to your goals',
   'barcode.savedOnDevice': 'on this device, and filled in automatically the next time you scan it.',
+  'barcode.unknownCodeHint': 'Barcode {code}. Enter the nutrition values from the package and the product is saved on this device, filled in automatically the next time you scan it.',
 
   // Equipment in the exercise catalog (keys are the catalog's English values)
   'equipLabel.barbell': 'Barbell',
@@ -711,6 +718,22 @@ export const en: Record<TextKey, string> = {
   'muscle.mapNone': 'Muscle map with no muscles highlighted.',
   'challenges.daysLeftShort': '{n} days left',
   'challenges.durationGoal': '{days} days · Goal: {target} {unit}',
+
+  // Challenges — titles, descriptions and units
+  'chal.streak30.title': '30-day challenge',
+  'chal.streak30.desc': 'Complete 13 workouts in 30 days (about 3 a week).',
+  'chal.volume10k.title': 'Lift 10,000 kg',
+  'chal.volume10k.desc': 'Lift 10,000 kg in total over a month.',
+  'chal.sessions20.title': '20 workouts',
+  'chal.sessions20.desc': 'Complete 20 workouts — take as long as you need.',
+  'chal.water14.title': 'Hydration habit',
+  'chal.water14.desc': 'Log water 14 days in a row.',
+  'chal.weight5.title': 'Lose 5 kg',
+  'chal.weight5.desc': 'Reduce your weight by 5 kg.',
+  'chal.sessions50.title': 'The 50-workout club',
+  'chal.sessions50.desc': 'Complete 50 workouts in total.',
+  'chal.unit.sessions': 'workouts',
+  'chal.unit.days': 'days',
 
   // Meals
   'meal.frukost': 'Breakfast',

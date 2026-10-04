@@ -443,6 +443,9 @@ export const sv = {
   'water.youHaveDrunk': 'Du har druckit {total} idag — bra jobbat.',
   'water.addAmount': 'Lägg till {amount}',
   'water.nothingToday': 'Inget loggat ännu idag',
+  'water.ofGoal': 'av {goal}',
+  'water.quickPicks': 'Snabbval',
+  'water.log': 'Logg',
   'water.addedToast': '+{amount} tillagt',
 
   // Recept
@@ -651,6 +654,8 @@ export const sv = {
   'challenges.cancel': 'Avbryt utmaning',
   'challenges.daysGoal': '{days} dagar · Mål: {goal}',
   'challenges.noneYet': 'Inga utmaningar ännu',
+  'challenges.startOne': 'Starta en utmaning',
+  'challenges.start': 'Starta',
   'challenges.noneYetHint': 'Starta en utmaning för att hålla motivationen uppe!',
 
   // Konto
@@ -687,6 +692,7 @@ export const sv = {
   // Diverse
   'home.sessionsOfTotal': 'pass av {total}',
   'home.sessionsWord': 'pass',
+  'home.sessionsOf': 'pass av {total}',
   'home.noPlan': 'Inget schema',
   'home.waterLogged': '+{amount} vatten loggat',
   'onb.daysPerWeek': '{n} pass per vecka',
@@ -698,6 +704,7 @@ export const sv = {
   'recipes.describeHint': 'Beskriv vad du är sugen på, t.ex. ”Ge mig en middag med 700 kcal och minst 50 g protein”',
   'recipes.tailoredSuffix': '{category} · anpassat efter dina mål',
   'barcode.savedOnDevice': 'på den här enheten och fylls i automatiskt nästa gång du skannar den.',
+  'barcode.unknownCodeHint': 'Streckkod {code}. Skriv av näringsvärdena från paketet så sparas varan på den här enheten och fylls i automatiskt nästa gång du skannar den.',
 
   // Utrustning i övningskatalogen (nycklarna är katalogens engelska värden)
   'equipLabel.barbell': 'Skivstång',
@@ -718,6 +725,22 @@ export const sv = {
   'muscle.mapNone': 'Muskelkarta utan markerade muskler.',
   'challenges.daysLeftShort': '{n} dagar kvar',
   'challenges.durationGoal': '{days} dagar · Mål: {target} {unit}',
+
+  // Utmaningar — titlar, beskrivningar och enheter
+  'chal.streak30.title': '30-dagarsutmaning',
+  'chal.streak30.desc': 'Genomför 13 träningspass på 30 dagar (ca 3/vecka).',
+  'chal.volume10k.title': 'Lyft 10 000 kg',
+  'chal.volume10k.desc': 'Lyft totalt 10 000 kg under en månad.',
+  'chal.sessions20.title': '20 pass',
+  'chal.sessions20.desc': 'Klara 20 träningspass — ta den tid du behöver.',
+  'chal.water14.title': 'Hydreringsvana',
+  'chal.water14.desc': 'Logga vatten 14 dagar i rad.',
+  'chal.weight5.title': 'Gå ner 5 kg',
+  'chal.weight5.desc': 'Minska din vikt med 5 kg.',
+  'chal.sessions50.title': '50-passsällskapet',
+  'chal.sessions50.desc': 'Klara totalt 50 träningspass.',
+  'chal.unit.sessions': 'pass',
+  'chal.unit.days': 'dagar',
 
   // Måltider
   'meal.frukost': 'Frukost',

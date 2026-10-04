@@ -1,4 +1,5 @@
 import { dateKey } from './derive'
+import type { TextKey, TranslateFn } from './i18n'
 
 const KEY = 'formplan_challenges'
 
@@ -19,6 +20,38 @@ export interface Challenge {
   currentValue: number
   completed: boolean
   completedDate: string | null
+}
+
+/**
+ * Texterna slås upp via `id`, inte via de lagrade `title`/`description`/`unit`.
+ *
+ * En startad utmaning sparas i localStorage med sin text. Översattes den där
+ * skulle redan startade utmaningar behålla sitt gamla språk för alltid, och en
+ * migrering av lagrad data vore enda vägen ur det. Id:t finns redan och ändras
+ * aldrig — därför hänger texten på det, och de lagrade fälten lämnas i fred
+ * för bakåtkompatibilitet.
+ */
+export const CHALLENGE_TEXT_KEYS: Record<string, { title: TextKey; desc: TextKey; unit: TextKey | null }> = {
+  'streak-30': { title: 'chal.streak30.title', desc: 'chal.streak30.desc', unit: 'chal.unit.sessions' },
+  'volume-10k': { title: 'chal.volume10k.title', desc: 'chal.volume10k.desc', unit: null },
+  'sessions-20': { title: 'chal.sessions20.title', desc: 'chal.sessions20.desc', unit: 'chal.unit.sessions' },
+  'water-14': { title: 'chal.water14.title', desc: 'chal.water14.desc', unit: 'chal.unit.days' },
+  'weight-5': { title: 'chal.weight5.title', desc: 'chal.weight5.desc', unit: null },
+  'sessions-50': { title: 'chal.sessions50.title', desc: 'chal.sessions50.desc', unit: 'chal.unit.sessions' },
+}
+
+/** Texten för en utmaning i användarens språk. `unit: null` = 'kg', som inte översätts. */
+export function challengeText(
+  challenge: { id: string; title: string; description: string; unit: string },
+  t: TranslateFn
+): { title: string; description: string; unit: string } {
+  const keys = CHALLENGE_TEXT_KEYS[challenge.id]
+  if (!keys) return challenge
+  return {
+    title: t(keys.title),
+    description: t(keys.desc),
+    unit: keys.unit ? t(keys.unit) : challenge.unit,
+  }
 }
 
 const PRESETS: Omit<Challenge, 'startDate' | 'progress' | 'currentValue' | 'completed' | 'completedDate'>[] = [

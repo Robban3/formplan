@@ -203,7 +203,7 @@ export function WaterPage() {
                 <span className="text-2xl font-bold text-stone-900 dark:text-stone-100">
                   {formatVolume(total)}
                 </span>
-                <span className="text-sm text-stone-500 dark:text-stone-400">av {formatVolume(GOAL_ML)}</span>
+                <span className="text-sm text-stone-500 dark:text-stone-400">{t('water.ofGoal', { goal: formatVolume(GOAL_ML) })}</span>
                 <span className={`text-sm font-semibold mt-0.5 ${goalReached ? 'text-forest-800 dark:text-forest-400' : 'text-sky-500'}`}>
                   ({Math.round(pct * 100)}%)
                 </span>
@@ -240,7 +240,7 @@ export function WaterPage() {
 
           {/* Snabbval */}
           <div>
-            <p className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">Snabbval</p>
+            <p className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">{t('water.quickPicks')}</p>
             <div className="flex gap-2">
               {QUICK_OPTIONS.map((ml) => (
                 <button
@@ -264,7 +264,7 @@ export function WaterPage() {
 
           {/* Logg — volym vänster, tid höger */}
           <div>
-            <p className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">Logg</p>
+            <p className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">{t('water.log')}</p>
             {entries.length === 0 ? (
               <p className="text-sm text-stone-500 dark:text-stone-400 text-center py-6">{t('water.nothingToday')}</p>
             ) : (
