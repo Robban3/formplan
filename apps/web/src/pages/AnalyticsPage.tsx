@@ -194,9 +194,9 @@ function MacroDonut({ protein, carbs, fat, kcal }: { protein: number; carbs: num
   const r = 52; const cx = 64; const cy = 64; const circ = 2 * Math.PI * r
   const total = protein + carbs + fat || 1
   const segs = [
-    { label: 'Protein', g: protein, pct: protein / total, color: '#22e6c6' },
-    { label: 'Fett',    g: fat,     pct: fat / total,     color: '#38bdf8' },
-    { label: 'Kolh.',   g: carbs,   pct: carbs / total,   color: '#fbbf24' },
+    { label: t('macro.protein'), g: protein, pct: protein / total, color: '#22e6c6' },
+    { label: t('macro.fat'), g: fat, pct: fat / total, color: '#38bdf8' },
+    { label: t('macro.carbsShort'), g: carbs, pct: carbs / total, color: '#fbbf24' },
   ]
   let cum = 0
   return (
@@ -551,7 +551,7 @@ export function AnalyticsPage() {
                     <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate">{s.workout_name}</p>
                     <p className="text-xs text-stone-500 dark:text-stone-400">
                       {fmtDate(s.completed_at, locale)}
-                      {s.completed_sets > 0 && ` · ${s.completed_sets} set`}
+                      {s.completed_sets > 0 && ` · ${t('analytics.setsSuffix', { n: s.completed_sets })}`}
                       {s.duration_seconds > 0 && ` · ${fmt(s.duration_seconds)}`}
                     </p>
                   </div>
@@ -574,7 +574,7 @@ export function AnalyticsPage() {
               <button onClick={() => setShowWeightInput((v) => !v)}
                 className="flex items-center gap-1 text-xs text-forest-800 dark:text-forest-400 font-medium">
                 <PlusIcon className="w-3.5 h-3.5 stroke-forest-600" />
-                Logga vikt
+                {t('analytics.logWeight')}
               </button>
             </div>
 
@@ -587,7 +587,7 @@ export function AnalyticsPage() {
                 />
                 <span className="flex items-center text-sm text-stone-500 dark:text-stone-400">{weightLabel}</span>
                 <button onClick={logWeight} className="px-3 py-2 bg-forest-700 text-white text-sm font-semibold rounded-xl">
-                  Spara
+                  {t('analytics.save')}
                 </button>
               </div>
             )}
@@ -669,7 +669,7 @@ export function AnalyticsPage() {
                 </div>
                 <div className="flex justify-between mt-2 text-[9px] text-stone-300 dark:text-stone-600">
                   <span>0 L</span>
-                  <span>mål: {formatVolume(settings.water_goal_ml)}</span>
+                  <span>{t('analytics.goalPrefix')} {formatVolume(settings.water_goal_ml)}</span>
                 </div>
 
                 {/* Vattenring idag */}

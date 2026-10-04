@@ -345,8 +345,13 @@ export function FoodSearch() {
                 const kcal = Math.round(selected.kcal_per_100g * f)
                 return (
                   <p className="text-xs text-stone-500 dark:text-stone-400">
-                    {kcal} kcal · {Math.round(kcal * 4.184)} kJ · P {Math.round(selected.protein_per_100g * f * 10) / 10}g · F{' '}
-                    {Math.round(selected.fat_per_100g * f * 10) / 10}g · K {Math.round(selected.carbs_per_100g * f * 10) / 10}g
+                    {t('food.macroLine', {
+                      kcal,
+                      kj: Math.round(kcal * 4.184),
+                      protein: Math.round(selected.protein_per_100g * f * 10) / 10,
+                      fat: Math.round(selected.fat_per_100g * f * 10) / 10,
+                      carbs: Math.round(selected.carbs_per_100g * f * 10) / 10,
+                    })}
                   </p>
                 )
               })()}
