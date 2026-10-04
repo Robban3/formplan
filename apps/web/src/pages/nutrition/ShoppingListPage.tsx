@@ -12,6 +12,7 @@ import {
   formatAmount,
 } from '../../lib/shoppingList'
 import { loadWeekPlan } from '../../lib/weekMealStore'
+import { useT } from '../../hooks/useT'
 
 const FOCUS_OPTIONS: { key: DietFocus; label: string }[] = [
   { key: 'balanced', label: 'Balanserat' },
@@ -23,6 +24,7 @@ const FOCUS_OPTIONS: { key: DietFocus; label: string }[] = [
 const VALID_FOCUS: DietFocus[] = ['balanced', 'high_protein', 'vegetarian', 'low_carb']
 
 export function ShoppingListPage() {
+  const { locale } = useT()
   const navigate = useNavigate()
   const settings = useSettings()
   const [params] = useSearchParams()
@@ -174,7 +176,7 @@ export function ShoppingListPage() {
                   <span className={`flex-1 text-sm ${isChecked ? 'text-stone-500 dark:text-stone-400 line-through' : 'text-stone-800 dark:text-stone-200'}`}>
                     {item.name}
                   </span>
-                  <span className="text-xs text-stone-500 dark:text-stone-400 flex-shrink-0">{formatAmount(item.amount_g)}</span>
+                  <span className="text-xs text-stone-500 dark:text-stone-400 flex-shrink-0">{formatAmount(item.amount_g, locale)}</span>
                 </button>
               )
             })}

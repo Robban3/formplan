@@ -1,3 +1,5 @@
+import { useT } from '../../hooks/useT'
+
 interface Props {
   eaten: number
   goal: number
@@ -6,6 +8,7 @@ interface Props {
 
 // Donut ring showing calorie progress — matches the design's circular chart
 export function MacroRing({ eaten, goal, size = 120 }: Props) {
+  const { locale } = useT()
   const r = (size / 2) * 0.72
   const circ = 2 * Math.PI * r
   const pct = goal > 0 ? Math.min(eaten / goal, 1) : 0
@@ -35,10 +38,10 @@ export function MacroRing({ eaten, goal, size = 120 }: Props) {
       {/* Center text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="font-bold text-stone-900 dark:text-stone-100" style={{ fontSize: size * 0.19 }}>
-          {eaten.toLocaleString('sv-SE')}
+          {eaten.toLocaleString(locale)}
         </span>
         <span className="text-stone-500 dark:text-stone-400" style={{ fontSize: size * 0.1 }}>
-          / {goal.toLocaleString('sv-SE')} kcal
+          / {goal.toLocaleString(locale)} kcal
         </span>
       </div>
     </div>

@@ -328,10 +328,10 @@ export function AuthPage() {
           <div className="mb-16">
             <h1 className="font-extrabold leading-tight mb-4" style={{ fontSize: '44px' }}>
               <span style={{ color: 'var(--brand)' }}>{t('auth.tagline')}</span>{' '}
-              <span className="text-white">tränings-<br />&amp; kostschema</span>
+              <span className="text-white">{t('auth.heroTitle')}</span>
             </h1>
             <p className="text-slate-300 text-base leading-relaxed max-w-sm">
-              Personliga tränings- och kostscheman anpassade för dig. Drivna av AI.
+              {t('auth.heroSub')}
             </p>
           </div>
         </div>
@@ -365,7 +365,7 @@ export function AuthPage() {
                 <form onSubmit={handleSetNewPassword} className="space-y-3">
                   <h2 className="text-white text-2xl font-bold text-center mb-1">{t('auth.newPassword')}</h2>
                   <p className="text-slate-400 text-sm text-center mb-7">
-                    Välj ett nytt lösenord för ditt konto.
+                    {t('auth.newPasswordSub')}
                   </p>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
@@ -390,7 +390,7 @@ export function AuthPage() {
                     <button type="button"
                       onClick={() => { endPasswordRecovery(); setNewPassword(''); resetFormState() }}
                       className="font-semibold" style={{ color: 'var(--brand)' }}>
-                      Avbryt
+                      {t('auth.cancel')}
                     </button>
                   </p>
                 </form>
@@ -500,7 +500,7 @@ export function AuthPage() {
                       <button type="button"
                         onClick={() => { setSent(false); setEmail(''); setError(null); setNotice(null) }}
                         className="mt-4 text-xs font-semibold" style={{ color: 'var(--brand)' }}>
-                        Använd en annan adress
+                        {t('auth.useAnotherAddress')}
                       </button>
                     </div>
                   ) : (

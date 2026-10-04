@@ -54,8 +54,8 @@ const FIELDS: {
   { key: 'thigh_cm',  label: 'Lår',     kind: 'length', placeholderMetric: 55 },
 ]
 
-function fmtDate(iso: string) {
-  return new Date(iso + 'T12:00:00').toLocaleDateString('sv-SE', {
+function fmtDate(iso: string, locale: string) {
+  return new Date(iso + 'T12:00:00').toLocaleDateString(locale, {
     day: 'numeric', month: 'short', year: 'numeric'
   })
 }
@@ -91,7 +91,7 @@ function MiniLineChart({ values, color, format }: {
 export function MeasurementsPage() {
   const navigate = useNavigate()
   const { weightLabel, lengthLabel, toStore, toStoreLength, toDisplay, toDisplayLength, formatWeight, formatLength } = useUnits()
-  const { t } = useT()
+  const { t, locale } = useT()
 
   /** Etikett och formatering per fälttyp — måtten lagras alltid metriskt. */
   const unitFor = (kind: 'weight' | 'length') => (kind === 'weight' ? weightLabel : lengthLabel)
@@ -253,7 +253,7 @@ export function MeasurementsPage() {
             {[...entries].reverse().map((e) => (
               <div key={e.id} className="px-4 py-3 border-b border-stone-50 last:border-0">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">{fmtDate(e.date)}</p>
+                  <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">{fmtDate(e.date, locale)}</p>
                   <button onClick={() => handleDelete(e.date)}>
                     <XIcon className="w-4 h-4 stroke-stone-300 dark:stroke-stone-600" />
                   </button>

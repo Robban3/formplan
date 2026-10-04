@@ -136,7 +136,7 @@ export function saveChecked(checked: Set<string>, hash: string) {
 }
 
 /** Display grams as a friendly amount (e.g. 1500 g → "1,5 kg"). */
-export function formatAmount(grams: number): string {
-  if (grams >= 1000) return `${(grams / 1000).toLocaleString('sv-SE', { maximumFractionDigits: 1 })} kg`
+export function formatAmount(grams: number, locale: string): string {
+  if (grams >= 1000) return `${(grams / 1000).toLocaleString(locale, { maximumFractionDigits: 1 })} kg`
   return `${grams} g`
 }

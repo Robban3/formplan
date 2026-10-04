@@ -1,4 +1,5 @@
 import type { DailyGoals } from '../../lib/nutritionApi'
+import { useT } from '../../hooks/useT'
 
 interface Eaten {
   kcal: number
@@ -14,18 +15,20 @@ interface Props {
 }
 
 function StatLine({ label, eaten, goal, unit }: { label: string; eaten: number; goal: number; unit: string }) {
+  const { t, locale } = useT()
   return (
     <div className="flex items-baseline justify-between gap-2">
       <span className="text-sm text-stone-600 dark:text-stone-300">{label}</span>
       <span className="text-sm font-semibold text-stone-900 dark:text-stone-100 tabular-nums">
-        {Math.round(eaten).toLocaleString('sv-SE')}
-        <span className="text-stone-500 dark:text-stone-400 font-normal"> / {goal.toLocaleString('sv-SE')} {unit}</span>
+        {Math.round(eaten).toLocaleString(locale)}
+        <span className="text-stone-500 dark:text-stone-400 font-normal"> / {goal.toLocaleString(locale)} {unit}</span>
       </span>
     </div>
   )
 }
 
 export function MacroSummary({ eaten, goals, size = 110 }: Props) {
+  const { t, locale } = useT()
   const macroKcal = {
     protein: eaten.protein_g * 4,
     fat: eaten.fat_g * 9,
@@ -75,17 +78,17 @@ export function MacroSummary({ eaten, goals, size = 110 }: Props) {
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="font-bold text-stone-900 dark:text-stone-100 text-lg leading-none">
-              {Math.round(eaten.kcal).toLocaleString('sv-SE')}
+              {Math.round(eaten.kcal).toLocaleString(locale)}
             </span>
             <span className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">
-              / {goals.kcal.toLocaleString('sv-SE')}
+              / {goals.kcal.toLocaleString(locale)}
             </span>
           </div>
         </div>
 
         <div className="flex-1 space-y-2">
-          <StatLine label="Kalorier" eaten={eaten.kcal} goal={goals.kcal} unit="kcal" />
-          <StatLine label="Protein" eaten={eaten.protein_g} goal={goals.protein_g} unit="g" />
+          <StatLine label={t('macro.calories')} eaten={eaten.kcal} goal={goals.kcal} unit="kcal" />
+          <StatLine label={t('macro.protein')} eaten={eaten.protein_g} goal={goals.protein_g} unit="g" />
           <StatLine label="Fett" eaten={eaten.fat_g} goal={goals.fat_g} unit="g" />
           <StatLine label="Kolhydrater" eaten={eaten.carbs_g} goal={goals.carbs_g} unit="g" />
         </div>

@@ -60,7 +60,7 @@ function MacroBar({ plan }: { plan: GeneratedMealPlan }) {
 export function MealPlanPage() {
   const navigate = useNavigate()
   const settings = useSettings()
-  const { t } = useT()
+  const { t, locale } = useT()
 
   const [kcal, setKcal] = useState(settings.calorie_goal)
   const [mealCount, setMealCount] = useState<MealCount>(4)
@@ -201,7 +201,7 @@ export function MealPlanPage() {
             {/* Summary card */}
             <div className="bg-forest-700 rounded-2xl p-4 text-white">
               <div className="flex items-baseline justify-between mb-3">
-                <p className="font-bold text-lg">{plan.totalKcal.toLocaleString('sv-SE')} kcal</p>
+                <p className="font-bold text-lg">{plan.totalKcal.toLocaleString(locale)} kcal</p>
                 <p className="text-forest-200 text-sm">{plan.meals.length} måltider</p>
               </div>
               <MacroBar plan={plan} />

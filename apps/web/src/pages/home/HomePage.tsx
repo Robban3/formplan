@@ -8,6 +8,8 @@ import { api } from '../../lib/api'
 import { nutritionApi, type FoodLogEntry, type MealSlot } from '../../lib/nutritionApi'
 import { dateKey, deriveDifficulty, isoWeekday } from '../../lib/derive'
 import { useUnits } from '../../hooks/useUnits'
+import { useT } from '../../hooks/useT'
+import type { TextKey } from '../../lib/i18n'
 import { loadActivePlan } from '../../lib/planLoader'
 import { useWeeklySessions } from '../../contexts/WeeklySessionsContext'
 import { getTrainingStreak } from '../../lib/streakStore'
@@ -42,11 +44,11 @@ type QuickLink = {
   iconStroke: string
 }
 
-const QUICK_LINKS: QuickLink[] = [
-  { Icon: DumbbellIcon, label: 'Träning', sub: 'Schema & pass', path: '/traning', iconBg: 'bg-forest-50 dark:bg-forest-900/30', iconStroke: 'stroke-forest-600' },
-  { Icon: LeafIcon, label: 'Kost', sub: 'Logga måltider', path: '/kost', iconBg: 'bg-sky-50 dark:bg-sky-900/30', iconStroke: 'stroke-sky-500' },
-  { Icon: BarChartIcon, label: 'Analys', sub: 'Statistik & trender', path: '/analys', iconBg: 'bg-amber-50 dark:bg-amber-900/25', iconStroke: 'stroke-amber-500' },
-  { Icon: TargetIcon, label: 'Mina mål', sub: 'Följ dina mål', path: '/mer/mina-mal', iconBg: 'bg-purple-50', iconStroke: 'stroke-purple-500' },
+const QUICK_LINKS: (Omit<QuickLink, 'label' | 'sub'> & { labelKey: TextKey; subKey: TextKey })[] = [
+  { Icon: DumbbellIcon, labelKey: 'nav.training', subKey: 'home.quick.trainingSub', path: '/traning', iconBg: 'bg-forest-50 dark:bg-forest-900/30', iconStroke: 'stroke-forest-600' },
+  { Icon: LeafIcon, labelKey: 'nav.nutrition', subKey: 'home.quick.nutritionSub', path: '/kost', iconBg: 'bg-sky-50 dark:bg-sky-900/30', iconStroke: 'stroke-sky-500' },
+  { Icon: BarChartIcon, labelKey: 'nav.analytics', subKey: 'home.quick.analyticsSub', path: '/analys', iconBg: 'bg-amber-50 dark:bg-amber-900/25', iconStroke: 'stroke-amber-500' },
+  { Icon: TargetIcon, labelKey: 'more.goals', subKey: 'home.quick.goalsSub', path: '/mer/mina-mal', iconBg: 'bg-purple-50', iconStroke: 'stroke-purple-500' },
 ]
 
 const DIFF_STYLES: Record<string, string> = {
@@ -55,8 +57,8 @@ const DIFF_STYLES: Record<string, string> = {
   Hög: 'bg-red-100 text-red-700 dark:text-red-300',
 }
 
-function todayLabel(): string {
-  return new Date().toLocaleDateString('sv-SE', {
+function todayLabel(locale: string): string {
+  return new Date().toLocaleDateString(locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -110,6 +112,7 @@ function StatCard({
   unit: string
   onClick?: () => void
 }) {
+  const { locale } = useT()
   return (
     <button
       onClick={onClick}
@@ -118,8 +121,8 @@ function StatCard({
       <MiniRing value={value} goal={goal} />
       <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-2">{label}</p>
       <p className="text-sm font-bold text-stone-900 dark:text-stone-100 mt-0.5">
-        {value.toLocaleString('sv-SE')}
-        <span className="text-stone-500 dark:text-stone-400 font-normal">/{goal.toLocaleString('sv-SE')}</span>
+        {value.toLocaleString(locale)}
+        <span className="text-stone-500 dark:text-stone-400 font-normal">/{goal.toLocaleString(locale)}</span>
       </p>
       <p className="text-[10px] text-stone-500 dark:text-stone-400">{unit}</p>
     </button>
@@ -153,6 +156,7 @@ function WeeklyRing({ done, total, size = 56 }: { done: number; total: number; s
 
 function WeeklyReport({ weeklyDone, weeklyTotal }: { weeklyDone: number; weeklyTotal: number }) {
   const { toDisplay, weightLabel } = useUnits()
+  const { t, locale } = useT()
   const now = new Date()
   const monday = new Date(now)
   monday.setDate(now.getDate() - ((now.getDay() + 6) % 7))
@@ -163,7 +167,7 @@ function WeeklyReport({ weeklyDone, weeklyTotal }: { weeklyDone: number; weeklyT
   const totalTime = weeklySessions.reduce((s, x) => s + x.duration_seconds, 0)
   const avgTime = weeklySessions.length > 0 ? Math.round(totalTime / weeklySessions.length / 60) : 0
 
-  const weekLabel = monday.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })
+  const weekLabel = monday.toLocaleDateString(locale, { day: 'numeric', month: 'short' })
   const onTrack = weeklyTotal > 0 && weeklyDone >= weeklyTotal
   const pct = weeklyTotal > 0 ? Math.round((weeklyDone / weeklyTotal) * 100) : 0
 
@@ -172,9 +176,9 @@ function WeeklyReport({ weeklyDone, weeklyTotal }: { weeklyDone: number; weeklyT
       <div className="flex items-center justify-between mb-3">
         <div>
           <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Veckans rapport</p>
-          <p className="text-[10px] text-stone-300 dark:text-stone-600">v. från {weekLabel}</p>
+          <p className="text-[10px] text-stone-300 dark:text-stone-600">{t('home.weekFrom', { date: weekLabel })}</p>
         </div>
-        {onTrack && <span className="text-xs bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300 font-semibold px-2 py-0.5 rounded-full border border-forest-100 dark:border-forest-800">Mål uppnått!</span>}
+        {onTrack && <span className="text-xs bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300 font-semibold px-2 py-0.5 rounded-full border border-forest-100 dark:border-forest-800">{t('home.goalReached')}</span>}
       </div>
       <div className="grid grid-cols-3 gap-3 text-center">
         <div>
@@ -183,12 +187,12 @@ function WeeklyReport({ weeklyDone, weeklyTotal }: { weeklyDone: number; weeklyT
           {weeklyTotal > 0 && <p className="text-[9px] text-forest-800 dark:text-forest-400 font-medium">{pct}%</p>}
         </div>
         <div>
-          <p className="text-xl font-bold text-stone-900 dark:text-stone-100">{Math.round(toDisplay(totalVolume)).toLocaleString('sv-SE')}</p>
+          <p className="text-xl font-bold text-stone-900 dark:text-stone-100">{Math.round(toDisplay(totalVolume)).toLocaleString(locale)}</p>
           <p className="text-[10px] text-stone-500 dark:text-stone-400">{weightLabel} lyft</p>
         </div>
         <div>
           <p className="text-xl font-bold text-stone-900 dark:text-stone-100">{avgTime}</p>
-          <p className="text-[10px] text-stone-500 dark:text-stone-400">min/pass</p>
+          <p className="text-[10px] text-stone-500 dark:text-stone-400">{t('home.minPerSession')}</p>
         </div>
       </div>
     </div>
@@ -209,6 +213,7 @@ export function HomePage() {
   const navigate = useNavigate()
   const settings = useSettings()
   const { formatVolume, toDisplay, weightLabel } = useUnits()
+  const { t, locale } = useT()
   const activeWorkout = useWorkoutStore()
   const [loading, setLoading] = useState(true)
   const [todayWorkout, setTodayWorkout] = useState<WorkoutDay | null>(null)
@@ -231,7 +236,7 @@ export function HomePage() {
   useEffect(() => subscribeSessions(() => setStreak(getTrainingStreak())), [])
 
   const firstName = user?.user_metadata?.['full_name']?.split(' ')[0]
-  const greeting = firstName ? `Hej, ${firstName}!` : 'Hej!'
+  const greeting = firstName ? t('home.greeting', { name: firstName }) : t('home.greetingNoName')
   const today = dateKey()
 
   useEffect(() => {
@@ -283,7 +288,7 @@ export function HomePage() {
         </div>
         <div className="px-5">
           <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide px-1 mb-2">
-            Denna vecka
+            {t('home.thisWeek')}
           </p>
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 flex items-center gap-3">
             <WeeklyRing done={weeklyDone} total={Math.max(weeklyTotal, 1)} />
@@ -330,13 +335,13 @@ export function HomePage() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{greeting}</h1>
-            <p className="text-stone-500 dark:text-stone-400 text-sm capitalize mt-0.5">{todayLabel()}</p>
+            <p className="text-stone-500 dark:text-stone-400 text-sm capitalize mt-0.5">{todayLabel(locale)}</p>
           </div>
           {/* Streak badge */}
           {streak > 0 && (
             <div className="flex flex-col items-center bg-amber-50 dark:bg-amber-900/25 border border-amber-100 dark:border-amber-800 rounded-xl px-3 py-2 min-w-[56px]">
               <span className="text-xl font-bold text-amber-600 dark:text-amber-400">{streak}</span>
-              <span className="text-[9px] text-amber-700 dark:text-amber-300 font-medium">dag streak</span>
+              <span className="text-[9px] text-amber-700 dark:text-amber-300 font-medium">{t('home.dayStreak')}</span>
             </div>
           )}
         </div>
@@ -346,25 +351,25 @@ export function HomePage() {
         {/* Dagens översikt */}
         <div>
           <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide px-1 mb-2">
-            Dagens översikt
+            {t('home.todayOverview')}
           </p>
           <div className="grid grid-cols-3 gap-2">
             <StatCard
-              label="Kalorier"
+              label={t('macro.calories')}
               value={Math.round(eatenKcal)}
               goal={kcalGoal}
               unit="kcal"
               onClick={() => navigate('/kost')}
             />
             <StatCard
-              label="Protein"
+              label={t('macro.protein')}
               value={Math.round(eatenProtein)}
               goal={proteinGoal}
               unit="g"
               onClick={() => navigate('/kost')}
             />
             <StatCard
-              label="Kvar idag"
+              label={t('home.remainingToday')}
               value={Math.max(0, Math.round(kcalGoal - eatenKcal))}
               goal={kcalGoal}
               unit="kcal"
@@ -380,11 +385,11 @@ export function HomePage() {
             className="w-full flex items-center justify-between bg-forest-700 text-white rounded-2xl px-4 py-3 active:scale-[0.98] transition-transform"
           >
             <div className="text-left">
-              <p className="text-xs text-forest-200">Pågående pass</p>
+              <p className="text-xs text-forest-200">{t('home.ongoingWorkout')}</p>
               <p className="font-semibold">{activeWorkout.workoutName}</p>
             </div>
             <span className="text-sm font-medium bg-forest-700 px-3 py-1 rounded-lg">
-              Fortsätt →
+              {t('home.resume')}
             </span>
           </button>
         )}
@@ -392,7 +397,7 @@ export function HomePage() {
         {/* Dagens pass */}
         <div>
           <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide px-1 mb-2">
-            Dagens pass
+            {t('home.todayWorkout')}
           </p>
           {todayWorkout ? (
             <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
@@ -425,24 +430,24 @@ export function HomePage() {
                 className="w-full flex items-center justify-center gap-2 bg-forest-700 hover:bg-forest-800 text-white font-semibold py-3.5 transition-colors"
               >
                 <PlayIcon className="w-4 h-4 stroke-white" />
-                Starta pass
+                {t('home.startWorkout')}
               </button>
             </div>
           ) : !planLoaded ? (
             <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
               <p className="font-semibold text-stone-800 dark:text-stone-200">Inget schema</p>
-              <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Välj ett träningsschema för att se dagens pass.</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">{t('home.pickPlanHint')}</p>
               <button
                 onClick={() => navigate('/traning')}
                 className="mt-3 text-sm text-forest-800 dark:text-forest-400 font-medium"
               >
-                Gå till Träning →
+                {t('home.goToTraining')}
               </button>
             </div>
           ) : (
             <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
               <p className="font-semibold text-stone-800 dark:text-stone-200">Vilodag</p>
-              <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Inget pass schemalagt idag.</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">{t('home.noWorkoutToday')}</p>
               <button
                 onClick={() => navigate('/traning')}
                 className="mt-3 text-sm text-forest-800 dark:text-forest-400 font-medium"
@@ -456,14 +461,14 @@ export function HomePage() {
         {/* Träning & vatten */}
         <div>
           <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide px-1 mb-2">
-            Denna vecka
+            {t('home.thisWeek')}
           </p>
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => navigate('/traning')}
               className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 text-left active:scale-[0.98] transition-transform"
             >
-              <p className="text-xs text-stone-500 dark:text-stone-400 mb-2">Träning</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mb-2">{t('nav.training')}</p>
               <div className="flex items-center gap-3">
                 <WeeklyRing done={weeklyDone} total={Math.max(weeklyTotal, 1)} />
                 <div>
@@ -479,7 +484,7 @@ export function HomePage() {
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs text-stone-500 dark:text-stone-400 flex items-center gap-1">
                   <DropletIcon className="w-3.5 h-3.5 stroke-sky-500" />
-                  Vatten
+                  {t('page.water')}
                 </p>
                 <button
                   onClick={handleQuickWater}
@@ -509,9 +514,9 @@ export function HomePage() {
         {topGoals.length > 0 && (
           <div>
             <div className="flex items-center justify-between px-1 mb-2">
-              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Mina mål</p>
+              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">{t('more.goals')}</p>
               <button onClick={() => navigate('/mer/mina-mal')} className="text-xs text-forest-800 dark:text-forest-400 font-medium">
-                Se alla →
+                {t('home.seeAll')}
               </button>
             </div>
             <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden divide-y divide-stone-50">
@@ -544,13 +549,13 @@ export function HomePage() {
         <div>
           <div className="flex items-center justify-between px-1 mb-2">
             <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">
-              Dagens måltider
+              {t('home.todayMeals')}
             </p>
             <button
               onClick={() => navigate('/kost')}
               className="text-xs text-forest-800 dark:text-forest-400 font-medium"
             >
-              Logga mat →
+              {t('home.logFood')}
             </button>
           </div>
 
@@ -559,8 +564,8 @@ export function HomePage() {
               onClick={() => navigate('/kost')}
               className="w-full bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 text-left active:scale-[0.98] transition-transform"
             >
-              <p className="text-sm text-stone-500 dark:text-stone-400">Inga måltider loggade ännu.</p>
-              <p className="text-xs text-forest-800 dark:text-forest-400 font-medium mt-1">Lägg till din första måltid →</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400">{t('home.noMealsYet')}</p>
+              <p className="text-xs text-forest-800 dark:text-forest-400 font-medium mt-1">{t('home.addFirstMeal')}</p>
             </button>
           ) : (
             <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden divide-y divide-stone-50">
@@ -588,10 +593,10 @@ export function HomePage() {
         {/* Snabbåtkomst */}
         <div>
           <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide px-1 mb-2">
-            Snabbåtkomst
+            {t('home.quickAccess')}
           </p>
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden divide-y divide-stone-100">
-            {QUICK_LINKS.map(({ Icon, label, sub, path, iconBg, iconStroke }) => (
+            {QUICK_LINKS.map(({ Icon, labelKey, subKey, path, iconBg, iconStroke }) => (
               <button
                 key={path}
                 onClick={() => navigate(path)}
@@ -601,8 +606,8 @@ export function HomePage() {
                   <Icon className={`w-5 h-5 ${iconStroke}`} />
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">{label}</p>
-                  <p className="text-xs text-stone-500 dark:text-stone-400">{sub}</p>
+                  <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">{t(labelKey)}</p>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">{t(subKey)}</p>
                 </div>
                 <ChevronRightIcon className="w-4 h-4 stroke-stone-300 dark:stroke-stone-600" />
               </button>

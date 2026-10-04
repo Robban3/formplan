@@ -439,7 +439,7 @@ export function OnboardingPage() {
         ) : step === 'body' ? (
           <div>
             <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">
-              Hjälper AI:n beräkna kalorier och näringsmål. Alla fält är valfria.
+              {t('onb.bodyHint')}
             </p>
 
             <div className="space-y-4 mb-6">
@@ -522,7 +522,7 @@ export function OnboardingPage() {
                 {saving ? (
                   <span className="flex items-center justify-center gap-2">
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Genererar ditt schema…
+                    {t('onb.generating')}
                   </span>
                 ) : (
                   t('onb.createPlan')

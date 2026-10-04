@@ -19,12 +19,12 @@ import type { TextKey } from '../../lib/i18n'
 const QUICK_OPTIONS = WATER_QUICK_OPTIONS_ML
 const DEFAULT_ML = 250
 
-function formatTime(iso?: string) {
+function formatTime(iso: string | undefined, locale: string) {
   const d = iso ? new Date(iso) : new Date()
   if (Number.isNaN(d.getTime())) {
-    return new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })
+    return new Date().toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
   }
-  return d.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
 }
 
 function normalizeEntry(entry: WaterEntry, amount_ml: number): WaterEntry {
@@ -51,7 +51,7 @@ export function WaterPage() {
   const navigate = useNavigate()
   const { water_goal_ml: GOAL_ML } = useSettings()
   const { imperial, formatVolume } = useUnits()
-  const { t } = useT()
+  const { t, locale } = useT()
   const today = dateKey()
   const [entries, setEntries] = useState<WaterEntry[]>([])
   const [total, setTotal] = useState(0)
@@ -276,7 +276,7 @@ export function WaterPage() {
                     </span>
                     <span className="flex-1" />
                     <span className="text-sm text-stone-500 dark:text-stone-400 tabular-nums">
-                      {formatTime(entry.logged_at)}
+                      {formatTime(entry.logged_at, locale)}
                     </span>
                   </div>
                 ))}

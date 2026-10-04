@@ -67,6 +67,18 @@ export function translate(
   )
 }
 
+/**
+ * BCP 47-tagg för Intl — datum, tider och tusentalsavgränsare.
+ *
+ * Engelska får en-GB, inte en-US: appen säljs i Sverige, och dag-före-månad
+ * (4 October) plus 24-timmarsklocka ligger närmare hur användarna redan läser
+ * datum. en-US hade gett "October 4" och "2:30 PM" i en app vars tider i
+ * övrigt står som 14:30.
+ */
+export function localeFor(lang: Lang): string {
+  return lang === 'sv' ? 'sv-SE' : 'en-GB'
+}
+
 /** Funktionen skärmarna använder. */
 export type TranslateFn = (key: TextKey, vars?: Record<string, string | number>) => string
 

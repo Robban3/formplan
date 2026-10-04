@@ -9,6 +9,7 @@ import { getTopFavorites, type FoodFavorite } from '../../lib/foodFavoritesStore
 import { toast } from '../../lib/toast'
 import { useSettings } from '../../hooks/useSettings'
 import { MEAL_SLOT_LABELS as MEAL_LABELS } from '../../lib/texts'
+import { useT } from '../../hooks/useT'
 
 const MEALS: MealSlot[] = ['frukost', 'lunch', 'middag', 'mellanmar']
 
@@ -29,6 +30,7 @@ function mealMacros(entries: FoodLogEntry[]) {
 }
 
 export function FoodDiary() {
+  const { locale } = useT()
   const navigate = useNavigate()
   const settings = useSettings()
   // Client fallback goals: same macro split as the server, preferring the user's
@@ -79,8 +81,8 @@ export function FoodDiary() {
   }
 
   function formatDate(d: Date) {
-    if (isToday) return 'Idag, ' + d.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })
-    return d.toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short' })
+    if (isToday) return 'Idag, ' + d.toLocaleDateString(locale, { day: 'numeric', month: 'short' })
+    return d.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })
   }
 
   function entriesFor(slot: MealSlot) {

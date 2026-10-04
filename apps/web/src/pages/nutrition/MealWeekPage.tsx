@@ -36,7 +36,7 @@ function dateForWeekday(weekday: number): Date {
 }
 
 export function MealWeekPage() {
-  const { t } = useT()
+  const { t, locale } = useT()
   const navigate = useNavigate()
   const [plan, setPlan] = useState<WeekMealPlan>(loadWeekPlan)
   const [selected, setSelected] = useState(weekdayOf(new Date()))
@@ -228,7 +228,7 @@ export function MealWeekPage() {
           <div className="flex items-center justify-between mb-3">
             <div>
               <p className="font-bold text-stone-900 dark:text-stone-100">
-                {DAY_FULL[selected - 1]} {dateForWeekday(selected).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long' })}
+                {DAY_FULL[selected - 1]} {dateForWeekday(selected).toLocaleDateString(locale, { day: 'numeric', month: 'long' })}
               </p>
               <p className="text-xs text-stone-500 dark:text-stone-400">{dayKcal} kcal totalt</p>
             </div>

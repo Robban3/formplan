@@ -4,20 +4,21 @@ import { getLocalWaterSummary, hydrateLocalWaterFromSummary } from '../../lib/wa
 import { dateKey, dateKeysInRange, weekRange } from '../../lib/derive'
 import { ChevronLeftIcon, ChevronRightIcon, GlassWaterIcon } from '../../components/ui/Icons'
 import { useUnits } from '../../hooks/useUnits'
+import { useT } from '../../hooks/useT'
 
 const WEEKDAY_SHORT = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön']
 
-function formatWeekTitle(from: Date, to: Date, isCurrentWeek: boolean) {
+function formatWeekTitle(from: Date, to: Date, isCurrentWeek: boolean, locale: string) {
   if (isCurrentWeek) return 'Denna vecka'
   const fmt = (d: Date) =>
-    d.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })
+    d.toLocaleDateString(locale, { day: 'numeric', month: 'short' })
   return `${fmt(from)} – ${fmt(to)}`
 }
 
-function formatDayLabel(dateStr: string, isToday: boolean) {
+function formatDayLabel(dateStr: string, isToday: boolean, locale: string) {
   if (isToday) return 'Idag'
   const d = new Date(dateStr + 'T12:00:00')
-  return d.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })
+  return d.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'short' })
 }
 
 interface DayTotal {
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
+  const { locale } = useT()
   const { formatVolume } = useUnits()
   const [weekOffset, setWeekOffset] = useState(0)
   const [days, setDays] = useState<DayTotal[]>([])
@@ -97,7 +99,7 @@ export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400" />
         </button>
         <span className="text-sm font-semibold text-stone-800 dark:text-stone-200 capitalize">
-          {formatWeekTitle(from, to, isCurrentWeek)}
+          {formatWeekTitle(from, to, isCurrentWeek, locale)}
         </span>
         <button
           type="button"
@@ -174,7 +176,7 @@ export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
                 <GlassWaterIcon className={`w-5 h-5 shrink-0 ${isToday ? 'stroke-forest-600' : 'stroke-sky-400'}`} />
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-medium capitalize ${isToday ? 'text-forest-800 dark:text-forest-300' : 'text-stone-800 dark:text-stone-200'}`}>
-                    {formatDayLabel(day.date, isToday)}
+                    {formatDayLabel(day.date, isToday, locale)}
                   </p>
                   <div className="mt-1.5 h-1.5 bg-stone-100 dark:bg-stone-700 rounded-full overflow-hidden">
                     <div

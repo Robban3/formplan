@@ -30,8 +30,8 @@ function fmt(seconds: number) {
   const m = Math.round((seconds % 3600) / 60)
   return h > 0 ? `${h} h ${m} min` : `${m} min`
 }
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })
+function fmtDate(iso: string, locale: string) {
+  return new Date(iso).toLocaleDateString(locale, { day: 'numeric', month: 'short' })
 }
 function last7Dates(): string[] {
   return Array.from({ length: 7 }, (_, i) => {
@@ -92,6 +92,7 @@ function StatRing({
   /** Färdigformaterat värde, när enheten beror på användarens inställning. */
   valueLabel?: string
 }) {
+  const { locale } = useT()
   const pct = goal > 0 ? Math.min((value / goal) * 100, 100) : 0
   return (
     <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-3 flex flex-col items-center gap-2">
@@ -110,7 +111,7 @@ function StatRing({
       </div>
       <div className="text-center">
         <p className="text-xs font-bold text-stone-900 dark:text-stone-100">
-          {valueLabel ?? `${value.toLocaleString('sv-SE')} ${unit}`}
+          {valueLabel ?? `${value.toLocaleString(locale)} ${unit}`}
         </p>
         <p className="text-[10px] text-stone-500 dark:text-stone-400">{label}</p>
         <p className="text-[9px] text-stone-300 dark:text-stone-600">mål: {goalLabel}</p>
@@ -187,6 +188,7 @@ function LineChart({
 // ── Macro donut ───────────────────────────────────────────────────────────────
 
 function MacroDonut({ protein, carbs, fat, kcal }: { protein: number; carbs: number; fat: number; kcal: number }) {
+  const { locale } = useT()
   const r = 52; const cx = 64; const cy = 64; const circ = 2 * Math.PI * r
   const total = protein + carbs + fat || 1
   const segs = [
@@ -213,7 +215,7 @@ function MacroDonut({ protein, carbs, fat, kcal }: { protein: number; carbs: num
           })}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-xl font-bold text-stone-900 dark:text-stone-100">{kcal.toLocaleString('sv-SE')}</span>
+          <span className="text-xl font-bold text-stone-900 dark:text-stone-100">{kcal.toLocaleString(locale)}</span>
           <span className="text-[10px] text-stone-500 dark:text-stone-400">kcal/dag</span>
         </div>
       </div>
@@ -286,6 +288,7 @@ function rollingAvg(values: number[], window: number): number[] {
 
 function WeightChart({ entries }: { entries: WeightEntry[] }) {
   const { formatWeight } = useUnits()
+  const { locale } = useT()
   if (entries.length < 2) return null
   const change = entries[entries.length - 1]!.weight_kg - entries[0]!.weight_kg
   const sign = change > 0 ? '+' : ''
@@ -312,8 +315,8 @@ function WeightChart({ entries }: { entries: WeightEntry[] }) {
         height={80}
       />
       <div className="flex justify-between mt-1 text-[9px] text-stone-500 dark:text-stone-400">
-        <span>{fmtDate(entries[0]!.date)}</span>
-        <span>{formatWeight(entries[entries.length - 1]!.weight_kg)} · {fmtDate(entries[entries.length - 1]!.date)}</span>
+        <span>{fmtDate(entries[0]!.date, locale)}</span>
+        <span>{formatWeight(entries[entries.length - 1]!.weight_kg)} · {fmtDate(entries[entries.length - 1]!.date, locale)}</span>
       </div>
     </div>
   )
@@ -324,7 +327,7 @@ function WeightChart({ entries }: { entries: WeightEntry[] }) {
 export function AnalyticsPage() {
   const settings = useSettings()
   const { formatVolume, formatWeight, toStore, toDisplay, weightLabel } = useUnits()
-  const { t } = useT()
+  const { t, locale } = useT()
   const [tab, setTab] = useState<Tab>('oversikt')
   const [sessions, setSessions] = useState<WorkoutSession[]>([])
   const [daySummaries, setDaySummaries] = useState<DaySummary[]>([])
@@ -514,7 +517,7 @@ export function AnalyticsPage() {
                 <div className="flex justify-between mt-1">
                   {last7.map((date, i) => (
                     <span key={date} className={`text-[9px] ${i === 6 ? 'text-sky-600 dark:text-sky-400 font-semibold' : 'text-stone-500 dark:text-stone-400'}`}>
-                      {new Date(date + 'T12:00').toLocaleDateString('sv-SE', { weekday: 'short' })}
+                      {new Date(date + 'T12:00').toLocaleDateString(locale, { weekday: 'short' })}
                     </span>
                   ))}
                 </div>
@@ -544,7 +547,7 @@ export function AnalyticsPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-stone-800 dark:text-stone-200 truncate">{s.workout_name}</p>
                     <p className="text-xs text-stone-500 dark:text-stone-400">
-                      {fmtDate(s.completed_at)}
+                      {fmtDate(s.completed_at, locale)}
                       {s.completed_sets > 0 && ` · ${s.completed_sets} set`}
                       {s.duration_seconds > 0 && ` · ${fmt(s.duration_seconds)}`}
                     </p>
@@ -606,7 +609,7 @@ export function AnalyticsPage() {
                 <div key={e.id} className="flex items-center justify-between px-4 py-3 border-b border-stone-50 last:border-0">
                   <div>
                     <p className="text-sm font-medium text-stone-800 dark:text-stone-200">{formatWeight(e.weight_kg)}</p>
-                    <p className="text-xs text-stone-500 dark:text-stone-400">{fmtDate(e.date)}</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400">{fmtDate(e.date, locale)}</p>
                   </div>
                   <button onClick={() => { deleteWeightEntry(e.id); setWeightEntries(getWeightEntries()) }} className="p-1">
                     <XIcon className="w-4 h-4 stroke-stone-300 dark:stroke-stone-600" />
@@ -622,7 +625,7 @@ export function AnalyticsPage() {
               <p className="font-semibold text-stone-800 dark:text-stone-200 mb-3">Belastningsgrad (RPE)</p>
               <LineChart points={rpeEntries.map((e) => e.rpe)} color="#f59e0b" height={64} showDots />
               <div className="flex justify-between mt-1 text-[9px] text-stone-500 dark:text-stone-400">
-                <span>{fmtDate(rpeEntries[0]!.date)}</span>
+                <span>{fmtDate(rpeEntries[0]!.date, locale)}</span>
                 <span>Senast: {rpeEntries[rpeEntries.length-1]!.rpe}/10 · {rpeEntries[rpeEntries.length-1]!.workoutName}</span>
               </div>
               <div className="flex justify-between mt-2 text-[9px] text-stone-300 dark:text-stone-600">
@@ -655,7 +658,7 @@ export function AnalyticsPage() {
                           />
                         </div>
                         <span className={`text-[9px] ${isToday ? 'text-sky-600 dark:text-sky-400 font-semibold' : 'text-stone-500 dark:text-stone-400'}`}>
-                          {new Date(last7[i]! + 'T12:00').toLocaleDateString('sv-SE', { weekday: 'short' })}
+                          {new Date(last7[i]! + 'T12:00').toLocaleDateString(locale, { weekday: 'short' })}
                         </span>
                       </div>
                     )
@@ -723,7 +726,7 @@ export function AnalyticsPage() {
                 <div className="flex justify-between mt-1">
                   {last7.map((date, i) => (
                     <span key={date} className={`text-[9px] ${i === 6 ? 'text-amber-600 font-semibold' : 'text-stone-500 dark:text-stone-400'}`}>
-                      {new Date(date + 'T12:00').toLocaleDateString('sv-SE', { weekday: 'short' })}
+                      {new Date(date + 'T12:00').toLocaleDateString(locale, { weekday: 'short' })}
                     </span>
                   ))}
                 </div>
@@ -748,7 +751,7 @@ export function AnalyticsPage() {
                           />
                         </div>
                         <span className={`text-[9px] ${isToday ? 'text-amber-600 font-semibold' : 'text-stone-500 dark:text-stone-400'}`}>
-                          {new Date(date + 'T12:00').toLocaleDateString('sv-SE', { weekday: 'short' })}
+                          {new Date(date + 'T12:00').toLocaleDateString(locale, { weekday: 'short' })}
                         </span>
                       </div>
                     )
@@ -795,7 +798,7 @@ export function AnalyticsPage() {
                             )}
                           </div>
                           <span className={`text-[9px] ${isToday ? 'text-amber-600 font-semibold' : 'text-stone-500 dark:text-stone-400'}`}>
-                            {new Date(date + 'T12:00').toLocaleDateString('sv-SE', { weekday: 'short' })}
+                            {new Date(date + 'T12:00').toLocaleDateString(locale, { weekday: 'short' })}
                           </span>
                         </div>
                       )
@@ -815,7 +818,7 @@ export function AnalyticsPage() {
                   <div key={d.date} className="flex items-center justify-between px-4 py-3 border-b border-stone-50 last:border-0">
                     <div>
                       <p className="text-sm font-medium text-stone-800 dark:text-stone-200 capitalize">
-                        {new Date(d.date + 'T12:00').toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}
+                        {new Date(d.date + 'T12:00').toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'short' })}
                       </p>
                       <p className="text-xs text-stone-500 dark:text-stone-400">P {d.protein_g}g · K {d.carbs_g}g · F {d.fat_g}g</p>
                     </div>
