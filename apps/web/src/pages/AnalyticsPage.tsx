@@ -510,7 +510,7 @@ export function AnalyticsPage() {
               </>
             ) : (
               <div className="flex flex-col items-center py-6 gap-1">
-                <DropletIcon className="w-8 h-8 stroke-stone-200" />
+                <DropletIcon className="w-8 h-8 stroke-stone-300 dark:stroke-stone-600" />
                 <p className="text-xs text-stone-500 dark:text-stone-400">Ingen vattendata loggad ännu</p>
               </div>
             )}
@@ -521,7 +521,7 @@ export function AnalyticsPage() {
             <p className="font-semibold text-stone-800 dark:text-stone-200 px-4 py-3 border-b border-stone-50">Senaste pass</p>
             {sessions.length === 0 ? (
               <div className="px-4 py-8 text-center">
-                <DumbbellIcon className="w-10 h-10 stroke-stone-200 mx-auto mb-2" />
+                <DumbbellIcon className="w-10 h-10 stroke-stone-300 dark:stroke-stone-600 mx-auto mb-2" />
                 <p className="text-sm text-stone-500 dark:text-stone-400">Genomför ditt första pass!</p>
               </div>
             ) : (
@@ -670,7 +670,7 @@ export function AnalyticsPage() {
               </>
             ) : (
               <div className="flex flex-col items-center py-6 gap-2">
-                <DropletIcon className="w-8 h-8 stroke-stone-200" />
+                <DropletIcon className="w-8 h-8 stroke-stone-300 dark:stroke-stone-600" />
                 <p className="text-xs text-stone-500 dark:text-stone-400">Logga vatten för att se trenden</p>
               </div>
             )}
@@ -687,7 +687,7 @@ export function AnalyticsPage() {
             </div>
           ) : daySummaries.length === 0 ? (
             <div className="text-center py-16">
-              <LeafIcon className="w-12 h-12 stroke-stone-200 mx-auto mb-3" />
+              <LeafIcon className="w-12 h-12 stroke-stone-300 dark:stroke-stone-600 mx-auto mb-3" />
               <h2 className="text-lg font-semibold mb-1">Ingen kostdata</h2>
               <p className="text-stone-500 dark:text-stone-400 text-sm">Logga dina måltider via Kost-fliken.</p>
             </div>

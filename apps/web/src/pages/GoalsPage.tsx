@@ -291,7 +291,7 @@ export function GoalsPage() {
       <div className="px-5 mt-5 space-y-3">
         {shown.length === 0 && (
           <div className="text-center py-12">
-            <TargetIcon className="w-12 h-12 text-stone-200 mx-auto mb-3" />
+            <TargetIcon className="w-12 h-12 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
             <p className="text-stone-500 dark:text-stone-400 text-sm">
               {tab === 'aktiva' ? 'Inga aktiva mål ännu.' : 'Inga avklarade mål ännu.'}
             </p>

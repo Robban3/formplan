@@ -291,7 +291,7 @@ export function CustomWorkoutPage() {
         {/* Saved workouts */}
         {workouts.length === 0 && !creating && (
           <div className="text-center py-16">
-            <DumbbellIcon className="w-12 h-12 stroke-stone-200 mx-auto mb-3" />
+            <DumbbellIcon className="w-12 h-12 stroke-stone-300 dark:stroke-stone-600 mx-auto mb-3" />
             <p className="font-semibold text-stone-800 dark:text-stone-200">Inga egna pass ännu</p>
             <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">Tryck på + för att bygga ditt första pass</p>
           </div>
