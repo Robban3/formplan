@@ -30,8 +30,14 @@ AI_PROVIDER = "gemini"
 #                       # betalvägg). Finns i env och inte i koden eftersom
 #                       # testgruppen ändras — och för att privatpersoners
 #                       # adresser inte ska ligga kvar i git-historiken.
-#                       # Sätts i Cloudflare-dashboarden under Workers &
-#                       # Pages → formplan-api → Settings → Variables.
+#                       #
+#                       # MÅSTE vara en SECRET, inte en vanlig variabel.
+#                       # `wrangler deploy` ersätter plain-text-variabler med
+#                       # innehållet i [vars] ovan, så en variabel satt i
+#                       # dashboarden försvinner vid nästa deploy. Secrets
+#                       # lagras separat och rörs inte. I dashboarden:
+#                       # Workers & Pages → formplan-api → Settings →
+#                       # Variables and Secrets → välj typen Secret.
 # ADMIN_EMAILS          # valfri: kommaseparerad lista med admin-mejladresser
 #                       # (t.ex. "anna@formplan.app,bo@formplan.app") som får
 #                       # använda admin-endpoints som /email/newsletter.
