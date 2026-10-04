@@ -6,6 +6,11 @@ vi.mock('./supabase', () => ({ isUserPremium }))
 const { resolveAccess, FULL_ACCESS_EMAILS, TRIAL_DAYS } = await import('./access')
 
 const env = {} as never
+
+/** Env med bara det testet behöver. `{} as never` går inte att sprida. */
+function envWith(overrides: Record<string, string | undefined>) {
+  return overrides as never
+}
 const DAY = 86_400_000
 
 function user(overrides: Record<string, unknown> = {}) {
@@ -83,7 +88,7 @@ describe('TESTER_EMAILS', () => {
   it('ger permanent åtkomst till en adress i listan', async () => {
     const status = await resolveAccess(
       user({ email: 'tester@example.com', created_at: new Date(Date.now() - 99 * DAY).toISOString() }),
-      { ...env, TESTER_EMAILS: 'tester@example.com' }
+      envWith({ TESTER_EMAILS: 'tester@example.com' })
     )
     expect(status.access).toBe(true)
     expect(status.premium).toBe(true)
@@ -94,7 +99,7 @@ describe('TESTER_EMAILS', () => {
   it('bryr sig inte om versaler eller mellanslag', async () => {
     const status = await resolveAccess(
       user({ email: 'Tester@Example.com', created_at: new Date(Date.now() - 99 * DAY).toISOString() }),
-      { ...env, TESTER_EMAILS: ' a@b.se , tester@example.com ' }
+      envWith({ TESTER_EMAILS: ' a@b.se , tester@example.com ' })
     )
     expect(status.access).toBe(true)
   })
@@ -103,7 +108,7 @@ describe('TESTER_EMAILS', () => {
     for (const value of ['', '   ', ',,', undefined]) {
       const status = await resolveAccess(
         user({ email: 'someone@example.com', created_at: new Date(Date.now() - 99 * DAY).toISOString() }),
-        { ...env, TESTER_EMAILS: value }
+        envWith({ TESTER_EMAILS: value })
       )
       expect(status.access, `TESTER_EMAILS=${JSON.stringify(value)}`).toBe(false)
     }
@@ -112,7 +117,7 @@ describe('TESTER_EMAILS', () => {
   it('påverkar inte den fasta listan', async () => {
     const status = await resolveAccess(
       user({ email: 'review@applabbet.com', created_at: new Date(Date.now() - 99 * DAY).toISOString() }),
-      { ...env, TESTER_EMAILS: '' }
+      envWith({ TESTER_EMAILS: '' })
     )
     expect(status.access).toBe(true)
   })
