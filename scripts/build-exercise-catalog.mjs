@@ -104,6 +104,21 @@ const CATALOG = [
   { slug: 'face-pull', name: 'Face pulls', category: 'Axlar', db: 'Face_Pull', aliases: ['face pull', 'ansiktsdrag'] },
   { slug: 'omvand-flyes', name: 'Omvänd flyes', category: 'Axlar', db: 'Reverse_Flyes', aliases: ['reverse flyes', 'omvända flyes', 'bakre axelflyes'] },
   { slug: 'upright-row', name: 'Upright row', category: 'Axlar', db: 'Upright_Barbell_Row', aliases: ['stående rodd', 'uprightrow'] },
+  // Kroppsviktsalternativ för axlar. Alla nio övningarna ovan kräver skivstång,
+  // hantlar eller kabel, så den som angett "Inga redskap" hade INGEN
+  // axelövning — ett överkroppspass kunde inte täcka axlarna alls.
+  //
+  // free-exercise-db har bara en kroppsviktsövning med axlar som PRIMÄR
+  // muskel: Handstand push-ups, expertnivå. Den klassiska nybörjarvarianten
+  // (pike push-up) finns inte i datan.
+  //
+  // Armhävningar med upphöjda fötter har bröst som primär muskel och axlar som
+  // sekundär. Att lägga den under Axlar är ett medvetet träningsval, inte en
+  // felklassning: ju mer upprätt bålen är, desto mer tar axlarna över, och
+  // lutande armhävningar är första steget i progressionen mot pike och
+  // handstående. Muskelkartan visar fortfarande sanningen (bröst primärt).
+  { slug: 'armhavningar-upphojda-fotter', name: 'Armhävningar med upphöjda fötter', category: 'Axlar', db: 'Push-Ups_With_Feet_Elevated', aliases: ['decline push-up', 'armhävningar med fötterna upphöjda', 'lutande armhävningar'] },
+  { slug: 'handstaende-armhavningar', name: 'Handstående armhävningar', category: 'Axlar', db: 'Handstand_Push-Ups', aliases: ['handstand push-ups', 'handstandspress', 'handstående press'] },
 
   // ── Armar ──────────────────────────────────────────────────────────────
   { slug: 'bicepscurl', name: 'Bicepscurl', category: 'Armar', db: 'Barbell_Curl', aliases: ['biceps curl', 'skivstångscurl', 'curl', 'bicep curl', 'hantelcurl'] },
@@ -268,6 +283,7 @@ function pruneDb(db) {
     .map((e) => ({
       id: e.id,
       equipment: e.equipment ?? null,
+      level: e.level ?? null,
       primaryMuscles: e.primaryMuscles ?? [],
       secondaryMuscles: e.secondaryMuscles ?? [],
       images: (e.images ?? []).slice(0, 2),
@@ -535,6 +551,7 @@ export function matchExercise(name: string): CatalogExercise | undefined {
     name: item.name,
     category: item.category,
     equipment: equipmentFor(item.slug, byId.get(item.db)),
+    level: byId.get(item.db).level ?? 'intermediate',
     aliases: item.aliases ?? [],
   }))
   const apiTs = `// GENERERAD FIL — ändra inte för hand.
@@ -546,6 +563,17 @@ export interface ApiCatalogExercise {
   name: string
   category: string
   equipment: string
+  /**
+   * free-exercise-db:s svårighetsgrad: 'beginner' | 'intermediate' | 'expert'.
+   *
+   * INFORMATION TILL MODELLEN, INTE ETT FILTER. Källans nivåer är grova:
+   * Knäböj, Marklyft och Crosstrainer är märkta 'intermediate', och en
+   * nybörjare ska absolut göra alla tre. Att filtrera på nivå hade tömt
+   * katalogen för den som angett nybörjare. Nivån finns med i prompten så
+   * modellen kan väga in den — t.ex. att Handstående armhävningar är den enda
+   * axelövning en kroppsviktsanvändare har, och att den är expertnivå.
+   */
+  level: string
   aliases: string[]
 }
 
@@ -624,9 +652,11 @@ export function matchExercise(name: string): ApiCatalogExercise | undefined {
  * Katalogen som text till prompten.
  *
  * \`allowed\` är katalogens utrustningsvärden användaren har (se lib/equipment.ts).
- * Utelämnad ⇒ hela katalogen. Varje rad visar utrustningen: utan den kunde
- * modellen inte veta vad en övning krävde, och instruktionen "välj övningar
- * som matchar användarens utrustning" var omöjlig att följa.
+ * Utelämnad ⇒ hela katalogen. Varje rad visar utrustning OCH nivå: utan
+ * utrustningen kunde modellen inte veta vad en övning krävde, och
+ * instruktionen "välj övningar som matchar användarens utrustning" var
+ * omöjlig att följa. Nivån är vägledning, inte ett filter (se
+ * ApiCatalogExercise.level).
  */
 export function catalogForPrompt(allowed?: Set<string>): string {
   const byCat = new Map<string, ApiCatalogExercise[]>()
@@ -637,7 +667,7 @@ export function catalogForPrompt(allowed?: Set<string>): string {
     byCat.set(e.category, list)
   }
   return [...byCat.entries()]
-    .map(([cat, list]) => \`\${cat}: \${list.map((e) => \`\${e.id} (\${e.name}, \${e.equipment})\`).join(', ')}\`)
+    .map(([cat, list]) => \`\${cat}: \${list.map((e) => \`\${e.id} (\${e.name}, \${e.equipment}, \${e.level})\`).join(', ')}\`)
     .join('\\n')
 }
 `

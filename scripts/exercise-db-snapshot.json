@@ -2,6 +2,7 @@
   {
     "id": "Ab_Roller",
     "equipment": "other",
+    "level": "intermediate",
     "primaryMuscles": [
       "abdominals"
     ],
@@ -16,6 +17,7 @@
   {
     "id": "Air_Bike",
     "equipment": "body only",
+    "level": "beginner",
     "primaryMuscles": [
       "abdominals"
     ],
@@ -28,6 +30,7 @@
   {
     "id": "Arnold_Dumbbell_Press",
     "equipment": "dumbbell",
+    "level": "intermediate",
     "primaryMuscles": [
       "shoulders"
     ],
@@ -42,6 +45,7 @@
   {
     "id": "Barbell_Bench_Press_-_Medium_Grip",
     "equipment": "barbell",
+    "level": "beginner",
     "primaryMuscles": [
       "chest"
     ],
@@ -57,6 +61,7 @@
   {
     "id": "Barbell_Curl",
     "equipment": "barbell",
+    "level": "beginner",
     "primaryMuscles": [
       "biceps"
     ],
@@ -71,6 +76,7 @@
   {
     "id": "Barbell_Deadlift",
     "equipment": "barbell",
+    "level": "intermediate",
     "primaryMuscles": [
       "lower back"
     ],
@@ -92,6 +98,7 @@
   {
     "id": "Barbell_Full_Squat",
     "equipment": "barbell",
+    "level": "intermediate",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -109,6 +116,7 @@
   {
     "id": "Barbell_Glute_Bridge",
     "equipment": "barbell",
+    "level": "intermediate",
     "primaryMuscles": [
       "glutes"
     ],
@@ -124,6 +132,7 @@
   {
     "id": "Barbell_Hip_Thrust",
     "equipment": "barbell",
+    "level": "intermediate",
     "primaryMuscles": [
       "glutes"
     ],
@@ -139,6 +148,7 @@
   {
     "id": "Barbell_Incline_Bench_Press_-_Medium_Grip",
     "equipment": "barbell",
+    "level": "beginner",
     "primaryMuscles": [
       "chest"
     ],
@@ -154,6 +164,7 @@
   {
     "id": "Barbell_Lunge",
     "equipment": "barbell",
+    "level": "intermediate",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -170,6 +181,7 @@
   {
     "id": "Barbell_Shoulder_Press",
     "equipment": "barbell",
+    "level": "intermediate",
     "primaryMuscles": [
       "shoulders"
     ],
@@ -185,6 +197,7 @@
   {
     "id": "Barbell_Shrug",
     "equipment": "barbell",
+    "level": "beginner",
     "primaryMuscles": [
       "traps"
     ],
@@ -197,6 +210,7 @@
   {
     "id": "Battling_Ropes",
     "equipment": "other",
+    "level": "beginner",
     "primaryMuscles": [
       "shoulders"
     ],
@@ -212,6 +226,7 @@
   {
     "id": "Bench_Dips",
     "equipment": "body only",
+    "level": "beginner",
     "primaryMuscles": [
       "triceps"
     ],
@@ -227,6 +242,7 @@
   {
     "id": "Bent_Over_Barbell_Row",
     "equipment": "barbell",
+    "level": "beginner",
     "primaryMuscles": [
       "middle back"
     ],
@@ -243,6 +259,7 @@
   {
     "id": "Bicycling",
     "equipment": "other",
+    "level": "beginner",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -259,6 +276,7 @@
   {
     "id": "Bodyweight_Squat",
     "equipment": "body only",
+    "level": "beginner",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -274,6 +292,7 @@
   {
     "id": "Bodyweight_Walking_Lunge",
     "equipment": null,
+    "level": "beginner",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -290,6 +309,7 @@
   {
     "id": "Butt_Lift_Bridge",
     "equipment": "body only",
+    "level": "beginner",
     "primaryMuscles": [
       "glutes"
     ],
@@ -304,6 +324,7 @@
   {
     "id": "Butterfly",
     "equipment": "machine",
+    "level": "beginner",
     "primaryMuscles": [
       "chest"
     ],
@@ -316,6 +337,7 @@
   {
     "id": "Cable_Crossover",
     "equipment": "cable",
+    "level": "beginner",
     "primaryMuscles": [
       "chest"
     ],
@@ -330,6 +352,7 @@
   {
     "id": "Cable_Hip_Adduction",
     "equipment": "cable",
+    "level": "beginner",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -342,6 +365,7 @@
   {
     "id": "Chin-Up",
     "equipment": "body only",
+    "level": "beginner",
     "primaryMuscles": [
       "lats"
     ],
@@ -358,6 +382,7 @@
   {
     "id": "Concentration_Curls",
     "equipment": "dumbbell",
+    "level": "beginner",
     "primaryMuscles": [
       "biceps"
     ],
@@ -372,6 +397,7 @@
   {
     "id": "Crunches",
     "equipment": "body only",
+    "level": "beginner",
     "primaryMuscles": [
       "abdominals"
     ],
@@ -384,6 +410,7 @@
   {
     "id": "Dead_Bug",
     "equipment": "body only",
+    "level": "beginner",
     "primaryMuscles": [
       "abdominals"
     ],
@@ -396,6 +423,7 @@
   {
     "id": "Dips_-_Chest_Version",
     "equipment": "other",
+    "level": "intermediate",
     "primaryMuscles": [
       "chest"
     ],
@@ -411,6 +439,7 @@
   {
     "id": "Dumbbell_Bench_Press",
     "equipment": "dumbbell",
+    "level": "beginner",
     "primaryMuscles": [
       "chest"
     ],
@@ -426,6 +455,7 @@
   {
     "id": "Dumbbell_Flyes",
     "equipment": "dumbbell",
+    "level": "beginner",
     "primaryMuscles": [
       "chest"
     ],
@@ -438,6 +468,7 @@
   {
     "id": "Dumbbell_Shoulder_Press",
     "equipment": "dumbbell",
+    "level": "intermediate",
     "primaryMuscles": [
       "shoulders"
     ],
@@ -452,6 +483,7 @@
   {
     "id": "Dumbbell_Side_Bend",
     "equipment": "dumbbell",
+    "level": "beginner",
     "primaryMuscles": [
       "abdominals"
     ],
@@ -464,6 +496,7 @@
   {
     "id": "Dumbbell_Step_Ups",
     "equipment": "dumbbell",
+    "level": "intermediate",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -480,6 +513,7 @@
   {
     "id": "Elliptical_Trainer",
     "equipment": "machine",
+    "level": "intermediate",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -496,6 +530,7 @@
   {
     "id": "Face_Pull",
     "equipment": "cable",
+    "level": "intermediate",
     "primaryMuscles": [
       "shoulders"
     ],
@@ -510,6 +545,7 @@
   {
     "id": "Flat_Bench_Lying_Leg_Raise",
     "equipment": "body only",
+    "level": "beginner",
     "primaryMuscles": [
       "abdominals"
     ],
@@ -522,6 +558,7 @@
   {
     "id": "Front_Barbell_Squat",
     "equipment": "barbell",
+    "level": "expert",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -538,6 +575,7 @@
   {
     "id": "Front_Box_Jump",
     "equipment": "other",
+    "level": "beginner",
     "primaryMuscles": [
       "hamstrings"
     ],
@@ -556,6 +594,7 @@
   {
     "id": "Front_Dumbbell_Raise",
     "equipment": "dumbbell",
+    "level": "beginner",
     "primaryMuscles": [
       "shoulders"
     ],
@@ -568,6 +607,7 @@
   {
     "id": "Goblet_Squat",
     "equipment": "kettlebells",
+    "level": "beginner",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -585,6 +625,7 @@
   {
     "id": "Good_Morning",
     "equipment": "barbell",
+    "level": "intermediate",
     "primaryMuscles": [
       "hamstrings"
     ],
@@ -601,6 +642,7 @@
   {
     "id": "Hammer_Curls",
     "equipment": "dumbbell",
+    "level": "beginner",
     "primaryMuscles": [
       "biceps"
     ],
@@ -611,8 +653,24 @@
     ]
   },
   {
+    "id": "Handstand_Push-Ups",
+    "equipment": "body only",
+    "level": "expert",
+    "primaryMuscles": [
+      "shoulders"
+    ],
+    "secondaryMuscles": [
+      "triceps"
+    ],
+    "images": [
+      "Handstand_Push-Ups/0.jpg",
+      "Handstand_Push-Ups/1.jpg"
+    ]
+  },
+  {
     "id": "Hanging_Leg_Raise",
     "equipment": "body only",
+    "level": "expert",
     "primaryMuscles": [
       "abdominals"
     ],
@@ -625,6 +683,7 @@
   {
     "id": "Hyperextensions_Back_Extensions",
     "equipment": "other",
+    "level": "beginner",
     "primaryMuscles": [
       "lower back"
     ],
@@ -640,6 +699,7 @@
   {
     "id": "Incline_Dumbbell_Press",
     "equipment": "dumbbell",
+    "level": "beginner",
     "primaryMuscles": [
       "chest"
     ],
@@ -655,6 +715,7 @@
   {
     "id": "Leg_Extensions",
     "equipment": "machine",
+    "level": "beginner",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -667,6 +728,7 @@
   {
     "id": "Leg_Press",
     "equipment": "machine",
+    "level": "beginner",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -683,6 +745,7 @@
   {
     "id": "Lying_Leg_Curls",
     "equipment": "machine",
+    "level": "beginner",
     "primaryMuscles": [
       "hamstrings"
     ],
@@ -695,6 +758,7 @@
   {
     "id": "Lying_T-Bar_Row",
     "equipment": "machine",
+    "level": "intermediate",
     "primaryMuscles": [
       "middle back"
     ],
@@ -710,6 +774,7 @@
   {
     "id": "Lying_Triceps_Press",
     "equipment": "e-z curl bar",
+    "level": "intermediate",
     "primaryMuscles": [
       "triceps"
     ],
@@ -722,6 +787,7 @@
   {
     "id": "Machine_Bench_Press",
     "equipment": "machine",
+    "level": "beginner",
     "primaryMuscles": [
       "chest"
     ],
@@ -737,6 +803,7 @@
   {
     "id": "Mountain_Climbers",
     "equipment": null,
+    "level": "beginner",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -753,6 +820,7 @@
   {
     "id": "One-Arm_Dumbbell_Row",
     "equipment": "dumbbell",
+    "level": "beginner",
     "primaryMuscles": [
       "middle back"
     ],
@@ -769,6 +837,7 @@
   {
     "id": "One-Arm_Kettlebell_Swings",
     "equipment": "kettlebells",
+    "level": "intermediate",
     "primaryMuscles": [
       "hamstrings"
     ],
@@ -786,6 +855,7 @@
   {
     "id": "Plank",
     "equipment": "body only",
+    "level": "beginner",
     "primaryMuscles": [
       "abdominals"
     ],
@@ -798,6 +868,7 @@
   {
     "id": "Preacher_Curl",
     "equipment": "barbell",
+    "level": "beginner",
     "primaryMuscles": [
       "biceps"
     ],
@@ -810,6 +881,7 @@
   {
     "id": "Pullups",
     "equipment": "body only",
+    "level": "beginner",
     "primaryMuscles": [
       "lats"
     ],
@@ -823,8 +895,25 @@
     ]
   },
   {
+    "id": "Push-Ups_With_Feet_Elevated",
+    "equipment": "body only",
+    "level": "beginner",
+    "primaryMuscles": [
+      "chest"
+    ],
+    "secondaryMuscles": [
+      "shoulders",
+      "triceps"
+    ],
+    "images": [
+      "Push-Ups_With_Feet_Elevated/0.jpg",
+      "Push-Ups_With_Feet_Elevated/1.jpg"
+    ]
+  },
+  {
     "id": "Pushups",
     "equipment": "body only",
+    "level": "beginner",
     "primaryMuscles": [
       "chest"
     ],
@@ -840,6 +929,7 @@
   {
     "id": "Reverse_Barbell_Curl",
     "equipment": "barbell",
+    "level": "beginner",
     "primaryMuscles": [
       "biceps"
     ],
@@ -854,6 +944,7 @@
   {
     "id": "Reverse_Flyes",
     "equipment": "dumbbell",
+    "level": "beginner",
     "primaryMuscles": [
       "shoulders"
     ],
@@ -866,6 +957,7 @@
   {
     "id": "Romanian_Deadlift",
     "equipment": "barbell",
+    "level": "intermediate",
     "primaryMuscles": [
       "hamstrings"
     ],
@@ -882,6 +974,7 @@
   {
     "id": "Rope_Jumping",
     "equipment": "other",
+    "level": "intermediate",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -897,6 +990,7 @@
   {
     "id": "Rowing_Stationary",
     "equipment": "machine",
+    "level": "intermediate",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -916,6 +1010,7 @@
   {
     "id": "Running_Treadmill",
     "equipment": "machine",
+    "level": "beginner",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -932,6 +1027,7 @@
   {
     "id": "Russian_Twist",
     "equipment": "body only",
+    "level": "intermediate",
     "primaryMuscles": [
       "abdominals"
     ],
@@ -946,6 +1042,7 @@
   {
     "id": "Seated_Cable_Rows",
     "equipment": "cable",
+    "level": "beginner",
     "primaryMuscles": [
       "middle back"
     ],
@@ -962,6 +1059,7 @@
   {
     "id": "Seated_Calf_Raise",
     "equipment": "machine",
+    "level": "beginner",
     "primaryMuscles": [
       "calves"
     ],
@@ -974,6 +1072,7 @@
   {
     "id": "Side_Bridge",
     "equipment": "body only",
+    "level": "beginner",
     "primaryMuscles": [
       "abdominals"
     ],
@@ -988,6 +1087,7 @@
   {
     "id": "Side_Lateral_Raise",
     "equipment": "dumbbell",
+    "level": "beginner",
     "primaryMuscles": [
       "shoulders"
     ],
@@ -1000,6 +1100,7 @@
   {
     "id": "Sit-Up",
     "equipment": "body only",
+    "level": "beginner",
     "primaryMuscles": [
       "abdominals"
     ],
@@ -1012,6 +1113,7 @@
   {
     "id": "Split_Squats",
     "equipment": null,
+    "level": "intermediate",
     "primaryMuscles": [
       "hamstrings"
     ],
@@ -1028,6 +1130,7 @@
   {
     "id": "Stairmaster",
     "equipment": "machine",
+    "level": "intermediate",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -1044,6 +1147,7 @@
   {
     "id": "Standing_Biceps_Cable_Curl",
     "equipment": "cable",
+    "level": "beginner",
     "primaryMuscles": [
       "biceps"
     ],
@@ -1056,6 +1160,7 @@
   {
     "id": "Standing_Calf_Raises",
     "equipment": "machine",
+    "level": "beginner",
     "primaryMuscles": [
       "calves"
     ],
@@ -1068,6 +1173,7 @@
   {
     "id": "Standing_Military_Press",
     "equipment": "barbell",
+    "level": "beginner",
     "primaryMuscles": [
       "shoulders"
     ],
@@ -1082,6 +1188,7 @@
   {
     "id": "Straight-Arm_Dumbbell_Pullover",
     "equipment": "dumbbell",
+    "level": "intermediate",
     "primaryMuscles": [
       "chest"
     ],
@@ -1098,6 +1205,7 @@
   {
     "id": "Superman",
     "equipment": "body only",
+    "level": "beginner",
     "primaryMuscles": [
       "lower back"
     ],
@@ -1113,6 +1221,7 @@
   {
     "id": "Triceps_Overhead_Extension_with_Rope",
     "equipment": "cable",
+    "level": "beginner",
     "primaryMuscles": [
       "triceps"
     ],
@@ -1125,6 +1234,7 @@
   {
     "id": "Triceps_Pushdown",
     "equipment": "cable",
+    "level": "beginner",
     "primaryMuscles": [
       "triceps"
     ],
@@ -1137,6 +1247,7 @@
   {
     "id": "Triceps_Pushdown_-_Rope_Attachment",
     "equipment": "cable",
+    "level": "beginner",
     "primaryMuscles": [
       "triceps"
     ],
@@ -1149,6 +1260,7 @@
   {
     "id": "Upright_Barbell_Row",
     "equipment": "barbell",
+    "level": "beginner",
     "primaryMuscles": [
       "shoulders"
     ],
@@ -1163,6 +1275,7 @@
   {
     "id": "Walking_Treadmill",
     "equipment": "machine",
+    "level": "beginner",
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -1179,6 +1292,7 @@
   {
     "id": "Wide-Grip_Lat_Pulldown",
     "equipment": "cable",
+    "level": "beginner",
     "primaryMuscles": [
       "lats"
     ],

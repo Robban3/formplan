@@ -1155,6 +1155,51 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
     ]
   },
   {
+    "id": "armhavningar-upphojda-fotter",
+    "name": "Armhävningar med upphöjda fötter",
+    "category": "Axlar",
+    "equipment": "body only",
+    "primaryMuscles": [
+      "chest"
+    ],
+    "secondaryMuscles": [
+      "shoulders",
+      "triceps"
+    ],
+    "images": [
+      "/exercises/armhavningar-upphojda-fotter-0.webp",
+      "/exercises/armhavningar-upphojda-fotter-1.webp"
+    ],
+    "logStyle": "reps",
+    "aliases": [
+      "decline push-up",
+      "armhävningar med fötterna upphöjda",
+      "lutande armhävningar"
+    ]
+  },
+  {
+    "id": "handstaende-armhavningar",
+    "name": "Handstående armhävningar",
+    "category": "Axlar",
+    "equipment": "body only",
+    "primaryMuscles": [
+      "shoulders"
+    ],
+    "secondaryMuscles": [
+      "triceps"
+    ],
+    "images": [
+      "/exercises/handstaende-armhavningar-0.webp",
+      "/exercises/handstaende-armhavningar-1.webp"
+    ],
+    "logStyle": "reps",
+    "aliases": [
+      "handstand push-ups",
+      "handstandspress",
+      "handstående press"
+    ]
+  },
+  {
     "id": "bicepscurl",
     "name": "Bicepscurl",
     "category": "Armar",

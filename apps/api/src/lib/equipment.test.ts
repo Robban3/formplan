@@ -72,9 +72,12 @@ describe('allowedEquipment', () => {
 })
 
 describe('catalogForPrompt', () => {
-  it('visar utrustningen per övning', () => {
-    // Utan den kunde modellen inte veta vad någon övning krävde.
-    expect(catalogForPrompt()).toMatch(/\(Bänkpress, barbell\)/)
+  it('visar utrustning och nivå per övning', () => {
+    // Utan utrustningen kunde modellen inte veta vad någon övning krävde.
+    // Nivån är vägledning: den enda kroppsviktsövningen för axlar är
+    // expertnivå, och det måste modellen kunna se.
+    expect(catalogForPrompt()).toMatch(/\(Bänkpress, barbell, beginner\)/)
+    expect(catalogForPrompt()).toMatch(/\(Handstående armhävningar, body only, expert\)/)
   })
 
   it('utesluter övningar utanför filtret', () => {

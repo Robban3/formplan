@@ -7,6 +7,17 @@ export interface ApiCatalogExercise {
   name: string
   category: string
   equipment: string
+  /**
+   * free-exercise-db:s svårighetsgrad: 'beginner' | 'intermediate' | 'expert'.
+   *
+   * INFORMATION TILL MODELLEN, INTE ETT FILTER. Källans nivåer är grova:
+   * Knäböj, Marklyft och Crosstrainer är märkta 'intermediate', och en
+   * nybörjare ska absolut göra alla tre. Att filtrera på nivå hade tömt
+   * katalogen för den som angett nybörjare. Nivån finns med i prompten så
+   * modellen kan väga in den — t.ex. att Handstående armhävningar är den enda
+   * axelövning en kroppsviktsanvändare har, och att den är expertnivå.
+   */
+  level: string
   aliases: string[]
 }
 
@@ -16,6 +27,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Bänkpress",
     "category": "Bröst",
     "equipment": "barbell",
+    "level": "beginner",
     "aliases": [
       "bänkpress med skivstång",
       "bench press",
@@ -27,6 +39,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Hantelpress",
     "category": "Bröst",
     "equipment": "dumbbell",
+    "level": "beginner",
     "aliases": [
       "hantelbänkpress",
       "dumbbell press"
@@ -37,6 +50,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Lutande bänkpress",
     "category": "Bröst",
     "equipment": "barbell",
+    "level": "beginner",
     "aliases": [
       "incline bench press",
       "snedbänk",
@@ -48,6 +62,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Lutande hantelpress",
     "category": "Bröst",
     "equipment": "dumbbell",
+    "level": "beginner",
     "aliases": [
       "incline dumbbell press"
     ]
@@ -57,6 +72,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Armhävningar",
     "category": "Bröst",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "push-ups",
       "pushups",
@@ -69,6 +85,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Flyes",
     "category": "Bröst",
     "equipment": "dumbbell",
+    "level": "beginner",
     "aliases": [
       "hantelflyes",
       "flys"
@@ -79,6 +96,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Pec deck",
     "category": "Bröst",
     "equipment": "machine",
+    "level": "beginner",
     "aliases": [
       "butterfly",
       "maskinflyes"
@@ -89,6 +107,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Maskinpress bröst",
     "category": "Bröst",
     "equipment": "machine",
+    "level": "beginner",
     "aliases": [
       "bröstpress maskin"
     ]
@@ -98,6 +117,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Dips",
     "category": "Bröst",
     "equipment": "body only",
+    "level": "intermediate",
     "aliases": [
       "dips bröst"
     ]
@@ -107,6 +127,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Kabelcross",
     "category": "Bröst",
     "equipment": "cable",
+    "level": "beginner",
     "aliases": [
       "cable crossover",
       "kabelkryss"
@@ -117,6 +138,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Marklyft",
     "category": "Rygg",
     "equipment": "barbell",
+    "level": "intermediate",
     "aliases": [
       "deadlift",
       "konventionell marklyft"
@@ -127,6 +149,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Pull-ups",
     "category": "Rygg",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "pullups",
       "räckhäv",
@@ -138,6 +161,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Chins",
     "category": "Rygg",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "chin-up",
       "chinups"
@@ -148,6 +172,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Latsdrag",
     "category": "Rygg",
     "equipment": "cable",
+    "level": "beginner",
     "aliases": [
       "lat pulldown",
       "latsdrag brett grepp"
@@ -158,6 +183,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Skivstångsrodd",
     "category": "Rygg",
     "equipment": "barbell",
+    "level": "beginner",
     "aliases": [
       "stångrodd",
       "barbell row",
@@ -170,6 +196,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Hantelrodd",
     "category": "Rygg",
     "equipment": "dumbbell",
+    "level": "beginner",
     "aliases": [
       "enarmsrodd",
       "dumbbell row",
@@ -181,6 +208,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Sittande kabelrodd",
     "category": "Rygg",
     "equipment": "cable",
+    "level": "beginner",
     "aliases": [
       "kabelrodd",
       "seated row",
@@ -192,6 +220,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "T-bar rodd",
     "category": "Rygg",
     "equipment": "machine",
+    "level": "intermediate",
     "aliases": [
       "t-bar row",
       "tbar rodd"
@@ -202,6 +231,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Pullover",
     "category": "Rygg",
     "equipment": "dumbbell",
+    "level": "intermediate",
     "aliases": [
       "hantelpullover"
     ]
@@ -211,6 +241,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Rygglyft",
     "category": "Rygg",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "ryggresning",
       "back extension",
@@ -222,6 +253,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Shrugs",
     "category": "Rygg",
     "equipment": "barbell",
+    "level": "beginner",
     "aliases": [
       "axelryckningar",
       "shrug"
@@ -232,6 +264,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Knäböj",
     "category": "Ben",
     "equipment": "barbell",
+    "level": "intermediate",
     "aliases": [
       "squat",
       "benböj",
@@ -243,6 +276,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Frontböj",
     "category": "Ben",
     "equipment": "barbell",
+    "level": "expert",
     "aliases": [
       "front squat",
       "frontknäböj"
@@ -253,6 +287,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Goblet squat",
     "category": "Ben",
     "equipment": "kettlebells",
+    "level": "beginner",
     "aliases": [
       "gobletsquat"
     ]
@@ -262,6 +297,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Benpress",
     "category": "Ben",
     "equipment": "machine",
+    "level": "beginner",
     "aliases": [
       "leg press"
     ]
@@ -271,6 +307,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Utfallssteg",
     "category": "Ben",
     "equipment": "barbell",
+    "level": "intermediate",
     "aliases": [
       "utfall",
       "lunges",
@@ -284,6 +321,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Bulgarisk split squat",
     "category": "Ben",
     "equipment": "body only",
+    "level": "intermediate",
     "aliases": [
       "split squat",
       "bulgarian split squat"
@@ -294,6 +332,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Step-up",
     "category": "Ben",
     "equipment": "dumbbell",
+    "level": "intermediate",
     "aliases": [
       "stepup",
       "uppsteg",
@@ -306,6 +345,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Rumänsk marklyft",
     "category": "Ben",
     "equipment": "barbell",
+    "level": "intermediate",
     "aliases": [
       "rdl",
       "romanian deadlift",
@@ -317,6 +357,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Good morning",
     "category": "Ben",
     "equipment": "barbell",
+    "level": "intermediate",
     "aliases": [
       "goodmorning"
     ]
@@ -326,6 +367,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Bencurl",
     "category": "Ben",
     "equipment": "machine",
+    "level": "beginner",
     "aliases": [
       "lårcurl",
       "leg curl",
@@ -337,6 +379,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Benspark",
     "category": "Ben",
     "equipment": "machine",
+    "level": "beginner",
     "aliases": [
       "leg extension",
       "lårspark"
@@ -347,6 +390,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Höftlyft",
     "category": "Ben",
     "equipment": "barbell",
+    "level": "intermediate",
     "aliases": [
       "glute bridge",
       "bäckenlyft"
@@ -357,6 +401,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Hip thrust",
     "category": "Ben",
     "equipment": "barbell",
+    "level": "intermediate",
     "aliases": [
       "höftstöt",
       "hipthrust"
@@ -367,6 +412,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Höftadduktion",
     "category": "Ben",
     "equipment": "cable",
+    "level": "beginner",
     "aliases": [
       "adduktion",
       "inåtföring lår"
@@ -377,6 +423,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Vadpress",
     "category": "Ben",
     "equipment": "machine",
+    "level": "beginner",
     "aliases": [
       "vadpress",
       "stående vadpress",
@@ -390,6 +437,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Sittande vadpress",
     "category": "Ben",
     "equipment": "machine",
+    "level": "beginner",
     "aliases": [
       "seated calf raise"
     ]
@@ -399,6 +447,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Box jump",
     "category": "Ben",
     "equipment": "other",
+    "level": "beginner",
     "aliases": [
       "boxhopp",
       "lådhopp"
@@ -409,6 +458,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Knäböj med kroppsvikt",
     "category": "Ben",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "bodyweight squat",
       "kroppsviktsknäböj",
@@ -421,6 +471,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Gående utfall",
     "category": "Ben",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "walking lunge",
       "bodyweight lunge",
@@ -432,6 +483,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Höftlyft med kroppsvikt",
     "category": "Ben",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "bodyweight glute bridge",
       "höftlyft utan vikt"
@@ -442,6 +494,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Axelpress",
     "category": "Axlar",
     "equipment": "barbell",
+    "level": "intermediate",
     "aliases": [
       "shoulder press",
       "skivstångspress axlar"
@@ -452,6 +505,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Militärpress",
     "category": "Axlar",
     "equipment": "barbell",
+    "level": "beginner",
     "aliases": [
       "military press",
       "stående press"
@@ -462,6 +516,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Hantelpress axlar",
     "category": "Axlar",
     "equipment": "dumbbell",
+    "level": "intermediate",
     "aliases": [
       "hantelaxelpress",
       "dumbbell shoulder press"
@@ -472,6 +527,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Arnoldpress",
     "category": "Axlar",
     "equipment": "dumbbell",
+    "level": "intermediate",
     "aliases": [
       "arnold press"
     ]
@@ -481,6 +537,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Sidolyft",
     "category": "Axlar",
     "equipment": "dumbbell",
+    "level": "beginner",
     "aliases": [
       "lateral raise",
       "sidolyft hantlar",
@@ -493,6 +550,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Frontlyft",
     "category": "Axlar",
     "equipment": "dumbbell",
+    "level": "beginner",
     "aliases": [
       "front raise"
     ]
@@ -502,6 +560,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Face pulls",
     "category": "Axlar",
     "equipment": "cable",
+    "level": "intermediate",
     "aliases": [
       "face pull",
       "ansiktsdrag"
@@ -512,6 +571,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Omvänd flyes",
     "category": "Axlar",
     "equipment": "dumbbell",
+    "level": "beginner",
     "aliases": [
       "reverse flyes",
       "omvända flyes",
@@ -523,9 +583,34 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Upright row",
     "category": "Axlar",
     "equipment": "barbell",
+    "level": "beginner",
     "aliases": [
       "stående rodd",
       "uprightrow"
+    ]
+  },
+  {
+    "id": "armhavningar-upphojda-fotter",
+    "name": "Armhävningar med upphöjda fötter",
+    "category": "Axlar",
+    "equipment": "body only",
+    "level": "beginner",
+    "aliases": [
+      "decline push-up",
+      "armhävningar med fötterna upphöjda",
+      "lutande armhävningar"
+    ]
+  },
+  {
+    "id": "handstaende-armhavningar",
+    "name": "Handstående armhävningar",
+    "category": "Axlar",
+    "equipment": "body only",
+    "level": "expert",
+    "aliases": [
+      "handstand push-ups",
+      "handstandspress",
+      "handstående press"
     ]
   },
   {
@@ -533,6 +618,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Bicepscurl",
     "category": "Armar",
     "equipment": "barbell",
+    "level": "beginner",
     "aliases": [
       "biceps curl",
       "skivstångscurl",
@@ -546,6 +632,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Hammarcurl",
     "category": "Armar",
     "equipment": "dumbbell",
+    "level": "beginner",
     "aliases": [
       "hammer curl"
     ]
@@ -555,6 +642,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Preacher curl",
     "category": "Armar",
     "equipment": "barbell",
+    "level": "beginner",
     "aliases": [
       "scottcurl",
       "preachercurl"
@@ -565,6 +653,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Koncentrationscurl",
     "category": "Armar",
     "equipment": "dumbbell",
+    "level": "beginner",
     "aliases": [
       "concentration curl"
     ]
@@ -574,6 +663,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Kabelcurl",
     "category": "Armar",
     "equipment": "cable",
+    "level": "beginner",
     "aliases": [
       "cable curl"
     ]
@@ -583,6 +673,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Omvänd curl",
     "category": "Armar",
     "equipment": "barbell",
+    "level": "beginner",
     "aliases": [
       "reverse curl",
       "omvänd bicepscurl"
@@ -593,6 +684,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Tricepspress",
     "category": "Armar",
     "equipment": "cable",
+    "level": "beginner",
     "aliases": [
       "triceps pushdown",
       "tricepsnedpress"
@@ -603,6 +695,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Repdrag triceps",
     "category": "Armar",
     "equipment": "cable",
+    "level": "beginner",
     "aliases": [
       "rope pushdown",
       "tricepsrep"
@@ -613,6 +706,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Tricepsextension över huvud",
     "category": "Armar",
     "equipment": "cable",
+    "level": "beginner",
     "aliases": [
       "overhead extension",
       "fransk press"
@@ -623,6 +717,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Skullcrushers",
     "category": "Armar",
     "equipment": "e-z curl bar",
+    "level": "intermediate",
     "aliases": [
       "skullcrusher",
       "liggande tricepspress"
@@ -633,6 +728,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Tricepsdips",
     "category": "Armar",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "bench dips",
       "bänkdips",
@@ -644,6 +740,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Plankan",
     "category": "Core",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "planka",
       "plank"
@@ -654,6 +751,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Sidoplanka",
     "category": "Core",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "side plank",
       "sidplanka"
@@ -664,6 +762,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Sit-ups",
     "category": "Core",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "situps",
       "magböj",
@@ -675,6 +774,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Crunches",
     "category": "Core",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "crunch",
       "magcrunch"
@@ -685,6 +785,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Cykelcrunch",
     "category": "Core",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "bicycle crunch",
       "cykelmage"
@@ -695,6 +796,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Russian twist",
     "category": "Core",
     "equipment": "body only",
+    "level": "intermediate",
     "aliases": [
       "rysk twist"
     ]
@@ -704,6 +806,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Hängande benlyft",
     "category": "Core",
     "equipment": "body only",
+    "level": "expert",
     "aliases": [
       "hanging leg raise"
     ]
@@ -713,6 +816,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Liggande benlyft",
     "category": "Core",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "lying leg raise",
       "benlyft"
@@ -723,6 +827,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Mountain climbers",
     "category": "Core",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "bergsklättrare"
     ]
@@ -732,6 +837,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Dead bug",
     "category": "Core",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "deadbug"
     ]
@@ -741,6 +847,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Ab wheel",
     "category": "Core",
     "equipment": "other",
+    "level": "intermediate",
     "aliases": [
       "maghjul",
       "ab roller"
@@ -751,6 +858,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Sidoböj",
     "category": "Core",
     "equipment": "dumbbell",
+    "level": "beginner",
     "aliases": [
       "side bend"
     ]
@@ -760,6 +868,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Superman",
     "category": "Core",
     "equipment": "body only",
+    "level": "beginner",
     "aliases": [
       "ryggresning golv"
     ]
@@ -769,6 +878,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Löpning",
     "category": "Kondition",
     "equipment": "machine",
+    "level": "beginner",
     "aliases": [
       "löpband",
       "running",
@@ -781,6 +891,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Gång",
     "category": "Kondition",
     "equipment": "machine",
+    "level": "beginner",
     "aliases": [
       "promenad",
       "walking"
@@ -791,6 +902,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Cykling",
     "category": "Kondition",
     "equipment": "other",
+    "level": "beginner",
     "aliases": [
       "cykel",
       "spinning",
@@ -802,6 +914,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Roddmaskin",
     "category": "Kondition",
     "equipment": "machine",
+    "level": "intermediate",
     "aliases": [
       "rodd",
       "rowing"
@@ -812,6 +925,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Crosstrainer",
     "category": "Kondition",
     "equipment": "machine",
+    "level": "intermediate",
     "aliases": [
       "elliptical"
     ]
@@ -821,6 +935,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Stairmaster",
     "category": "Kondition",
     "equipment": "machine",
+    "level": "intermediate",
     "aliases": [
       "trappmaskin"
     ]
@@ -830,6 +945,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Hopprep",
     "category": "Kondition",
     "equipment": "other",
+    "level": "intermediate",
     "aliases": [
       "hoppa rep",
       "jump rope"
@@ -840,6 +956,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Kettlebell swing",
     "category": "Kondition",
     "equipment": "kettlebells",
+    "level": "intermediate",
     "aliases": [
       "kb swing",
       "kettlebellsving",
@@ -852,6 +969,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "name": "Battle ropes",
     "category": "Kondition",
     "equipment": "other",
+    "level": "beginner",
     "aliases": [
       "kamprep"
     ]
@@ -931,9 +1049,11 @@ export function matchExercise(name: string): ApiCatalogExercise | undefined {
  * Katalogen som text till prompten.
  *
  * `allowed` är katalogens utrustningsvärden användaren har (se lib/equipment.ts).
- * Utelämnad ⇒ hela katalogen. Varje rad visar utrustningen: utan den kunde
- * modellen inte veta vad en övning krävde, och instruktionen "välj övningar
- * som matchar användarens utrustning" var omöjlig att följa.
+ * Utelämnad ⇒ hela katalogen. Varje rad visar utrustning OCH nivå: utan
+ * utrustningen kunde modellen inte veta vad en övning krävde, och
+ * instruktionen "välj övningar som matchar användarens utrustning" var
+ * omöjlig att följa. Nivån är vägledning, inte ett filter (se
+ * ApiCatalogExercise.level).
  */
 export function catalogForPrompt(allowed?: Set<string>): string {
   const byCat = new Map<string, ApiCatalogExercise[]>()
@@ -944,6 +1064,6 @@ export function catalogForPrompt(allowed?: Set<string>): string {
     byCat.set(e.category, list)
   }
   return [...byCat.entries()]
-    .map(([cat, list]) => `${cat}: ${list.map((e) => `${e.id} (${e.name}, ${e.equipment})`).join(', ')}`)
+    .map(([cat, list]) => `${cat}: ${list.map((e) => `${e.id} (${e.name}, ${e.equipment}, ${e.level})`).join(', ')}`)
     .join('\n')
 }

@@ -280,13 +280,14 @@ ${profile.age ? `- Age: ${profile.age}` : ''}
 ${profile.weight_kg ? `- Weight: ${profile.weight_kg} kg` : ''}
 ${profile.height_cm ? `- Height: ${profile.height_cm} cm` : ''}
 
-EXERCISE CATALOG — every exercise you use MUST come from this list (format: id (Namn, equipment)):
+EXERCISE CATALOG — every exercise you use MUST come from this list (format: id (Namn, equipment, level)):
 ${catalogForPrompt(allowedEquipment(profile.equipment))}
 
 EXERCISE RULES (strict):
 - Choose exercises ONLY from the catalog above. Put the catalog id in "exercise_id" and the exact Swedish name from the list in "name".
 - Inventing exercises, variations or names that are not in the catalog is NOT allowed. If the exercise you had in mind is missing, pick the closest one that IS in the catalog.
 - The catalog above is ALREADY FILTERED to the equipment this user has, and each entry states its equipment. Every exercise in it is usable; nothing outside it is.
+- Each entry also states a difficulty level. Match it to the user's experience level: do not build a beginner's plan around exercises marked "expert". The levels are coarse, so treat them as a weighting, not a ban — a beginner can squat and deadlift.
 
 INSTRUCTIONS:
 - WORKOUT DAY COUNT — HARD RULE: exactly ${profile.days_per_week} of the 7 days must have type "workout", and the remaining ${7 - profile.days_per_week} must have type "rest". Not more, not fewer. This is the user's recovery capacity, not a suggestion. Spread the workout days out so that two workouts are rarely back to back.
