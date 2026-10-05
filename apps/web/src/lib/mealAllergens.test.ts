@@ -134,7 +134,7 @@ describe('generateMealPlan med hänsyn', () => {
  * grinden.
  */
 describe('genereringen är blockerad tills hänsynen är kända', () => {
-  it('varje sida som anropar generateMealPlan grindar på restrictionsLoaded', async () => {
+  it('varje sida som bygger en matsedel grindar på restrictionsReady', async () => {
     const { readdirSync, readFileSync, statSync } = await import('node:fs')
     const { join } = await import('node:path')
     const { fileURLToPath } = await import('node:url')
@@ -150,15 +150,24 @@ describe('genereringen är blockerad tills hänsynen är kända', () => {
     }
     walk(root)
 
-    const callers = files.filter((f) => readFileSync(f, 'utf8').includes('generateMealPlan('))
+    // Båda ingångarna till den lokala generatorn. ShoppingListPage anropar inte
+    // generateMealPlan direkt utan via buildWeeklyShoppingList — den vägen
+    // saknade filtret helt, och en regel som bara såg det direkta anropet
+    // hade inte fångat det.
+    const ENTRY = ['generateMealPlan(', 'buildWeeklyShoppingList(']
+    const callers = files.filter((f) => {
+      const text = readFileSync(f, 'utf8')
+      return ENTRY.some((e) => text.includes(e))
+    })
     // Utan det här skulle testet passera om filerna döptes om.
-    expect(callers.length).toBeGreaterThan(0)
+    expect(callers.length).toBeGreaterThanOrEqual(3)
 
     const ungated = callers.filter((f) => {
       const text = readFileSync(f, 'utf8')
-      return !text.includes('restrictionsLoaded')
+      // Ordgräns: en delsträngssökning passerade även på 'restrictionsReadyX'.
+      return !/\buseRestrictions\b/.test(text) || !/\brestrictionsReady\b/.test(text)
     })
-    expect(ungated.map((f) => f.slice(root.length)), 'blockera knappen på !restrictionsLoaded').toEqual([])
+    expect(ungated.map((f) => f.slice(root.length)), 'grinda på useRestrictions/restrictionsReady').toEqual([])
   })
 
   it('hooken kan inte användas utan att se om hänsynen är kända', async () => {
@@ -186,5 +195,57 @@ describe('genereringen är blockerad tills hänsynen är kända', () => {
     const katch = hook.slice(hook.indexOf('.catch('))
     expect(katch).toMatch(/setStatus\('failed'\)/)
     expect(katch).not.toMatch(/setStatus\('ready'\)/)
+  })
+})
+
+/**
+ * Inköpslistan.
+ *
+ * Buggen: buildWeeklyShoppingList anropade generateMealPlan UTAN restrictions,
+ * så fallback-listan byggdes ur en ofiltrerad matsedel — listan sa åt någon
+ * som kryssat ägg och laktos att köpa ägg och kvarg. Filtret fanns, men nådde
+ * inte hit.
+ *
+ * Parametern är nu obligatorisk och utan standardvärde, så en ny anropare
+ * tvingas skicka profilens hänsyn i stället för att tyst få noll filtrering.
+ */
+describe('buildWeeklyShoppingList respekterar hänsyn', () => {
+  const names = (cats: Awaited<ReturnType<typeof load>>) => cats.flatMap((c) => c.items.map((i) => i.name))
+  async function load() {
+    const { buildWeeklyShoppingList } = await import('./shoppingList')
+    return buildWeeklyShoppingList(2000, 'balanced', 4, [], 7, 0)
+  }
+
+  it('utan hänsyn innehåller listan mat', async () => {
+    expect(names(await load()).length).toBeGreaterThan(0)
+  })
+
+  it('kryssad ägg ger inga ägg i inköpslistan', async () => {
+    const { buildWeeklyShoppingList } = await import('./shoppingList')
+    const cats = buildWeeklyShoppingList(2000, 'balanced', 4, ['Ägg'], 7, 0)
+    for (const n of cats.flatMap((c) => c.items.map((i) => i.name))) {
+      expect(FOOD_ALLERGENS[n]?.includes('Ägg'), n).not.toBe(true)
+    }
+  })
+
+  it('flera hänsyn samtidigt', async () => {
+    const { buildWeeklyShoppingList } = await import('./shoppingList')
+    const cats = buildWeeklyShoppingList(2200, 'balanced', 5, ['Laktos', 'Gluten', 'Nötter'], 7, 0)
+    const got = cats.flatMap((c) => c.items.map((i) => i.name))
+    expect(got.length).toBeGreaterThan(0)
+    for (const n of got) {
+      const tags = FOOD_ALLERGENS[n] ?? []
+      for (const bad of ['Laktos', 'Gluten', 'Nötter']) expect(tags).not.toContain(bad)
+    }
+  })
+
+  // Strukturella skyddet: utan standardvärde kan en ny anropare inte glömma
+  // hänsynen utan att tsc säger till.
+  it('restrictions har inget standardvärde', async () => {
+    const { readFileSync } = await import('node:fs')
+    const { fileURLToPath } = await import('node:url')
+    const src = readFileSync(fileURLToPath(new URL('./shoppingList.ts', import.meta.url)), 'utf8')
+    expect(src).toMatch(/restrictions: readonly string\[\],/)
+    expect(src).not.toMatch(/restrictions: readonly string\[\] = \[\]/)
   })
 })

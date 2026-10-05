@@ -13,6 +13,7 @@ import {
 } from '../../lib/shoppingList'
 import { loadWeekPlan } from '../../lib/weekMealStore'
 import { useT } from '../../hooks/useT'
+import { useRestrictions } from '../../hooks/useRestrictions'
 
 const FOCUS_OPTIONS: { key: DietFocus; label: string }[] = [
   { key: 'balanced', label: 'Balanserat' },
@@ -27,6 +28,7 @@ export function ShoppingListPage() {
   const { locale, t } = useT()
   const navigate = useNavigate()
   const settings = useSettings()
+  const { restrictions, status: restrictionsStatus, ready: restrictionsReady, retry: retryRestrictions } = useRestrictions()
   const [params] = useSearchParams()
 
   // Initial focus/mealCount come from the MealPlanPage selection (query params)
@@ -52,11 +54,19 @@ export function ShoppingListPage() {
   const fromPlan = planCategories !== null
 
   // Recompute whenever inputs change; seed forces a fresh list on "regenerate".
+  // Fallback-listan genereras först när hänsynen är KÄNDA. Tom lista betyder
+  // "filtrera inte", så ett tidigt bygge gav en ofiltrerad inköpslista. Den
+  // som kommer ur ett sparat veckoschema är redan filtrerad och behöver ingen
+  // grind.
   const categories = useMemo(
     () =>
-      planCategories ?? buildWeeklyShoppingList(kcal, focus, mealCount, 7, seed),
-    [planCategories, kcal, focus, mealCount, seed]
+      planCategories ??
+      (restrictionsReady ? buildWeeklyShoppingList(kcal, focus, mealCount, restrictions, 7, seed) : []),
+    [planCategories, kcal, focus, mealCount, restrictions, restrictionsReady, seed]
   )
+
+  /** Fallback-listan väntar på hänsynen — en tom lista får inte visas som "klar". */
+  const pending = !fromPlan && !restrictionsReady
 
   // Checked state is keyed by the list's content — a new list resets it.
   const listHash = useMemo(() => shoppingListHash(categories), [categories])
@@ -149,6 +159,27 @@ export function ShoppingListPage() {
             </button>
           )}
         </div>
+
+        {/* Hänsynen okända — visa inte en tom lista som om den vore färdig. */}
+        {pending && (
+          <div className="rounded-2xl border border-stone-200 dark:border-stone-700 p-4 text-center">
+            {restrictionsStatus === 'failed' ? (
+              <>
+                <p className="text-xs text-stone-600 dark:text-stone-300">{t('diet.restrictionsFailed')}</p>
+                <button
+                  onClick={retryRestrictions}
+                  className="mt-2 text-xs font-semibold text-forest-700 dark:text-forest-400 underline"
+                >
+                  {t('common.tryAgain')}
+                </button>
+              </>
+            ) : (
+              <div className="flex justify-center">
+                <div className="w-6 h-6 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Categories */}
         {categories.map((cat) => (

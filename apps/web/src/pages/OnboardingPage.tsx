@@ -107,6 +107,10 @@ export function OnboardingPage() {
   const [step, setStep] = useState<Step>('goal')
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
+  // Skild från loading: en MISSLYCKAD hämtning får inte se ut som "ny
+  // användare". Se catch-grenen nedan.
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [attempt, setAttempt] = useState(0)
   const [form, setForm] = useState<OnboardingForm>(EMPTY_ONBOARDING_FORM)
 
   useEffect(() => {
@@ -125,9 +129,17 @@ export function OnboardingPage() {
           setForm(profileToForm(profile as Record<string, unknown>))
         }
       } catch {
-        if (!cancelled && draft) {
+        if (cancelled) return
+        if (draft) {
           setForm(draft.form)
           setStep(draft.step)
+        } else {
+          // Utan utkast skulle formuläret visas TOMT, som om användaren inte
+          // hade något sparat. submit() upsertar hela raden, så ett sparande
+          // därifrån nollade allergier, ålder, vikt och längd — tyst. Och
+          // eftersom profilen då korrekt säger "inga allergier" slutar
+          // kostgeneratorn filtrera utan att varna. Visa ett fel i stället.
+          setLoadFailed(true)
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -136,12 +148,12 @@ export function OnboardingPage() {
 
     init()
     return () => { cancelled = true }
-  }, [])
+  }, [attempt])
 
   useEffect(() => {
-    if (loading) return
+    if (loading || loadFailed) return
     saveOnboardingDraft({ step, form })
-  }, [step, form, loading])
+  }, [step, form, loading, loadFailed])
 
   const stepIndex = STEPS.indexOf(step)
   const progress = ((stepIndex + 1) / STEPS.length) * 100
@@ -305,6 +317,17 @@ export function OnboardingPage() {
         {loading ? (
           <div className="flex justify-center pt-12">
             <div className="w-7 h-7 border-2 border-forest-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : loadFailed ? (
+          <div className="pt-8 text-center">
+            <p className="text-sm text-stone-600 dark:text-stone-300">{t('onb.loadFailed')}</p>
+            <button
+              type="button"
+              onClick={() => { setLoadFailed(false); setLoading(true); setAttempt((n) => n + 1) }}
+              className="mt-4 text-sm font-semibold text-forest-700 dark:text-forest-400 underline"
+            >
+              {t('common.tryAgain')}
+            </button>
           </div>
         ) : step === 'goal' ? (
           <div>

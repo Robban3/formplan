@@ -881,4 +881,5 @@ export const en: Record<TextKey, string> = {
   'training.recordShort': 'record: {n}',
   'diet.restrictionsFailed': 'Could not load your allergies and dietary restrictions, so no meal plan was created — we will not risk serving you something you cannot eat.',
   'common.tryAgain': 'Try again',
+  'onb.loadFailed': 'Could not load your saved details. We are not showing an empty form, because saving it would overwrite what you have already filled in.',
 }

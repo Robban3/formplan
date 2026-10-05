@@ -61,7 +61,7 @@ function MacroBar({ plan }: { plan: GeneratedMealPlan }) {
 }
 
 export function MealPlanPage() {
-  const { restrictions, status: restrictionsStatus, ready: restrictionsLoaded, retry: retryRestrictions } = useRestrictions()
+  const { restrictions, status: restrictionsStatus, ready: restrictionsReady, retry: retryRestrictions } = useRestrictions()
   const navigate = useNavigate()
   const settings = useSettings()
   const { t, locale } = useT()
@@ -204,7 +204,7 @@ export function MealPlanPage() {
         )}
         <button
           onClick={generate}
-          disabled={!restrictionsLoaded}
+          disabled={!restrictionsReady}
           className="disabled:opacity-60 w-full bg-forest-700 hover:bg-forest-800 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-colors"
         >
           <LeafIcon className="w-5 h-5 stroke-white" />
@@ -273,7 +273,7 @@ export function MealPlanPage() {
             {/* Regenerate */}
             <button
               onClick={regenerate}
-              disabled={!restrictionsLoaded}
+              disabled={!restrictionsReady}
               className="disabled:opacity-60 w-full py-3 border border-stone-200 dark:border-stone-700 rounded-2xl text-sm text-stone-500 dark:text-stone-400 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
             >
               {t('mealplan.generateAnother')}

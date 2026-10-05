@@ -66,11 +66,20 @@ function groupTotals(totals: Map<string, number>): ShoppingCategory[] {
  * Build an aggregated weekly shopping list from the meal-plan generator:
  * generate one day per `days` (varying the seed for variety), sum each food's
  * grams across the week, then group into ordered grocery categories.
+ *
+ * `restrictions` är OBLIGATORISKT och har med avsikt inget standardvärde.
+ * Anropet saknade det helt, så fallback-listan byggdes ur en OFILTRERAD
+ * matsedel: inköpslistan sa åt någon som kryssat ägg och laktos att köpa ägg
+ * och kvarg. Ett standardvärde på tom lista hade gjort samma fel möjligt igen
+ * utan att bygget sa något — en ny anropare ska tvingas skicka profilens
+ * hänsyn. (Listan som byggs ur ett SPARAT veckoschema är redan filtrerad:
+ * maten i schemat gick genom filtret när schemat skapades.)
  */
 export function buildWeeklyShoppingList(
   kcal: number,
   focus: DietFocus,
   mealCount: MealCount,
+  restrictions: readonly string[],
   days = 7,
   seedOffset = 0
 ): ShoppingCategory[] {
@@ -78,7 +87,7 @@ export function buildWeeklyShoppingList(
   for (let d = 0; d < days; d++) {
     // Seeds 1..7 — the same seeds MealWeekPage uses for the week's days, so
     // the fallback list matches what the week view shows.
-    const plan = generateMealPlan(kcal, mealCount, focus, d + 1 + seedOffset * days)
+    const plan = generateMealPlan(kcal, mealCount, focus, d + 1 + seedOffset * days, restrictions)
     for (const meal of plan.meals) {
       for (const food of meal.foods) {
         totals.set(food.name, (totals.get(food.name) ?? 0) + food.amount_g)
