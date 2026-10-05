@@ -25,7 +25,11 @@ const profile: FitnessProfile = {
   user_id: 'user-1',
   goal: 'maintain',
   level: 'beginner',
-  equipment: ['bodyweight'],
+  // Fullt gym: de här testerna handlar om databasskrivning, inte om
+  // utrustningsfiltret. Med ['bodyweight'] föll de på att den mockade
+  // AI-responsen innehåller bänkpress — korrekt beteende, men det hör till
+  // filtertesterna i exerciseCatalog.test.ts.
+  equipment: ['Gym (fullutrustat)'],
   days_per_week: 3,
   allergies: [],
   calorie_goal: null,

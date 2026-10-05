@@ -1,7 +1,13 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { z } from 'zod'
 import { supabaseAdmin } from './supabase'
-import { catalogForPrompt, getExerciseById, matchExercise } from './exerciseCatalog'
+import {
+  catalogForPrompt,
+  getExerciseById,
+  matchExercise,
+  allowedEquipment,
+  isExerciseAllowed,
+} from './exerciseCatalog'
 import { languageInstruction, languageName, type Lang } from './lang'
 import type {
   Env,
@@ -279,13 +285,13 @@ ${profile.age ? `- Age: ${profile.age}` : ''}
 ${profile.weight_kg ? `- Weight: ${profile.weight_kg} kg` : ''}
 ${profile.height_cm ? `- Height: ${profile.height_cm} cm` : ''}
 
-EXERCISE CATALOG — every exercise you use MUST come from this list (format: id (Namn)):
-${catalogForPrompt()}
+EXERCISE CATALOG — every exercise you use MUST come from this list (format: id (Namn, equipment)):
+${catalogForPrompt(allowedEquipment(profile.equipment))}
 
 EXERCISE RULES (strict):
 - Choose exercises ONLY from the catalog above. Put the catalog id in "exercise_id" and the exact Swedish name from the list in "name".
 - Inventing exercises, variations or names that are not in the catalog is NOT allowed. If the exercise you had in mind is missing, pick the closest one that IS in the catalog.
-- Prefer exercises whose equipment matches the user's available equipment (${profile.equipment.join(', ')}); only pick another exercise when the catalog offers nothing suitable for that equipment.
+- The catalog above is ALREADY FILTERED to the equipment this user has, and each entry states its equipment. Every exercise in it is usable; nothing outside it is.
 
 INSTRUCTIONS:
 - Distribute ${profile.days_per_week} workout days across the week. Remaining days are rest days.
@@ -374,7 +380,14 @@ function toNumber(value: unknown, fallback: number): number {
  * tomma) kastar vi i stället — routes/plan.ts sätter då planens status till
  * "error", vilket är ärligare än ett i praktiken tomt schema.
  */
-export function normalizePlanExercises<T extends GeneratedPlanDay>(days: T[]): T[] {
+export function normalizePlanExercises<T extends GeneratedPlanDay>(
+  days: T[],
+  /**
+   * Katalogens utrustningsvärden användaren har. Utelämnad ⇒ ingen
+   * utrustningskontroll, vilket befintliga tester förlitar sig på.
+   */
+  allowed?: Set<string>
+): T[] {
   if (!Array.isArray(days) || days.length === 0) {
     throw new Error('Plan generation returned no days')
   }
@@ -421,6 +434,17 @@ export function normalizePlanExercises<T extends GeneratedPlanDay>(days: T[]): T
         console.warn(
           `Plan: dropping unknown exercise (weekday ${day.weekday}):`,
           JSON.stringify({ exercise_id: o.exercise_id, name: o.name }).slice(0, 200)
+        )
+        continue
+      }
+
+      // Katalogen i prompten är filtrerad, men namnuppslaget ovan går mot HELA
+      // katalogen — hittar modellen på ett namn kan matchExercise lösa upp det
+      // till en övning användaren inte kan göra. Sista spärren sitter här.
+      if (allowed && !allowed.has(hit.equipment)) {
+        console.warn(
+          `Plan: dropping exercise outside available equipment (weekday ${day.weekday}):`,
+          JSON.stringify({ id: hit.id, equipment: hit.equipment }).slice(0, 200)
         )
         continue
       }
@@ -514,6 +538,9 @@ export async function generatePlan(
   lang: Lang = 'sv'
 ): Promise<void> {
   const db = supabaseAdmin(env)
+  // Samma mängd som filtrerar katalogen i prompten — så efterkontrollen nedan
+  // bedömer mot exakt samma regel som modellen fick.
+  const allowed = allowedEquipment(profile.equipment)
 
   const { text: rawText, stopReason } = await callAi(
     {
@@ -545,7 +572,7 @@ export async function generatePlan(
 
   // Lås övningarna till katalogen innan något sparas. Kastar hellre än sparar
   // en träningsdag utan giltiga övningar.
-  const days = normalizePlanExercises(parsed.days)
+  const days = normalizePlanExercises(parsed.days, allowed)
 
   const dayRows = days.flatMap((d) => [
     {
