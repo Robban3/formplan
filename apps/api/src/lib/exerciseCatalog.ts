@@ -894,103 +894,13 @@ export function matchExercise(name: string): ApiCatalogExercise | undefined {
   return best
 }
 
-/** Kompakt lista att bädda in i AI-prompten (id + namn per kategori). */
-/**
- * Profilens utrustningsval → katalogens utrustningsvärden.
- *
- * Profilen lagrar SVENSKA val ('Hantlar'), katalogen har ENGELSKA värden
- * ('dumbbell'). Utan den här översättningen kan ingen matchning ske — och
- * prompten bad tidigare modellen matcha svenska ord mot en lista som varken
- * innehöll utrustningen eller de engelska orden.
- *
- * 'body only' läggs alltid till: kroppsvikt har alla, och det garanterar att
- * katalogen aldrig blir tom. 'Gummiband' finns inte i katalogen — den
- * användaren får kroppsviktsövningar, vilket är bättre än att få
- * kabelmaskiner föreslagna.
- *
- * 'other' kräver gym, trots att några av dess övningar (Dips, Mountain
- * climbers) inte behöver utrustning. Katalogen skiljer inte på "behöver
- * redskap" och "behöver inget" inom den kategorin, och att omklassificera
- * nio övningar här skulle glida ifrån generatorn som producerar filen.
- */
-const EQUIPMENT_FOR_PROFILE: Record<string, string[]> = {
-  'Gym (fullutrustat)': ['barbell', 'dumbbell', 'machine', 'cable', 'kettlebells', 'e-z curl bar', 'other'],
-  'Hantlar': ['dumbbell'],
-  'Skivstång': ['barbell', 'e-z curl bar'],
-  'Kettlebells': ['kettlebells'],
-  'Chin-up stång': [],
-  'Gummiband': [],
-  'Inga redskap (kroppsvikt)': [],
-}
-
-/**
- * Värden som förekommit i verklig profildata utan att vara onboardingens
- * nuvarande val — äldre konton, testfixturer och mockdata. De pekas om i
- * stället för att räknas som okända.
- */
-const EQUIPMENT_ALIASES: Record<string, string> = {
-  'gym': 'Gym (fullutrustat)',
-  'bodyweight': 'Inga redskap (kroppsvikt)',
-  'kroppsvikt': 'Inga redskap (kroppsvikt)',
-  'hantlar': 'Hantlar',
-  'skivstång': 'Skivstång',
-  'kettlebells': 'Kettlebells',
-  'gummiband': 'Gummiband',
-  'chin-up stång': 'Chin-up stång',
-}
-
-/** Kroppsvikt är alltid tillgängligt. */
-const ALWAYS_ALLOWED = 'body only'
-
-/** Varje utrustningsvärde katalogen innehåller. */
-function allEquipment(): Set<string> {
-  return new Set(EXERCISE_CATALOG.map((e) => e.equipment))
-}
-
-/**
- * Vilka av katalogens utrustningsvärden användaren faktiskt har.
- *
- * Två fall ger ingen filtrering alls:
- *
- * 1. Tom profil. Ett konto utan ifylld utrustning ska få ett fullt schema,
- *    inte bara armhävningar.
- * 2. Ett värde kartan inte känner. Då är kartan ofullständig, och att gissa
- *    är sämre än att inte filtrera — annars reduceras en användare med ett
- *    äldre eller felstavat värde tyst till kroppsvikt. Testfixturen hade
- *    'bodyweight' och mockdatan 'Gym', båda utanför onboardingens val, så
- *    det är inte ett teoretiskt fall.
- */
-export function allowedEquipment(profileEquipment: readonly string[]): Set<string> {
-  if (profileEquipment.length === 0) return allEquipment()
-
-  const allowed = new Set<string>([ALWAYS_ALLOWED])
-  for (const raw of profileEquipment) {
-    const key = raw.trim()
-    const canonical = EQUIPMENT_FOR_PROFILE[key] ? key : EQUIPMENT_ALIASES[key.toLowerCase()]
-    const mapped = canonical ? EQUIPMENT_FOR_PROFILE[canonical] : undefined
-    if (!mapped) {
-      console.warn(`allowedEquipment: okänt utrustningsvärde ${JSON.stringify(raw)} — filtrerar inte`)
-      return allEquipment()
-    }
-    for (const eq of mapped) allowed.add(eq)
-  }
-  return allowed
-}
-
-/** Får den här övningen föreslås med användarens utrustning? */
-export function isExerciseAllowed(id: string, allowed: Set<string>): boolean {
-  const ex = getExerciseById(id)
-  return ex ? allowed.has(ex.equipment) : false
-}
-
 /**
  * Katalogen som text till prompten.
  *
- * Två ändringar mot tidigare: listan FILTRERAS på användarens utrustning, så
- * modellen inte kan välja något otillgängligt, och den visar utrustningen per
- * övning. Förut stod bara `id (namn)` — instruktionen "välj övningar vars
- * utrustning matchar" var omöjlig att följa, eftersom listan inte sa vad
- * någon övning krävde.
+ * `allowed` är katalogens utrustningsvärden användaren har (se lib/equipment.ts).
+ * Utelämnad ⇒ hela katalogen. Varje rad visar utrustningen: utan den kunde
+ * modellen inte veta vad en övning krävde, och instruktionen "välj övningar
+ * som matchar användarens utrustning" var omöjlig att följa.
  */
 export function catalogForPrompt(allowed?: Set<string>): string {
   const byCat = new Map<string, ApiCatalogExercise[]>()

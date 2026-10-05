@@ -1,13 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { z } from 'zod'
 import { supabaseAdmin } from './supabase'
-import {
-  catalogForPrompt,
-  getExerciseById,
-  matchExercise,
-  allowedEquipment,
-  isExerciseAllowed,
-} from './exerciseCatalog'
+import { catalogForPrompt, getExerciseById, matchExercise } from './exerciseCatalog'
+import { allowedEquipment } from './equipment'
 import { languageInstruction, languageName, type Lang } from './lang'
 import type {
   Env,

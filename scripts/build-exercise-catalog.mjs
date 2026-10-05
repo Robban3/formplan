@@ -554,16 +554,24 @@ export function matchExercise(name: string): ApiCatalogExercise | undefined {
   return best
 }
 
-/** Kompakt lista att bädda in i AI-prompten (id + namn per kategori). */
-export function catalogForPrompt(): string {
+/**
+ * Katalogen som text till prompten.
+ *
+ * \`allowed\` är katalogens utrustningsvärden användaren har (se lib/equipment.ts).
+ * Utelämnad ⇒ hela katalogen. Varje rad visar utrustningen: utan den kunde
+ * modellen inte veta vad en övning krävde, och instruktionen "välj övningar
+ * som matchar användarens utrustning" var omöjlig att följa.
+ */
+export function catalogForPrompt(allowed?: Set<string>): string {
   const byCat = new Map<string, ApiCatalogExercise[]>()
   for (const e of EXERCISE_CATALOG) {
+    if (allowed && !allowed.has(e.equipment)) continue
     const list = byCat.get(e.category) ?? []
     list.push(e)
     byCat.set(e.category, list)
   }
   return [...byCat.entries()]
-    .map(([cat, list]) => \`\${cat}: \${list.map((e) => \`\${e.id} (\${e.name})\`).join(', ')}\`)
+    .map(([cat, list]) => \`\${cat}: \${list.map((e) => \`\${e.id} (\${e.name}, \${e.equipment})\`).join(', ')}\`)
     .join('\\n')
 }
 `
