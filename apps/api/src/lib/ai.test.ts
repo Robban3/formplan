@@ -30,7 +30,11 @@ const profile: FitnessProfile = {
   // AI-responsen innehåller bänkpress — korrekt beteende, men det hör till
   // filtertesterna i exerciseCatalog.test.ts.
   equipment: ['Gym (fullutrustat)'],
-  days_per_week: 3,
+  // 1 av samma skäl som gymmet ovan: planJson nedan är minimal och har EN
+  // träningsdag. Med 3 föll de här testerna på att antalet träningsdagar inte
+  // matchade profilen — korrekt beteende, men det hör till testerna för
+  // dagantalet längre ner, inte till databasskrivningen.
+  days_per_week: 1,
   allergies: [],
   calorie_goal: null,
   age: null,
@@ -65,22 +69,24 @@ const geminiOk = () =>
     { status: 200, headers: { 'Content-Type': 'application/json' } }
   )
 
+// Delade hjälpare: både normaliseringstesterna och testerna för dagantalet
+// bygger samma minimala träningsdag.
+const nutrition = { total_calories: 2000, protein_g: 150, carbs_g: 200, fat_g: 60, meals: [] }
+
+const workoutDay = (exercises: unknown[]): GeneratedPlanDay => ({
+  weekday: 1,
+  type: 'workout',
+  content: { name: 'Pass', focus: 'Bröst', duration_minutes: 60, exercises } as unknown as WorkoutDay,
+  nutrition,
+})
+
+const exercisesOf = (day: GeneratedPlanDay) => (day.content as WorkoutDay).exercises
+
 // Modellen får aldrig litas på: den kan hitta på id:n, stava namn på eget sätt
 // eller utelämna exercise_id. normalizePlanExercises låser övningarna till den
 // kurerade katalogen så bild/teknik alltid kan kopplas och historiken inte
 // splittras på namnvarianter.
 describe('normalizePlanExercises', () => {
-  const nutrition = { total_calories: 2000, protein_g: 150, carbs_g: 200, fat_g: 60, meals: [] }
-
-  const workoutDay = (exercises: unknown[]): GeneratedPlanDay => ({
-    weekday: 1,
-    type: 'workout',
-    content: { name: 'Pass', focus: 'Bröst', duration_minutes: 60, exercises } as unknown as WorkoutDay,
-    nutrition,
-  })
-
-  const exercisesOf = (day: GeneratedPlanDay) => (day.content as WorkoutDay).exercises
-
   it('keeps a valid exercise_id and canonicalises the name', () => {
     const days = normalizePlanExercises([
       workoutDay([
@@ -341,6 +347,80 @@ describe('normalizePlanExercises', () => {
     const days = normalizePlanExercises([good, restWithEmptyArray, { ...restWithEmptyArray, weekday: 4 }])
     expect(days.map((d) => d.type)).toEqual(['workout', 'rest', 'rest'])
     expect(exercisesOf(days[0]!)).toHaveLength(1)
+  })
+})
+
+/**
+ * Antalet träningsdagar mot profilens days_per_week.
+ *
+ * Buggen: ingenting kontrollerade ANTALET. Övningarna låstes till katalogen
+ * och utrustningen filtrerades, men den som valt 3 dagar kunde få 5 — och den
+ * som valt 5 kunde få 3 — utan att något i kedjan märkte det. days_per_week är
+ * ett villkor om återhämtning, inte en upplysning till modellen.
+ */
+describe('normalizePlanExercises: antal träningsdagar', () => {
+  const workout = (weekday: number): GeneratedPlanDay => ({
+    ...workoutDay([{ exercise_id: 'bankpress', name: 'Bänkpress', sets: 4, reps: '8', rest_seconds: 120 }]),
+    weekday,
+  })
+  const workoutTypes = (days: GeneratedPlanDay[]) =>
+    days.filter((d) => d.type === 'workout').map((d) => d.weekday)
+
+  it('låter rätt antal passera', () => {
+    const days = normalizePlanExercises([workout(1), workout(3), workout(5)], undefined, 3)
+    expect(workoutTypes(days)).toEqual([1, 3, 5])
+  })
+
+  it('gör överskottet till vilodagar', () => {
+    const days = normalizePlanExercises(
+      [workout(1), workout(2), workout(3), workout(4), workout(5)],
+      undefined,
+      3
+    )
+    expect(workoutTypes(days)).toHaveLength(3)
+  })
+
+  // Sent i veckan först: veckans början hålls intakt och vilan hamnar
+  // sammanhängande i slutet i stället för som hål på måndag och onsdag.
+  it('tar bort de SENASTE dagarna, inte de första', () => {
+    const days = normalizePlanExercises([workout(1), workout(3), workout(6), workout(7)], undefined, 2)
+    expect(workoutTypes(days)).toEqual([1, 3])
+  })
+
+  // Modellen levererar inte alltid dagarna sorterade — trimningen måste gå på
+  // weekday, inte på arrayordningen.
+  it('sorterar på weekday, inte på arrayens ordning', () => {
+    const days = normalizePlanExercises([workout(7), workout(1), workout(4)], undefined, 2)
+    expect(workoutTypes(days).sort((a, b) => a - b)).toEqual([1, 4])
+  })
+
+  it('en trimmad dag behåller sin nutrition', () => {
+    const days = normalizePlanExercises([workout(1), workout(7)], undefined, 1)
+    const trimmed = days.find((d) => d.weekday === 7)!
+    expect(trimmed.type).toBe('rest')
+    expect(trimmed.content).toEqual({ notes: 'Vila' })
+    expect(trimmed.nutrition).toBe(nutrition)
+  })
+
+  // Ett något kortare schema är fortfarande träningsbart, och generering är
+  // hårt kvotad — ett kast skulle kosta användaren ett försök i onödan.
+  it('släpper igenom ett litet underskott med en varning', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const days = normalizePlanExercises([workout(1), workout(3)], undefined, 3)
+    expect(workoutTypes(days)).toEqual([1, 3])
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('asked for 3'))
+    warn.mockRestore()
+  })
+
+  it('kastar när hälften eller mindre av dagarna levererades', () => {
+    expect(() => normalizePlanExercises([workout(1), workout(3)], undefined, 4)).toThrow(
+      /2 workout days but the profile asks for 4/
+    )
+  })
+
+  it('utan days_per_week kontrolleras antalet inte', () => {
+    const days = normalizePlanExercises([workout(1), workout(2), workout(3), workout(4)])
+    expect(workoutTypes(days)).toHaveLength(4)
   })
 })
 

@@ -289,7 +289,7 @@ EXERCISE RULES (strict):
 - The catalog above is ALREADY FILTERED to the equipment this user has, and each entry states its equipment. Every exercise in it is usable; nothing outside it is.
 
 INSTRUCTIONS:
-- Distribute ${profile.days_per_week} workout days across the week. Remaining days are rest days.
+- WORKOUT DAY COUNT — HARD RULE: exactly ${profile.days_per_week} of the 7 days must have type "workout", and the remaining ${7 - profile.days_per_week} must have type "rest". Not more, not fewer. This is the user's recovery capacity, not a suggestion. Spread the workout days out so that two workouts are rarely back to back.
 - Every day gets a nutrition plan (macros + meals).
 ${
   profile.allergies.length
@@ -386,7 +386,12 @@ export function normalizePlanExercises<T extends GeneratedPlanDay>(
    * Katalogens utrustningsvärden användaren har. Utelämnad ⇒ ingen
    * utrustningskontroll, vilket befintliga tester förlitar sig på.
    */
-  allowed?: Set<string>
+  allowed?: Set<string>,
+  /**
+   * Profilens days_per_week. Utelämnad ⇒ antalet träningsdagar kontrolleras
+   * inte, vilket befintliga tester förlitar sig på.
+   */
+  daysPerWeek?: number
 ): T[] {
   if (!Array.isArray(days) || days.length === 0) {
     throw new Error('Plan generation returned no days')
@@ -528,6 +533,54 @@ export function normalizePlanExercises<T extends GeneratedPlanDay>(
     day.content = { notes: 'Vila' } satisfies RestDay
   }
 
+  // Efterkontroll av ANTALET träningsdagar. Allt ovan kontrollerar att
+  // övningarna är giltiga — ingenting frågade om modellen levererade det antal
+  // dagar användaren bett om. Den som valt 3 dagar kunde få 5 och den som valt
+  // 5 kunde få 3, utan att något i kedjan märkte det. days_per_week är ett
+  // villkor om återhämtning, inte en upplysning.
+  //
+  // Körs sist: först här är day.type färdigsatt (tömda dagar har blivit
+  // vilodagar, felmärkta har typats om), så räkningen sker på det som faktiskt
+  // sparas.
+  if (daysPerWeek && daysPerWeek > 0) {
+    const workouts = days.filter((d) => d.type === 'workout')
+
+    if (workouts.length > daysPerWeek) {
+      // Överskottet blir vilodagar, sent i veckan först. Att ta de sista
+      // dagarna håller veckans början intakt och ger ett sammanhängande
+      // vilopass på slutet, i stället för ett schema med hål på måndag och
+      // onsdag. Sorteringen sker på weekday, inte på arrayordningen — modellen
+      // levererar inte alltid dagarna i ordning.
+      const surplus = [...workouts]
+        .sort((a, b) => b.weekday - a.weekday)
+        .slice(0, workouts.length - daysPerWeek)
+      for (const day of surplus) {
+        console.warn(
+          `Plan: ${workouts.length} workout days but the user asked for ${daysPerWeek} — weekday ${day.weekday} converted to a rest day`
+        )
+        day.type = 'rest'
+        // Nutritionen ligger utanför content och behålls.
+        day.content = { notes: 'Vila' } satisfies RestDay
+      }
+    } else if (workouts.length < daysPerWeek) {
+      console.warn(
+        `Plan: only ${workouts.length} workout days for a user who asked for ${daysPerWeek}`
+      )
+      // Underskott går inte att reparera — att hitta på ett pass vore värre än
+      // att leverera färre. Avvägningen: generering är hårt kvotad (3/h, en
+      // plan på gratisnivån), så ett kast kostar användaren ett försök. Ett
+      // schema som är NÅGOT kortare är fortfarande träningsbart och får
+      // passera med en varning; hälften eller mindre är inte den plan som
+      // efterfrågades, och då är ett fel ärligare — samma gräns som regeln för
+      // tömda dagar ovan.
+      if (workouts.length * 2 <= daysPerWeek) {
+        throw new Error(
+          `Plan generation produced ${workouts.length} workout days but the profile asks for ${daysPerWeek}`
+        )
+      }
+    }
+  }
+
   return days
 }
 
@@ -572,7 +625,7 @@ export async function generatePlan(
 
   // Lås övningarna till katalogen innan något sparas. Kastar hellre än sparar
   // en träningsdag utan giltiga övningar.
-  const days = normalizePlanExercises(parsed.days, allowed)
+  const days = normalizePlanExercises(parsed.days, allowed, profile.days_per_week)
 
   const dayRows = days.flatMap((d) => [
     {
