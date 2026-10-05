@@ -25,7 +25,12 @@ planRouter.post(
   requireVerifiedEmail,
   // Plangenerering är den dyraste AI-operationen — hård gräns per användare.
   rateLimit('plan-generate', 3),
-  zValidator('json', z.object({ profile_snapshot: z.record(z.unknown()).optional() }), validationHook),
+  // Tom body. Profilen läses ur databasen nedan och får ALDRIG komma från
+  // klienten: en snapshot skickad härifrån kunde vara den profil som gällde när
+  // skärmen laddades, så utrustning användaren hunnit klicka ur hade styrt
+  // genereringen ändå. Schemat hette tidigare `{ profile_snapshot?: … }` —
+  // fältet lästes aldrig, men en oanvänd väg in inbjuder till att koppla in den.
+  zValidator('json', z.object({}).strip(), validationHook),
   async (c) => {
     const user = c.get('user')
     const db = supabaseAdmin(c.env)

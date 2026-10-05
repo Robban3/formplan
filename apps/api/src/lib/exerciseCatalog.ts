@@ -134,6 +134,18 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     ]
   },
   {
+    "id": "armhavningar-upphojda-fotter",
+    "name": "Armhävningar med upphöjda fötter",
+    "category": "Bröst",
+    "equipment": "body only",
+    "level": "beginner",
+    "aliases": [
+      "decline push-up",
+      "armhävningar med fötterna upphöjda",
+      "lutande armhävningar"
+    ]
+  },
+  {
     "id": "marklyft",
     "name": "Marklyft",
     "category": "Rygg",
@@ -587,18 +599,6 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "aliases": [
       "stående rodd",
       "uprightrow"
-    ]
-  },
-  {
-    "id": "armhavningar-upphojda-fotter",
-    "name": "Armhävningar med upphöjda fötter",
-    "category": "Axlar",
-    "equipment": "body only",
-    "level": "beginner",
-    "aliases": [
-      "decline push-up",
-      "armhävningar med fötterna upphöjda",
-      "lutande armhävningar"
     ]
   },
   {

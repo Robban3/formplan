@@ -52,6 +52,9 @@ const CATALOG = [
   { slug: 'maskinpress-brost', name: 'Maskinpress bröst', category: 'Bröst', db: 'Machine_Bench_Press', aliases: ['bröstpress maskin'] },
   { slug: 'dips-brost', name: 'Dips', category: 'Bröst', db: 'Dips_-_Chest_Version', aliases: ['dips bröst'] },
   { slug: 'kabelcross', name: 'Kabelcross', category: 'Bröst', db: 'Cable_Crossover', aliases: ['cable crossover', 'kabelkryss'] },
+  // Bröst primärt, axlar sekundärt. Ger axelarbete — särskilt ju mer upprätt
+  // bålen är — men hör där den primära muskeln hör.
+  { slug: 'armhavningar-upphojda-fotter', name: 'Armhävningar med upphöjda fötter', category: 'Bröst', db: 'Push-Ups_With_Feet_Elevated', aliases: ['decline push-up', 'armhävningar med fötterna upphöjda', 'lutande armhävningar'] },
 
   // ── Rygg ───────────────────────────────────────────────────────────────
   { slug: 'marklyft', name: 'Marklyft', category: 'Rygg', db: 'Barbell_Deadlift', aliases: ['deadlift', 'konventionell marklyft'] },
@@ -112,12 +115,8 @@ const CATALOG = [
   // muskel: Handstand push-ups, expertnivå. Den klassiska nybörjarvarianten
   // (pike push-up) finns inte i datan.
   //
-  // Armhävningar med upphöjda fötter har bröst som primär muskel och axlar som
-  // sekundär. Att lägga den under Axlar är ett medvetet träningsval, inte en
-  // felklassning: ju mer upprätt bålen är, desto mer tar axlarna över, och
-  // lutande armhävningar är första steget i progressionen mot pike och
-  // handstående. Muskelkartan visar fortfarande sanningen (bröst primärt).
-  { slug: 'armhavningar-upphojda-fotter', name: 'Armhävningar med upphöjda fötter', category: 'Axlar', db: 'Push-Ups_With_Feet_Elevated', aliases: ['decline push-up', 'armhävningar med fötterna upphöjda', 'lutande armhävningar'] },
+  // Armhävningar med upphöjda fötter ligger under Bröst (nedan), där dess
+  // primära muskel hör. Den ger axelarbete men är ingen axelövning.
   { slug: 'handstaende-armhavningar', name: 'Handstående armhävningar', category: 'Axlar', db: 'Handstand_Push-Ups', aliases: ['handstand push-ups', 'handstandspress', 'handstående press'] },
 
   // ── Armar ──────────────────────────────────────────────────────────────

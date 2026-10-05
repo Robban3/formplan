@@ -264,19 +264,25 @@ export function SettingsPage() {
   }, [])
 
   // Persist a goal override to the server profile. Explicit non-null
-  // calorie_goal/protein_goal are treated as overrides by the API. Guards
-  // against writing before the profile has hydrated (which would 400 and drop
-  // the override) by fetch-merging the full profile first.
+  // calorie_goal/protein_goal are treated as overrides by the API.
+  //
+  // Läser ALLTID om profilen precis före skrivningen. api.saveProfile ersätter
+  // hela raden, och en ögonblicksbild tagen vid mount skrev tillbaka den
+  // utrustning och de allergier som gällde DÅ: klickade användaren ur
+  // kettlebells i onboardingen medan den här sidan låg öppen — eller på en
+  // annan enhet — återställdes valet tyst av nästa kalorimål, och nästa
+  // schemagenerering föreslog kettlebellövningar igen.
+  //
+  // Misslyckas läsningen skrivs ingenting. Vi vet då inte vad raden innehåller,
+  // och att skriva hela den blint är värre än att inte spara målet — det lokala
+  // värdet står kvar (NumberInput skriver det via settingKey) och toasten
+  // säger att serversparningen inte gick igenom.
   async function saveGoalToProfile(patch: { calorie_goal?: number; protein_goal?: number }) {
     try {
-      if (!hydratedRef.current) {
-        const { profile } = await api.getProfile()
-        if (profile && typeof profile === 'object') {
-          profileRef.current = { ...(profile as Record<string, unknown>) }
-        }
-        hydratedRef.current = true
-      }
-      profileRef.current = { ...profileRef.current, ...patch }
+      const { profile } = await api.getProfile()
+      if (!profile || typeof profile !== 'object') throw new Error('ingen profil')
+      profileRef.current = { ...(profile as Record<string, unknown>), ...patch }
+      hydratedRef.current = true
       await api.saveProfile(profileRef.current)
     } catch {
       toast.error(t('settings.goalSaveFailed'))

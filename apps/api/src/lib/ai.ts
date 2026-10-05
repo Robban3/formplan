@@ -727,6 +727,11 @@ async function buildUserContext(userId: string, env: Env): Promise<string> {
     if (profile.height_cm) lines.push(`Längd: ${profile.height_cm} cm`)
     if (profile.calorie_goal) lines.push(`Kalorimål: ${profile.calorie_goal} kcal/dag`)
     lines.push(`Mål för träningsdagar/vecka: ${profile.days_per_week}`)
+    // Utrustningen MÅSTE med: coachen är instruerad att ge konkreta råd, och
+    // utan den föreslog den skivstångsknäböj till någon som angett noll
+    // redskap. Samma fel som schemagenereringen hade — villkoret samlas in i
+    // onboardingen men nådde aldrig fram till det som ger svaret.
+    if (profile.equipment?.length) lines.push(`Tillgänglig utrustning: ${profile.equipment.join(', ')}`)
     if (profile.allergies?.length) lines.push(`Allergier/kosthänsyn: ${profile.allergies.join(', ')}`)
   }
 
@@ -813,6 +818,7 @@ Riktlinjer:
 - Referera till användarens data när det är relevant (t.ex. kaloriintag, antal pass, mål).
 - Ge konkreta, handlingsbara råd. Ställ inga medicinska diagnoser.
 - Hitta inte på siffror — använd bara data som finns ovan. Saknas data, uppmuntra användaren att logga pass/kost.
+- Föreslår du övningar måste de gå att göra med användarens tillgängliga utrustning ovan. Står det "Inga redskap (kroppsvikt)" ska inga övningar kräva skivstång, hantlar, maskiner eller kablar. Saknas utrustningsrad, fråga vad användaren har.
 - Var ärlig, evidensbaserad och uppmuntrande.
 
 VIKTIGT — håll dig till ämnet:

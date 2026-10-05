@@ -101,3 +101,57 @@ describe('isExerciseAllowed', () => {
     expect(isExerciseAllowed('finns-inte', allowedEquipment([]))).toBe(false)
   })
 })
+
+/**
+ * Hela kedjan när användaren ÄNDRAR sin utrustning.
+ *
+ * Det enskilda fallet som ska fungera: man klickar ur Kettlebells i
+ * inställningarna och nästa generering slutar föreslå kettlebellövningar.
+ *
+ * Kedjan har tre led, och alla tre testas här mot samma profilvärden:
+ *   1. allowedEquipment översätter profilens svenska val till katalogvärden,
+ *   2. catalogForPrompt visar modellen bara det som är kvar,
+ *   3. normalizePlanExercises släpper övningar utanför mängden — spärren för
+ *      när modellen ändå hittar på en.
+ *
+ * Led 3 är inte överflödigt: namnuppslaget i normaliseringen går mot HELA
+ * katalogen, så en övning som inte fanns i prompten kan ändå lösas upp.
+ */
+describe('ändrad utrustning får effekt på nästa generering', () => {
+  const KETTLEBELL_IDS = EXERCISE_CATALOG.filter((e) => e.equipment === 'kettlebells').map((e) => e.id)
+
+  it('katalogen har kettlebellövningar att utesluta', () => {
+    // Utan det här skulle testerna nedan passera av fel anledning.
+    expect(KETTLEBELL_IDS.length).toBeGreaterThan(0)
+  })
+
+  it('med kettlebells ingår de', () => {
+    const allowed = allowedEquipment(['Hantlar', 'Kettlebells'])
+    expect(allowed.has('kettlebells')).toBe(true)
+    for (const id of KETTLEBELL_IDS) expect(isExerciseAllowed(id, allowed), id).toBe(true)
+  })
+
+  it('urklickad försvinner ur prompten', () => {
+    const before = catalogForPrompt(allowedEquipment(['Hantlar', 'Kettlebells']))
+    const after = catalogForPrompt(allowedEquipment(['Hantlar']))
+    for (const id of KETTLEBELL_IDS) {
+      expect(before, `${id} skulle finnas före`).toContain(id)
+      expect(after, `${id} skulle vara borta efter`).not.toContain(id)
+    }
+    expect(after).not.toContain('kettlebells')
+    // Resten av profilen påverkas inte.
+    expect(after).toContain('dumbbell')
+  })
+
+  it('urklickad släpps även om modellen ändå föreslår den', () => {
+    const allowed = allowedEquipment(['Hantlar'])
+    for (const id of KETTLEBELL_IDS) expect(isExerciseAllowed(id, allowed), id).toBe(false)
+  })
+
+  // Det omvända hållet måste också fungera: lägger man TILL utrustning ska den
+  // bli valbar direkt, utan att något annat behöver ändras.
+  it('tillagd utrustning blir tillgänglig', () => {
+    expect(allowedEquipment(['Inga redskap (kroppsvikt)']).has('kettlebells')).toBe(false)
+    expect(allowedEquipment(['Inga redskap (kroppsvikt)', 'Kettlebells']).has('kettlebells')).toBe(true)
+  })
+})

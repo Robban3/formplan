@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { generatePlan, normalizePlanExercises, type GeneratedPlanDay } from './ai'
+import { coachReply, generatePlan, normalizePlanExercises, type GeneratedPlanDay } from './ai'
+import { allowedEquipment } from './equipment'
 import type { Env, FitnessProfile, WorkoutDay } from './types'
 
 // generatePlan körs i bakgrunden (waitUntil). Om plan_day-insert misslyckas får
@@ -351,6 +352,76 @@ describe('normalizePlanExercises', () => {
 })
 
 /**
+ * Utrustningsspärren i normaliseringen.
+ *
+ * Varför den behövs TROTS att prompten redan är filtrerad: namnuppslaget i
+ * normaliseringen går mot HELA katalogen, så en övning som aldrig låg i
+ * prompten kan ändå lösas upp om modellen hittar på namnet. Det här är ledet
+ * som gör att en urklickad utrustning inte kan smyga tillbaka.
+ */
+describe('normalizePlanExercises: utrustningsspärren', () => {
+  const dumbbellsOnly = allowedEquipment(['Hantlar'])
+
+  it('släpper en kettlebellövning för den som klickat ur kettlebells', () => {
+    const good = (weekday: number): GeneratedPlanDay => ({
+      ...workoutDay([{ exercise_id: 'hantelpress-brost', name: 'Hantelpress', sets: 4, reps: '8', rest_seconds: 120 }]),
+      weekday,
+    })
+    const kb: GeneratedPlanDay = {
+      ...workoutDay([{ exercise_id: 'kettlebell-swing', name: 'Kettlebell swing', sets: 3, reps: '15', rest_seconds: 60 }]),
+      weekday: 3,
+    }
+
+    const days = normalizePlanExercises([good(1), good(2), kb], dumbbellsOnly)
+
+    // Dagen töms av spärren och blir vilodag — övningen byts inte tyst ut.
+    expect(days.find((d) => d.weekday === 3)!.type).toBe('rest')
+    expect(days.filter((d) => d.type === 'workout')).toHaveLength(2)
+  })
+
+  it('behåller den när kettlebells finns i profilen', () => {
+    const kb: GeneratedPlanDay = {
+      ...workoutDay([{ exercise_id: 'kettlebell-swing', name: 'Kettlebell swing', sets: 3, reps: '15', rest_seconds: 60 }]),
+      weekday: 3,
+    }
+    const days = normalizePlanExercises([kb], allowedEquipment(['Hantlar', 'Kettlebells']))
+    expect(days[0]!.type).toBe('workout')
+    expect(exercisesOf(days[0]!)[0]!.exercise_id).toBe('kettlebell-swing')
+  })
+
+  // Spärren måste hålla även när modellen skickar ett NAMN utan giltigt id:
+  // namnuppslaget går mot hela katalogen och skulle annars återinföra övningen.
+  //
+  // Tre dagar, inte två: med två dagar tömmer spärren hälften av dem och
+  // majoritetsregeln kastar i stället för att göra dagen till vilodag. Det är
+  // rätt beteende, men då testas inte det här ledet.
+  it('håller även när övningen bara kan lösas upp via namnet', () => {
+    const byName: GeneratedPlanDay = {
+      ...workoutDay([{ exercise_id: 'hittepa-id', name: 'Kettlebell swing', sets: 3, reps: '15', rest_seconds: 60 }]),
+      weekday: 1,
+    }
+    const good = (weekday: number): GeneratedPlanDay => ({
+      ...workoutDay([{ exercise_id: 'hantelpress-brost', name: 'Hantelpress', sets: 4, reps: '8', rest_seconds: 120 }]),
+      weekday,
+    })
+    const days = normalizePlanExercises([byName, good(2), good(4)], dumbbellsOnly)
+    expect(days.find((d) => d.weekday === 1)!.type).toBe('rest')
+    expect(days.filter((d) => d.type === 'workout')).toHaveLength(2)
+  })
+
+  // Spärren får inte ensam kunna spränga en hel plan tyst: tappar MERPARTEN av
+  // dagarna sin utrustning kastar normaliseringen, och routes/plan.ts sätter
+  // planens status till "error" i stället för att spara ett tomt schema.
+  it('kastar när utrustningen tömmer merparten av veckan', () => {
+    const kb = (weekday: number): GeneratedPlanDay => ({
+      ...workoutDay([{ exercise_id: 'kettlebell-swing', name: 'Kettlebell swing', sets: 3, reps: '15', rest_seconds: 60 }]),
+      weekday,
+    })
+    expect(() => normalizePlanExercises([kb(1), kb(3), kb(5)], dumbbellsOnly)).toThrow(/no exercises/i)
+  })
+})
+
+/**
  * Antalet träningsdagar mot profilens days_per_week.
  *
  * Buggen: ingenting kontrollerade ANTALET. Övningarna låstes till katalogen
@@ -513,5 +584,67 @@ describe('generatePlan plan_day insert failure', () => {
     expect(workoutRow.content.exercises).toEqual([
       { exercise_id: 'bankpress', name: 'Bänkpress', sets: 4, reps: '8', rest_seconds: 120 },
     ])
+  })
+})
+
+/**
+ * AI-coachens kontext.
+ *
+ * Buggen: kontexten bar mål, nivå, vikt, kaloribudget, träningsdagar och
+ * allergier — men INTE utrustning. Coachen är instruerad att ge konkreta råd,
+ * så den föreslog skivstångsknäböj till någon som angett noll redskap. Samma
+ * strukturella fel som schemagenereringen hade: villkoret samlas in i
+ * onboardingen men nådde aldrig fram till det som ger svaret.
+ */
+describe('coachReply: utrustningen i kontexten', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  /** Mockar profilen och fångar det som faktiskt skickas till modellen. */
+  function mockWith(profileRow: Record<string, unknown>) {
+    const sent: string[] = []
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input)
+      if (url.includes('generativelanguage.googleapis.com')) {
+        sent.push(String(init?.body ?? ''))
+        return new Response(
+          JSON.stringify({ candidates: [{ content: { parts: [{ text: 'Svar' }] }, finishReason: 'STOP' }] }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      if (url.includes('/fitness_profile')) {
+        return new Response(JSON.stringify([profileRow]), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      }
+      return new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } })
+    })
+    return sent
+  }
+
+  const ask = (sent: string[]) =>
+    coachReply('user-1', [{ role: 'user', content: 'Vilket träningspass för ben ska jag köra?' }], '', env).then(
+      () => sent.join('\n')
+    )
+
+  it('skickar med utrustningen', async () => {
+    const sent = mockWith({ ...profile, equipment: ['Hantlar', 'Chin-up stång'] })
+    expect(await ask(sent)).toContain('Tillgänglig utrustning: Hantlar, Chin-up stång')
+  })
+
+  it('kroppsvikt följer med precis som den står i profilen', async () => {
+    const sent = mockWith({ ...profile, equipment: ['Inga redskap (kroppsvikt)'] })
+    const body = await ask(sent)
+    // Hela raden, inte bara värdet: instruktionstexten nämner "Inga redskap
+    // (kroppsvikt)" ordagrant, så en sökning på värdet enbart passerade även
+    // när DATAN saknades helt.
+    expect(body).toContain('Tillgänglig utrustning: Inga redskap (kroppsvikt)')
+    // Och instruktionen som gör uppgiften användbar för modellen.
+    expect(body).toContain('måste de gå att göra med användarens tillgängliga utrustning')
+  })
+
+  it('tom utrustning ger ingen rad — modellen ska fråga, inte gissa', async () => {
+    const sent = mockWith({ ...profile, equipment: [] })
+    expect(await ask(sent)).not.toContain('Tillgänglig utrustning:')
   })
 })

@@ -265,6 +265,29 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
     ]
   },
   {
+    "id": "armhavningar-upphojda-fotter",
+    "name": "Armhävningar med upphöjda fötter",
+    "category": "Bröst",
+    "equipment": "body only",
+    "primaryMuscles": [
+      "chest"
+    ],
+    "secondaryMuscles": [
+      "shoulders",
+      "triceps"
+    ],
+    "images": [
+      "/exercises/armhavningar-upphojda-fotter-0.webp",
+      "/exercises/armhavningar-upphojda-fotter-1.webp"
+    ],
+    "logStyle": "reps",
+    "aliases": [
+      "decline push-up",
+      "armhävningar med fötterna upphöjda",
+      "lutande armhävningar"
+    ]
+  },
+  {
     "id": "marklyft",
     "name": "Marklyft",
     "category": "Rygg",
@@ -1152,29 +1175,6 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
     "aliases": [
       "stående rodd",
       "uprightrow"
-    ]
-  },
-  {
-    "id": "armhavningar-upphojda-fotter",
-    "name": "Armhävningar med upphöjda fötter",
-    "category": "Axlar",
-    "equipment": "body only",
-    "primaryMuscles": [
-      "chest"
-    ],
-    "secondaryMuscles": [
-      "shoulders",
-      "triceps"
-    ],
-    "images": [
-      "/exercises/armhavningar-upphojda-fotter-0.webp",
-      "/exercises/armhavningar-upphojda-fotter-1.webp"
-    ],
-    "logStyle": "reps",
-    "aliases": [
-      "decline push-up",
-      "armhävningar med fötterna upphöjda",
-      "lutande armhävningar"
     ]
   },
   {
