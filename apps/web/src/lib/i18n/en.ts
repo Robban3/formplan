@@ -882,4 +882,11 @@ export const en: Record<TextKey, string> = {
   'diet.restrictionsFailed': 'Could not load your allergies and dietary restrictions, so no meal plan was created — we will not risk serving you something you cannot eat.',
   'common.tryAgain': 'Try again',
   'onb.loadFailed': 'Could not load your saved details. We are not showing an empty form, because saving it would overwrite what you have already filled in.',
+  'notif.reminderTitle': 'FormPlan – {label}',
+  'notif.reminderBody': 'Time to train! Open the app to get started.',
+  'notif.waterTitle': 'FormPlan',
+  'notif.waterBody': 'Time to drink some water!',
+  'notif.testTitle': 'FormPlan – test notification',
+  'notif.enableInSettings': 'You can enable notifications for FormPlan in your device settings.',
+  'notif.allowInSettings': 'Allow notifications for FormPlan in your device settings.',
 }

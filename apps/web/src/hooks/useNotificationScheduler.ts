@@ -1,25 +1,35 @@
 import { useEffect } from 'react'
 import { useSettings } from './useSettings'
-import { scheduleReminderNotification, scheduleWaterReminders } from '../lib/notifications'
+import { useT } from './useT'
+import { syncNotifications } from '../lib/notifications'
 
+/**
+ * Håller det som är schemalagt i linje med inställningarna.
+ *
+ * Hooken kontrollerade tidigare `Notification.permission` själv och hoppade av
+ * när API:t saknades — vilket det gör i iOS WebView, så i appen gjorde den
+ * ingenting. Behörigheten hör i notifications.ts, som känner båda
+ * plattformarna; här finns bara kopplingen inställningar → schema.
+ *
+ * Texterna skickas in: notistexterna låg hårdkodade på svenska i
+ * notifications.ts och följde inte appens språk.
+ */
 export function useNotificationScheduler() {
   const { notifications_enabled, water_reminder, reminders } = useSettings()
+  const { t } = useT()
 
   useEffect(() => {
-    // Notification saknas i vissa miljöer (iOS-webview m.fl.) — krascha inte.
-    if (typeof Notification === 'undefined') return
-    if (!notifications_enabled || Notification.permission !== 'granted') return
-
-    const cleanups: (() => void)[] = []
-
-    if (water_reminder) {
-      cleanups.push(scheduleWaterReminders())
-    }
-
-    for (const r of reminders) {
-      if (r.enabled) cleanups.push(scheduleReminderNotification(r))
-    }
-
-    return () => cleanups.forEach((c) => c())
-  }, [notifications_enabled, water_reminder, reminders])
+    return syncNotifications({
+      enabled: notifications_enabled,
+      water: water_reminder,
+      reminders,
+      texts: {
+        reminderTitle: (label) => t('notif.reminderTitle', { label }),
+        reminderBody: t('notif.reminderBody'),
+        waterTitle: t('notif.waterTitle'),
+        waterBody: t('notif.waterBody'),
+      },
+    })
+    // `t` ändras när språket byts — då ska schemat läggas om med nya texter.
+  }, [notifications_enabled, water_reminder, reminders, t])
 }

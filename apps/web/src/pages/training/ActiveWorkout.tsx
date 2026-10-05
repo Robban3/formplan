@@ -17,6 +17,7 @@ import { getExerciseHistory } from '../../lib/exerciseHistoryStore'
 import { exerciseKey } from '../../lib/exerciseKey'
 import { recommendNextWeight, type ProgressionAdvice } from '../../lib/progression'
 import { useT } from '../../hooks/useT'
+import { keepScreenAwake } from '../../lib/keepAwake'
 
 function formatTime(seconds: number) {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
@@ -179,30 +180,43 @@ export function ActiveWorkout() {
     setRestTimer(null)
   }
 
-  // Keep screen awake during workout when enabled
+  // Keep screen awake during workout when enabled.
+  //
+  // Går via lib/keepAwake.ts: implementationen var tidigare navigator.wakeLock
+  // rakt här, och det API:t finns inte i iOS WebView — växeln gjorde ingenting
+  // i appen.
   useEffect(() => {
-    if (!keep_screen_on || !('wakeLock' in navigator)) return
+    if (!keep_screen_on) return
 
-    let wakeLock: WakeLockSentinel | null = null
+    let release: (() => void) | null = null
+    let cancelled = false
 
     async function acquire() {
-      try {
-        wakeLock = await navigator.wakeLock.request('screen')
-      } catch {
-        // Unsupported or denied — ignore silently
-      }
+      const r = await keepScreenAwake()
+      // Effekten kan ha rivits medan begäran pågick; släpp då direkt så
+      // skärmen inte hålls tänd efter att passet avslutats.
+      if (cancelled) r()
+      else release = r
     }
 
-    acquire()
+    void acquire()
 
+    // webb-wakeLock släpps av webbläsaren när fliken döljs och måste begäras
+    // om. Capacitor-pluginet behöver det inte, men ett extra anrop är
+    // harmlöst — keepAwake() är idempotent.
     function onVisible() {
-      if (document.visibilityState === 'visible') acquire()
+      if (document.visibilityState === 'visible' && !cancelled) {
+        release?.()
+        release = null
+        void acquire()
+      }
     }
     document.addEventListener('visibilitychange', onVisible)
 
     return () => {
+      cancelled = true
       document.removeEventListener('visibilitychange', onVisible)
-      wakeLock?.release()
+      release?.()
     }
   }, [keep_screen_on])
 

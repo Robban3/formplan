@@ -1,46 +1,61 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon } from '../components/ui/Icons'
 import { useSettings } from '../hooks/useSettings'
 import { settingsStore } from '../lib/settings'
 import { toast } from '../lib/toast'
 import { useT } from '../hooks/useT'
+import { Capacitor } from '@capacitor/core'
+import {
+  notificationPermission,
+  requestNotificationPermission,
+  showNotificationNow,
+  type PermissionState,
+} from '../lib/notifications'
 
-type PermState = 'default' | 'granted' | 'denied'
 
 export function NotificationsPage() {
   const { t } = useT()
   const navigate = useNavigate()
   const settings = useSettings()
-  const [permState, setPermState] = useState<PermState>(
-    'Notification' in window ? (Notification.permission as PermState) : 'denied'
-  )
+  // Behörighetsläget läses asynkront: i native går det via Capacitor, och
+  // Notification.permission finns inte där. 'default' som startvärde visar
+  // banderollen med Aktivera-knappen, vilket är rätt gissning medan vi väntar.
+  const [permState, setPermState] = useState<PermissionState>('default')
+  // I appen hänvisar man till telefonens inställningar, inte webbläsarens.
+  const nativeApp = Capacitor.isNativePlatform()
+  const allowWhere = nativeApp ? t('notif.allowInSettings') : t('notif.allowInBrowser')
+  const enableWhere = nativeApp ? t('notif.enableInSettings') : t('notif.enableInBrowser')
+
+  useEffect(() => {
+    let cancelled = false
+    notificationPermission().then((p) => {
+      if (!cancelled) setPermState(p)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   async function requestPermission() {
-    if (!('Notification' in window)) {
+    const result = await requestNotificationPermission()
+    setPermState(result)
+    if (result === 'unsupported') {
       toast.error(t('notif.unsupported'))
       return
     }
-    const result = await Notification.requestPermission()
-    setPermState(result as PermState)
     if (result === 'granted') {
       settingsStore.set('notifications_enabled', true)
-      new Notification('FormPlan', {
-        body: t('notif.enabled'),
-        icon: '/logo.svg',
-      })
+      await showNotificationNow('FormPlan', t('notif.enabled'))
     } else {
       settingsStore.set('notifications_enabled', false)
-      toast.info(t('notif.enableInBrowser'))
+      toast.info(enableWhere)
     }
   }
 
-  function sendTestNotification() {
-    if (Notification.permission !== 'granted') return
-    new Notification('FormPlan – Testnotis', {
-      body: t('notif.testBody'),
-      icon: '/logo.svg',
-    })
+  async function sendTestNotification() {
+    if (permState !== 'granted') return
+    await showNotificationNow(t('notif.testTitle'), t('notif.testBody'))
   }
 
   const rows = [
@@ -66,7 +81,7 @@ export function NotificationsPage() {
           {permState === 'denied' ? (
             <>
               <p className="font-semibold text-red-700 dark:text-red-300 text-sm">{t('notif.blocked')}</p>
-              <p className="text-red-500 text-xs mt-0.5">{t('notif.allowInBrowser')}</p>
+              <p className="text-red-500 text-xs mt-0.5">{allowWhere}</p>
             </>
           ) : (
             <>

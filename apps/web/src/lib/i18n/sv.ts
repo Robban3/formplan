@@ -894,6 +894,13 @@ export const sv = {
   'diet.restrictionsFailed': 'Kunde inte hämta dina allergier och kosthänsyn, så ingen matsedel skapades — vi vill inte riskera att servera något du inte tål.',
   'common.tryAgain': 'Försök igen',
   'onb.loadFailed': 'Kunde inte hämta dina sparade uppgifter. Vi visar inte ett tomt formulär, eftersom ett sparande då hade skrivit över det du redan fyllt i.',
+  'notif.reminderTitle': 'FormPlan – {label}',
+  'notif.reminderBody': 'Dags att träna! Öppna appen för att komma igång.',
+  'notif.waterTitle': 'FormPlan',
+  'notif.waterBody': 'Dags att dricka vatten!',
+  'notif.testTitle': 'FormPlan – testnotis',
+  'notif.enableInSettings': 'Du kan aktivera notiser för FormPlan i telefonens inställningar.',
+  'notif.allowInSettings': 'Tillåt notiser för FormPlan i telefonens inställningar.',
 } as const
 
 /** Varje text som finns. `en.ts` måste täcka alla. */

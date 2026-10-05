@@ -9,6 +9,7 @@ import { useUnits } from '../hooks/useUnits'
 import { PROTEIN_GOAL_MIN_G, PROTEIN_GOAL_MAX_G, PROTEIN_GOAL_STEP_G, WATER_GOAL_MIN_ML, WATER_GOAL_MAX_ML, WATER_GOAL_STEP_ML, WATER_GOAL_STEP_FLOZ } from '../lib/constants'
 import { useT } from '../hooks/useT'
 import type { LanguageSetting } from '../lib/i18n'
+import { canKeepScreenAwake } from '../lib/keepAwake'
 
 type BoolKey = {
   [K in keyof AppSettings]: AppSettings[K] extends boolean ? K : never
@@ -321,11 +322,16 @@ export function SettingsPage() {
             settingKey="rest_seconds_default"
             options={REST_OPTIONS}
           />
-          <Toggle
-            label={t('settings.keepScreenOn')}
-            sub={t('settings.keepScreenOnSub')}
-            settingKey="keep_screen_on"
-          />
+          {/* Dölj växeln där den inte kan göra något — Safari saknar wakeLock.
+              En inställning utan effekt är värre än ingen inställning, och det
+              var precis vad den var i appen innan Capacitor-pluginet. */}
+          {canKeepScreenAwake() && (
+            <Toggle
+              label={t('settings.keepScreenOn')}
+              sub={t('settings.keepScreenOnSub')}
+              settingKey="keep_screen_on"
+            />
+          )}
         </Section>
 
         <Section title={t('settings.sec.nutrition')}>
