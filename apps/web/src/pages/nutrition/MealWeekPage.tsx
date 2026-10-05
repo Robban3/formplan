@@ -34,7 +34,7 @@ function dateForWeekday(weekday: number): Date {
 }
 
 export function MealWeekPage() {
-  const { restrictions, loaded: restrictionsLoaded } = useRestrictions()
+  const { restrictions, status: restrictionsStatus, ready: restrictionsLoaded, retry: retryRestrictions } = useRestrictions()
   const { t, locale } = useT()
   const SLOT_LABELS = mealSlotLabels(t)
   const DAY_SHORT = weekdayNames(locale, 'short')
@@ -193,7 +193,18 @@ export function MealWeekPage() {
             ))}
           </div>
 
-          <button
+          {restrictionsStatus === 'failed' && (
+          <div className="mb-3 rounded-2xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/25 p-3">
+            <p className="text-xs text-amber-800 dark:text-amber-200">{t('diet.restrictionsFailed')}</p>
+            <button
+              onClick={retryRestrictions}
+              className="mt-2 text-xs font-semibold text-amber-900 dark:text-amber-100 underline"
+            >
+              {t('common.tryAgain')}
+            </button>
+          </div>
+        )}
+        <button
             onClick={generateWeek}
             disabled={!restrictionsLoaded}
             className="disabled:opacity-60 w-full bg-forest-700 hover:bg-forest-800 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors"

@@ -879,4 +879,6 @@ export const en: Record<TextKey, string> = {
   'water.goalShort': 'Goal {goal}',
   'training.sessionsOfTotal': '{done} of {total} workouts',
   'training.recordShort': 'record: {n}',
+  'diet.restrictionsFailed': 'Could not load your allergies and dietary restrictions, so no meal plan was created — we will not risk serving you something you cannot eat.',
+  'common.tryAgain': 'Try again',
 }

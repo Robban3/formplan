@@ -1,35 +1,51 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { api } from '../lib/api'
 
 /**
- * Profilens allergier och kosthänsyn, för den lokala kostgeneratorn.
+ * Profilens allergier och kosthänsyn, för den LOKALA kostgeneratorn.
  *
  * Läses här och inte i generatorn: generatorn är ren och ska gå att testa utan
  * nätverk.
  *
- * `loaded` är hela poängen med hooken. Tidigare returnerade den bara listan,
- * som börjar tom och fylls när hämtningen svarar — och "tom" betyder "filtrera
+ * `status` är hela poängen. Hooken returnerade tidigare bara listan, som
+ * börjar tom och fylls när hämtningen svarar — och "tom" betyder "filtrera
  * inte". Tryckte användaren på Generera innan profilen hunnit fram fick hen en
- * matsedel UTAN allergifiltrering: ägg och kvarg till någon som kryssat ägg och
+ * matsedel UTAN filtrering: ägg och kvarg till någon som kryssat ägg och
  * laktos. Samma bugg som filtret skulle rätta, återuppstådd genom ett
- * tidsglapp. Anropande sida måste blockera generering medan `loaded` är false.
+ * tidsglapp.
  *
- * Hooken låg tidigare duplicerad i MealPlanPage och MealWeekPage. Två kopior av
- * ett villkor är två ställen där det kan glida isär.
+ * FAIL CLOSED vid nätverksfel. Går profilen inte att läsa vet vi inte vad som
+ * ska uteslutas, och kan alltså inte filtrera rätt — då genereras ingenting.
+ * Priset är att den som är offline inte kan generera matsedel, även utan
+ * allergier. Det är rätt pris: ett allergen är en medicinsk risk, en utebliven
+ * matsedel är en olägenhet. (Tidigare gällde motsatsen, med motiveringen att
+ * en tom lista inte tömmer matsedeln — men följden var att allergenet kom
+ * igenom.)
  *
- * VID NÄTVERKSFEL blir listan tom och filtret släpper igenom allt. Det är ett
- * medvetet men diskutabelt val, ärvt härifrån: alternativet — att utesluta allt
- * otaggat — tömmer matsedeln helt för den som har en enda hänsyn. Notera att
- * följden är att en allergiker kan få sitt allergen om profilhämtningen
- * misslyckas. `loaded` sätts ändå, så användaren blockeras inte för alltid.
+ * AI-recepten går en annan väg: där hämtar API:t allergierna ur profilen
+ * serversidan och struntar i klientens lista, så den här hooken behövs inte
+ * för dem.
  */
+export type RestrictionsStatus = 'loading' | 'ready' | 'failed'
+
 export interface Restrictions {
   restrictions: string[]
-  loaded: boolean
+  status: RestrictionsStatus
+  /** Säkert att generera? Endast 'ready' betyder att hänsynen är kända. */
+  ready: boolean
+  /** Försök hämta igen efter ett nätverksfel. */
+  retry: () => void
 }
 
 export function useRestrictions(): Restrictions {
-  const [state, setState] = useState<Restrictions>({ restrictions: [], loaded: false })
+  const [restrictions, setRestrictions] = useState<string[]>([])
+  const [status, setStatus] = useState<RestrictionsStatus>('loading')
+  const [attempt, setAttempt] = useState(0)
+
+  const retry = useCallback(() => {
+    setStatus('loading')
+    setAttempt((n) => n + 1)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -38,15 +54,16 @@ export function useRestrictions(): Restrictions {
       .then(({ profile }) => {
         if (cancelled) return
         const p = profile as { allergies?: string[] } | null
-        setState({ restrictions: p?.allergies ?? [], loaded: true })
+        setRestrictions(p?.allergies ?? [])
+        setStatus('ready')
       })
       .catch(() => {
-        if (!cancelled) setState({ restrictions: [], loaded: true })
+        if (!cancelled) setStatus('failed')
       })
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [attempt])
 
-  return state
+  return { restrictions, status, ready: status === 'ready', retry }
 }

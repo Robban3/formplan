@@ -6,6 +6,7 @@ import { requireAccess, requireVerifiedEmail } from '../middleware/access'
 import { coachReply, generateRecipe, analyzeFoodPhoto, estimateMeal, friendlyAiError } from '../lib/ai'
 import { langFromHeader, LANG_HEADER } from '../lib/lang'
 import { rateLimit } from '../lib/rateLimit'
+import { supabaseAdmin } from '../lib/supabase'
 import { validationHook } from '../lib/validation'
 import type { AppContext } from '../lib/types'
 
@@ -67,8 +68,38 @@ aiRouter.post(
   ),
   async (c) => {
     const b = c.req.valid('json')
+    const user = c.get('user')
+
+    // Allergierna hämtas HÄR, ur profilen — klientens lista får aldrig vara
+    // enda källan. Receptsidan fyller sin lista asynkront och började på en
+    // tom array, så ett tryck på Generera innan profilen svarat skickade
+    // `allergies: []`. Prompten säger då inget om allergier alls, och modellen
+    // fick aktivt veta att det inte fanns några. Det är AI-genererad mat
+    // användaren faktiskt lagar.
+    //
+    // UNION, inte enbart profilen: UI:t speglar idag bara profilen, men en
+    // tillfällig hänsyn för ett enskilt recept ska kunna läggas till utan att
+    // tappa de sparade.
+    const db = supabaseAdmin(c.env)
+    const { data: rows, error: profileErr } = await db.query<{ allergies: string[] }[]>(
+      `/fitness_profile?user_id=eq.${user.sub}&select=allergies&limit=1`
+    )
+
+    // FAIL CLOSED. Går profilen inte att läsa vet vi inte vad som ska
+    // uteslutas, och då kan vi inte filtrera rätt. Ett recept som kanske
+    // innehåller användarens allergen är värre än inget recept.
+    if (profileErr) {
+      console.error('Recipe generation: could not read allergies:', profileErr)
+      return c.json(
+        { error: 'Kunde inte läsa dina kosthänsyn just nu, så inget recept skapades. Försök igen.' },
+        503
+      )
+    }
+
+    const allergies = [...new Set([...(rows?.[0]?.allergies ?? []), ...(b.allergies ?? [])])]
+
     try {
-      const recipe = await generateRecipe(b, c.env, langFromHeader(c.req.header(LANG_HEADER)))
+      const recipe = await generateRecipe({ ...b, allergies }, c.env, langFromHeader(c.req.header(LANG_HEADER)))
       return c.json({ recipe })
     } catch (err) {
       console.error('Recipe generation failed:', err)

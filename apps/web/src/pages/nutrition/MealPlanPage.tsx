@@ -61,7 +61,7 @@ function MacroBar({ plan }: { plan: GeneratedMealPlan }) {
 }
 
 export function MealPlanPage() {
-  const { restrictions, loaded: restrictionsLoaded } = useRestrictions()
+  const { restrictions, status: restrictionsStatus, ready: restrictionsLoaded, retry: retryRestrictions } = useRestrictions()
   const navigate = useNavigate()
   const settings = useSettings()
   const { t, locale } = useT()
@@ -191,6 +191,17 @@ export function MealPlanPage() {
         </div>
 
         {/* Generate button */}
+        {restrictionsStatus === 'failed' && (
+          <div className="mb-3 rounded-2xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/25 p-3">
+            <p className="text-xs text-amber-800 dark:text-amber-200">{t('diet.restrictionsFailed')}</p>
+            <button
+              onClick={retryRestrictions}
+              className="mt-2 text-xs font-semibold text-amber-900 dark:text-amber-100 underline"
+            >
+              {t('common.tryAgain')}
+            </button>
+          </div>
+        )}
         <button
           onClick={generate}
           disabled={!restrictionsLoaded}

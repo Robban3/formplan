@@ -509,3 +509,113 @@ describe('CORS', () => {
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://app.formplan.app')
   })
 })
+
+/**
+ * Allergierna till receptgeneratorn hämtas SERVERSIDAN.
+ *
+ * Buggen: routen tog `allergies` ur klientens request. Receptsidan fyller sin
+ * lista asynkront och började på en tom array, så ett tryck på Generera innan
+ * profilen svarat skickade `allergies: []` — prompten sa då ingenting om
+ * allergier, och modellen fick aktivt veta att det inte fanns några. Det är
+ * AI-genererad mat användaren faktiskt lagar.
+ *
+ * Nu läses profilen i routen och unionen används, så klientens kapplöpning
+ * inte kan påverka resultatet.
+ */
+describe('POST /ai/recipe: allergierna kommer ur profilen', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  const RECIPE = JSON.stringify({
+    name: 'Testrätt',
+    meal_type: 'middag',
+    kcal: 600,
+    protein_g: 40,
+    fat_g: 20,
+    carbs_g: 50,
+    prep_minutes: 20,
+    servings: 1,
+    ingredients: ['100 g något'],
+    steps: ['Laga'],
+    tags: ['Test'],
+  })
+
+  /** Returnerar prompterna som skickades till modellen. */
+  function mock(profile: () => Response) {
+    const prompts: string[] = []
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input)
+      if (url.includes('/auth/v1/user')) {
+        // Nyss skapat konto ⇒ aktiv provperiod, igenom paywallen.
+        const createdAt = new Date(Date.now() - 86_400_000).toISOString()
+        return new Response(
+          JSON.stringify({ id: 'user-1', email: 'a@b.c', created_at: createdAt, email_confirmed_at: createdAt }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      if (url.includes('/fitness_profile')) return profile()
+      if (url.includes('generativelanguage.googleapis.com')) {
+        prompts.push(String(init?.body ?? ''))
+        return new Response(
+          JSON.stringify({ candidates: [{ content: { parts: [{ text: RECIPE }] }, finishReason: 'STOP' }] }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      return new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } })
+    })
+    return prompts
+  }
+
+  const env = { ...mockEnv, AI_PROVIDER: 'gemini', GEMINI_API_KEY: 'test-gemini-key' }
+
+  const call = (body: Record<string, unknown>) =>
+    app.request(
+      '/ai/recipe',
+      {
+        method: 'POST',
+        headers: { Authorization: 'Bearer token', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: 'nåt gott', ...body }),
+      },
+      env
+    )
+
+  const withAllergies = (list: string[]) => () =>
+    new Response(JSON.stringify([{ allergies: list }]), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+  it('använder profilens allergier även när klienten skickar en tom lista', async () => {
+    const prompts = mock(withAllergies(['Nötter', 'Laktos']))
+    const res = await call({ allergies: [] })
+    expect(res.status).toBe(200)
+    expect(prompts.join('\n')).toContain('Nötter, Laktos')
+  })
+
+  it('tar unionen av profilens och klientens lista', async () => {
+    const prompts = mock(withAllergies(['Nötter']))
+    const res = await call({ allergies: ['Fisk'] })
+    expect(res.status).toBe(200)
+    const sent = prompts.join('\n')
+    expect(sent).toContain('Nötter')
+    expect(sent).toContain('Fisk')
+  })
+
+  /**
+   * FAIL CLOSED. Går profilen inte att läsa vet vi inte vad som ska uteslutas
+   * — ett recept som kanske innehåller användarens allergen är värre än inget
+   * recept. Modellen får inte ens anropas.
+   */
+  it('genererar inget recept när profilen inte går att läsa', async () => {
+    const prompts = mock(() => new Response('db down', { status: 500 }))
+    const res = await call({ allergies: [] })
+    expect(res.status).toBe(503)
+    expect(prompts, 'modellen ska inte ha anropats').toEqual([])
+  })
+
+  it('en profil utan allergier fungerar som förut', async () => {
+    const prompts = mock(withAllergies([]))
+    const res = await call({ allergies: [] })
+    expect(res.status).toBe(200)
+    expect(prompts.join('\n')).not.toContain('MÅSTE undvikas')
+  })
+})

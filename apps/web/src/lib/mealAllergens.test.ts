@@ -161,13 +161,30 @@ describe('genereringen är blockerad tills hänsynen är kända', () => {
     expect(ungated.map((f) => f.slice(root.length)), 'blockera knappen på !restrictionsLoaded').toEqual([])
   })
 
-  it('hooken kan inte användas utan att se loaded', async () => {
+  it('hooken kan inte användas utan att se om hänsynen är kända', async () => {
     const { readFileSync } = await import('node:fs')
     const { fileURLToPath } = await import('node:url')
     const hook = readFileSync(fileURLToPath(new URL('../hooks/useRestrictions.ts', import.meta.url)), 'utf8')
-    // Returtypen är ett objekt, inte en array: en anropare MÅSTE se loaded för
+    // Returtypen är ett objekt, inte en array: en anropare MÅSTE se status för
     // att komma åt listan. Blir den en naken string[] igen är grinden borta.
-    expect(hook).toMatch(/loaded: boolean/)
     expect(hook).toMatch(/export function useRestrictions\(\): Restrictions/)
+    expect(hook).toMatch(/ready: status === 'ready'/)
+  })
+
+  /**
+   * FAIL CLOSED: ett nätverksfel får inte se ut som "inga hänsyn".
+   *
+   * Hooken satte tidigare `loaded: true` i sin catch, med en tom lista — och
+   * tom lista betyder "filtrera inte". Ett misslyckat anrop gav alltså en
+   * ofiltrerad matsedel, vilket var hela buggen. Catch-grenen måste sätta
+   * 'failed', aldrig 'ready'.
+   */
+  it('ett nätverksfel ger status failed, inte ready', async () => {
+    const { readFileSync } = await import('node:fs')
+    const { fileURLToPath } = await import('node:url')
+    const hook = readFileSync(fileURLToPath(new URL('../hooks/useRestrictions.ts', import.meta.url)), 'utf8')
+    const katch = hook.slice(hook.indexOf('.catch('))
+    expect(katch).toMatch(/setStatus\('failed'\)/)
+    expect(katch).not.toMatch(/setStatus\('ready'\)/)
   })
 })

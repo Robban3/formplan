@@ -891,6 +891,8 @@ export const sv = {
   'water.goalShort': 'Mål {goal}',
   'training.sessionsOfTotal': '{done} av {total} pass',
   'training.recordShort': 'rekord: {n}',
+  'diet.restrictionsFailed': 'Kunde inte hämta dina allergier och kosthänsyn, så ingen matsedel skapades — vi vill inte riskera att servera något du inte tål.',
+  'common.tryAgain': 'Försök igen',
 } as const
 
 /** Varje text som finns. `en.ts` måste täcka alla. */
