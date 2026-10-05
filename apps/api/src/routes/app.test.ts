@@ -684,32 +684,15 @@ describe('POST /measurements: client_id ger upsert', () => {
   })
 
   /**
-   * Fallbacken. Deployas API:t innan migrationen körts känner databasen inte
-   * client_id, och utan fallbacken hade VARJE mätning slutat sparas i fönstret
-   * mellan deploy och SQL — ett fönster ingen kan koordinera bort.
+   * Ett misslyckat skrivning ska svara 500 och göra EXAKT ett försök.
+   *
+   * Routen hade en övergångsvis fallback som gjorde ett andra försök utan
+   * client_id, för fönstret mellan att API:t deployades och att migrationen
+   * (2026-10-05-measurement-client-id.sql) kördes. Migrationen är körd och
+   * fallbacken borttagen; det här testet håller fast att ett fel inte tyst
+   * leder till ett omförsök som kan dölja orsaken.
    */
-  it('faller tillbaka på en vanlig insert när kolumnen inte finns', async () => {
-    let call_n = 0
-    const urls = mock(() => {
-      call_n++
-      if (call_n === 1) {
-        return new Response('column "client_id" of relation "body_measurement" does not exist', {
-          status: 400,
-        })
-      }
-      return ok()
-    })
-
-    const res = await call({ client_id: 'local-abc' })
-    expect(res.status).toBe(201)
-    expect(urls).toHaveLength(2)
-    expect(urls[0]).toContain('on_conflict')
-    expect(urls[1]).not.toContain('on_conflict')
-  })
-
-  // Ett ÄKTA fel får inte maskeras av fallbacken — då hade en trasig
-  // skrivning sett ut som ett lyckat sparande efter ett andra försök.
-  it('faller inte tillbaka på ett orelaterat fel', async () => {
+  it('ett skrivfel ger 500 och bara ett försök', async () => {
     const urls = mock(() => new Response('db down', { status: 500 }))
     const res = await call({ client_id: 'local-abc' })
     expect(res.status).toBe(500)

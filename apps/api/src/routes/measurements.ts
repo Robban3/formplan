@@ -75,34 +75,21 @@ measurementsRouter.post('/', zValidator('json', measurementSchema, validationHoo
     thigh_cm: b.thigh_cm ?? null,
   }
 
-  /** Samma skrivning, med eller utan klientens idempotensnyckel. */
-  const insert = (withClientId: boolean) => {
-    if (!withClientId) {
-      return db.query<BodyMeasurementRow[]>('/body_measurement', {
+  // Med klientens idempotensnyckel görs en UPSERT, så en re-POST från
+  // offline-flushen efter ett förlorat svar blir en merge i stället för en
+  // dubblettrad. Utan nyckel (vanligt online-anrop) en ren insert — NULL är
+  // distinkt i det unika indexet, så de förblir obegränsade.
+  const { data, error } = b.client_id
+    ? await db.query<BodyMeasurementRow[]>('/body_measurement?on_conflict=user_id,client_id', {
+        method: 'POST',
+        body: JSON.stringify({ ...row, client_id: b.client_id }),
+        headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+      })
+    : await db.query<BodyMeasurementRow[]>('/body_measurement', {
         method: 'POST',
         body: JSON.stringify(row),
         headers: { Prefer: 'return=representation' },
       })
-    }
-    return db.query<BodyMeasurementRow[]>('/body_measurement?on_conflict=user_id,client_id', {
-      method: 'POST',
-      body: JSON.stringify({ ...row, client_id: b.client_id }),
-      headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
-    })
-  }
-
-  let { data, error } = await insert(Boolean(b.client_id))
-
-  // Faller tillbaka på en vanlig insert om client_id-vägen inte finns i
-  // databasen än. Då har migrationen (2026-10-05-measurement-client-id.sql)
-  // inte körts, och PostgREST svarar att kolumnen eller ON CONFLICT-målet är
-  // okänt. Utan detta hade varje mätning slutat sparas i fönstret mellan att
-  // API:t deployas och att SQL:en körs — ett fönster ingen kan koordinera bort.
-  // Kan tas bort när migrationen är körd.
-  if (error && b.client_id && /client_id|42P10|42703|PGRST204/i.test(error)) {
-    console.warn('measurements: client_id saknas i databasen — kör migrationen. Faller tillbaka.')
-    ;({ data, error } = await insert(false))
-  }
 
   if (error || !data?.[0]) {
     console.error('add measurement failed:', error)
