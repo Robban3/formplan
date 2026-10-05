@@ -130,7 +130,7 @@ export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
       <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
         <div className="flex items-center justify-between mb-4">
           <p className="font-semibold text-stone-800 dark:text-stone-200 text-sm">{t('water.intakePerDay')}</p>
-          <p className="text-xs text-stone-500 dark:text-stone-400">Mål {formatVolume(goalMl)}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">{t('water.goalShort', { goal: formatVolume(goalMl) })}</p>
         </div>
         <div className="relative flex items-end justify-between gap-1.5 h-36">
           {/* Mållinje */}

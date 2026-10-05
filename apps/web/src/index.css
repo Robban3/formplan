@@ -105,6 +105,22 @@ html.dark {
   .pt-header {
     padding-top: calc(env(safe-area-inset-top) + 3rem);
   }
+  /* Bara insetet, inget eget avstånd. För YTTERSTA containern på helskärms-
+     sidor som inte har någon egen topp-padding (inloggning, paywall, plan):
+     den användbara ytan krymper med notchen och innehållet kan aldrig hamna
+     under statusraden, medan inre element behåller sina Tailwind-avstånd.
+
+     Får INTE kombineras med Tailwinds egna pt- eller py-klasser på samma
+     element: två padding-top-deklarationer adderas inte, den ena vinner. */
+  .safe-pt {
+    padding-top: env(safe-area-inset-top);
+  }
+  /* För absolut placerade element i toppen (bakåtknapp ovanpå en hero-bild,
+     badge i ett hörn). Tailwinds top-* kan inte räkna in env(), så ett
+     hårdkodat top-12 hamnade mitt i Dynamic Island på en notchad iPhone. */
+  .safe-pin-top {
+    top: calc(env(safe-area-inset-top) + 0.75rem);
+  }
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;

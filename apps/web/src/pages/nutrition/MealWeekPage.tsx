@@ -16,6 +16,7 @@ import { mealSlotLabels } from '../../lib/texts'
 import { useT } from '../../hooks/useT'
 import { weekdayNames } from '../../lib/i18n'
 import type { TextKey } from '../../lib/i18n'
+import { useRestrictions } from '../../hooks/useRestrictions'
 
 
 const SLOTS: WeekSlot[] = ['frukost', 'lunch', 'middag', 'mellanmar']
@@ -32,30 +33,8 @@ function dateForWeekday(weekday: number): Date {
   return d
 }
 
-/**
- * Profilens allergier och kosthänsyn.
- *
- * Läses här och inte i generatorn: generatorn är ren och ska gå att testa
- * utan nätverk. Misslyckas hämtningen blir listan tom — och tom lista
- * filtrerar inte, vilket är det enda säkra defaultvärdet som inte tömmer
- * matsedeln vid ett nätverksfel.
- */
-function useRestrictions(): string[] {
-  const [restrictions, setRestrictions] = useState<string[]>([])
-  useEffect(() => {
-    api
-      .getProfile()
-      .then(({ profile }) => {
-        const p = profile as { allergies?: string[] } | null
-        if (p?.allergies?.length) setRestrictions(p.allergies)
-      })
-      .catch(() => {})
-  }, [])
-  return restrictions
-}
-
 export function MealWeekPage() {
-  const restrictions = useRestrictions()
+  const { restrictions, loaded: restrictionsLoaded } = useRestrictions()
   const { t, locale } = useT()
   const SLOT_LABELS = mealSlotLabels(t)
   const DAY_SHORT = weekdayNames(locale, 'short')
@@ -216,7 +195,8 @@ export function MealWeekPage() {
 
           <button
             onClick={generateWeek}
-            className="w-full bg-forest-700 hover:bg-forest-800 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors"
+            disabled={!restrictionsLoaded}
+            className="disabled:opacity-60 w-full bg-forest-700 hover:bg-forest-800 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors"
           >
             <LeafIcon className="w-5 h-5 stroke-white" />
             {t('mealweek.generateWeek')}
@@ -257,6 +237,7 @@ export function MealWeekPage() {
             </div>
             <button
               onClick={() => regenerateDay(selected)}
+              disabled={!restrictionsLoaded}
               className="text-xs px-3 py-1.5 rounded-full border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 font-medium hover:border-forest-400 hover:text-forest-700 dark:hover:text-forest-300 transition-colors"
             >
               {t('mealweek.regenerateDay')}

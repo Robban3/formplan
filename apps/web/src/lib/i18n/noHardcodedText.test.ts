@@ -45,6 +45,32 @@ const STANDALONE = /^[A-ZÅÄÖ][A-Za-zÅÄÖåäö0-9 ,.'’:%/–-]{2,}$/
 const ATTRIBUTE = /\b(placeholder|aria-label|alt|title)="([^"]*[A-Za-zÅÄÖåäö][^"]*)"/g
 
 /**
+ * Text som GRÄNSAR till ett uttryck: `>av {x}<`, `>{n}g protein<`,
+ * `>Undviker: {list}<`.
+ *
+ * Det här var den dokumenterade luckan i testet ovan: rader med `{` hoppades
+ * över helt, så tio sammansatta strängar låg kvar på svenska — "3 av 5 pass",
+ * "Mål 2500 ml", "rekord: 12". De syns bara i engelskt läge, och bara som
+ * halvöversatta rader. De behöver en nyckel MED platshållare, inte en
+ * konkatenering: ordföljden är inte samma i alla språk.
+ */
+const ADJACENT = [
+  />\s*([A-Za-zÅÄÖåäö][A-Za-zÅÄÖåäö ,.'’:%]*?)\s*\{/g,
+  /\}\s*([A-Za-zÅÄÖåäö][A-Za-zÅÄÖåäö ,.'’:%]*?)\s*</g,
+  /\}\s*([A-Za-zÅÄÖåäö][A-Za-zÅÄÖåäö ,.'’:%]*?)\s*\{/g,
+]
+
+/**
+ * `} catch {`, `} else {`, `} finally {` är JavaScript, inte textnoder — de
+ * matchar formen ovan men är kod. Utan den här listan var regeln obrukbar:
+ * 65 av 75 träffar var nyckelord.
+ */
+const JS_KEYWORDS = new Set(['catch', 'else', 'finally', 'try', 'void', 'return', 'do', 'in', 'of'])
+
+/** Enheter och symboler som är desamma i båda språken. */
+const UNITS = new Set(['px', 'kcal', 'g', 'ml', 'kg', 'cm', 'h', 'min', 's', 'km', 'lbs', 'oz'])
+
+/**
  * Text som får stå kvar oöversatt.
  *
  * Bara egennamn och sådant som är identiskt i båda språken. Växer den här
@@ -84,6 +110,17 @@ describe('ingen hårdkodad text i gränssnittet', () => {
         for (const m of line.matchAll(ATTRIBUTE)) {
           const text = m[2]!.trim()
           if (!ALLOWED.has(text)) found.push(`${rel}:${i + 1}  ${m[1]}="${text}"`)
+        }
+
+        // Text som gränsar till ett uttryck. Körs före `{`-filtret — det är
+        // just de raderna regeln finns för.
+        for (const re of ADJACENT) {
+          for (const m of line.matchAll(re)) {
+            const text = m[1]!.trim()
+            if (text.length < 2) continue
+            if (JS_KEYWORDS.has(text) || UNITS.has(text) || ALLOWED.has(text)) continue
+            found.push(`${rel}:${i + 1}  …${text}…`)
+          }
         }
 
         if (NOT_JSX_TEXT.test(line) || line.includes('{')) return

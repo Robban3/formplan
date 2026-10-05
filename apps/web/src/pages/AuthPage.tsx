@@ -307,7 +307,7 @@ export function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{
+    <div className="min-h-screen safe-pt flex flex-col" style={{
       backgroundImage: `url('/image-1780947666657.webp')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',

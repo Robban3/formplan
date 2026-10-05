@@ -88,7 +88,7 @@ export function FoodPhotoPage() {
         </button>
         <div>
           <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">{t('food.photoMeal')}</h1>
-          <p className="text-xs text-stone-500 dark:text-stone-400">Lägger till i {SLOT_LABELS[slot].toLowerCase()}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">{t('food.addingToSlot', { slot: SLOT_LABELS[slot].toLowerCase() })}</p>
         </div>
       </div>
 

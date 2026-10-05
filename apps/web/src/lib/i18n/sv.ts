@@ -389,7 +389,6 @@ export const sv = {
   'food.searchTitle': 'Livsmedelssökning',
   'food.searchPlaceholder': 'Sök livsmedel…',
   'food.searchHint': 'Sök livsmedel & näringsvärden',
-  'food.addingTo': 'Lägger till i',
   'food.addingToSlot': 'Lägger till i {slot}',
   'food.addItem': 'Lägg till {name}',
   'food.per100gMacros': 'Per 100 g: {kcal} kcal · P {protein} g · F {fat} g · K {carbs} g',
@@ -422,7 +421,7 @@ export const sv = {
   'diary.macrosPerMeal': 'Makro per måltid',
   'diary.hide': 'Dölj ▲',
   'diary.show': 'Visa ▼',
-  'diary.gProtein': 'g protein',
+  'diary.gProtein': '{n} g protein',
   'diary.title': 'Kostdagbok',
   'diary.weekPlan': 'Veckoplan',
   'diary.today': 'Idag',
@@ -885,6 +884,13 @@ export const sv = {
   'meal.namePlaceholder': 't.ex. Kyckling bowl',
   'food.photoPreview': 'Förhandsvisning',
   'barcode.manualPlaceholder': 't.ex. 7310865004703',
+  'analytics.lastRpe': 'Senast: {rpe}/10 · {name}',
+  'analytics.ofGoalPct': 'av {goal} · {pct}%',
+  'recipes.avoiding': 'Undviker: {list}',
+  'home.lifted': '{weight} lyft',
+  'water.goalShort': 'Mål {goal}',
+  'training.sessionsOfTotal': '{done} av {total} pass',
+  'training.recordShort': 'rekord: {n}',
 } as const
 
 /** Varje text som finns. `en.ts` måste täcka alla. */

@@ -31,7 +31,7 @@ export function WorkoutHero({ title, subtitle, size = 'lg', back, badge, as = 'h
         }}
       />
 
-      {badge && <div className="absolute top-3 right-3 z-10">{badge}</div>}
+      {badge && <div className="absolute safe-pin-top right-3 z-10">{badge}</div>}
 
       <div className={`absolute left-5 right-5 z-10 ${tall ? 'bottom-5' : 'bottom-4'}`}>
         {back && (

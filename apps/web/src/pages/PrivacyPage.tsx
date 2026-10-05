@@ -53,7 +53,7 @@ export function PrivacyPage() {
   return (
     <div className="min-h-full bg-canvas">
       <header className="sticky top-0 z-10 bg-canvas/95 backdrop-blur border-b border-stone-200 dark:border-stone-700">
-        <div className="flex items-center gap-2 px-4 py-3">
+        <div className="flex items-center gap-2 px-4 pb-3 safe-top">
           <button
             onClick={() => navigate(-1)}
             aria-label={t('onb.back')}

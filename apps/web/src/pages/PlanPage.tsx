@@ -175,7 +175,7 @@ export function PlanPage() {
   const selectedNutrition = nutritionDays.find((d) => d.weekday === selected)
 
   return (
-    <div className="min-h-screen pb-8 bg-slate-950 text-slate-100">
+    <div className="min-h-screen pb-8 safe-pt bg-slate-950 text-slate-100">
       <div className="max-w-lg mx-auto px-4">
         <div className="flex items-center justify-between py-6">
           <div className="flex items-center gap-3">

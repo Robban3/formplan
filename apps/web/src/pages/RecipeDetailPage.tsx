@@ -33,7 +33,7 @@ export function RecipeDetailPage() {
 
   if (!recipe) {
     return (
-      <div className="px-5 pt-12 text-center text-stone-500 dark:text-stone-400">
+      <div className="px-5 pt-header text-center text-stone-500 dark:text-stone-400">
         <p>{t('recipes.notFound')}</p>
         <button onClick={() => navigate(-1)} className="text-forest-800 dark:text-forest-400 mt-2">{t('common.back')}</button>
       </div>
@@ -78,7 +78,7 @@ export function RecipeDetailPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
         <button
           onClick={() => navigate(-1)}
-          className="absolute top-12 left-4 w-9 h-9 bg-white dark:bg-stone-800/90 backdrop-blur rounded-full flex items-center justify-center shadow"
+          className="absolute safe-pin-top left-4 w-9 h-9 bg-white dark:bg-stone-800/90 backdrop-blur rounded-full flex items-center justify-center shadow"
         >
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-700" />
         </button>

@@ -118,3 +118,56 @@ describe('generateMealPlan med hänsyn', () => {
     expect(names(plan).length).toBeGreaterThan(0)
   })
 })
+
+/**
+ * Att filtret FINNS räcker inte — det måste vara i kraft när planen skapas.
+ *
+ * Buggen: useRestrictions hämtar profilens hänsyn asynkront och började på en
+ * tom lista, och tom lista betyder "filtrera inte". Tryckte användaren på
+ * Generera innan hämtningen svarat fick hen en matsedel UTAN filtrering: ägg
+ * och kvarg till någon som kryssat ägg och laktos. Precis den bugg filtret
+ * rättar, återuppstådd genom ett tidsglapp.
+ *
+ * Hooken returnerar nu `loaded`, och varje sida som genererar måste blockera
+ * på den. Testet läser källan eftersom projektet inte har jsdom — det kan
+ * alltså inte rendera och klicka, men det fångar en ny sida som glömmer
+ * grinden.
+ */
+describe('genereringen är blockerad tills hänsynen är kända', () => {
+  it('varje sida som anropar generateMealPlan grindar på restrictionsLoaded', async () => {
+    const { readdirSync, readFileSync, statSync } = await import('node:fs')
+    const { join } = await import('node:path')
+    const { fileURLToPath } = await import('node:url')
+
+    const root = fileURLToPath(new URL('../pages', import.meta.url))
+    const files: string[] = []
+    const walk = (dir: string) => {
+      for (const e of readdirSync(dir)) {
+        const full = join(dir, e)
+        if (statSync(full).isDirectory()) walk(full)
+        else if (e.endsWith('.tsx')) files.push(full)
+      }
+    }
+    walk(root)
+
+    const callers = files.filter((f) => readFileSync(f, 'utf8').includes('generateMealPlan('))
+    // Utan det här skulle testet passera om filerna döptes om.
+    expect(callers.length).toBeGreaterThan(0)
+
+    const ungated = callers.filter((f) => {
+      const text = readFileSync(f, 'utf8')
+      return !text.includes('restrictionsLoaded')
+    })
+    expect(ungated.map((f) => f.slice(root.length)), 'blockera knappen på !restrictionsLoaded').toEqual([])
+  })
+
+  it('hooken kan inte användas utan att se loaded', async () => {
+    const { readFileSync } = await import('node:fs')
+    const { fileURLToPath } = await import('node:url')
+    const hook = readFileSync(fileURLToPath(new URL('../hooks/useRestrictions.ts', import.meta.url)), 'utf8')
+    // Returtypen är ett objekt, inte en array: en anropare MÅSTE se loaded för
+    // att komma åt listan. Blir den en naken string[] igen är grinden borta.
+    expect(hook).toMatch(/loaded: boolean/)
+    expect(hook).toMatch(/export function useRestrictions\(\): Restrictions/)
+  })
+})

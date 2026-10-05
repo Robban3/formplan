@@ -190,7 +190,7 @@ function WeeklyReport({ weeklyDone, weeklyTotal }: { weeklyDone: number; weeklyT
         </div>
         <div>
           <p className="text-xl font-bold text-stone-900 dark:text-stone-100">{Math.round(toDisplay(totalVolume)).toLocaleString(locale)}</p>
-          <p className="text-[10px] text-stone-500 dark:text-stone-400">{weightLabel} lyft</p>
+          <p className="text-[10px] text-stone-500 dark:text-stone-400">{t('home.lifted', { weight: weightLabel })}</p>
         </div>
         <div>
           <p className="text-xl font-bold text-stone-900 dark:text-stone-100">{avgTime}</p>
@@ -499,7 +499,7 @@ export function HomePage() {
               <p className="text-lg font-bold text-stone-900 dark:text-stone-100">
                 {formatVolume(waterTotal)}
               </p>
-              <p className="text-xs text-stone-500 dark:text-stone-400">av {formatVolume(settings.water_goal_ml)}</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400">{t('water.ofGoal', { goal: formatVolume(settings.water_goal_ml) })}</p>
               <div className="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-1.5 mt-2">
                 <div
                   className="bg-sky-500 h-1.5 rounded-full transition-all"

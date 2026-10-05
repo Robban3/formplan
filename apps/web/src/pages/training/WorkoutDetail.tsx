@@ -135,7 +135,7 @@ export function WorkoutDetail() {
 
   if (!day) {
     return (
-      <div className="px-5 pt-12 text-center text-stone-500 dark:text-stone-400">
+      <div className="px-5 pt-header text-center text-stone-500 dark:text-stone-400">
         <p>{t('workout.notFound')}</p>
         <button onClick={() => navigate('/traning')} className="text-forest-800 dark:text-forest-400 mt-2">
           {t('common.back')}

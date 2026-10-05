@@ -630,7 +630,7 @@ export function AnalyticsPage() {
               <LineChart points={rpeEntries.map((e) => e.rpe)} color="#f59e0b" height={64} showDots />
               <div className="flex justify-between mt-1 text-[9px] text-stone-500 dark:text-stone-400">
                 <span>{fmtDate(rpeEntries[0]!.date, locale)}</span>
-                <span>Senast: {rpeEntries[rpeEntries.length-1]!.rpe}/10 · {rpeEntries[rpeEntries.length-1]!.workoutName}</span>
+                <span>{t('analytics.lastRpe', { rpe: rpeEntries[rpeEntries.length-1]!.rpe, name: rpeEntries[rpeEntries.length-1]!.workoutName })}</span>
               </div>
               <div className="flex justify-between mt-2 text-[9px] text-stone-300 dark:text-stone-600">
                 <span>{t('analytics.rpeEasy')}</span><span>5 = Medel</span><span>10 = Maximalt</span>
@@ -681,7 +681,7 @@ export function AnalyticsPage() {
                       {formatVolume(waterToday)} idag
                     </p>
                     <p className="text-xs text-stone-500 dark:text-stone-400">
-                      av {formatVolume(settings.water_goal_ml)} · {settings.water_goal_ml > 0 ? Math.round((waterToday / settings.water_goal_ml) * 100) : 0}%
+                      {t('analytics.ofGoalPct', { goal: formatVolume(settings.water_goal_ml), pct: settings.water_goal_ml > 0 ? Math.round((waterToday / settings.water_goal_ml) * 100) : 0 })}
                     </p>
                   </div>
                 </div>

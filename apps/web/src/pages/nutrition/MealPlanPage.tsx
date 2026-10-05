@@ -11,6 +11,7 @@ import {
 import { useT } from '../../hooks/useT'
 import type { TranslateFn, TextKey } from '../../lib/i18n'
 import { api } from '../../lib/api'
+import { useRestrictions } from '../../hooks/useRestrictions'
 
 /** Nycklarna är lagrade värden; etiketterna kommer ur ordlistan. */
 const FOCUS_KEYS: DietFocus[] = ['balanced', 'high_protein', 'vegetarian', 'low_carb']
@@ -59,30 +60,8 @@ function MacroBar({ plan }: { plan: GeneratedMealPlan }) {
   )
 }
 
-/**
- * Profilens allergier och kosthänsyn.
- *
- * Läses här och inte i generatorn: generatorn är ren och ska gå att testa
- * utan nätverk. Misslyckas hämtningen blir listan tom — och tom lista
- * filtrerar inte, vilket är det enda säkra defaultvärdet som inte tömmer
- * matsedeln vid ett nätverksfel.
- */
-function useRestrictions(): string[] {
-  const [restrictions, setRestrictions] = useState<string[]>([])
-  useEffect(() => {
-    api
-      .getProfile()
-      .then(({ profile }) => {
-        const p = profile as { allergies?: string[] } | null
-        if (p?.allergies?.length) setRestrictions(p.allergies)
-      })
-      .catch(() => {})
-  }, [])
-  return restrictions
-}
-
 export function MealPlanPage() {
-  const restrictions = useRestrictions()
+  const { restrictions, loaded: restrictionsLoaded } = useRestrictions()
   const navigate = useNavigate()
   const settings = useSettings()
   const { t, locale } = useT()
@@ -214,7 +193,8 @@ export function MealPlanPage() {
         {/* Generate button */}
         <button
           onClick={generate}
-          className="w-full bg-forest-700 hover:bg-forest-800 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-colors"
+          disabled={!restrictionsLoaded}
+          className="disabled:opacity-60 w-full bg-forest-700 hover:bg-forest-800 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-colors"
         >
           <LeafIcon className="w-5 h-5 stroke-white" />
           {t('mealplan.generate')}
@@ -282,7 +262,8 @@ export function MealPlanPage() {
             {/* Regenerate */}
             <button
               onClick={regenerate}
-              className="w-full py-3 border border-stone-200 dark:border-stone-700 rounded-2xl text-sm text-stone-500 dark:text-stone-400 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
+              disabled={!restrictionsLoaded}
+              className="disabled:opacity-60 w-full py-3 border border-stone-200 dark:border-stone-700 rounded-2xl text-sm text-stone-500 dark:text-stone-400 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
             >
               {t('mealplan.generateAnother')}
             </button>

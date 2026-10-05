@@ -253,14 +253,14 @@ export function TrainingOverview() {
               <WeeklyRing done={thisWeekDone} total={totalWeek} />
               <div className="flex-1">
                 <p className="text-xs text-stone-500 dark:text-stone-400">{t('home.thisWeek')}</p>
-                <p className="font-bold text-stone-900 dark:text-stone-100 text-lg">{thisWeekDone} av {totalWeek} pass</p>
+                <p className="font-bold text-stone-900 dark:text-stone-100 text-lg">{t('training.sessionsOfTotal', { done: thisWeekDone, total: totalWeek })}</p>
               </div>
               {streak > 0 && (
                 <div className="flex flex-col items-center bg-amber-50 dark:bg-amber-900/25 rounded-xl px-3 py-2">
                   <span className="text-lg font-bold text-amber-600 dark:text-amber-400">{streak}</span>
                   <span className="text-[9px] text-amber-700 dark:text-amber-300">{t('home.dayStreak')}</span>
                   {longestStreak > streak && (
-                    <span className="text-[8px] text-stone-500 dark:text-stone-400">rekord: {longestStreak}</span>
+                    <span className="text-[8px] text-stone-500 dark:text-stone-400">{t('training.recordShort', { n: longestStreak })}</span>
                   )}
                 </div>
               )}

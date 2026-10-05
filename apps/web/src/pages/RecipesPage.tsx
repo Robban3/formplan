@@ -285,7 +285,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
       </div>
 
       {allergies.length > 0 && (
-        <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-2">Undviker: {allergies.join(', ')}</p>
+        <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-2">{t('recipes.avoiding', { list: allergies.join(', ') })}</p>
       )}
 
       <button

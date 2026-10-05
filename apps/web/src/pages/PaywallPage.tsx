@@ -39,7 +39,7 @@ export function PaywallPage({ status }: { status: BillingStatus }) {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-stone-900 text-white flex flex-col max-w-lg mx-auto">
+    <div className="min-h-[100dvh] safe-pt bg-stone-900 text-white flex flex-col max-w-lg mx-auto">
       <div className="flex-1 flex flex-col justify-center px-6 py-10">
         <div className="flex justify-center mb-6">
           <img src="/logo.png" alt="FormPlan" style={{ height: '120px', width: 'auto' }} />

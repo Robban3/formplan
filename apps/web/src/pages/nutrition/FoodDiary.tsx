@@ -211,7 +211,7 @@ export function FoodDiary() {
                         <span className="text-sm text-stone-700 dark:text-stone-300">{MEAL_LABELS[slot]}</span>
                         <div className="text-right">
                           <span className="text-sm font-semibold text-stone-800 dark:text-stone-200">{m.kcal} kcal</span>
-                          <span className="text-xs text-stone-500 dark:text-stone-400 ml-2">{m.protein_g.toFixed(0)}g protein</span>
+                          <span className="text-xs text-stone-500 dark:text-stone-400 ml-2">{t('diary.gProtein', { n: m.protein_g.toFixed(0) })}</span>
                         </div>
                       </div>
                     )
