@@ -94,7 +94,7 @@ export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
           type="button"
           onClick={() => setWeekOffset((o) => o - 1)}
           className="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700 active:bg-stone-200 dark:active:bg-stone-700 transition-colors"
-          aria-label="Föregående vecka"
+          aria-label={t('common.prevWeek')}
         >
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400" />
         </button>
@@ -106,7 +106,7 @@ export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
           onClick={() => setWeekOffset((o) => o + 1)}
           disabled={isCurrentWeek}
           className="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700 active:bg-stone-200 dark:active:bg-stone-700 transition-colors disabled:opacity-30"
-          aria-label="Nästa vecka"
+          aria-label={t('common.nextWeek')}
         >
           <ChevronRightIcon className="w-5 h-5 stroke-stone-500 dark:stroke-stone-400" />
         </button>

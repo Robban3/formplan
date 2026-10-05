@@ -878,6 +878,13 @@ export const sv = {
   'prog.day.lowerA': 'Underkropp A',
   'prog.day.upperB': 'Överkropp B',
   'prog.day.lowerB': 'Underkropp B',
+  'common.send': 'Skicka',
+  'common.optional': 'valfritt',
+  'common.prevWeek': 'Föregående vecka',
+  'common.nextWeek': 'Nästa vecka',
+  'meal.namePlaceholder': 't.ex. Kyckling bowl',
+  'food.photoPreview': 'Förhandsvisning',
+  'barcode.manualPlaceholder': 't.ex. 7310865004703',
 } as const
 
 /** Varje text som finns. `en.ts` måste täcka alla. */

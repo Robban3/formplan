@@ -114,7 +114,7 @@ export function FoodPhotoPage() {
           className="w-full aspect-square max-h-72 rounded-2xl border-2 border-dashed border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 flex flex-col items-center justify-center gap-2 overflow-hidden disabled:opacity-60"
         >
           {preview ? (
-            <img src={preview} alt="Förhandsvisning" className="w-full h-full object-cover" />
+            <img src={preview} alt={t('food.photoPreview')} className="w-full h-full object-cover" />
           ) : (
             <>
               <div className="w-14 h-14 rounded-2xl bg-forest-50 dark:bg-forest-900/30 flex items-center justify-center">

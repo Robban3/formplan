@@ -866,4 +866,11 @@ export const en: Record<TextKey, string> = {
   'prog.day.lowerA': 'Lower body A',
   'prog.day.upperB': 'Upper body B',
   'prog.day.lowerB': 'Lower body B',
+  'common.send': 'Send',
+  'common.optional': 'optional',
+  'common.prevWeek': 'Previous week',
+  'common.nextWeek': 'Next week',
+  'meal.namePlaceholder': 'e.g. Chicken bowl',
+  'food.photoPreview': 'Preview',
+  'barcode.manualPlaceholder': 'e.g. 7310865004703',
 }

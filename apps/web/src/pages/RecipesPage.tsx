@@ -267,7 +267,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
             inputMode="numeric"
             value={kcal}
             onChange={(e) => setKcal(e.target.value)}
-            placeholder="valfritt"
+            placeholder={t('common.optional')}
             className="w-full bg-stone-100 dark:bg-stone-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
           />
         </div>
@@ -278,7 +278,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
             inputMode="numeric"
             value={minProtein}
             onChange={(e) => setMinProtein(e.target.value)}
-            placeholder="valfritt"
+            placeholder={t('common.optional')}
             className="w-full bg-stone-100 dark:bg-stone-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest-400"
           />
         </div>

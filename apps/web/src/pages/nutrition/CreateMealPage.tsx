@@ -123,7 +123,7 @@ export function CreateMealPage() {
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="t.ex. Kyckling bowl"
+            placeholder={t('meal.namePlaceholder')}
             className="mt-1 w-full bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-3 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-forest-400"
           />
         </label>

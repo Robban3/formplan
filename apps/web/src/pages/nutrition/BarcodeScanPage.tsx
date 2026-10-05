@@ -305,7 +305,7 @@ export function BarcodeScanPage() {
               value={manual}
               onChange={(e) => setManual(e.target.value.replace(/\D/g, ''))}
               inputMode="numeric"
-              placeholder="t.ex. 7310865004703"
+              placeholder={t('barcode.manualPlaceholder')}
               className="flex-1 bg-stone-100 dark:bg-stone-700 rounded-xl px-4 py-2.5 text-sm text-stone-800 dark:text-stone-200 outline-none focus:ring-2 focus:ring-forest-400"
             />
             <button

@@ -12,9 +12,10 @@ import { fileURLToPath } from 'node:url'
  * fäller en SAKNAD översättning, men ser inte en sträng som aldrig slogs upp.
  * Sådant syns bara när någon byter språk, och ingen gjorde det.
  *
- * Testet läser JSX-textnoder, inte alla stränglitteraler. Det missar text i
- * attribut (`placeholder`, `aria-label`) och är alltså ingen fullständig
- * granskning — men det fångar den form felen faktiskt tog.
+ * Testet läser JSX-textnoder och de attribut som visas för användaren, inte
+ * alla stränglitteraler — text som byggs i en hjälpfunktion och skickas in
+ * som prop syns inte här. Ingen fullständig granskning, men den fångar de
+ * former felen faktiskt tog.
  */
 
 const SRC = fileURLToPath(new URL('../..', import.meta.url))
@@ -35,6 +36,13 @@ const PROPERTY = /^[\p{L}\w$]+\s*:\s*\S/u
  */
 const INLINE = />\s*([A-ZÅÄÖ][A-Za-zÅÄÖåäö0-9 ,.'’:%/–-]{2,})\s*</g
 const STANDALONE = /^[A-ZÅÄÖ][A-Za-zÅÄÖåäö0-9 ,.'’:%/–-]{2,}$/
+
+/**
+ * Attribut användaren faktiskt möter. `aria-label` och `alt` räknas: de läses
+ * upp av skärmläsare, så ett svenskt värde i engelskt läge är ett fel även om
+ * det aldrig syns på skärmen.
+ */
+const ATTRIBUTE = /\b(placeholder|aria-label|alt|title)="([^"]*[A-Za-zÅÄÖåäö][^"]*)"/g
 
 /**
  * Text som får stå kvar oöversatt.
@@ -70,6 +78,14 @@ describe('ingen hårdkodad text i gränssnittet', () => {
         if (opens > closes) inComment = true
         else if (closes > opens) inComment = false
         if (wasInComment || inComment) return
+
+        // Attributen kontrolleras före `{`-filtret: samma rad bär ofta både
+        // ett hårdkodat attribut och ett uttryck.
+        for (const m of line.matchAll(ATTRIBUTE)) {
+          const text = m[2]!.trim()
+          if (!ALLOWED.has(text)) found.push(`${rel}:${i + 1}  ${m[1]}="${text}"`)
+        }
+
         if (NOT_JSX_TEXT.test(line) || line.includes('{')) return
         for (const m of line.matchAll(INLINE)) {
           const text = m[1]!.trim()
