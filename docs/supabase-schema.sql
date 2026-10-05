@@ -184,12 +184,25 @@ create table if not exists body_measurement (
   hips_cm     numeric(5,1),
   arm_cm      numeric(5,1),
   thigh_cm    numeric(5,1),
-  created_at  timestamptz not null default now()
+  created_at  timestamptz not null default now(),
+  -- Klientens lokala post-id för idempotent offline-flush (valfritt).
+  client_id   text
 );
+
+-- Idempotent: lägg till kolumnen i befintliga databaser.
+alter table body_measurement add column if not exists client_id text;
 
 alter table body_measurement enable row level security;
 create policy "owner" on body_measurement using (auth.uid() = user_id);
 create index if not exists body_measurement_user_date_idx on body_measurement(user_id, measured_on desc);
+-- Idempotent offline-flush för vikt och kroppsmått: en re-POST med samma
+-- client_id blir en no-op (merge) i stället för en dubblettrad. NON-partiellt av
+-- samma skäl som water_log_client_idx — PostgREST kan inte skicka ett partiellt
+-- index predikat till ON CONFLICT (42P10). NULL är distinkt i ett unikt index,
+-- så inserts utan client_id förblir obegränsade.
+-- (Se docs/migrations/2026-10-05-measurement-client-id.sql.)
+create unique index if not exists body_measurement_client_idx
+  on body_measurement(user_id, client_id);
 
 -- Seed a small Swedish food reference set (idempotent on name).
 insert into food_item (name, kcal_per_100g, protein_per_100g, fat_per_100g, carbs_per_100g, serving_size_g)

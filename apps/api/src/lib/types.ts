@@ -208,6 +208,8 @@ export interface BodyMeasurementRow {
   arm_cm: number | null
   thigh_cm: number | null
   created_at: string
+  /** Klientens lokala post-id, satt vid idempotent offline-flush. */
+  client_id?: string | null
 }
 
 export interface WorkoutSessionRow {

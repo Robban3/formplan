@@ -3,8 +3,8 @@
 // källan för UI:t — serverfel får aldrig påverka upplevelsen.
 
 import { measurementsApi } from './measurementsApi'
-import { getMeasurements, mergeServerMeasurements } from './measurementStore'
-import { getWeightEntries, mergeServerWeights } from './weightStore'
+import { flushLocalMeasurements, getMeasurements, mergeServerMeasurements } from './measurementStore'
+import { flushLocalWeights, getWeightEntries, mergeServerWeights } from './weightStore'
 
 const BACKFILL_FLAG = 'formplan_backfill_measurements_v1'
 
@@ -64,6 +64,12 @@ async function backfillOnce(): Promise<void> {
  * the merge is done so callers can refresh their state. Never rejects.
  */
 export async function initMeasurementsSync(): Promise<void> {
+  // Flushen FÖRST, och ordningen är inte valfri: backfillen laddar upp lokal
+  // historik UTAN client_id och hoppar över datum servern redan har. Kördes
+  // den före flushen laddades en väntande post upp utan nyckel, och flushen
+  // laddade sedan upp samma post MED nyckel — två rader för samma datum.
+  await flushLocalWeights()
+  await flushLocalMeasurements()
   await backfillOnce()
   try {
     const { measurements } = await measurementsApi.list()

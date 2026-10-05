@@ -19,6 +19,8 @@ import { parseMockPlanId } from './lib/mockPlan'
 import { isPasswordRecovery, subscribePasswordRecovery } from './lib/authRecovery'
 import { registerNativeAuthLinks } from './lib/nativeAuthLinks'
 import { toast } from './lib/toast'
+import { flushLocalWeights } from './lib/weightStore'
+import { flushLocalMeasurements } from './lib/measurementStore'
 
 /**
  * Redirect a freshly-authenticated user with no profile to onboarding. Without
@@ -88,11 +90,18 @@ export default function App() {
       }
     })
   }, [navigate])
-  // Push any water logged offline to the server on app start (flush-on-reconnect).
-  // Wait for the session to be reconciled first, so a pending offline row from a
-  // previous account can't be POSTed before the uid-guard purge clears it.
+  // Push anything logged offline to the server on app start
+  // (flush-on-reconnect). Wait for the session to be reconciled first, so a
+  // pending offline row from a previous account can't be POSTed before the
+  // uid-guard purge clears it.
+  //
+  // Vikt och kroppsmått flushas HÄR och inte bara i initMeasurementsSync:
+  // den körs på Analys och Mått, och den som aldrig öppnar de sidorna skulle
+  // annars aldrig få sin offline-loggade vikt skickad.
   useEffect(() => {
-    whenAuthReconciled.then(() => flushLocalWater()).catch(() => {})
+    whenAuthReconciled
+      .then(() => Promise.all([flushLocalWater(), flushLocalWeights(), flushLocalMeasurements()]))
+      .catch(() => {})
   }, [])
 
   if (loading) {

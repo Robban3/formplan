@@ -1,10 +1,14 @@
 import { measurementsApi, type ServerMeasurement } from './measurementsApi'
 import { getMeasurements } from './measurementStore'
 import { dateKey } from './derive'
+import { createPendingDeletes, isPending, newPendingId, once } from './pendingSync'
 
 const KEY = 'formplan_weight_log'
 const TOMBSTONE_KEY = 'formplan_weight_tombstones'
 const WEIGHT_FROM_MEASUREMENTS_FLAG = 'formplan_weight_from_measurements_v1'
+const PENDING_DELETE_KEY = 'formplan_weight_pending_deletes'
+
+const pendingDeletes = createPendingDeletes(PENDING_DELETE_KEY)
 
 export interface WeightEntry {
   id: string
@@ -96,13 +100,42 @@ export function addWeightEntry(weight_kg: number): WeightEntry {
   // A new entry for a previously deleted date un-deletes it.
   const tombstones = loadTombstones()
   if (tombstones.delete(date)) saveTombstones(tombstones)
-  // Replace existing entry for today if any
+  // En ny post för datumet ersätter den gamla. Fanns där en VÄNTANDE post är
+  // den borta nu, och dess client_id med den — det är avsiktligt: det är det
+  // nya värdet som ska nå servern, inte det överskrivna.
   const filtered = entries.filter((e) => e.date !== date)
-  const entry: WeightEntry = { id: crypto.randomUUID(), date, weight_kg }
+  // Väntande id tills servern bekräftat. Tidigare fick posten ett vanligt
+  // uuid och POSTen gjordes med .catch(() => {}) — misslyckades den fanns
+  // vikten bara i den här webbläsaren, för alltid.
+  const entry: WeightEntry = { id: newPendingId(), date, weight_kg }
   save([...filtered, entry])
-  // Best-effort server mirror — the local UX must never depend on it.
-  measurementsApi.create({ measured_on: date, weight_kg }).catch(() => {})
+  // Försök direkt; lyckas det inte ligger posten kvar i kön och flushen tar
+  // den. Den lokala upplevelsen väntar aldrig på nätet.
+  void pushPending(entry)
   return entry
+}
+
+/**
+ * Skickar en väntande post och byter dess lokala id mot serverradens.
+ *
+ * Id-bytet är det som gör flushen idempotent lokalt: posten är inte längre
+ * `local-`, så en senare körning hoppar över den.
+ */
+async function pushPending(entry: WeightEntry): Promise<void> {
+  try {
+    const { measurement } = await measurementsApi.create({
+      measured_on: entry.date,
+      weight_kg: entry.weight_kg,
+      client_id: entry.id,
+    })
+    // Läs om: listan kan ha ändrats medan anropet pågick.
+    const current = load()
+    const still = current.find((e) => e.id === entry.id)
+    if (!still) return // borttagen eller ersatt under tiden — lämna den i fred
+    save([...current.filter((e) => e.id !== entry.id), { ...still, id: measurement.id }])
+  } catch {
+    /* fortfarande offline / API nere — posten är kvar som väntande */
+  }
 }
 
 export function deleteWeightEntry(id: string) {
@@ -114,15 +147,42 @@ export function deleteWeightEntry(id: string) {
   const tombstones = loadTombstones()
   tombstones.add(entry.date)
   saveTombstones(tombstones)
-  // …and best-effort delete the matching server rows.
-  measurementsApi
-    .list()
-    .then(({ measurements }) => {
-      const matches = measurements.filter((m) => m.measured_on === entry.date && isWeightRow(m))
-      return Promise.all(matches.map((m) => measurementsApi.remove(m.id).catch(() => {})))
-    })
-    .catch(() => {})
+  // En post som aldrig nådde servern behöver ingen serverborttagning.
+  if (isPending(entry.id)) return
+  // …och köa serverborttagningen. Den gjordes tidigare fire-and-forget, så en
+  // borttagning offline fastnade lokalt: raden låg kvar på servern och kom
+  // tillbaka på nästa enhet användaren loggade in på.
+  pendingDeletes.add(entry.date)
+  void pushPendingDelete(entry.date)
 }
+
+/** Tar bort serverns viktrader för ett datum och kvitterar kön vid lyckat. */
+async function pushPendingDelete(date: string): Promise<void> {
+  try {
+    const { measurements } = await measurementsApi.list()
+    const matches = measurements.filter((m) => m.measured_on === date && isWeightRow(m))
+    // Alla måste bort innan datumet kvitteras — annars tror vi att det är
+    // gjort medan en rad ligger kvar och kommer tillbaka på nästa enhet.
+    for (const m of matches) await measurementsApi.remove(m.id)
+    pendingDeletes.done(date)
+  } catch {
+    /* kvar i kön, flushen försöker igen */
+  }
+}
+
+/**
+ * Skickar vikt som loggats eller tagits bort utan nät.
+ *
+ * Anropas från samma ställen som flushLocalWater/flushLocalSessions.
+ */
+export const flushLocalWeights = once(async () => {
+  for (const entry of load().filter((e) => isPending(e.id))) {
+    await pushPending(entry)
+  }
+  for (const date of pendingDeletes.all()) {
+    await pushPendingDelete(date)
+  }
+})
 
 /**
  * Merge server weight rows (from other devices / earlier backfills) into the

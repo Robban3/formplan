@@ -619,3 +619,100 @@ describe('POST /ai/recipe: allergierna kommer ur profilen', () => {
     expect(prompts.join('\n')).not.toContain('MÅSTE undvikas')
   })
 })
+
+/**
+ * POST /measurements med client_id.
+ *
+ * Vikt- och måttloggen saknade en offline-kö och gav upp vid fel, så en vikt
+ * loggad utan nät fanns bara i den webbläsarens localStorage. Kön behöver
+ * kunna skicka om en post utan att skapa en dubblett när svaret på första
+ * försöket gick förlorat — därav client_id och en UPSERT.
+ */
+describe('POST /measurements: client_id ger upsert', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  /** Returnerar de PostgREST-URL:er routen anropade. */
+  function mock(measurementPost: (url: string) => Response) {
+    const urls: string[] = []
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input)
+      if (url.includes('/auth/v1/user')) {
+        const createdAt = new Date(Date.now() - 86_400_000).toISOString()
+        return new Response(
+          JSON.stringify({ id: 'user-1', email: 'a@b.c', created_at: createdAt, email_confirmed_at: createdAt }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      if (url.includes('/body_measurement') && init?.method === 'POST') {
+        urls.push(url)
+        return measurementPost(url)
+      }
+      return new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } })
+    })
+    return urls
+  }
+
+  const ok = () =>
+    new Response(JSON.stringify([{ id: 'row-1', measured_on: '2026-10-05', weight_kg: 80 }]), {
+      status: 201,
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+  const call = (body: Record<string, unknown>) =>
+    app.request(
+      '/measurements',
+      {
+        method: 'POST',
+        headers: { Authorization: 'Bearer token', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ measured_on: '2026-10-05', weight_kg: 80, ...body }),
+      },
+      mockEnv
+    )
+
+  it('med client_id görs en upsert på on_conflict', async () => {
+    const urls = mock(ok)
+    const res = await call({ client_id: 'local-abc' })
+    expect(res.status).toBe(201)
+    expect(urls[0]).toContain('on_conflict=user_id,client_id')
+  })
+
+  it('utan client_id görs en vanlig insert', async () => {
+    const urls = mock(ok)
+    const res = await call({})
+    expect(res.status).toBe(201)
+    expect(urls[0]).not.toContain('on_conflict')
+  })
+
+  /**
+   * Fallbacken. Deployas API:t innan migrationen körts känner databasen inte
+   * client_id, och utan fallbacken hade VARJE mätning slutat sparas i fönstret
+   * mellan deploy och SQL — ett fönster ingen kan koordinera bort.
+   */
+  it('faller tillbaka på en vanlig insert när kolumnen inte finns', async () => {
+    let call_n = 0
+    const urls = mock(() => {
+      call_n++
+      if (call_n === 1) {
+        return new Response('column "client_id" of relation "body_measurement" does not exist', {
+          status: 400,
+        })
+      }
+      return ok()
+    })
+
+    const res = await call({ client_id: 'local-abc' })
+    expect(res.status).toBe(201)
+    expect(urls).toHaveLength(2)
+    expect(urls[0]).toContain('on_conflict')
+    expect(urls[1]).not.toContain('on_conflict')
+  })
+
+  // Ett ÄKTA fel får inte maskeras av fallbacken — då hade en trasig
+  // skrivning sett ut som ett lyckat sparande efter ett andra försök.
+  it('faller inte tillbaka på ett orelaterat fel', async () => {
+    const urls = mock(() => new Response('db down', { status: 500 }))
+    const res = await call({ client_id: 'local-abc' })
+    expect(res.status).toBe(500)
+    expect(urls).toHaveLength(1)
+  })
+})

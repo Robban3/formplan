@@ -6,6 +6,8 @@ import { workoutApi } from '../lib/workoutApi'
 import { CheckIcon } from '../components/ui/Icons'
 import { useT } from '../hooks/useT'
 import type { TextKey } from '../lib/i18n'
+import { flushLocalWeights } from '../lib/weightStore'
+import { flushLocalMeasurements } from '../lib/measurementStore'
 
 const FEATURE_KEYS: TextKey[] = [
   'paywall.f1', 'paywall.f2', 'paywall.f3', 'paywall.f4', 'paywall.f5', 'paywall.f6',
@@ -34,6 +36,8 @@ export function PaywallPage({ status }: { status: BillingStatus }) {
     // logout never discards unsynced water/session rows or local settings.
     await flushLocalWater().catch(() => {})
     await workoutApi.flushLocalSessions().catch(() => {})
+    await flushLocalWeights().catch(() => {})
+    await flushLocalMeasurements().catch(() => {})
     await supabase.auth.signOut()
     window.location.href = '/auth'
   }

@@ -10,6 +10,8 @@ export interface ServerMeasurement {
   arm_cm: number | null
   thigh_cm: number | null
   created_at: string
+  /** Klientens lokala post-id, satt när raden kom via offline-flushen. */
+  client_id?: string | null
 }
 
 export interface MeasurementInput {
@@ -20,6 +22,11 @@ export interface MeasurementInput {
   hips_cm?: number
   arm_cm?: number
   thigh_cm?: number
+  /**
+   * Klientens lokala post-id. Skickas av offline-flushen så en re-POST efter
+   * ett förlorat svar blir en no-op i stället för en dubblettrad.
+   */
+  client_id?: string
 }
 
 export const measurementsApi = {
