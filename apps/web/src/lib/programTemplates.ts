@@ -1,5 +1,7 @@
 // Pre-made training programs — always available, independent of any AI plan.
 
+import { matchExercise } from './exerciseCatalog'
+
 export interface TemplateExercise {
   name: string
   sets: number
@@ -97,3 +99,38 @@ export const PROGRAM_TEMPLATES: ProgramTemplate[] = [
     ],
   },
 ]
+
+/**
+ * Vilken utrustning ett färdigt program kräver.
+ *
+ * Programmen är hårdkodade och pekar på övningar med NAMN, så utrustningen
+ * måste slås upp i katalogen. Utan det visades skivstångsprogram för någon
+ * som bara har hantlar — samma fel som schemagenereringen hade.
+ *
+ * Övningar som inte går att slå upp hoppas över i stället för att räknas som
+ * kravlösa: ett program ska inte se genomförbart ut på grund av en felstavning.
+ */
+export function programEquipment(template: ProgramTemplate): Set<string> {
+  const needed = new Set<string>()
+  for (const day of template.days) {
+    for (const ex of day.exercises) {
+      const hit = matchExercise(ex.name)
+      if (hit) needed.add(hit.equipment)
+    }
+  }
+  return needed
+}
+
+/**
+ * Utrustning programmet kräver som användaren INTE har.
+ *
+ * Tom mängd ⇒ programmet går att genomföra. Programmen döljs inte när något
+ * saknas — alla tre kräver skivstång, kabel och maskin, så filtrering hade
+ * tömt sektionen. Att visa vad som saknas säger mer än att visa ingenting.
+ */
+export function missingEquipment(
+  template: ProgramTemplate,
+  allowed: Set<string>
+): string[] {
+  return [...programEquipment(template)].filter((eq) => !allowed.has(eq)).sort()
+}

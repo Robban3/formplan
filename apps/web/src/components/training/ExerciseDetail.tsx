@@ -2,30 +2,7 @@ import type { CatalogExercise } from '../../lib/exerciseCatalog'
 import { ExerciseMedia } from './ExerciseMedia'
 import { MuscleMap } from './MuscleMap'
 import { useT } from '../../hooks/useT'
-import type { TranslateFn } from '../../lib/i18n'
-
-/**
- * Etiketter för katalogens utrustningsnycklar.
- *
- * Nycklarna är katalogens EGNA engelska värden ('body only', 'e-z curl bar')
- * och får inte ändras — de kommer ur övningsdatan.
- */
-function equipmentLabels(t: TranslateFn): Record<string, string> {
-  return {
-    barbell: t('equipLabel.barbell'),
-    dumbbell: t('equipLabel.dumbbell'),
-    'body only': t('equipLabel.bodyOnly'),
-    machine: t('equipLabel.machine'),
-    cable: t('equipLabel.cable'),
-    kettlebells: t('equipLabel.kettlebells'),
-    'e-z curl bar': t('equipLabel.ezCurlBar'),
-    bands: t('equipLabel.bands'),
-    'medicine ball': t('equipLabel.medicineBall'),
-    'exercise ball': t('equipLabel.exerciseBall'),
-    'foam roll': t('equipLabel.foamRoll'),
-    other: t('equipLabel.other'),
-  }
-}
+import { equipmentLabels } from '../../lib/equipmentLabels'
 
 export interface ExerciseDetailProps {
   exercise: CatalogExercise

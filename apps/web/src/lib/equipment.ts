@@ -1,9 +1,14 @@
 /**
  * Översättning mellan profilens utrustningsval och övningskatalogens.
  *
- * Ligger i en EGEN fil och inte i exerciseCatalog.ts, som genereras av
- * scripts/build-exercise-catalog.mjs — handskriven logik där skrivs över
- * nästa gång generatorn körs, och CI fäller det (vilket den gjorde).
+ * TVILLING till apps/api/src/lib/equipment.ts. Kartan måste vara identisk i
+ * båda: API:t filtrerar katalogen innan AI-prompten, webben markerar vilka
+ * färdiga program användaren kan göra. Glider de isär visar appen ett program
+ * som grönt medan schemagenereringen räknar det som otillgängligt.
+ *
+ * equipment.sync.test.ts jämför filerna och fäller bygget om de skiljer sig.
+ * Apparna delar inget paket, och att generera filen vore att lägga policy i
+ * en datagenerator — testet är den billigare garantin.
  *
  * Problemet den löser: profilen lagrar SVENSKA val ('Hantlar'), katalogen har
  * ENGELSKA värden ('dumbbell'). Utan översättningen kan ingen matchning ske,

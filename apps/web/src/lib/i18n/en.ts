@@ -254,6 +254,8 @@ export const en: Record<TextKey, string> = {
   'training.noPlanHint': 'Generate an AI plan or build your own workout.',
   'training.myPlan': 'Your plan',
   'training.readyPrograms': 'Ready-made programs',
+  'training.daysPerWeekShort': '{n} days/wk',
+  'training.needsEquipment': 'Needs {equipment}, which you haven’t listed',
   'training.generatePlan': 'Generate plan',
   'training.generating': 'Generating…',
   'training.aiPlan': 'AI plan',

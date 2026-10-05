@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api'
 import { deriveDifficulty } from '../../lib/derive'
@@ -25,6 +25,9 @@ import { ExerciseMedia } from '../../components/training/ExerciseMedia'
 import { ExerciseDetail } from '../../components/training/ExerciseDetail'
 import { PROGRAM_TEMPLATES, type ProgramTemplate, type TemplateDay } from '../../lib/programTemplates'
 import { useT } from '../../hooks/useT'
+import { allowedEquipment } from '../../lib/equipment'
+import { equipmentLabel } from '../../lib/equipmentLabels'
+import { missingEquipment } from '../../lib/programTemplates'
 import { weekdayNames } from '../../lib/i18n'
 import type { TextKey } from '../../lib/i18n'
 
@@ -45,8 +48,11 @@ function todayWeekday() {
 }
 
 export function TrainingOverview() {
+  const [profileEquipment, setProfileEquipment] = useState<string[]>([])
   const { locale, t } = useT()
   const WEEKDAYS = weekdayNames(locale, 'long')
+  // En gång per utrustningsändring: allowedEquipment itererar hela katalogen.
+  const allowed = useMemo(() => allowedEquipment(profileEquipment), [profileEquipment])
   const navigate = useNavigate()
   const activeWorkout = useWorkoutStore()
   const [plan, setPlan] = useState<Plan | null>(null)
@@ -85,6 +91,9 @@ export function TrainingOverview() {
       try {
         const { profile } = await api.getProfile()
         profileData = profile
+        // Utrustningen styr vilka färdiga program som går att genomföra.
+        const eq = (profile as { equipment?: string[] } | null)?.equipment
+        if (eq?.length) setProfileEquipment(eq)
         if (!profile && !hasMockSession) {
           navigate('/onboarding')
           return
@@ -375,7 +384,7 @@ export function TrainingOverview() {
           <div className="space-y-3">
             <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">{t('training.readyPrograms')}</p>
             {PROGRAM_TEMPLATES.map((tpl) => (
-              <ProgramTemplateCard key={tpl.id} template={tpl} onStartDay={startTemplateDay} />
+              <ProgramTemplateCard key={tpl.id} template={tpl} onStartDay={startTemplateDay} allowed={allowed} />
             ))}
           </div>
         </div>
@@ -599,22 +608,36 @@ function ExerciseLibrary() {
 function ProgramTemplateCard({
   template,
   onStartDay,
+  allowed,
 }: {
   template: ProgramTemplate
   onStartDay: (templateId: string, day: TemplateDay) => void
+  /** Katalogens utrustningsvärden användaren har. */
+  allowed: Set<string>
 }) {
   const { t } = useT()
   const [open, setOpen] = useState(false)
+  // Programmen döljs inte när något saknas — alla kräver skivstång, kabel och
+  // maskin, så filtrering hade tömt sektionen. Att visa VAD som saknas säger
+  // mer än att visa ingenting.
+  const missing = missingEquipment(template, allowed)
   return (
     <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
       <button onClick={() => setOpen((v) => !v)} className="w-full text-left p-4">
         <div className="flex items-center justify-between">
           <p className="font-semibold text-stone-900 dark:text-stone-100">{template.name}</p>
           <span className="text-xs text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-700 px-2 py-1 rounded-lg flex-shrink-0">
-            {template.days_per_week} dgr/v
+            {t('training.daysPerWeekShort', { n: template.days_per_week })}
           </span>
         </div>
         <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{template.description}</p>
+        {missing.length > 0 && (
+          <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-1.5">
+            {t('training.needsEquipment', {
+              equipment: missing.map((eq) => equipmentLabel(eq, t)).join(', '),
+            })}
+          </p>
+        )}
         <p className="text-[11px] text-forest-800 dark:text-forest-400 font-medium mt-2">{open ? t('training.hideSessions') : t('training.showSessions')}</p>
       </button>
 

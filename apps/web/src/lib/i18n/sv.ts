@@ -260,6 +260,8 @@ export const sv = {
   'training.noPlanHint': 'Generera ett AI-schema eller bygg ett eget pass.',
   'training.myPlan': 'Ditt schema',
   'training.readyPrograms': 'Färdiga program',
+  'training.daysPerWeekShort': '{n} dgr/v',
+  'training.needsEquipment': 'Kräver {equipment} som du inte angett',
   'training.generatePlan': 'Generera schema',
   'training.generating': 'Genererar…',
   'training.aiPlan': 'AI-schema',
