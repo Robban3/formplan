@@ -226,7 +226,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
     "id": "dips-brost",
     "name": "Dips",
     "category": "Bröst",
-    "equipment": "other",
+    "equipment": "body only",
     "primaryMuscles": [
       "chest"
     ],
@@ -482,7 +482,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
     "id": "rygglyft",
     "name": "Rygglyft",
     "category": "Rygg",
-    "equipment": "other",
+    "equipment": "body only",
     "primaryMuscles": [
       "lower back"
     ],
@@ -643,7 +643,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
     "id": "bulgarisk-split-squat",
     "name": "Bulgarisk split squat",
     "category": "Ben",
-    "equipment": "other",
+    "equipment": "body only",
     "primaryMuscles": [
       "hamstrings"
     ],
@@ -898,6 +898,75 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
     "aliases": [
       "boxhopp",
       "lådhopp"
+    ]
+  },
+  {
+    "id": "knaboj-kroppsvikt",
+    "name": "Knäböj med kroppsvikt",
+    "category": "Ben",
+    "equipment": "body only",
+    "primaryMuscles": [
+      "quadriceps"
+    ],
+    "secondaryMuscles": [
+      "glutes",
+      "hamstrings"
+    ],
+    "images": [
+      "/exercises/knaboj-kroppsvikt-0.webp",
+      "/exercises/knaboj-kroppsvikt-1.webp"
+    ],
+    "logStyle": "reps",
+    "aliases": [
+      "bodyweight squat",
+      "kroppsviktsknäböj",
+      "air squat",
+      "knäböj utan vikt"
+    ]
+  },
+  {
+    "id": "utfall-kroppsvikt",
+    "name": "Gående utfall",
+    "category": "Ben",
+    "equipment": "body only",
+    "primaryMuscles": [
+      "quadriceps"
+    ],
+    "secondaryMuscles": [
+      "calves",
+      "glutes",
+      "hamstrings"
+    ],
+    "images": [
+      "/exercises/utfall-kroppsvikt-0.webp",
+      "/exercises/utfall-kroppsvikt-1.webp"
+    ],
+    "logStyle": "reps",
+    "aliases": [
+      "walking lunge",
+      "bodyweight lunge",
+      "gående utfallssteg"
+    ]
+  },
+  {
+    "id": "hoftlyft-kroppsvikt",
+    "name": "Höftlyft med kroppsvikt",
+    "category": "Ben",
+    "equipment": "body only",
+    "primaryMuscles": [
+      "glutes"
+    ],
+    "secondaryMuscles": [
+      "hamstrings"
+    ],
+    "images": [
+      "/exercises/hoftlyft-kroppsvikt-0.webp",
+      "/exercises/hoftlyft-kroppsvikt-1.webp"
+    ],
+    "logStyle": "reps",
+    "aliases": [
+      "bodyweight glute bridge",
+      "höftlyft utan vikt"
     ]
   },
   {
@@ -1463,7 +1532,7 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
     "id": "mountain-climbers",
     "name": "Mountain climbers",
     "category": "Core",
-    "equipment": "other",
+    "equipment": "body only",
     "primaryMuscles": [
       "quadriceps"
     ],

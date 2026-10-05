@@ -257,6 +257,51 @@
     ]
   },
   {
+    "id": "Bodyweight_Squat",
+    "equipment": "body only",
+    "primaryMuscles": [
+      "quadriceps"
+    ],
+    "secondaryMuscles": [
+      "glutes",
+      "hamstrings"
+    ],
+    "images": [
+      "Bodyweight_Squat/0.jpg",
+      "Bodyweight_Squat/1.jpg"
+    ]
+  },
+  {
+    "id": "Bodyweight_Walking_Lunge",
+    "equipment": null,
+    "primaryMuscles": [
+      "quadriceps"
+    ],
+    "secondaryMuscles": [
+      "calves",
+      "glutes",
+      "hamstrings"
+    ],
+    "images": [
+      "Bodyweight_Walking_Lunge/0.jpg",
+      "Bodyweight_Walking_Lunge/1.jpg"
+    ]
+  },
+  {
+    "id": "Butt_Lift_Bridge",
+    "equipment": "body only",
+    "primaryMuscles": [
+      "glutes"
+    ],
+    "secondaryMuscles": [
+      "hamstrings"
+    ],
+    "images": [
+      "Butt_Lift_Bridge/0.jpg",
+      "Butt_Lift_Bridge/1.jpg"
+    ]
+  },
+  {
     "id": "Butterfly",
     "equipment": "machine",
     "primaryMuscles": [
@@ -691,7 +736,7 @@
   },
   {
     "id": "Mountain_Climbers",
-    "equipment": "other",
+    "equipment": null,
     "primaryMuscles": [
       "quadriceps"
     ],
@@ -966,7 +1011,7 @@
   },
   {
     "id": "Split_Squats",
-    "equipment": "other",
+    "equipment": null,
     "primaryMuscles": [
       "hamstrings"
     ],

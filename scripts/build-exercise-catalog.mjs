@@ -84,6 +84,15 @@ const CATALOG = [
   { slug: 'vadpress-staende', name: 'Vadpress', category: 'Ben', db: 'Standing_Calf_Raises', aliases: ['vadpress', 'stående vadpress', 'calf raise', 'tåhävningar', 'calf raises'] },
   { slug: 'vadpress-sittande', name: 'Sittande vadpress', category: 'Ben', db: 'Seated_Calf_Raise', aliases: ['seated calf raise'] },
   { slug: 'box-jump', name: 'Box jump', category: 'Ben', db: 'Front_Box_Jump', aliases: ['boxhopp', 'lådhopp'] },
+  // Kroppsviktsvarianter. Knäböj, Utfallssteg och Höftlyft ovan är alla med
+  // skivstång, så den som angett "Inga redskap" hade EN benövning i hela
+  // katalogen (Bulgarisk split squat) — ett benpass gick inte att bygga.
+  // Aliasen får inte krocka med skivstångsvarianternas ('utfall', 'squat',
+  // 'glute bridge'); matchExercise väljer längsta nyckeln och skulle annars
+  // lösa upp samma text till två olika övningar.
+  { slug: 'knaboj-kroppsvikt', name: 'Knäböj med kroppsvikt', category: 'Ben', db: 'Bodyweight_Squat', aliases: ['bodyweight squat', 'kroppsviktsknäböj', 'air squat', 'knäböj utan vikt'] },
+  { slug: 'utfall-kroppsvikt', name: 'Gående utfall', category: 'Ben', db: 'Bodyweight_Walking_Lunge', aliases: ['walking lunge', 'bodyweight lunge', 'gående utfallssteg'] },
+  { slug: 'hoftlyft-kroppsvikt', name: 'Höftlyft med kroppsvikt', category: 'Ben', db: 'Butt_Lift_Bridge', aliases: ['bodyweight glute bridge', 'höftlyft utan vikt'] },
 
   // ── Axlar ──────────────────────────────────────────────────────────────
   { slug: 'axelpress', name: 'Axelpress', category: 'Axlar', db: 'Barbell_Shoulder_Press', aliases: ['shoulder press', 'skivstångspress axlar'] },
@@ -135,6 +144,44 @@ const CATALOG = [
   { slug: 'kettlebell-swing', name: 'Kettlebell swing', category: 'Kondition', db: 'One-Arm_Kettlebell_Swings', aliases: ['kb swing', 'kettlebellsving', 'kettlebell swings', 'kettlebell sving'] },
   { slug: 'battle-ropes', name: 'Battle ropes', category: 'Kondition', db: 'Battling_Ropes', log: 'time', aliases: ['kamprep'] },
 ]
+
+/**
+ * Rättar utrustningsvärden free-exercise-db satt till 'other'.
+ *
+ * Varför det spelar roll: 'other' räknas som gymutrustning i
+ * apps/api/src/lib/equipment.ts, så allt i den kategorin försvann ur prompten
+ * för den som kryssat "Inga redskap (kroppsvikt)". Mountain climbers kräver
+ * ingenting alls och fanns ändå inte att föreslå.
+ *
+ * Gränsen går vid STATISKT stöd, inte vid "går att improvisera". En bänkkant
+ * eller en stol bär dig utan att röra sig, och finns i varje hem. Box jump
+ * ligger därför kvar som 'other': ett hopp upp på en möbel är en riktig
+ * skaderisk, och det ska inte föreslås till någon som angett noll redskap.
+ *
+ * Kvar som 'other' av egen kraft: ab-wheel, cykling, hopprep, battle-ropes —
+ * de kräver faktiska redskap.
+ *
+ * Ligger HÄR och inte i equipment.ts eftersom det är ett påstående om
+ * övningen, inte om användarens profil. Kartan i equipment.ts översätter
+ * profilval till katalogvärden; den ska inte också omklassificera övningar.
+ */
+const EQUIPMENT_OVERRIDE = {
+  // Golvet räcker.
+  'mountain-climbers': 'body only',
+  // Prone back extension — görs liggande på golvet.
+  rygglyft: 'body only',
+  // Bakre foten på en stol eller soffa; hantlar är tillval, inte krav.
+  'bulgarisk-split-squat': 'body only',
+  // Barer, ringar eller en bänkkant. Allt tre bär dig utan att röra sig.
+  'dips-brost': 'body only',
+  // Källan har null här också — gående utfall kräver bara golvyta.
+  'utfall-kroppsvikt': 'body only',
+}
+
+/** Övningens utrustning, med generatorns rättelser applicerade. */
+function equipmentFor(slug, src) {
+  return EQUIPMENT_OVERRIDE[slug] ?? src?.equipment ?? 'other'
+}
 
 // ── Speglingar av den genererade matchningslogiken ──────────────────────────
 // Används bara för validering här i generatorn. Måste hållas i synk med
@@ -204,14 +251,23 @@ async function fetchDb() {
   throw new Error(`Kunde inte hämta free-exercise-db: ${lastErr?.message ?? lastErr}`)
 }
 
-/** Bara de fält katalogen använder — snapshoten ska vara liten och läsbar. */
+/**
+ * Bara de fält katalogen använder — snapshoten ska vara liten och läsbar.
+ *
+ * `equipment` sparas RÅTT, null och allt. Tidigare stod här `?? 'other'`,
+ * vilket gjorde att snapshoten raderade skillnaden mellan "okänd utrustning"
+ * och "övrig utrustning". Kontrollen i main() kunde då bara fälla bygget vid
+ * --refresh; från snapshoten — alltså i CI och i alla vanliga körningar — såg
+ * en okänd utrustning ut som ett medvetet 'other'. Fallbacken hör i
+ * equipmentFor(), på ett ställe.
+ */
 function pruneDb(db) {
   const needed = new Set(CATALOG.map((c) => c.db))
   return db
     .filter((e) => needed.has(e.id))
     .map((e) => ({
       id: e.id,
-      equipment: e.equipment ?? 'other',
+      equipment: e.equipment ?? null,
       primaryMuscles: e.primaryMuscles ?? [],
       secondaryMuscles: e.secondaryMuscles ?? [],
       images: (e.images ?? []).slice(0, 2),
@@ -249,6 +305,16 @@ async function main() {
     const src = byId.get(item.db)
     if (!src) problems.push(`${item.name}: okänt free-exercise-db-id "${item.db}"`)
     else if (!src.images || src.images.length < 2) problems.push(`${item.name}: saknar två bildrutor`)
+    // free-exercise-db har equipment: null på 77 av 876 övningar. NULL BETYDER
+    // OKÄND, men `?? 'other'` gjorde okänd till 'other' — som räknas som
+    // gymutrustning. Mountain climbers och Bulgarisk split squat försvann
+    // därför helt för den som angett kroppsvikt. Den som lägger in en ny övning
+    // med okänd utrustning ska tvingas bestämma, inte få gym tyst.
+    else if (src.equipment == null && !(item.slug in EQUIPMENT_OVERRIDE)) {
+      problems.push(
+        `${item.name}: free-exercise-db saknar utrustningsvärde. Lägg in "${item.slug}" i EQUIPMENT_OVERRIDE.`
+      )
+    }
   }
 
   // Två poster får inte peka på samma källövning — då skulle de få identiska
@@ -322,7 +388,7 @@ async function main() {
       id: item.slug,
       name: item.name,
       category: item.category,
-      equipment: src.equipment ?? 'other',
+      equipment: equipmentFor(item.slug, src),
       primaryMuscles: src.primaryMuscles ?? [],
       secondaryMuscles: src.secondaryMuscles ?? [],
       images: [`/exercises/${item.slug}-0.webp`, `/exercises/${item.slug}-1.webp`],
@@ -468,7 +534,7 @@ export function matchExercise(name: string): CatalogExercise | undefined {
     id: item.slug,
     name: item.name,
     category: item.category,
-    equipment: byId.get(item.db).equipment ?? 'other',
+    equipment: equipmentFor(item.slug, byId.get(item.db)),
     aliases: item.aliases ?? [],
   }))
   const apiTs = `// GENERERAD FIL — ändra inte för hand.

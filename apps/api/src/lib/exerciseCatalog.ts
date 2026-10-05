@@ -97,7 +97,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "id": "dips-brost",
     "name": "Dips",
     "category": "Bröst",
-    "equipment": "other",
+    "equipment": "body only",
     "aliases": [
       "dips bröst"
     ]
@@ -210,7 +210,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "id": "rygglyft",
     "name": "Rygglyft",
     "category": "Rygg",
-    "equipment": "other",
+    "equipment": "body only",
     "aliases": [
       "ryggresning",
       "back extension",
@@ -283,7 +283,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "id": "bulgarisk-split-squat",
     "name": "Bulgarisk split squat",
     "category": "Ben",
-    "equipment": "other",
+    "equipment": "body only",
     "aliases": [
       "split squat",
       "bulgarian split squat"
@@ -402,6 +402,39 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "aliases": [
       "boxhopp",
       "lådhopp"
+    ]
+  },
+  {
+    "id": "knaboj-kroppsvikt",
+    "name": "Knäböj med kroppsvikt",
+    "category": "Ben",
+    "equipment": "body only",
+    "aliases": [
+      "bodyweight squat",
+      "kroppsviktsknäböj",
+      "air squat",
+      "knäböj utan vikt"
+    ]
+  },
+  {
+    "id": "utfall-kroppsvikt",
+    "name": "Gående utfall",
+    "category": "Ben",
+    "equipment": "body only",
+    "aliases": [
+      "walking lunge",
+      "bodyweight lunge",
+      "gående utfallssteg"
+    ]
+  },
+  {
+    "id": "hoftlyft-kroppsvikt",
+    "name": "Höftlyft med kroppsvikt",
+    "category": "Ben",
+    "equipment": "body only",
+    "aliases": [
+      "bodyweight glute bridge",
+      "höftlyft utan vikt"
     ]
   },
   {
@@ -689,7 +722,7 @@ export const EXERCISE_CATALOG: ApiCatalogExercise[] = [
     "id": "mountain-climbers",
     "name": "Mountain climbers",
     "category": "Core",
-    "equipment": "other",
+    "equipment": "body only",
     "aliases": [
       "bergsklättrare"
     ]
