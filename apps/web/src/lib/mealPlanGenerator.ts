@@ -1,4 +1,6 @@
 export type DietFocus = 'balanced' | 'high_protein' | 'vegetarian' | 'low_carb'
+import { isFoodAllowed } from './mealAllergens'
+
 export type MealCount = 3 | 4 | 5
 
 export interface MealPlanFood {
@@ -200,12 +202,17 @@ function pickFoodsForMeal(
   slotKey: string,
   targetKcal: number,
   focus: DietFocus,
-  rng: () => number
+  rng: () => number,
+  restrictions: readonly string[] = []
 ): MealPlanFood[] {
-  const pool = FOODS[focus][slotKey as keyof typeof FOODS[typeof focus]] ?? FOODS[focus]['snack']
+  const rawPool = FOODS[focus][slotKey as keyof typeof FOODS[typeof focus]] ?? FOODS[focus]['snack']
+  // Allergier och kosthänsyn filtreras bort INNAN urvalet. Listan hade ingen
+  // allergeninformation alls, så planeraren kunde servera ägg och kvarg till
+  // någon som kryssat ägg och laktos i onboardingen.
+  const pool = (rawPool ?? []).filter((f) => isFoodAllowed(f[0], restrictions))
   // Shuffle pool — Fisher-Yates with the seeded rng. `sort(() => rng() - 0.5)`
   // is non-uniform and engine-dependent, so avoid it.
-  const shuffled = [...(pool ?? [])]
+  const shuffled = [...pool]
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1))
     ;[shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!]
@@ -272,7 +279,9 @@ export function generateMealPlan(
   targetKcal: number,
   mealCount: MealCount,
   focus: DietFocus,
-  variation = 0
+  variation = 0,
+  /** Profilens allergier och kosthänsyn. Tom lista ⇒ ingen filtrering. */
+  restrictions: readonly string[] = []
 ): GeneratedMealPlan {
   const configs = MEAL_CONFIGS[mealCount]
   const rng = seededRng(
@@ -284,7 +293,7 @@ export function generateMealPlan(
 
   const meals: MealPlanSlot[] = configs.map((cfg) => {
     const slotKcal = Math.round(targetKcal * cfg.share)
-    const foods = pickFoodsForMeal(cfg.key, slotKcal, focus, rng)
+    const foods = pickFoodsForMeal(cfg.key, slotKcal, focus, rng, restrictions)
     const total = sumFoods(foods)
     return { label: cfg.label, time: cfg.time, foods, total }
   })

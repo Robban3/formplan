@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { api, ApiError, type GeneratedRecipe } from '../../lib/api'
 import { nutritionApi, type MealSlot } from '../../lib/nutritionApi'
 import { addCustomWeekMeal, weekdayOf } from '../../lib/weekMealStore'
@@ -38,6 +38,20 @@ interface Props {
 }
 
 export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogged }: Props) {
+  // Allergierna hämtas här eftersom komponenten sitter i varje måltidssektion
+  // och inte får dem som prop. Misslyckas hämtningen blir listan tom, vilket
+  // är samma beteende som före rättelsen — men nu är det ett undantag, inte
+  // normalfallet.
+  const [restrictions, setRestrictions] = useState<string[]>([])
+  useEffect(() => {
+    api
+      .getProfile()
+      .then(({ profile }) => {
+        const p = profile as { allergies?: string[] } | null
+        if (p?.allergies?.length) setRestrictions(p.allergies)
+      })
+      .catch(() => {})
+  }, [])
   const { t } = useT()
   const [open, setOpen] = useState(false)
   const [ingredient, setIngredient] = useState(defaultIngredient)
@@ -62,6 +76,10 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
         prompt,
         calorie_target: kcal ? Number(kcal) : null,
         meal_type: MEAL_TYPE[slot],
+        // Saknades helt: samma endpoint fick allergierna från receptsidan men
+        // inte härifrån, så ett recept genererat i en måltidssektion kunde
+        // innehålla precis det användaren kryssat bort.
+        allergies: restrictions,
       })
       setRecipe(recipe)
     } catch (e) {

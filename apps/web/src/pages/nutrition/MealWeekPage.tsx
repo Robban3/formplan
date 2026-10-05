@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeftIcon, PlusIcon, XIcon, LeafIcon, ZapIcon } from '../../components/ui/Icons'
 import { generateMealPlan, type MealCount, type DietFocus } from '../../lib/mealPlanGenerator'
@@ -32,7 +32,30 @@ function dateForWeekday(weekday: number): Date {
   return d
 }
 
+/**
+ * Profilens allergier och kosthänsyn.
+ *
+ * Läses här och inte i generatorn: generatorn är ren och ska gå att testa
+ * utan nätverk. Misslyckas hämtningen blir listan tom — och tom lista
+ * filtrerar inte, vilket är det enda säkra defaultvärdet som inte tömmer
+ * matsedeln vid ett nätverksfel.
+ */
+function useRestrictions(): string[] {
+  const [restrictions, setRestrictions] = useState<string[]>([])
+  useEffect(() => {
+    api
+      .getProfile()
+      .then(({ profile }) => {
+        const p = profile as { allergies?: string[] } | null
+        if (p?.allergies?.length) setRestrictions(p.allergies)
+      })
+      .catch(() => {})
+  }, [])
+  return restrictions
+}
+
 export function MealWeekPage() {
+  const restrictions = useRestrictions()
   const { t, locale } = useT()
   const SLOT_LABELS = mealSlotLabels(t)
   const DAY_SHORT = weekdayNames(locale, 'short')
@@ -60,7 +83,7 @@ export function MealWeekPage() {
   function generateWeek() {
     const days = { ...plan.days }
     for (let d = 1; d <= 7; d++) {
-      days[d] = { ...days[d]!, generated: generateMealPlan(clampedKcal(), plan.mealCount, plan.focus, d) }
+      days[d] = { ...days[d]!, generated: generateMealPlan(clampedKcal(), plan.mealCount, plan.focus, d, restrictions) }
     }
     update({ ...plan, days })
     toast.success('Veckan genererades!')
@@ -69,7 +92,7 @@ export function MealWeekPage() {
   function regenerateDay(day: number) {
     const days = { ...plan.days }
     const seed = day * 1000 + Math.floor(Math.random() * 1000)
-    days[day] = { ...days[day]!, generated: generateMealPlan(clampedKcal(), plan.mealCount, plan.focus, seed) }
+    days[day] = { ...days[day]!, generated: generateMealPlan(clampedKcal(), plan.mealCount, plan.focus, seed, restrictions) }
     update({ ...plan, days })
   }
 

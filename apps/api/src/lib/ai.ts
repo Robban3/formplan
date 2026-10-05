@@ -291,6 +291,11 @@ EXERCISE RULES (strict):
 INSTRUCTIONS:
 - Distribute ${profile.days_per_week} workout days across the week. Remaining days are rest days.
 - Every day gets a nutrition plan (macros + meals).
+${
+  profile.allergies.length
+    ? `- ALLERGIES AND DIETARY RESTRICTIONS — HARD RULE: the user must never be served ${profile.allergies.join(', ')}. This includes dishes where it is an ingredient, not just the item on its own. Allergies are a medical constraint, not a preference: if a meal you had in mind contains any of it, replace the meal.`
+    : '- The user has no allergies or dietary restrictions.'
+}
 - ${languageInstruction(lang)}
 - Respond ONLY with valid JSON matching this exact schema:
 

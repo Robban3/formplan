@@ -10,6 +10,7 @@ import {
 } from '../../lib/mealPlanGenerator'
 import { useT } from '../../hooks/useT'
 import type { TranslateFn, TextKey } from '../../lib/i18n'
+import { api } from '../../lib/api'
 
 /** Nycklarna är lagrade värden; etiketterna kommer ur ordlistan. */
 const FOCUS_KEYS: DietFocus[] = ['balanced', 'high_protein', 'vegetarian', 'low_carb']
@@ -58,7 +59,30 @@ function MacroBar({ plan }: { plan: GeneratedMealPlan }) {
   )
 }
 
+/**
+ * Profilens allergier och kosthänsyn.
+ *
+ * Läses här och inte i generatorn: generatorn är ren och ska gå att testa
+ * utan nätverk. Misslyckas hämtningen blir listan tom — och tom lista
+ * filtrerar inte, vilket är det enda säkra defaultvärdet som inte tömmer
+ * matsedeln vid ett nätverksfel.
+ */
+function useRestrictions(): string[] {
+  const [restrictions, setRestrictions] = useState<string[]>([])
+  useEffect(() => {
+    api
+      .getProfile()
+      .then(({ profile }) => {
+        const p = profile as { allergies?: string[] } | null
+        if (p?.allergies?.length) setRestrictions(p.allergies)
+      })
+      .catch(() => {})
+  }, [])
+  return restrictions
+}
+
 export function MealPlanPage() {
+  const restrictions = useRestrictions()
   const navigate = useNavigate()
   const settings = useSettings()
   const { t, locale } = useT()
@@ -83,14 +107,14 @@ export function MealPlanPage() {
   }
 
   function generate() {
-    setPlan(generateMealPlan(clampedKcal(), mealCount, focus, variation))
+    setPlan(generateMealPlan(clampedKcal(), mealCount, focus, variation, restrictions))
     setExpanded(null)
   }
 
   function regenerate() {
     const next = variation + 1
     setVariation(next)
-    setPlan(generateMealPlan(clampedKcal(), mealCount, focus, next))
+    setPlan(generateMealPlan(clampedKcal(), mealCount, focus, next, restrictions))
     setExpanded(null)
   }
 
