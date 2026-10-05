@@ -164,7 +164,7 @@ export function BarcodeScanPage() {
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
         </button>
         <div>
-          <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">Skanna streckkod</h1>
+          <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">{t('barcode.scanTitle')}</h1>
           <p className="text-xs text-stone-500 dark:text-stone-400">{t('food.addingToSlot', { slot: SLOT_LABELS[slot].toLowerCase() })}</p>
         </div>
       </div>
@@ -178,7 +178,7 @@ export function BarcodeScanPage() {
               <div className="w-2/3 h-24 border-2 border-white/80 rounded-xl" />
             </div>
             <p className="absolute bottom-2 inset-x-0 text-center text-xs text-white/90">
-              Rikta kameran mot streckkoden
+              {t('barcode.aimCamera')}
             </p>
           </div>
         )}
@@ -299,7 +299,7 @@ export function BarcodeScanPage() {
 
         {/* Manual entry */}
         <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
-          <p className="text-sm font-semibold text-stone-800 dark:text-stone-200 mb-2">Ange streckkod manuellt</p>
+          <p className="text-sm font-semibold text-stone-800 dark:text-stone-200 mb-2">{t('barcode.manualEntry')}</p>
           <div className="flex gap-2">
             <input
               value={manual}
@@ -316,7 +316,7 @@ export function BarcodeScanPage() {
               disabled={manual.length < 6 || looking}
               className="px-4 rounded-xl bg-forest-700 text-white text-sm font-semibold disabled:opacity-50"
             >
-              Sök
+              {t('common.search')}
             </button>
           </div>
         </div>

@@ -546,7 +546,7 @@ export function ActiveWorkout() {
         <span className="text-5xl font-mono font-bold tracking-tight text-stone-900 dark:text-stone-100">
           {formatTime(elapsed)}
         </span>
-        <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">Tid</p>
+        <p className="text-stone-500 dark:text-stone-400 text-xs mt-1">{t('common.time')}</p>
       </div>
 
       {/* Rest countdown overlay */}

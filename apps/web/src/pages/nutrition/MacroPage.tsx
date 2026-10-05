@@ -81,7 +81,7 @@ export function MacroPage() {
         <div className="px-5 pt-6 space-y-5">
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-6 flex flex-col items-center">
             <MacroRing eaten={Math.round(eaten.kcal)} goal={goals.kcal} size={160} />
-            <p className="text-sm text-stone-500 dark:text-stone-400 mt-3">Kalorier idag</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mt-3">{t('macro.caloriesToday')}</p>
           </div>
 
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 space-y-4">
@@ -114,7 +114,7 @@ export function MacroPage() {
       ) : (
         <div className="px-5 pt-5 space-y-3">
           {entries.length === 0 ? (
-            <p className="text-center text-stone-500 dark:text-stone-400 text-sm pt-12">Ingen mat loggad idag.</p>
+            <p className="text-center text-stone-500 dark:text-stone-400 text-sm pt-12">{t('food.noneLoggedToday')}</p>
           ) : (
             <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden divide-y divide-stone-50">
               {entries.map((e) => (

@@ -226,7 +226,7 @@ export function FoodDiary() {
             <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <StarIcon className="w-4 h-4 stroke-amber-400" />
-                <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">Snabblogg</p>
+                <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">{t('diary.quickLog')}</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {favorites.map((fav: FoodFavorite) => (

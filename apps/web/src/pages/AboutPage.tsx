@@ -31,7 +31,7 @@ export function AboutPage() {
       <div className="px-5 pt-header pb-4">
         <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-4">
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
-          Mer
+          {t('nav.more')}
         </button>
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-1">{t('page.aboutApp')}</h1>
         <p className="text-sm text-stone-500 dark:text-stone-400">Version 0.1.0</p>
@@ -61,7 +61,7 @@ export function AboutPage() {
 
       {/* Feature list */}
       <div className="px-5 space-y-3 mb-6">
-        <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Funktioner</p>
+        <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">{t('about.features')}</p>
         {FEATURE_VISUALS.map(({ Icon, bg, stroke }, i) => (
           <div key={i} className="flex items-start gap-3 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
             <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center flex-shrink-0`}>

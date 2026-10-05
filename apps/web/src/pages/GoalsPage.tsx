@@ -105,7 +105,7 @@ function GoalCard({
             </p>
             {isAuto && !goal.done && (
               <span className="text-[9px] bg-forest-100 dark:bg-forest-900/40 text-forest-800 dark:text-forest-300 px-1.5 py-0.5 rounded-full font-semibold flex-shrink-0">
-                Auto
+                {t('common.auto')}
               </span>
             )}
           </div>
@@ -115,7 +115,7 @@ function GoalCard({
             <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{statusText}</p>
           )}
           {!statusText && !goal.done && (
-            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Framsteg</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{t('common.progress')}</p>
           )}
 
           {/* Progress bar */}
@@ -276,7 +276,7 @@ export function GoalsPage() {
       <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
         <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-3">
           <ChevronLeftIcon className="w-4 h-4 text-stone-500 dark:text-stone-400" />
-          Mer
+          {t('nav.more')}
         </button>
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('more.goals')}</h1>
 

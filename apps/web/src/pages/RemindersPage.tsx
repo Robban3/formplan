@@ -59,7 +59,7 @@ export function RemindersPage() {
     <div className="px-5 pt-header pb-4">
       <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-4">
         <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
-        Mer
+        {t('nav.more')}
       </button>
       <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">{t('more.reminders')}</h1>
       <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">{t('reminders.subtitle')}</p>
@@ -91,7 +91,7 @@ export function RemindersPage() {
       {adding ? (
         <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-5 space-y-4">
           <label className="block">
-            <span className="text-sm text-stone-500 dark:text-stone-400">Etikett</span>
+            <span className="text-sm text-stone-500 dark:text-stone-400">{t('reminders.label')}</span>
             <input
               value={newLabel}
               onChange={(e) => setNewLabel(e.target.value)}
@@ -120,7 +120,7 @@ export function RemindersPage() {
           </div>
 
           <label className="block">
-            <span className="text-sm text-stone-500 dark:text-stone-400">Tid</span>
+            <span className="text-sm text-stone-500 dark:text-stone-400">{t('common.time')}</span>
             <input
               type="time"
               value={newTime}

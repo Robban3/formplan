@@ -259,7 +259,7 @@ export function PlanPage() {
         {/* Nutrition card */}
         {selectedNutrition && (
           <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5">
-            <h2 className="font-bold mb-1">Kostplan</h2>
+            <h2 className="font-bold mb-1">{t('plan.nutritionPlan')}</h2>
             <div className="flex gap-4 mb-4 text-sm">
               {[
                 { label: 'Kalorier', value: `${(selectedNutrition.content as NutritionContent).total_calories} kcal` },

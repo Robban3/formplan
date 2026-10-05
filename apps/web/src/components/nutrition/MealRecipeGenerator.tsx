@@ -221,7 +221,7 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
             ))}
           </div>
 
-          <p className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-1">Ingredienser</p>
+          <p className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-1">{t('recipes.ingredients')}</p>
           <ul className="space-y-1 mb-3">
             {recipe.ingredients.map((ing, i) => (
               <li key={i} className="flex items-start gap-2 text-xs text-stone-700 dark:text-stone-300">
@@ -231,7 +231,7 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
             ))}
           </ul>
 
-          <p className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-1">Tillagning</p>
+          <p className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-1">{t('recipes.preparation')}</p>
           <ol className="space-y-1.5">
             {recipe.steps.map((step, i) => (
               <li key={i} className="flex gap-2 text-xs text-stone-700 dark:text-stone-300">

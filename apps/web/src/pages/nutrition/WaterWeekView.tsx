@@ -32,7 +32,7 @@ interface Props {
 }
 
 export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
-  const { locale } = useT()
+  const { locale, t } = useT()
   const { formatVolume } = useUnits()
   const [weekOffset, setWeekOffset] = useState(0)
   const [days, setDays] = useState<DayTotal[]>([])
@@ -129,7 +129,7 @@ export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
       {/* Stapeldiagram */}
       <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
         <div className="flex items-center justify-between mb-4">
-          <p className="font-semibold text-stone-800 dark:text-stone-200 text-sm">Intag per dag</p>
+          <p className="font-semibold text-stone-800 dark:text-stone-200 text-sm">{t('water.intakePerDay')}</p>
           <p className="text-xs text-stone-500 dark:text-stone-400">Mål {formatVolume(goalMl)}</p>
         </div>
         <div className="relative flex items-end justify-between gap-1.5 h-36">
@@ -163,7 +163,7 @@ export function WaterWeekView({ goalMl, refreshKey = 0 }: Props) {
 
       {/* Daglista */}
       <div>
-        <p className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">Dag för dag</p>
+        <p className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">{t('water.dayByDay')}</p>
         <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
           {[...days].reverse().map((day, i, arr) => {
             const pct = goalMl > 0 ? Math.min((day.total_ml / goalMl) * 100, 100) : 0

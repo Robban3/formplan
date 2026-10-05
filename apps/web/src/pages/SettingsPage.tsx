@@ -192,7 +192,7 @@ function NotificationToggle() {
   return (
     <div className="flex items-center justify-between px-4 py-4">
       <div className="flex-1 mr-4">
-        <p className="text-stone-800 dark:text-stone-200 font-medium text-sm">Aktivera notifikationer</p>
+        <p className="text-stone-800 dark:text-stone-200 font-medium text-sm">{t('settings.enableNotifications')}</p>
         <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
           {permissionStatus ?? t('settings.allowReminders')}
         </p>
@@ -288,7 +288,7 @@ export function SettingsPage() {
       <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
         <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-3">
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
-          Mer
+          {t('nav.more')}
         </button>
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('more.settings')}</h1>
       </div>

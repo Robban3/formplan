@@ -129,7 +129,7 @@ export function CreateMealPage() {
         </label>
 
         <div>
-          <p className="text-sm font-semibold text-stone-800 dark:text-stone-200 mb-2">Livsmedel</p>
+          <p className="text-sm font-semibold text-stone-800 dark:text-stone-200 mb-2">{t('food.foods')}</p>
           {ingredients.map((ing, i) => (
             <div key={i} className="flex items-center justify-between py-2.5 border-b border-stone-50">
               <div>
@@ -225,7 +225,7 @@ export function CreateMealPage() {
             </div>
             <div>
               <p className="font-bold text-stone-900 dark:text-stone-100">{Math.round(totals.carbs_g)}g</p>
-              <p className="text-stone-500 dark:text-stone-400">Kolhydrater</p>
+              <p className="text-stone-500 dark:text-stone-400">{t('macro.carbs')}</p>
             </div>
           </div>
         </div>

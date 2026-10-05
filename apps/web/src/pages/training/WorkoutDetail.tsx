@@ -8,6 +8,7 @@ import type { ExerciseLog } from '../../store/workoutStore'
 import { resolveExercise } from '../../lib/exerciseResolve'
 import { ExerciseMedia } from '../../components/training/ExerciseMedia'
 import { ExerciseDetail } from '../../components/training/ExerciseDetail'
+import { useT } from '../../hooks/useT'
 
 interface Exercise {
   name: string
@@ -79,6 +80,7 @@ function ExerciseRow({ exercise }: { exercise: Exercise }) {
 }
 
 export function WorkoutDetail() {
+  const { t } = useT()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [day, setDay] = useState<PlanDay | null>(null)
@@ -134,9 +136,9 @@ export function WorkoutDetail() {
   if (!day) {
     return (
       <div className="px-5 pt-12 text-center text-stone-500 dark:text-stone-400">
-        <p>Passet hittades inte.</p>
+        <p>{t('workout.notFound')}</p>
         <button onClick={() => navigate('/traning')} className="text-forest-800 dark:text-forest-400 mt-2">
-          Tillbaka
+          {t('common.back')}
         </button>
       </div>
     )
@@ -174,7 +176,7 @@ export function WorkoutDetail() {
           className="w-full bg-forest-700 hover:bg-forest-800 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-colors"
         >
           <PlayIcon className="w-5 h-5" />
-          Starta pass
+          {t('workout.startSession')}
         </button>
       </div>
     </div>

@@ -9,7 +9,7 @@ export function AppleHealthPage() {
     <div className="px-5 pt-header pb-4">
       <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-4">
         <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
-        Mer
+        {t('nav.more')}
       </button>
       <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">{t('more.appleHealth')}</h1>
 

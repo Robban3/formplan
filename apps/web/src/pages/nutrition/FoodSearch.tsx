@@ -192,14 +192,14 @@ export function FoodSearch() {
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300 text-sm font-semibold hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors"
           >
             <ScanBarcodeIcon className="w-4 h-4 stroke-forest-600" />
-            Skanna streckkod
+            {t('barcode.scanTitle')}
           </button>
           <button
             onClick={() => navigate(`/kost/foto?slot=${slot}&date=${date}`)}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300 text-sm font-semibold hover:bg-forest-100 dark:hover:bg-forest-900/40 transition-colors"
           >
             <CameraIcon className="w-4 h-4 stroke-forest-600" />
-            Fotografera
+            {t('food.photograph')}
           </button>
         </div>
       </div>

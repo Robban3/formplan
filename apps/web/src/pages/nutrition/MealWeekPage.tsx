@@ -153,7 +153,7 @@ export function MealWeekPage() {
       <div className="px-5 mt-4 space-y-4">
         {/* Controls */}
         <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 space-y-3">
-          <p className="font-semibold text-stone-800 dark:text-stone-200 text-sm">Dagligt kaloriintag</p>
+          <p className="font-semibold text-stone-800 dark:text-stone-200 text-sm">{t('mealplan.dailyCalories')}</p>
           <div className="flex items-center gap-2">
             <input
               type="number"

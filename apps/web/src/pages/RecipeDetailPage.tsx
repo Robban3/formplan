@@ -35,7 +35,7 @@ export function RecipeDetailPage() {
     return (
       <div className="px-5 pt-12 text-center text-stone-500 dark:text-stone-400">
         <p>{t('recipes.notFound')}</p>
-        <button onClick={() => navigate(-1)} className="text-forest-800 dark:text-forest-400 mt-2">Tillbaka</button>
+        <button onClick={() => navigate(-1)} className="text-forest-800 dark:text-forest-400 mt-2">{t('common.back')}</button>
       </div>
     )
   }

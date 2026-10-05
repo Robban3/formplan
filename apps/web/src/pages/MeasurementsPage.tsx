@@ -250,7 +250,7 @@ export function MeasurementsPage() {
         {/* History list */}
         {entries.length > 0 && (
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
-            <p className="font-semibold text-stone-800 dark:text-stone-200 px-4 py-3 border-b border-stone-50">Historik</p>
+            <p className="font-semibold text-stone-800 dark:text-stone-200 px-4 py-3 border-b border-stone-50">{t('common.history')}</p>
             {[...entries].reverse().map((e) => (
               <div key={e.id} className="px-4 py-3 border-b border-stone-50 last:border-0">
                 <div className="flex items-center justify-between mb-2">

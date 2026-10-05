@@ -191,7 +191,7 @@ export function TrainingOverview() {
     }))
     workoutStore.start({
       planDayId: `template-${templateId}`,
-      workoutName: day.name,
+      workoutName: t(day.nameKey),
       startedAt: Date.now(),
       exercises,
       currentExerciseIndex: 0,
@@ -428,6 +428,7 @@ function WorkoutCard({
   isToday: boolean
   onClick: () => void
 }) {
+  const { t } = useT()
   const { locale } = useT()
   const WEEKDAYS = weekdayNames(locale, 'long')
   const diff: Record<string, string> = {
@@ -447,7 +448,7 @@ function WorkoutCard({
           <div className="flex items-center gap-2 mb-1">
             {isToday && (
               <span className="text-xs bg-forest-700 text-white px-2 py-0.5 rounded-full font-medium">
-                Idag
+                {t('tab.today')}
               </span>
             )}
             <span className="text-xs text-stone-500 dark:text-stone-400">
@@ -625,12 +626,12 @@ function ProgramTemplateCard({
     <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
       <button onClick={() => setOpen((v) => !v)} className="w-full text-left p-4">
         <div className="flex items-center justify-between">
-          <p className="font-semibold text-stone-900 dark:text-stone-100">{template.name}</p>
+          <p className="font-semibold text-stone-900 dark:text-stone-100">{t(template.nameKey)}</p>
           <span className="text-xs text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-700 px-2 py-1 rounded-lg flex-shrink-0">
             {t('training.daysPerWeekShort', { n: template.days_per_week })}
           </span>
         </div>
-        <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{template.description}</p>
+        <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{t(template.descKey)}</p>
         {missing.length > 0 && (
           <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-1.5">
             {t('training.needsEquipment', {
@@ -646,13 +647,13 @@ function ProgramTemplateCard({
           {template.days.map((day) => (
             <div key={day.name} className="px-4 py-3">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">{day.name}</p>
+                <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">{t(day.nameKey)}</p>
                 <button
                   onClick={() => onStartDay(template.id, day)}
                   className="flex items-center gap-1 text-xs font-semibold bg-forest-700 text-white px-3 py-1.5 rounded-lg"
                 >
                   <PlayIcon className="w-3.5 h-3.5 stroke-white" />
-                  Starta
+                  {t('challenges.start')}
                 </button>
               </div>
               <div className="flex flex-wrap gap-1.5">

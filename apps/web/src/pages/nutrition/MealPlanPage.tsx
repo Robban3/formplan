@@ -133,7 +133,7 @@ export function MealPlanPage() {
       <div className="px-5 mt-5 space-y-5">
         {/* Kaloriintag */}
         <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 space-y-3">
-          <p className="font-semibold text-stone-800 dark:text-stone-200">Dagligt kaloriintag</p>
+          <p className="font-semibold text-stone-800 dark:text-stone-200">{t('mealplan.dailyCalories')}</p>
           <div className="flex items-center gap-3">
             <input
               type="number"
@@ -190,7 +190,7 @@ export function MealPlanPage() {
 
         {/* Kostfokus */}
         <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 space-y-3">
-          <p className="font-semibold text-stone-800 dark:text-stone-200">Kostfokus</p>
+          <p className="font-semibold text-stone-800 dark:text-stone-200">{t('diet.focus')}</p>
           <div className="grid grid-cols-2 gap-2">
             {focusOptions(t).map((opt) => (
               <button

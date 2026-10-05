@@ -24,7 +24,7 @@ const FOCUS_OPTIONS: { key: DietFocus; label: string }[] = [
 const VALID_FOCUS: DietFocus[] = ['balanced', 'high_protein', 'vegetarian', 'low_carb']
 
 export function ShoppingListPage() {
-  const { locale } = useT()
+  const { locale, t } = useT()
   const navigate = useNavigate()
   const settings = useSettings()
   const [params] = useSearchParams()
@@ -91,11 +91,11 @@ export function ShoppingListPage() {
       <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
         <button onClick={() => navigate('/kost')} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-3">
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
-          Kost
+          {t('nav.nutrition')}
         </button>
         <div className="flex items-center gap-2">
           <ShoppingCartIcon className="w-6 h-6 stroke-forest-600" />
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Inköpslista</h1>
+          <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('diary.shoppingList')}</h1>
         </div>
         <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
           {fromPlan ? 'Veckans varor utifrån din sparade veckoplan' : 'Veckans varor utifrån ditt kostschema'}
@@ -106,7 +106,7 @@ export function ShoppingListPage() {
         {/* Kostfokus — bara relevant när listan genereras (ingen sparad veckoplan) */}
         {!fromPlan && (
         <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4 space-y-3">
-          <p className="font-semibold text-stone-800 dark:text-stone-200 text-sm">Kostfokus</p>
+          <p className="font-semibold text-stone-800 dark:text-stone-200 text-sm">{t('diet.focus')}</p>
           <div className="grid grid-cols-2 gap-2">
             {FOCUS_OPTIONS.map((opt) => (
               <button
@@ -145,7 +145,7 @@ export function ShoppingListPage() {
           </p>
           {checkedCount > 0 && (
             <button onClick={clearChecked} className="text-xs text-stone-500 dark:text-stone-400 underline">
-              Återställ
+              {t('common.reset')}
             </button>
           )}
         </div>
@@ -189,7 +189,7 @@ export function ShoppingListPage() {
             onClick={() => setSeed((s) => s + 1)}
             className="w-full py-3 border border-stone-200 dark:border-stone-700 rounded-2xl text-sm text-stone-500 dark:text-stone-400 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
           >
-            Generera ny lista
+            {t('mealplan.generateNewList')}
           </button>
         )}
       </div>

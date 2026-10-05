@@ -571,7 +571,7 @@ export function AnalyticsPage() {
           {/* Vikt */}
           <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
             <div className="flex items-center justify-between mb-3">
-              <p className="font-semibold text-stone-800 dark:text-stone-200">Viktutveckling</p>
+              <p className="font-semibold text-stone-800 dark:text-stone-200">{t('analytics.weightTrend')}</p>
               <button onClick={() => setShowWeightInput((v) => !v)}
                 className="flex items-center gap-1 text-xs text-forest-800 dark:text-forest-400 font-medium">
                 <PlusIcon className="w-3.5 h-3.5 stroke-forest-600" />
@@ -608,7 +608,7 @@ export function AnalyticsPage() {
           {/* Viktlogg */}
           {weightEntries.length > 0 && (
             <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
-              <p className="font-semibold text-stone-800 dark:text-stone-200 px-4 py-3 border-b border-stone-50">Viktlogg</p>
+              <p className="font-semibold text-stone-800 dark:text-stone-200 px-4 py-3 border-b border-stone-50">{t('analytics.weightLog')}</p>
               {[...weightEntries].reverse().map((e) => (
                 <div key={e.id} className="flex items-center justify-between px-4 py-3 border-b border-stone-50 last:border-0">
                   <div>
@@ -766,7 +766,7 @@ export function AnalyticsPage() {
               {/* Kaloribalans */}
               {calorieGoal > 0 && (
                 <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
-                  <p className="font-semibold text-stone-800 dark:text-stone-200 mb-1">Kaloribalans</p>
+                  <p className="font-semibold text-stone-800 dark:text-stone-200 mb-1">{t('analytics.calorieBalance')}</p>
                   <p className="text-xs text-stone-500 dark:text-stone-400 mb-4">{t('analytics.calorieGoalLegend', { goal: calorieGoal })}</p>
                   <div className="flex items-center gap-1.5 h-28">
                     {last7.map((date, i) => {
@@ -817,7 +817,7 @@ export function AnalyticsPage() {
 
               {/* Daglig lista */}
               <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
-                <p className="font-semibold text-stone-800 dark:text-stone-200 px-4 py-3 border-b border-stone-50">Daglig uppdelning</p>
+                <p className="font-semibold text-stone-800 dark:text-stone-200 px-4 py-3 border-b border-stone-50">{t('analytics.dailyBreakdown')}</p>
                 {[...daySummaries].reverse().map((d) => (
                   <div key={d.date} className="flex items-center justify-between px-4 py-3 border-b border-stone-50 last:border-0">
                     <div>

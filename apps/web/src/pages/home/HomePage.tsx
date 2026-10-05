@@ -175,7 +175,7 @@ function WeeklyReport({ weeklyDone, weeklyTotal }: { weeklyDone: number; weeklyT
     <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Veckans rapport</p>
+          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">{t('home.weeklyReport')}</p>
           <p className="text-[10px] text-stone-300 dark:text-stone-600">{t('home.weekFrom', { date: weekLabel })}</p>
         </div>
         {onTrack && <span className="text-xs bg-forest-50 dark:bg-forest-900/30 text-forest-800 dark:text-forest-300 font-semibold px-2 py-0.5 rounded-full border border-forest-100 dark:border-forest-800">{t('home.goalReached')}</span>}
@@ -449,7 +449,7 @@ export function HomePage() {
             </div>
           ) : (
             <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 p-4">
-              <p className="font-semibold text-stone-800 dark:text-stone-200">Vilodag</p>
+              <p className="font-semibold text-stone-800 dark:text-stone-200">{t('home.restDay')}</p>
               <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">{t('home.noWorkoutToday')}</p>
               <button
                 onClick={() => navigate('/traning')}

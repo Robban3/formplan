@@ -55,7 +55,7 @@ export function NotificationsPage() {
     <div className="px-5 pt-header pb-4">
       <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-4">
         <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
-        Mer
+        {t('nav.more')}
       </button>
       <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 mb-2">{t('more.notifications')}</h1>
       <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">{t('notif.pickWhich')}</p>
@@ -65,7 +65,7 @@ export function NotificationsPage() {
         <div className={`rounded-2xl p-4 mb-4 ${permState === 'denied' ? 'bg-red-50 dark:bg-red-900/25 border border-red-100' : 'bg-forest-50 dark:bg-forest-900/30 border border-forest-100 dark:border-forest-800'}`}>
           {permState === 'denied' ? (
             <>
-              <p className="font-semibold text-red-700 dark:text-red-300 text-sm">Notiser blockerade</p>
+              <p className="font-semibold text-red-700 dark:text-red-300 text-sm">{t('notif.blocked')}</p>
               <p className="text-red-500 text-xs mt-0.5">{t('notif.allowInBrowser')}</p>
             </>
           ) : (
@@ -75,7 +75,7 @@ export function NotificationsPage() {
                 onClick={requestPermission}
                 className="mt-2 bg-forest-700 text-white text-sm font-medium px-4 py-2 rounded-xl"
               >
-                Aktivera notiser
+                {t('notif.enable')}
               </button>
             </>
           )}
@@ -114,7 +114,7 @@ export function NotificationsPage() {
           onClick={sendTestNotification}
           className="w-full py-3 border border-stone-200 dark:border-stone-700 rounded-xl text-sm text-stone-600 dark:text-stone-300 hover:border-forest-400 hover:text-forest-600 transition-colors"
         >
-          Skicka testnotis
+          {t('notif.sendTest')}
         </button>
       )}
     </div>

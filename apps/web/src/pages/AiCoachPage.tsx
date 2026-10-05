@@ -113,8 +113,8 @@ export function AiCoachPage() {
             <BotIcon className="w-4 h-4 stroke-forest-600" />
           </div>
           <div>
-            <h1 className="font-semibold text-stone-900 dark:text-stone-100">AI-coach</h1>
-            <p className="text-[10px] text-forest-800 dark:text-forest-400">Online</p>
+            <h1 className="font-semibold text-stone-900 dark:text-stone-100">{t('coach.title')}</h1>
+            <p className="text-[10px] text-forest-800 dark:text-forest-400">{t('coach.online')}</p>
           </div>
         </div>
       </div>

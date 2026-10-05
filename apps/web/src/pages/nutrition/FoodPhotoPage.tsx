@@ -87,7 +87,7 @@ export function FoodPhotoPage() {
           <ChevronLeftIcon className="w-5 h-5 stroke-stone-600 dark:stroke-stone-300" />
         </button>
         <div>
-          <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">Fotografera måltid</h1>
+          <h1 className="text-xl font-bold text-stone-900 dark:text-stone-100">{t('food.photoMeal')}</h1>
           <p className="text-xs text-stone-500 dark:text-stone-400">Lägger till i {SLOT_LABELS[slot].toLowerCase()}</p>
         </div>
       </div>
@@ -120,8 +120,8 @@ export function FoodPhotoPage() {
               <div className="w-14 h-14 rounded-2xl bg-forest-50 dark:bg-forest-900/30 flex items-center justify-center">
                 <CameraIcon className="w-7 h-7 stroke-forest-600" />
               </div>
-              <p className="text-sm font-medium text-stone-600 dark:text-stone-300">Ta en bild eller välj från galleriet</p>
-              <p className="text-xs text-stone-500 dark:text-stone-400">AI uppskattar kalorier och makron</p>
+              <p className="text-sm font-medium text-stone-600 dark:text-stone-300">{t('food.photoTakeOrPick')}</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400">{t('food.photoAiEstimates')}</p>
             </>
           )}
         </button>
@@ -131,7 +131,7 @@ export function FoodPhotoPage() {
             onClick={() => fileRef.current?.click()}
             className="w-full py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-sm text-stone-500 dark:text-stone-400 font-medium hover:border-forest-400 hover:text-forest-600 transition-colors"
           >
-            Ta ny bild
+            {t('food.photoRetake')}
           </button>
         )}
 
@@ -187,7 +187,7 @@ export function FoodPhotoPage() {
                 </button>
               </>
             ) : (
-              <p className="text-sm text-stone-500 dark:text-stone-400 mt-2">Prova en tydligare bild på maten.</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400 mt-2">{t('food.photoClearer')}</p>
             )}
           </div>
         )}

@@ -219,7 +219,7 @@ export function ChallengesPage() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <TrophyIcon className="w-4 h-4 stroke-amber-500" />
-              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Avklarade</p>
+              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">{t('challenges.completedSection')}</p>
             </div>
             <div className="space-y-2">
               {completed.map((c) => (

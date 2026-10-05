@@ -226,7 +226,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
 
       {/* Kategori — styr huvudråvara/kosthållning */}
       <div className="mt-3">
-        <p className="text-[10px] text-stone-500 dark:text-stone-400 font-medium mb-1.5">Kategori</p>
+        <p className="text-[10px] text-stone-500 dark:text-stone-400 font-medium mb-1.5">{t('common.category')}</p>
         <div className="flex flex-wrap gap-2">
           {RECIPE_CATEGORIES.map((c) => (
             <button
@@ -325,7 +325,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
             ))}
           </div>
 
-          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-2">Ingredienser</p>
+          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-2">{t('recipes.ingredients')}</p>
           <ul className="space-y-1.5 mb-4">
             {recipe.ingredients.map((ing, i) => (
               <li key={i} className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300">
@@ -335,7 +335,7 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
             ))}
           </ul>
 
-          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-2">Tillagning</p>
+          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-2">{t('recipes.preparation')}</p>
           <ol className="space-y-2">
             {recipe.steps.map((step, i) => (
               <li key={i} className="flex gap-3 text-sm text-stone-700 dark:text-stone-300">
@@ -379,7 +379,7 @@ export function RecipesPage() {
       <div className="px-5 pt-header pb-4 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
         <button onClick={() => navigate('/mer')} className="flex items-center gap-1 text-stone-500 dark:text-stone-400 text-sm mb-3">
           <ChevronLeftIcon className="w-4 h-4 stroke-stone-500 dark:stroke-stone-400" />
-          Mer
+          {t('nav.more')}
         </button>
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('more.recipes')}</h1>
 
