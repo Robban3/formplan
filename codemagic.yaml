@@ -295,17 +295,43 @@ workflows:
           # app/build.gradle läser FORMPLAN_*; Codemagics keystore-integration
           # sätter CM_*. Mappa i stället för att ändra build.gradle, så ett
           # lokalt bygge med gradle.properties fortsätter fungera.
-          if [ -z "$CM_KEYSTORE_PATH" ]; then
-            echo "Ingen keystore kopplad i Codemagic — .aab:n blir OSIGNERAD"
-            echo "och går inte att ladda upp till Google Play."
-            echo "Ladda upp nyckeln under Code signing → Android keystore."
+          #
+          # Codemagic har haft TVÅ namn för alias-variablerna. Acceptera båda —
+          # vilket som gäller beror på integrationens version, och att gissa fel
+          # gav en tom keyAlias som inte märktes förrän AGP kraschade med
+          # "java.lang.NullPointerException (no error message)" i
+          # :app:signReleaseBundle, efter två och en halv minuts bygge.
+          KEYSTORE_PATH="${CM_KEYSTORE_PATH:-}"
+          KEYSTORE_PASSWORD="${CM_KEYSTORE_PASSWORD:-}"
+          KEY_ALIAS="${CM_KEY_ALIAS:-${CM_KEY_ALIAS_USERNAME:-}}"
+          KEY_PASSWORD="${CM_KEY_PASSWORD:-${CM_KEY_ALIAS_PASSWORD:-}}"
+
+          # Rapportera vilka som är satta — ALDRIG värdena. Utan den här raden
+          # syns inte vilken av fyra variabler som fattas.
+          for v in CM_KEYSTORE_PATH CM_KEYSTORE_PASSWORD CM_KEY_ALIAS \
+                   CM_KEY_ALIAS_USERNAME CM_KEY_PASSWORD CM_KEY_ALIAS_PASSWORD; do
+            eval "val=\${$v:-}"
+            if [ -n "$val" ]; then echo "$v: satt"; else echo "$v: TOM"; fi
+          done
+
+          MISSING=""
+          [ -z "$KEYSTORE_PATH" ]     && MISSING="$MISSING keystore-filen"
+          [ -z "$KEYSTORE_PASSWORD" ] && MISSING="$MISSING keystore-lösenordet"
+          [ -z "$KEY_ALIAS" ]         && MISSING="$MISSING nyckelns-alias"
+          [ -z "$KEY_PASSWORD" ]      && MISSING="$MISSING nyckelns-lösenord"
+          if [ -n "$MISSING" ]; then
+            echo ""
+            echo "Signeringen saknar:$MISSING"
+            echo "Fyll i ALLA fyra fälten under Code signing → Android keystore,"
+            echo "med referensnamnet formplan_upload."
             exit 1
           fi
+
           cat >> "$CM_ENV" <<EOF
-          FORMPLAN_KEYSTORE=$CM_KEYSTORE_PATH
-          FORMPLAN_KEYSTORE_PASSWORD=$CM_KEYSTORE_PASSWORD
-          FORMPLAN_KEY_ALIAS=$CM_KEY_ALIAS
-          FORMPLAN_KEY_PASSWORD=$CM_KEY_PASSWORD
+          FORMPLAN_KEYSTORE=$KEYSTORE_PATH
+          FORMPLAN_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD
+          FORMPLAN_KEY_ALIAS=$KEY_ALIAS
+          FORMPLAN_KEY_PASSWORD=$KEY_PASSWORD
           FORMPLAN_VERSION_CODE=$BUILD_NUMBER
           EOF
 
