@@ -28,9 +28,11 @@ android {
     // den som har keystoren kan publicera uppdateringar i ditt namn, och
     // tappar du bort den kan appen aldrig uppdateras igen.
     //
-    // Skapa nyckeln en gång och lägg undan den på två säkra ställen:
-    //   keytool -genkeypair -v -keystore formplan-upload.jks \
-    //     -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+    // Skapa nyckeln en gång och lägg undan den på två säkra ställen. ALLT PÅ
+    // EN RAD — `\` är radbrytning i bash, inte i Windows cmd, där den ger
+    // "Otillåtet alternativ: \" och resten av raden körs som ett eget
+    // kommando:
+    //   keytool -genkeypair -v -keystore formplan-upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
     //
     // Sätt sedan, t.ex. i %USERPROFILE%\.gradle\gradle.properties:
     //   formplan.keystore=C:/sokvag/till/formplan-upload.jks

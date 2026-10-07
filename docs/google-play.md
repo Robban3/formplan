@@ -12,8 +12,16 @@ Ladda upp `formplan-upload.jks` i Codemagic under **Code signing → Android
 keystore** med referensnamnet `formplan_upload` — samma namn som
 `android_signing` i `codemagic.yaml`.
 
-Har du ingen nyckel ännu står `keytool`-kommandot i
-`apps/web/android/app/build.gradle`.
+Har du ingen nyckel ännu, skapa den — allt på en rad (`\` är radbrytning i
+bash, inte i Windows cmd):
+
+```
+keytool -genkeypair -v -keystore formplan-upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+```
+
+Codemagic frågar efter keystore-lösenord, `Key alias` (`upload`),
+nyckellösenord och **referensnamn** — det senare måste vara exakt
+`formplan_upload`.
 
 **Lägg undan nyckeln och lösenorden på två säkra ställen.** Tappar du
 keystoren kan appen aldrig uppdateras igen — Play identifierar appen med
