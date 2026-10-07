@@ -1,5 +1,20 @@
 apply plugin: 'com.android.application'
 
+// Google Play avvisar en uppladdning vars versionCode redan använts, och
+// Capacitors mall sätter alltid 1 — andra uppladdningen hade alltså failat. I
+// CI kommer numret från Codemagics räknare; lokalt räcker 1, eftersom ett
+// lokalt bygge aldrig laddas upp.
+//
+// Samma problem och samma lösning som CFBundleVersion på iOS-sidan, se
+// codemagic.yaml.
+//
+// Beräknas HÄR och inte inline i defaultConfig: `versionCode (uttryck) as
+// Integer` är ett metodanrop i DSL:en, och `as Integer` binder då till
+// anropets RESULTAT i stället för till argumentet — versionCode fick en
+// String och bygget dog med "Value is null" på just den raden.
+def formplanVersionCode = (System.getenv('FORMPLAN_VERSION_CODE') ?: '1').toInteger()
+def formplanVersionName = System.getenv('FORMPLAN_VERSION_NAME') ?: '1.0'
+
 android {
     namespace = "app.formplan.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,15 +22,8 @@ android {
         applicationId "app.formplan.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        // Google Play avvisar en uppladdning vars versionCode redan använts, och
-        // Capacitors mall sätter alltid 1 — andra uppladdningen hade alltså
-        // failat. I CI kommer numret från Codemagics räknare; lokalt räcker 1,
-        // eftersom ett lokalt bygge aldrig laddas upp.
-        //
-        // Samma problem och samma lösning som CFBundleVersion på iOS-sidan, se
-        // codemagic.yaml.
-        versionCode (System.getenv('FORMPLAN_VERSION_CODE') ?: '1') as Integer
-        versionName System.getenv('FORMPLAN_VERSION_NAME') ?: "1.0"
+        versionCode formplanVersionCode
+        versionName formplanVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
