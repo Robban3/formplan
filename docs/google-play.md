@@ -47,7 +47,12 @@ fel API.
 
 ## 3. Bygg och hämta paketet
 
-Kör **FormPlan Android**. Hämta `.aab`:n under byggets *Artifacts*.
+Kör **FormPlan Android** — välj workflow i rullgardinen vid *Start new
+build*, den står kvar på iOS annars. Hämta `.aab`:n under byggets
+*Artifacts*.
+
+Bygget kör på en Mac-instans trots att Android inte kräver det: Linux-
+instanser ingår inte i Codemagics gratisplan.
 
 `versionCode` kommer från Codemagics räknare. Play avvisar en uppladdning
 vars `versionCode` redan använts, så varje bygge måste ha ett nytt — det
