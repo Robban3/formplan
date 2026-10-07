@@ -1,9 +1,23 @@
 import { generateMealPlan, type DietFocus, type MealCount } from './mealPlanGenerator'
 import type { WeekMealPlan } from './weekMealStore'
+import {
+  formatIngredientAmount,
+  ingredientKey,
+  mergeIngredients,
+  type ParsedIngredient,
+  type UnitFamily,
+} from './recipeIngredients'
 
 export interface ShoppingItem {
   name: string
-  amount_g: number
+  /** Mängd i familjens basenhet (g, ml, st). null = mängd okänd. */
+  amount: number | null
+  /**
+   * Enhetsfamilj. Veckoschemats livsmedel är alltid 'mass' — fältet finns för
+   * ingredienser från recept, som kommer i dl, msk och styck. Utan det hade
+   * "2 dl havregryn" blivit "2 g" på vägen in i listan.
+   */
+  family: UnitFamily | null
 }
 
 export interface ShoppingCategory {
@@ -52,7 +66,7 @@ function groupTotals(totals: Map<string, number>): ShoppingCategory[] {
   for (const [name, amount_g] of totals) {
     const category = categorize(name)
     const list = byCategory.get(category) ?? []
-    list.push({ name, amount_g: Math.round(amount_g) })
+    list.push({ name, amount: Math.round(amount_g), family: 'mass' })
     byCategory.set(category, list)
   }
 
@@ -115,6 +129,49 @@ export function buildShoppingListFromWeekPlan(plan: WeekMealPlan): ShoppingCateg
   return groupTotals(totals)
 }
 
+/**
+ * Lägger receptens ingredienser i samma kategorilista som veckoschemats.
+ *
+ * Posterna slås ihop med varandra (två recept med kyckling ger en rad) men
+ * INTE med veckoschemats. Skälet är att de räknas olika: veckoschemats
+ * mängder kommer ur en kurerad livsmedelslista med exakta gram per portion,
+ * receptens ur fritext där "kycklingfilé" och "kyckling" är olika strängar.
+ * Slog man ihop dem skulle en felstavning se ut som en dubbel mängd.
+ *
+ * Samma namn OCH samma enhetsfamilj krävs för att en receptpost ska läggas
+ * till en befintlig rad från veckoschemat — därav nyckeln nedan.
+ */
+export function withRecipeIngredients(
+  categories: ShoppingCategory[],
+  recipeIngredients: ParsedIngredient[]
+): ShoppingCategory[] {
+  if (recipeIngredients.length === 0) return categories
+
+  const byCategory = new Map<string, ShoppingItem[]>()
+  for (const c of categories) byCategory.set(c.category, [...c.items])
+
+  for (const item of mergeIngredients(recipeIngredients)) {
+    const category = categorize(item.name)
+    const list = byCategory.get(category) ?? []
+    // Finns varan redan med samma enhetsfamilj summeras den; annars en ny rad.
+    const existing = list.find(
+      (i) =>
+        i.family === item.family &&
+        i.amount !== null &&
+        item.amount !== null &&
+        ingredientKey(i.name) === ingredientKey(item.name)
+    )
+    if (existing) existing.amount = (existing.amount ?? 0) + (item.amount ?? 0)
+    else list.push({ name: item.name, amount: item.amount, family: item.family })
+    byCategory.set(category, list)
+  }
+
+  return CATEGORY_ORDER.filter((c) => byCategory.has(c)).map((category) => ({
+    category,
+    items: byCategory.get(category)!.sort((a, b) => a.name.localeCompare(b.name, 'sv')),
+  }))
+}
+
 // ── Checked-off state (persisted locally, keyed by list content) ────────────
 // The stored state carries a hash of the list it belongs to; when a new list
 // is generated the hash changes and the checked state resets automatically.
@@ -144,8 +201,13 @@ export function saveChecked(checked: Set<string>, hash: string) {
   localStorage.setItem(KEY, JSON.stringify({ hash, items: [...checked] }))
 }
 
-/** Display grams as a friendly amount (e.g. 1500 g → "1,5 kg"). */
-export function formatAmount(grams: number, locale: string): string {
-  if (grams >= 1000) return `${(grams / 1000).toLocaleString(locale, { maximumFractionDigits: 1 })} kg`
-  return `${grams} g`
+/**
+ * Mängden som text.
+ *
+ * Delegerar till formatIngredientAmount så veckoschemats poster och receptens
+ * visas likadant — den hanterar dessutom dl, msk och styck, vilket den gamla
+ * gram-only-varianten inte gjorde.
+ */
+export function formatAmount(item: ShoppingItem, locale: string): string {
+  return formatIngredientAmount(item.amount, item.family, locale)
 }

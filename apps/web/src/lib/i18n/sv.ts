@@ -901,6 +901,12 @@ export const sv = {
   'notif.testTitle': 'FormPlan – testnotis',
   'notif.enableInSettings': 'Du kan aktivera notiser för FormPlan i telefonens inställningar.',
   'notif.allowInSettings': 'Tillåt notiser för FormPlan i telefonens inställningar.',
+  'recipes.addToShoppingList': 'Lägg till i inköpslistan',
+  'recipes.inShoppingList': 'Ligger i inköpslistan',
+  'recipes.addedToShoppingList': 'Tillagt i inköpslistan',
+  'recipes.removedFromShoppingList': 'Borttaget från inköpslistan',
+  'mealplan.fromRecipes': 'Från recept',
+  'mealplan.removeRecipe': 'Ta bort',
 } as const
 
 /** Varje text som finns. `en.ts` måste täcka alla. */

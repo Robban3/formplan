@@ -16,6 +16,7 @@ import { api, type GeneratedRecipe, type RecipeCategory } from '../lib/api'
 import { useT } from '../hooks/useT'
 import { recipes, type Recipe, type IllustrationKey } from '../lib/content/recipes'
 import type { TextKey } from '../lib/i18n'
+import { AddToShoppingList } from '../components/nutrition/AddToShoppingList'
 
 type IconComponent = React.ComponentType<{ className?: string }>
 
@@ -346,6 +347,10 @@ function AiRecipeGenerator({ mealTab }: { mealTab: MealTab }) {
               </li>
             ))}
           </ol>
+
+          <div className="mt-4">
+            <AddToShoppingList name={recipe.name} ingredients={recipe.ingredients} />
+          </div>
 
           <button
             onClick={() => generate()}

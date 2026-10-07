@@ -7,6 +7,7 @@ import { useT } from '../hooks/useT'
 import { nutritionApi, type MealSlot } from '../lib/nutritionApi'
 import { dateKey } from '../lib/derive'
 import { toast } from '../lib/toast'
+import { AddToShoppingList } from '../components/nutrition/AddToShoppingList'
 
 // Receptets måltidstagg → dagbokens slot-enum. Faller tillbaka på lunch när
 // taggen inte pekar ut en tydlig måltid.
@@ -140,6 +141,10 @@ export function RecipeDetailPage() {
               <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed">{step}</p>
             </div>
           ))}
+        </div>
+
+        <div className="mt-5">
+          <AddToShoppingList name={recipe.name} ingredients={recipe.ingredients} />
         </div>
 
         {/* Add to diary */}

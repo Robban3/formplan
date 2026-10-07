@@ -889,4 +889,10 @@ export const en: Record<TextKey, string> = {
   'notif.testTitle': 'FormPlan – test notification',
   'notif.enableInSettings': 'You can enable notifications for FormPlan in your device settings.',
   'notif.allowInSettings': 'Allow notifications for FormPlan in your device settings.',
+  'recipes.addToShoppingList': 'Add to shopping list',
+  'recipes.inShoppingList': 'In your shopping list',
+  'recipes.addedToShoppingList': 'Added to your shopping list',
+  'recipes.removedFromShoppingList': 'Removed from your shopping list',
+  'mealplan.fromRecipes': 'From recipes',
+  'mealplan.removeRecipe': 'Remove',
 }

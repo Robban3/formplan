@@ -5,6 +5,7 @@ import { addCustomWeekMeal, weekdayOf } from '../../lib/weekMealStore'
 import { toast } from '../../lib/toast'
 import { ZapIcon, ClockIcon } from '../ui/Icons'
 import { useT } from '../../hooks/useT'
+import { AddToShoppingList } from './AddToShoppingList'
 
 // Slot → meal_type som AI:n förstår (slot-enumet använder 'mellanmar').
 const MEAL_TYPE: Record<MealSlot, string> = {
@@ -242,6 +243,10 @@ export function MealRecipeGenerator({ slot, date, defaultIngredient = '', onLogg
               </li>
             ))}
           </ol>
+
+          <div className="mt-3">
+            <AddToShoppingList name={recipe.name} ingredients={recipe.ingredients} />
+          </div>
 
           <div className="grid grid-cols-2 gap-2 mt-3">
             <button

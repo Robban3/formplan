@@ -6,6 +6,7 @@ import type { DietFocus, MealCount } from '../../lib/mealPlanGenerator'
 import {
   buildShoppingListFromWeekPlan,
   buildWeeklyShoppingList,
+  withRecipeIngredients,
   loadChecked,
   saveChecked,
   shoppingListHash,
@@ -14,6 +15,7 @@ import {
 import { loadWeekPlan } from '../../lib/weekMealStore'
 import { useT } from '../../hooks/useT'
 import { useRestrictions } from '../../hooks/useRestrictions'
+import { getAddedRecipes, removeAddedRecipe } from '../../lib/recipeShoppingStore'
 
 const FOCUS_OPTIONS: { key: DietFocus; label: string }[] = [
   { key: 'balanced', label: 'Balanserat' },
@@ -29,6 +31,9 @@ export function ShoppingListPage() {
   const navigate = useNavigate()
   const settings = useSettings()
   const { restrictions, status: restrictionsStatus, ready: restrictionsReady, retry: retryRestrictions } = useRestrictions()
+  // Recept som lagts till. Läses in i state så listan kan uppdateras när man
+  // tar bort ett, utan att ladda om sidan.
+  const [addedRecipes, setAddedRecipes] = useState(() => getAddedRecipes())
   const [params] = useSearchParams()
 
   // Initial focus/mealCount come from the MealPlanPage selection (query params)
@@ -58,15 +63,24 @@ export function ShoppingListPage() {
   // "filtrera inte", så ett tidigt bygge gav en ofiltrerad inköpslista. Den
   // som kommer ur ett sparat veckoschema är redan filtrerad och behöver ingen
   // grind.
-  const categories = useMemo(
+  const baseCategories = useMemo(
     () =>
       planCategories ??
       (restrictionsReady ? buildWeeklyShoppingList(kcal, focus, mealCount, restrictions, 7, seed) : []),
     [planCategories, kcal, focus, mealCount, restrictions, restrictionsReady, seed]
   )
 
+  // Receptens ingredienser läggs ovanpå. De filtreras INTE mot kosthänsyn:
+  // användaren har valt receptet själv, och att tyst stryka ingredienser ur
+  // något hen bestämt sig för att laga vore att dölja information i stället
+  // för att ge den.
+  const categories = useMemo(
+    () => withRecipeIngredients(baseCategories, addedRecipes.flatMap((r) => r.ingredients)),
+    [baseCategories, addedRecipes]
+  )
+
   /** Fallback-listan väntar på hänsynen — en tom lista får inte visas som "klar". */
-  const pending = !fromPlan && !restrictionsReady
+  const pending = !fromPlan && !restrictionsReady && addedRecipes.length === 0
 
   // Checked state is keyed by the list's content — a new list resets it.
   const listHash = useMemo(() => shoppingListHash(categories), [categories])
@@ -181,7 +195,33 @@ export function ShoppingListPage() {
           </div>
         )}
 
-        {/* Categories */}
+        {/* Tillagda recept — vilka de är, och en väg att ångra. Utan den här
+            listan går det inte att se VARFÖR en vara ligger i inköpslistan. */}
+        {addedRecipes.length > 0 && (
+          <div className="rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
+            <div className="px-4 py-2.5 bg-stone-50 dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
+              <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">
+                {t('mealplan.fromRecipes')}
+              </p>
+            </div>
+            {addedRecipes.map((r) => (
+              <div key={r.id} className="flex items-center justify-between px-4 py-3 border-t border-stone-50 dark:border-stone-700 first:border-t-0">
+                <p className="text-sm text-stone-700 dark:text-stone-300">{r.name}</p>
+                <button
+                  onClick={() => {
+                    removeAddedRecipe(r.id)
+                    setAddedRecipes(getAddedRecipes())
+                  }}
+                  className="text-xs font-semibold text-stone-500 dark:text-stone-400 underline flex-shrink-0 ml-3"
+                >
+                  {t('mealplan.removeRecipe')}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Categories */}        {/* Categories */}
         {categories.map((cat) => (
           <div key={cat.category} className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-700 overflow-hidden">
             <div className="px-4 py-2.5 bg-stone-50 dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
@@ -207,7 +247,7 @@ export function ShoppingListPage() {
                   <span className={`flex-1 text-sm ${isChecked ? 'text-stone-500 dark:text-stone-400 line-through' : 'text-stone-800 dark:text-stone-200'}`}>
                     {item.name}
                   </span>
-                  <span className="text-xs text-stone-500 dark:text-stone-400 flex-shrink-0">{formatAmount(item.amount_g, locale)}</span>
+                  <span className="text-xs text-stone-500 dark:text-stone-400 flex-shrink-0">{formatAmount(item, locale)}</span>
                 </button>
               )
             })}
