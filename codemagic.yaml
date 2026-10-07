@@ -306,6 +306,21 @@ workflows:
           KEY_ALIAS="${CM_KEY_ALIAS:-${CM_KEY_ALIAS_USERNAME:-}}"
           KEY_PASSWORD="${CM_KEY_PASSWORD:-${CM_KEY_ALIAS_PASSWORD:-}}"
 
+          # Faller tillbaka på nyckellagrets lösenord när nyckelns är tomt.
+          # Keytool skapar PKCS12 sedan JDK 9, och det formatet KAN INTE ha ett
+          # eget nyckellösenord — det är alltid samma som nyckellagrets. Att
+          # kräva fältet ifyllt vore att kräva att man skriver in samma sak två
+          # gånger, och lämnar man det tomt dog bygget i :app:signReleaseBundle
+          # med en NullPointerException.
+          #
+          # Loggas högt: har man en äldre JKS med ett ANNAT nyckellösenord
+          # fallerar signeringen, och då ska raden nedan finnas i loggen så
+          # orsaken syns direkt.
+          if [ -z "$KEY_PASSWORD" ] && [ -n "$KEYSTORE_PASSWORD" ]; then
+            echo "Nyckelns lösenord är tomt — använder nyckellagrets (PKCS12 har inget eget)."
+            KEY_PASSWORD="$KEYSTORE_PASSWORD"
+          fi
+
           # Rapportera vilka som är satta — ALDRIG värdena. Utan den här raden
           # syns inte vilken av fyra variabler som fattas.
           for v in CM_KEYSTORE_PATH CM_KEYSTORE_PASSWORD CM_KEY_ALIAS \

@@ -54,6 +54,12 @@ android {
     def keystorePw = System.getenv('FORMPLAN_KEYSTORE_PASSWORD') ?: project.findProperty('formplan.keystorePassword')
     def keyAliasName = System.getenv('FORMPLAN_KEY_ALIAS') ?: project.findProperty('formplan.keyAlias')
     def keyPw = System.getenv('FORMPLAN_KEY_PASSWORD') ?: project.findProperty('formplan.keyPassword')
+    // PKCS12 — keytools standard sedan JDK 9 — kan inte ha ett eget
+    // nyckellösenord; det är alltid nyckellagrets. Att kräva båda ifyllda vore
+    // att kräva samma uppgift två gånger, och utelämnat gav det en
+    // NullPointerException i :app:signReleaseBundle. Samma härledning görs i
+    // codemagic.yaml, så lokalt och CI beter sig lika.
+    if (!keyPw?.toString()) keyPw = keystorePw
 
     // ALLA FYRA måste finnas, inte bara filen. Med bara keystorePath satt
     // byggdes en halv signeringskonfiguration, och AGP dog i

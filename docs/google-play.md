@@ -23,6 +23,11 @@ Codemagic frågar efter keystore-lösenord, `Key alias` (`upload`),
 nyckellösenord och **referensnamn** — det senare måste vara exakt
 `formplan_upload`.
 
+Lämnar du *Key password* tomt härleder bygget det ur keystore-lösenordet:
+keytool skapar PKCS12, och det formatet kan inte ha ett eget
+nyckellösenord. Har du en äldre JKS med ett annat nyckellösenord måste
+fältet fyllas i — loggen säger när härledningen används.
+
 **Lägg undan nyckeln och lösenorden på två säkra ställen.** Tappar du
 keystoren kan appen aldrig uppdateras igen — Play identifierar appen med
 den, och det finns ingen återställning utom en manuell begäran hos Google
