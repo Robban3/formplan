@@ -20,6 +20,26 @@
 #
 # iOS-projektet (apps/web/ios) genereras i CI med `cap add ios` — det behöver
 # alltså inte committas och kräver ingen Mac lokalt.
+#
+# ── ANDROID ──────────────────────────────────────────────────────────────────
+# Förkrav i Codemagic-UI:t för android-formplan nedan:
+#   1. Code signing → Android keystore: ladda upp din formplan-upload.jks och
+#      ge den referensnamnet "formplan_upload" (samma som android_signing
+#      nedan). Codemagic exponerar den då som CM_KEYSTORE_PATH m.fl.
+#   2. Environment variables → grupp "formplan_android" med SAMMA tre
+#      VITE_*-värden som formplan_ios. De används av webb-bygget, inte av
+#      Android, men bygget behöver dem för att `npm run build` ska producera
+#      en app som pekar på rätt API.
+#
+# Android-projektet (apps/web/android) ÄR committat, till skillnad från iOS:.
+# Därför `cap sync android` och inte `cap add` — och därför måste
+# capacitor.build.gradle vara i synk med package.json, annars saknas nya
+# plugins tyst i bygget.
+#
+# FÖRSTA UPPLADDNINGEN TILL GOOGLE PLAY MÅSTE GÖRAS MANUELLT. Googles API
+# vägrar ta emot det allra första paketet för ett nytt app-id, så publishing-
+# blocket nedan är avstängt till dess. Hämta .aab:n från byggets artifacts och
+# ladda upp den i Play Console → Testning → Internt test.
 
 workflows:
   ios-formplan:
@@ -223,3 +243,105 @@ workflows:
         # och lägg till beta_groups med namnet på din externa testgrupp.
         submit_to_testflight: false
         # submit_to_app_store: false  # slå på när du är redo för skarp granskning
+
+  android-formplan:
+    name: FormPlan Android
+    # Linux räcker för Android och är billigare än en Mac.
+    instance_type: linux_x2
+    max_build_duration: 45
+    environment:
+      groups:
+        - formplan_android
+      android_signing:
+        - formplan_upload
+      # Samma skäl som på iOS: Capacitor 8:s CLI kräver Node >= 22.
+      node: 22
+      # AGP 8.x kräver JDK 17 eller senare; 21 är det som Codemagics image har
+      # som standard och det Capacitor 8 testas mot.
+      java: 21
+    scripts:
+      - name: Installera beroenden (workspace-root)
+        script: npm ci
+
+      - name: Bygg webben (prod) och synka Android-projektet
+        script: |
+          set -e
+          cd apps/web
+          npm run build
+          npx cap sync android
+
+          # cap sync kan skriva ut ett fel och ändå avsluta med 0 — kontrollera
+          # resultatet i stället för returkoden. Samma fälla som på iOS-sidan.
+          if [ ! -f android/app/src/main/assets/public/index.html ]; then
+            echo "cap sync kopierade inte webbtillgångarna — avbryter."
+            exit 1
+          fi
+
+          # Plugins måste ha registrerats, annars byggs appen utan dem och
+          # notiser/skärmlås slutar fungera UTAN felmeddelande.
+          for plugin in capacitor-local-notifications capacitor-community-keep-awake; do
+            if ! grep -q "$plugin" android/app/capacitor.build.gradle; then
+              echo "$plugin saknas i capacitor.build.gradle — avbryter."
+              exit 1
+            fi
+          done
+
+      - name: Signeringsnyckel från Codemagic till Gradle
+        script: |
+          set -e
+          # app/build.gradle läser FORMPLAN_*; Codemagics keystore-integration
+          # sätter CM_*. Mappa i stället för att ändra build.gradle, så ett
+          # lokalt bygge med gradle.properties fortsätter fungera.
+          if [ -z "$CM_KEYSTORE_PATH" ]; then
+            echo "Ingen keystore kopplad i Codemagic — .aab:n blir OSIGNERAD"
+            echo "och går inte att ladda upp till Google Play."
+            echo "Ladda upp nyckeln under Code signing → Android keystore."
+            exit 1
+          fi
+          cat >> "$CM_ENV" <<EOF
+          FORMPLAN_KEYSTORE=$CM_KEYSTORE_PATH
+          FORMPLAN_KEYSTORE_PASSWORD=$CM_KEYSTORE_PASSWORD
+          FORMPLAN_KEY_ALIAS=$CM_KEY_ALIAS
+          FORMPLAN_KEY_PASSWORD=$CM_KEY_PASSWORD
+          FORMPLAN_VERSION_CODE=$BUILD_NUMBER
+          EOF
+
+      - name: Bygg signerad AAB
+        script: |
+          set -e
+          cd apps/web/android
+          chmod +x ./gradlew
+          ./gradlew bundleRelease
+
+          # Gradle varnar bara i loggen när nyckeln saknas och producerar ett
+          # osignerat paket. Play avvisar det med ett svårläst fel timmar
+          # senare — fånga det här i stället.
+          AAB=$(find app/build/outputs/bundle/release -name '*.aab' | head -1)
+          if [ -z "$AAB" ]; then
+            echo "Ingen .aab producerad."
+            exit 1
+          fi
+          if unzip -l "$AAB" | grep -q 'META-INF/.*\.RSA\|META-INF/.*\.EC'; then
+            echo "✓ signerad: $AAB"
+          else
+            echo "✗ $AAB verkar OSIGNERAD — Google Play kommer avvisa den."
+            exit 1
+          fi
+    artifacts:
+      - apps/web/android/app/build/outputs/bundle/**/*.aab
+      - apps/web/android/app/build/outputs/**/mapping.txt
+    # publishing:
+    #   google_play:
+    #     credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+    #     track: internal
+    #     submit_as_draft: false
+    #
+    # Slå på blocket ovan EFTER att du laddat upp den första .aab:n manuellt.
+    # Googles Publishing API vägrar ta emot det första paketet för ett nytt
+    # app-id, så ett automatiskt bygge hade failat i sista steget trots att
+    # allt annat gick bra. Du behöver då också:
+    #   1. Ett tjänstekonto i Google Cloud med Play-behörighet, och dess
+    #      JSON-nyckel i Environment variables som
+    #      GCLOUD_SERVICE_ACCOUNT_CREDENTIALS (markerad "secure").
+    #   2. Play Console → Användare och behörigheter → bjud in tjänstekontot
+    #      med rätten att hantera releaser.
