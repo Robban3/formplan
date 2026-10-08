@@ -282,7 +282,7 @@ workflows:
 
           # Plugins måste ha registrerats, annars byggs appen utan dem och
           # notiser/skärmlås slutar fungera UTAN felmeddelande.
-          for plugin in capacitor-local-notifications capacitor-community-keep-awake; do
+          for plugin in capacitor-local-notifications capacitor-community-keep-awake capacitor-haptics; do
             if ! grep -q "$plugin" android/app/capacitor.build.gradle; then
               echo "$plugin saknas i capacitor.build.gradle — avbryter."
               exit 1

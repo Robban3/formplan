@@ -756,4 +756,18 @@ describe('CORS-preflight', () => {
     const res = await preflight('content-type', 'https://inte-formplan.example')
     expect(res.headers.get('Access-Control-Allow-Origin')).not.toBe('https://inte-formplan.example')
   })
+
+  /**
+   * Native-appens origins. De når aldrig hit idag — CapacitorHttp går utanför
+   * webbläsarens CORS — men stängs det av slutar hela appen fungera mot API:t
+   * med ett fel som inte nämner CORS. Gratis att tillåta: autentiseringen är
+   * en Bearer-token, inte en cookie, så origin är inte säkerhetsgränsen.
+   */
+  it.each([
+    ['capacitor://localhost', 'iOS'],
+    ['https://localhost', 'Android'],
+  ])('tillåter %s (%s)', async (origin) => {
+    const res = await preflight('content-type,authorization,x-formplan-language', origin)
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe(origin)
+  })
 })

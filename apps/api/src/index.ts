@@ -22,9 +22,29 @@ app.use('*', logger())
 app.use(
   '*',
   cors({
-    // localhost tillåts bara utanför produktion (lokal utveckling/test).
+    /**
+     * Native-appens origins är med i ALLA miljöer, webbens dev-server bara
+     * utanför produktion.
+     *
+     * Capacitor serverar appen från capacitor://localhost (iOS) respektive
+     * https://localhost (Android). Idag når de aldrig hit — CapacitorHttp gör
+     * anropen i native-lagret, utanför webbläsarens CORS — men stängs det av,
+     * eller ändras i en framtida Capacitor-version, slutar hela appen fungera
+     * mot API:t med ett fel som inte nämner CORS.
+     *
+     * Att tillåta dem kostar ingenting i säkerhet: API:t autentiserar med en
+     * Bearer-token ur Supabase, inte med cookies. Origin är alltså inte
+     * säkerhetsgränsen här — en angripare som kan servera en sida från
+     * localhost på offrets maskin kommer ändå inte åt tokenen, som ligger i
+     * localStorage under app.formplan.app.
+     */
     origin: (origin, c) => {
-      const allowed = ['https://app.formplan.app', 'https://formplan.app']
+      const allowed = [
+        'https://app.formplan.app',
+        'https://formplan.app',
+        'capacitor://localhost',
+        'https://localhost',
+      ]
       if (c.env.ENVIRONMENT !== 'production') allowed.push('http://localhost:5173')
       return allowed.includes(origin) ? origin : null
     },

@@ -16,6 +16,7 @@ import { BUSY_ADDING } from '../../lib/texts'
 import { useT } from '../../hooks/useT'
 import type { TranslateFn } from '../../lib/i18n'
 import type { TextKey } from '../../lib/i18n'
+import { hapticSuccess } from '../../lib/haptics'
 
 const QUICK_OPTIONS = WATER_QUICK_OPTIONS_ML
 const DEFAULT_ML = 250
@@ -48,7 +49,7 @@ function celebrateWaterGoal(totalMl: number, goalMl: number, imperial: boolean, 
     }),
     6000
   )
-  navigator.vibrate?.([100, 50, 100])
+  hapticSuccess()
 }
 
 export function WaterPage() {
