@@ -699,3 +699,61 @@ describe('POST /measurements: client_id ger upsert', () => {
     expect(urls).toHaveLength(1)
   })
 })
+
+/**
+ * CORS-preflighten.
+ *
+ * Buggen: webben började skicka x-formplan-language på VARJE anrop när appen
+ * blev tvåspråkig, men headern lades aldrig till i allowHeaders. En header som
+ * saknas där får webbläsaren att avvisa hela preflighten — alltså fallerade
+ * varenda förfrågan från app.formplan.app, inte bara de språkberoende. Hela
+ * webbappen var nere.
+ *
+ * Native-appen gick fri: CapacitorHttp gör anropen i native-lagret, utanför
+ * webbläsarens CORS. Felet syntes därför bara på webben, och inte alls i
+ * TestFlight-bygget.
+ *
+ * Testet skickar en riktig OPTIONS-preflight, precis som webbläsaren gör.
+ */
+describe('CORS-preflight', () => {
+  const preflight = (headers: string, origin = 'https://app.formplan.app') =>
+    app.request(
+      '/billing/status',
+      {
+        method: 'OPTIONS',
+        headers: {
+          Origin: origin,
+          'Access-Control-Request-Method': 'GET',
+          'Access-Control-Request-Headers': headers,
+        },
+      },
+      mockEnv
+    )
+
+  /** Headrarna servern säger ja till, gemener. */
+  const allowed = async (res: Response) =>
+    (res.headers.get('Access-Control-Allow-Headers') ?? '').toLowerCase()
+
+  it('tillåter språkheadern som webben alltid skickar', async () => {
+    const res = await preflight('content-type,authorization,x-formplan-language')
+    expect(await allowed(res)).toContain('x-formplan-language')
+  })
+
+  it('tillåter fortfarande Content-Type och Authorization', async () => {
+    const res = await preflight('content-type,authorization')
+    const a = await allowed(res)
+    expect(a).toContain('content-type')
+    expect(a).toContain('authorization')
+  })
+
+  it('speglar tillbaka appens origin', async () => {
+    const res = await preflight('content-type')
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://app.formplan.app')
+  })
+
+  // Allowlistan ska fortfarande stänga ute okända origins.
+  it('släpper inte igenom en främmande origin', async () => {
+    const res = await preflight('content-type', 'https://inte-formplan.example')
+    expect(res.headers.get('Access-Control-Allow-Origin')).not.toBe('https://inte-formplan.example')
+  })
+})

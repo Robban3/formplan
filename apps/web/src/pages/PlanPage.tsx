@@ -209,7 +209,7 @@ export function PlanPage() {
               >
                 <span className="text-xs font-medium">{day}</span>
                 {hasWorkout && (
-                  <div className={`w-1.5 h-1.5 rounded-full mt-1 ${selected === weekday ? 'bg-white' : 'bg-brand-500'}`} />
+                  <div className={`w-1.5 h-1.5 rounded-full mt-1 ${selected === weekday ? 'bg-[#ffffff]' : 'bg-brand-500'}`} />
                 )}
               </button>
             )

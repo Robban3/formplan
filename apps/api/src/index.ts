@@ -11,6 +11,7 @@ import { aiRouter } from './routes/ai'
 import { billingRouter } from './routes/billing'
 import { accountRouter } from './routes/account'
 import { measurementsRouter } from './routes/measurements'
+import { LANG_HEADER } from './lib/lang'
 import type { Env } from './lib/types'
 import { sendWeeklyReports } from './jobs/weeklyReport'
 import { sendTrialReminders } from './jobs/trialReminder'
@@ -27,7 +28,13 @@ app.use(
       if (c.env.ENVIRONMENT !== 'production') allowed.push('http://localhost:5173')
       return allowed.includes(origin) ? origin : null
     },
-    allowHeaders: ['Content-Type', 'Authorization'],
+    // LANG_HEADER måste stå här. Webben skickar x-formplan-language på VARJE
+    // anrop sedan appen blev tvåspråkig, och en header som inte finns i
+    // allowHeaders får webbläsaren att avvisa hela preflighten — alltså
+    // fallerade varenda förfrågan från app.formplan.app, inte bara de
+    // språkberoende. Native-appen gick fri: CapacitorHttp går utanför
+    // webbläsarens CORS, så felet syntes bara på webben.
+    allowHeaders: ['Content-Type', 'Authorization', LANG_HEADER],
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
   })

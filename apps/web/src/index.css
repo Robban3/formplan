@@ -44,7 +44,14 @@ html.dark {
   html.dark body {
     background-color: var(--canvas);
   }
-  /* Tab-layout cards + nav */
+  /* Tab-layout cards + nav.
+     VARNING: de här reglerna är !important och träffar VARJE element med
+     klassen, även på sidor som är mörka med flit och inte deltar i temat
+     (inloggningen, paywallen, PlanPage). Där blev `bg-white text-slate-900`
+     till mörk text på mörk bakgrund, och en vit prick osynlig — båda i
+     mörkt läge, som är standard. Behöver en sådan sida en färg som inte får
+     tematiseras: skriv den som ett arbiträrt värde, t.ex. bg-[#ffffff], så
+     ligger den utanför de här selektorerna. */
   html.dark .bg-white   { @apply bg-stone-800 !important; }
   html.dark .bg-stone-50 { @apply bg-stone-900 !important; }
   html.dark .bg-stone-100 { @apply bg-stone-700 !important; }
